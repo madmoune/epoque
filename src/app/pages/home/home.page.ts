@@ -22,5 +22,11 @@ export class HomePage {
             route: '/anagrams',
             isAvailable: true,
         },
+        {
+            title: 'Cryptogrammes',
+            description: 'Décoder comme un malade.',
+            route: '/cryptograms',
+            isAvailable: true,
+        },
     ];
 }

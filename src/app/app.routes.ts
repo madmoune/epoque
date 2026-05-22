@@ -12,6 +12,13 @@ export const routes: Routes = [
             import('./puzzles/anagrams/anagram.page').then((m) => m.AnagramsPage),
     },
     {
+        path: 'cryptograms',
+        loadComponent: () =>
+            import('./puzzles/cryptograms/cryptogram.page').then(
+                (m) => m.CryptogramsPage,
+            ),
+    },
+    {
         path: '**',
         redirectTo: '',
     },

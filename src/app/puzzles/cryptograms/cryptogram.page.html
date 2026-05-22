@@ -1,0 +1,67 @@
+<main class="page">
+    <a routerLink="/" class="back-link">← Retour à la belle époque</a>
+
+    <section class="card">
+        <p class="eyebrow">Cryptogramme</p>
+        <h1>Decode comme un génie</h1>
+
+        @if (isLoading()) {
+        <p>Chargement…</p>
+        } @else if (loadError()) {
+        <p class="error">{{ loadError() }}</p>
+        } @else if (puzzle()) {
+        <div class="cryptogram" aria-label="Cryptogram puzzle">
+            @for (wordGroup of wordGroups(); track $index) {
+            <span class="word-group">
+                @for (character of wordGroup; track character.index) {
+                @if (character.isLetter) {
+                <label class="character-tile">
+                    <span class="encrypted-character">
+                        {{ character.encryptedCharacter }}
+                    </span>
+
+                    <input #guessInput type="text" autocomplete="off" autocapitalize="characters" inputmode="text"
+                        enterkeyhint="next"
+                        [attr.aria-label]="'Guess for encrypted letter ' + character.encryptedCharacter"
+                        [attr.data-character-index]="character.index" [ngModel]="guesses()[character.index]"
+                        (focus)="guessInput.select()"
+                        (keydown)="handleGuessKeydown(character.index, $event, guessInput)" [disabled]="isCorrect()"
+                        [class.correct]="
+    guesses()[character.index] === character.answerCharacter
+  " />
+                </label>
+                } @else {
+                <span class="punctuation">
+                    {{ character.encryptedCharacter }}
+                </span>
+                }
+                }
+            </span>
+            }
+        </div>
+        <button type="button" class="secondary-button" (click)="showHint()" [disabled]="isCorrect()">
+            Hint
+        </button>
+        <button type="button" class="secondary-button" (click)="clearGuesses()" [disabled]="isCorrect()">
+            Clear all
+        </button>
+        @if (!isCorrect()) {
+        <div class="actions">
+            <button type="button" class="secondary-button" (click)="nextPuzzle()">
+                Skip
+            </button>
+        </div>
+        }
+
+        @if (isCorrect()) {
+        <p class="success" role="status">
+            Bravo, t'es pas ultra CON!
+        </p>
+
+        <button type="button" (click)="nextPuzzle()">
+            Prochain
+        </button>
+        }
+        }
+    </section>
+</main>
