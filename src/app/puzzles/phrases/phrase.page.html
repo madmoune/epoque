@@ -1,0 +1,77 @@
+<main class="page">
+    <a routerLink="/" class="back-link">← Époquapable faque je retourne au menu.</a>
+
+    <section class="card">
+        <p class="eyebrow">Phrase</p>
+        <h1>Allume maudit tètè</h1>
+
+        @if (isLoading()) {
+        <p>Loading phrases…</p>
+        } @else if (loadError()) {
+        <p class="error">{{ loadError() }}</p>
+        } @else if (puzzle(); as currentPuzzle) {
+        <p class="instructions">
+            Essaie de deviner la phrase avec le moins de lettre possible lol
+        </p>
+
+        <div class="phrase-board" aria-label="Phrase puzzle">
+            @for (wordGroup of wordGroups(); track $index) {
+            <span class="word-group">
+                @for (character of wordGroup; track character.index) {
+                @if (character.isLetter) {
+                <button type="button" class="letter-tile" [class.revealed]="character.isRevealed"
+                    [class.locked]="character.isLocked"
+                    [disabled]="character.isRevealed || character.isLocked || isSolved()"
+                    (click)="revealCharacter(character.index)" [attr.aria-label]="
+                    character.isLocked
+                      ? 'Locked hidden letter'
+                      : character.isRevealed
+                        ? 'Revealed letter ' + character.character
+                        : 'Hidden letter'
+                  ">
+                    @if (character.isRevealed) {
+                    {{ character.character }}
+                    } @else if (character.isLocked) {
+                    🔒
+                    } @else {
+                    &nbsp;
+                    }
+                </button>
+                } @else {
+                <span class="punctuation">
+                    {{ character.character }}
+                </span>
+                }
+                }
+            </span>
+            }
+        </div>
+
+        <label for="answer">Your answer</label>
+
+        <input id="answer" class="answer-input" type="text" autocomplete="off" autocapitalize="characters"
+            [ngModel]="answerInput()" (ngModelChange)="updateAnswer($event)" [class.correct]="isAnswerCorrect()"
+            [disabled]="isSolved()" />
+
+        <div class="actions">
+            <button type="button" class="secondary-button" (click)="nextPuzzle()">
+                Skip
+            </button>
+
+            <button type="button" class="secondary-button" (click)="revealAllUnlocked()" [disabled]="isSolved()">
+                Reveal all unlocked
+            </button>
+        </div>
+
+        @if (isSolved()) {
+        <p class="success" role="status">
+            Correct! The answer is {{ currentPuzzle.answer }}.
+        </p>
+
+        <button type="button" (click)="nextPuzzle()">
+            Next puzzle
+        </button>
+        }
+        }
+    </section>
+</main>

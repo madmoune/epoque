@@ -1,0 +1,164 @@
+.page {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 1rem;
+    color: #444;
+}
+
+.card {
+    padding: 2rem;
+    border: 1px solid #ddd;
+    border-radius: 1.25rem;
+    box-shadow: 0 0.75rem 2rem rgb(0 0 0 / 6%);
+}
+
+.eyebrow {
+    margin: 0 0 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+h1 {
+    margin-top: 0;
+}
+
+.instructions {
+    color: #555;
+}
+
+.phrase-board {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: clamp(1.5rem, 5vw, 2.75rem);
+    row-gap: 1.25rem;
+    margin: 2rem 0;
+    align-items: end;
+}
+
+.word-group {
+    display: inline-flex;
+    gap: clamp(0.35rem, 1.6vw, 0.5rem);
+    white-space: nowrap;
+    align-items: end;
+}
+
+.letter-tile {
+    display: grid;
+    place-items: center;
+    width: clamp(2.25rem, 9vw, 2.75rem);
+    height: clamp(2.25rem, 9vw, 2.75rem);
+    border: 1px solid #ccc;
+    border-radius: 0.5rem;
+    background: #f2f2f2;
+    font-size: clamp(1rem, 4vw, 1.25rem);
+    font-weight: 700;
+    cursor: pointer;
+    touch-action: manipulation;
+
+    &:hover:not(:disabled) {
+        background: #e8e8e8;
+    }
+
+    &:focus {
+        outline: 3px solid rgb(0 0 0 / 15%);
+        outline-offset: 2px;
+    }
+
+    &.revealed {
+        background: white;
+        border-color: #17803d;
+        color: #17803d;
+    }
+
+    &.locked {
+        cursor: not-allowed;
+        background: #f8f8f8;
+        color: #777;
+    }
+
+    &:disabled {
+        cursor: default;
+    }
+}
+
+.punctuation {
+    display: grid;
+    place-items: center;
+    min-width: 1rem;
+    height: clamp(2.25rem, 9vw, 2.75rem);
+    font-weight: 700;
+    font-size: clamp(1rem, 4vw, 1.25rem);
+}
+
+.actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+button {
+    padding: 0.75rem 1rem;
+    border: 0;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    font-weight: 700;
+    touch-action: manipulation;
+
+    &:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+}
+
+.secondary-button {
+    background: #f2f2f2;
+    color: #222;
+}
+
+.success {
+    margin-top: 1rem;
+    color: #17803d;
+    font-weight: 700;
+}
+
+.error {
+    color: #b00020;
+    font-weight: 700;
+}
+
+@media (max-width: 600px) {
+    .page {
+        padding: 1rem;
+    }
+
+    .card {
+        padding: 1rem;
+        border-radius: 1rem;
+    }
+
+    .phrase-board {
+        margin: 1.5rem 0;
+    }
+
+    .actions {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    button {
+        width: 100%;
+        min-height: 3rem;
+    }
+
+    .letter-tile {
+        padding: 0;
+    }
+}
