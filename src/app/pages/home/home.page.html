@@ -1,0 +1,16 @@
+<main class="page">
+    <section class="hero">
+        <h1>Entraînement d'Époque</h1>
+        <p>Choisissez un type d'énigme afin de devenir bon.</p>
+    </section>
+
+    <section class="puzzle-grid" aria-label="Puzzle types">
+        @for (puzzle of puzzleTypes; track puzzle.title) {
+        <a class="puzzle-card" [routerLink]="puzzle.route" [class.disabled]="!puzzle.isAvailable"
+            [attr.aria-disabled]="!puzzle.isAvailable">
+            <h2>{{ puzzle.title }}</h2>
+            <p>{{ puzzle.description }}</p>
+        </a>
+        }
+    </section>
+</main>

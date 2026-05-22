@@ -1,0 +1,54 @@
+<main class="page">
+    <a routerLink="/" class="back-link">← Retour à la bonne vielle époque</a>
+
+    <section class="card" (keydown.enter)="goToNextPuzzleIfCorrect($event)">
+        <p class="eyebrow">Anagramme</p>
+        <h1>Pour pas avoir l'air fou si on doit trouver BUCHERON</h1>
+
+        @if (isLoading()) {
+        <p>Chargement des mots…</p>
+        } @else if (loadError()) {
+        <p class="error">{{ loadError() }}</p>
+        } @else if (currentWord(); as word) {
+        <div class="letters" aria-label="Scrambled letters">
+            @for (letter of scrambledLetters().split(''); track $index) {
+            <span>{{ letter }}</span>
+            }
+        </div>
+
+        <label for="answer">Réponse</label>
+
+        <input id="answer" type="text" autocomplete="off" [ngModel]="answerInput()"
+            (ngModelChange)="updateAnswer($event)" [class.correct]="isCorrect()" [disabled]="isCorrect()" />
+
+        <div class="hint">
+            <button type="button" class="secondary-button" (click)="showNextHintLetter()"
+                [disabled]="isCorrect() || hintLetterCount() >= word.answer.length">
+                Hint
+            </button>
+
+            @if (revealedHint()) {
+            <p>
+                Starts with:
+                <strong>{{ revealedHint() }}</strong>
+            </p>
+            }
+        </div>
+
+        @if(!isCorrect()) {
+        <button type="button" class="secondary-button" (click)="nextPuzzle()">
+            Skip
+        </button>
+        }
+
+        @if (isCorrect()) {
+        <p class="success" role="status">
+            C'est beau biggie!
+        </p>
+        <button type="button" (click)="nextPuzzle()">
+            Prochain mot
+        </button>
+        }
+        }
+    </section>
+</main>
