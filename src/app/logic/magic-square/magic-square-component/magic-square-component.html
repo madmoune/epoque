@@ -1,2 +1,8 @@
-<p>magic-square-component works!</p>
-asdasd
+<div class="square">@for (x of square; track $index; let xIndex = $index) {
+    <div class="row">
+        @for (y of square; track $index; let yIndex = $index) {
+        <div class="cell">{{square[xIndex][yIndex]}}</div>
+        }
+    </div>
+    }
+</div>
