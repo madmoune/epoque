@@ -17,7 +17,7 @@ export class AnagramService {
         }
 
         const text = await firstValueFrom(
-            this.http.get('/words.txt', {
+            this.http.get('words.txt', {
                 responseType: 'text',
             }),
         );
