@@ -19,6 +19,11 @@ export const routes: Routes = [
             ),
     },
     {
+        path: 'phrases',
+        loadComponent: () =>
+            import('./puzzles/phrases/phrase.page').then((m) => m.PhrasesPage),
+    },
+    {
         path: '**',
         redirectTo: '',
     },

@@ -28,5 +28,11 @@ export class HomePage {
             route: '/cryptograms',
             isAvailable: true,
         },
+        {
+            title: 'Phrases',
+            description: 'Découvrir une lettre à la fois',
+            route: '/phrases',
+            isAvailable: true,
+        },
     ];
 }
