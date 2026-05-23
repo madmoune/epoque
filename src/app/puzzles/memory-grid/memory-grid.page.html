@@ -1,0 +1,136 @@
+<main class="page">
+    <a routerLink="/" class="back-link">← On est trop frère l'époque.</a>
+
+    <section class="card">
+        <p class="eyebrow">Grille mémoire</p>
+        <h1>Je me souviens (de la grille)</h1>
+
+        @if (phase() === 'memorize') {
+        <p class="instructions">
+            Tu capable de te rappeler de formes et de couleurs?
+        </p>
+
+        <p class="step-indicator">
+            Prochaine étape {{ revealStep() }} de 3
+        </p>
+
+        <div class="memory-grid answer-grid" aria-label="Answer grid preview">
+            @for (cell of answerGrid(); track $index) {
+            <div class="grid-cell preview-cell">
+                @if (visibleAnswerIndexes().has($index)) {
+                <span class="shape" [class]="'shape shape-' + cell.shape + ' color-' + cell.color"
+                    [attr.aria-label]="cell.color + ' ' + shapeLabel(cell.shape)"></span>
+                } @else {
+                <span class="hidden-cell">?</span>
+                }
+            </div>
+            }
+        </div>
+
+        <div class="actions">
+            <button type="button" (click)="goToNextRevealStep()">
+                @if (revealStep() < 3) { Next reveal } @else { Start } </button>
+
+                    <button type="button" class="secondary-button" (click)="nextPuzzle()">
+                        New grid
+                    </button>
+        </div>
+        } @else {
+        <p class="instructions">
+            Pèse su une cellule pis choisis une forme couleurée.
+        </p>
+
+        <div class="memory-grid player-grid" aria-label="Player memory grid">
+            @for (cell of playerGrid(); track $index) {
+            <button type="button" class="grid-cell player-cell" [class.selected]="selectedCellIndex() === $index"
+                [class.correct]="
+              isSolved() &&
+              memoryGridService.areCellsEqual(answerGrid()[$index], cell)
+            " (click)="openCellPicker($index)" [attr.aria-label]="'Cell ' + ($index + 1)">
+                @if (cell.color && cell.shape) {
+                <span class="shape" [class]="'shape shape-' + cell.shape + ' color-' + cell.color"></span>
+                } @else {
+                <span class="empty-cell"></span>
+                }
+            </button>
+            }
+        </div>
+
+        <div class="actions">
+            <button type="button" class="secondary-button" (click)="resetPlayerGrid()" [disabled]="isSolved()">
+                Clearer toute
+            </button>
+
+            <button type="button" class="secondary-button" (click)="nextPuzzle()">
+                Nouvelle grille
+            </button>
+        </div>
+
+        @if (isGridComplete() && !isSolved()) {
+        <p class="error" role="status">
+            Calisse, c'mon. {{ correctCellCount() }} sur 9 sont correctes.
+        </p>
+        }
+
+        @if (isSolved()) {
+        <p class="success" role="status">
+            Bravo mon p'tit génie!
+        </p>
+
+        <button type="button" (click)="nextPuzzle()">
+            Prochaine grille
+        </button>
+        }
+
+        @if (isPickerOpen() && selectedCell(); as cell) {
+        <div class="picker-backdrop" role="presentation" (click)="closePicker()"></div>
+
+        <section class="picker-sheet" role="dialog" aria-modal="true" aria-label="Choose cell color and shape">
+            <div class="picker-header">
+                <h2>Cell {{ selectedCellIndex()! + 1 }}</h2>
+
+                <button type="button" class="icon-button" aria-label="Close picker" (click)="closePicker()">
+                    ×
+                </button>
+            </div>
+
+            <div class="selected-preview">
+                @if (cell.color && cell.shape) {
+                <span class="shape" [class]="'shape shape-' + cell.shape + ' color-' + cell.color"></span>
+                } @else {
+                <span class="empty-cell"></span>
+                }
+            </div>
+
+            <h3>Color</h3>
+
+            <div class="picker-options color-options">
+                @for (color of colors; track color) {
+                <button type="button" class="picker-button icon-picker-button" [class.selected]="cell.color === color"
+                    (click)="selectColor(color)" [attr.aria-label]="colorLabel(color)">
+                    <span [class]="'color-dot color-' + color"></span>
+                </button>
+                }
+            </div>
+
+            <h3>Shape</h3>
+
+            <div class="picker-options shape-options">
+                @for (shape of shapes; track shape) {
+                <button type="button" class="picker-button icon-picker-button" [class.selected]="cell.shape === shape"
+                    (click)="selectShape(shape)" [attr.aria-label]="shapeLabel(shape)">
+                    <span class="shape small-shape" [class]="'shape small-shape shape-' + shape"></span>
+                </button>
+                }
+            </div>
+
+            <div class="picker-actions">
+                <button type="button" class="secondary-button" (click)="clearSelectedCell()">
+                    Clearer
+                </button>
+            </div>
+        </section>
+        }
+        }
+    </section>
+</main>
