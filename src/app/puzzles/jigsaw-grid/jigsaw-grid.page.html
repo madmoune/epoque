@@ -1,0 +1,143 @@
+<main class="page">
+    <a routerLink="/" class="back-link">← Back to puzzle selection</a>
+
+    <section class="card">
+        <p class="eyebrow">Jigsaw Grid</p>
+        <h1>Fit the pieces</h1>
+
+        <p class="instructions">
+            Drag a piece onto the board. Right-click to rotate on desktop.
+            On mobile, use the Rotate button before dragging.
+            Blocked cells cannot be covered.
+        </p>
+
+        <div class="game-layout">
+            <div class="board-section">
+                <div class="board-wrapper">
+                    <div class="column-labels">
+                        <span></span>
+
+                        @for (column of columns(); track column) {
+                        <span>{{ column + 1 }}</span>
+                        }
+                    </div>
+
+                    <div class="board-layout">
+                        <div class="row-labels">
+                            @for (row of rows(); track row) {
+                            <span>{{ row + 1 }}</span>
+                            }
+                        </div>
+
+                        <div class="jigsaw-board" aria-label="Jigsaw grid" (pointerleave)="clearHoveredAnchor()">
+                            @for (cell of boardCells(); track cell.row + '-' + cell.column) {
+                            <button type="button" data-board-cell="true" [attr.data-row]="cell.row"
+                                [attr.data-column]="cell.column" [class]="boardCellClasses(cell)" (pointerenter)="
+                    setHoveredAnchor({ row: cell.row, column: cell.column })
+                  " (pointermove)="
+                    setHoveredAnchor({ row: cell.row, column: cell.column })
+                  " (click)="handleBoardCellClick(cell, $event)" [attr.aria-label]="
+                    'Row ' + (cell.row + 1) + ', column ' + (cell.column + 1)
+                  ">
+                                @if (cell.isBlocked) {
+                                ×
+                                }
+
+                                @if (cell.isLocked) {
+                                <span class="lock-icon" aria-hidden="true">🔒</span>
+                                }
+                            </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                @if (errorMessage()) {
+                <p class="error" role="status">{{ errorMessage() }}</p>
+                }
+
+                @if (selectedPiece(); as piece) {
+                <div class="selected-info">
+                    Selected: <strong>{{ piece.name }}</strong>
+                </div>
+                } @else {
+                <div class="selected-info">
+                    Select a piece to place.
+                </div>
+                }
+            </div>
+
+            <aside class="piece-tray" aria-label="Pieces to place">
+                <h2>Pieces to place</h2>
+
+                <div class="piece-list">
+                    @for (piece of unplacedPieces(); track piece.id) {
+                    <button type="button" class="piece-button" [class.selected]="selectedPieceId() === piece.id"
+                        (pointerdown)="startPieceDrag(piece.id, $event)" [attr.aria-label]="'Drag ' + piece.name">
+                        <span class="piece-preview" [style.gridTemplateColumns]="
+                  'repeat(' + previewGridSize(piece) + ', 1fr)'
+                " [style.gridTemplateRows]="
+                  'repeat(' + previewGridSize(piece) + ', 1fr)'
+                ">
+                            @for (
+                            previewCell of previewCells(piece);
+                            track previewCell.row + '-' + previewCell.column
+                            ) {
+                            <span class="piece-preview-cell" [class]="'piece-preview-cell ' + colorClass(piece)"
+                                [style.gridRow]="previewCell.row + 1"
+                                [style.gridColumn]="previewCell.column + 1"></span>
+                            }
+                        </span>
+                    </button>
+                    }
+                </div>
+            </aside>
+        </div>
+
+        <div class="actions">
+            <button type="button" class="secondary-button" (click)="rotateSelectedPiece()"
+                [disabled]="!selectedPiece()">
+                Rotate
+            </button>
+
+            <button type="button" class="secondary-button" (click)="placeHintPiece()"
+                [disabled]="isSolved() || unplacedPieces().length === 0">
+                Hint
+            </button>
+
+            <button type="button" class="secondary-button" (click)="resetPuzzle()">
+                Reset
+            </button>
+
+            <button type="button" (click)="newPuzzle()">
+                New puzzle
+            </button>
+        </div>
+
+        @if (isSolved()) {
+        <p class="success" role="status">
+            Correct! The grid is complete.
+        </p>
+        }
+    </section>
+
+    @if (selectedPiece(); as piece) {
+    @if (dragPosition(); as position) {
+    <div class="drag-preview" [style.transform]="dragPreviewTransform(position)">
+        <span class="piece-preview" [style.gridTemplateColumns]="
+            'repeat(' + previewGridSize(piece) + ', 1fr)'
+          " [style.gridTemplateRows]="
+            'repeat(' + previewGridSize(piece) + ', 1fr)'
+          ">
+            @for (
+            previewCell of previewCells(piece);
+            track previewCell.row + '-' + previewCell.column
+            ) {
+            <span class="piece-preview-cell" [class]="'piece-preview-cell ' + colorClass(piece)"
+                [style.gridRow]="previewCell.row + 1" [style.gridColumn]="previewCell.column + 1"></span>
+            }
+        </span>
+    </div>
+    }
+    }
+</main>

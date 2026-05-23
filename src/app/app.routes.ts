@@ -31,6 +31,13 @@ export const routes: Routes = [
             ),
     },
     {
+        path: 'jigsaw-grid',
+        loadComponent: () =>
+            import('./puzzles/jigsaw-grid/jigsaw-grid.page').then(
+                (m) => m.JigsawGridPage,
+            ),
+    },
+    {
         path: '**',
         redirectTo: '',
     },
