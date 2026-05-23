@@ -34,5 +34,11 @@ export class HomePage {
             route: '/phrases',
             isAvailable: true,
         },
+        {
+            title: 'Grille de mémoire',
+            description: 'Mémoriser des couleurs et des formes dans une grille.',
+            route: '/memory-grid',
+            isAvailable: true,
+        },
     ];
 }

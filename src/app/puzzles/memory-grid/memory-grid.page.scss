@@ -1,0 +1,341 @@
+.page {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 1rem;
+    color: #444;
+}
+
+.card {
+    padding: 2rem;
+    border: 1px solid #ddd;
+    border-radius: 1.25rem;
+    box-shadow: 0 0.75rem 2rem rgb(0 0 0 / 6%);
+}
+
+.eyebrow {
+    margin: 0 0 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+h1 {
+    margin-top: 0;
+}
+
+.instructions,
+.step-indicator {
+    color: #555;
+}
+
+.step-indicator {
+    font-weight: 700;
+}
+
+.memory-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(4.75rem, 1fr));
+    gap: clamp(0.625rem, 2vw, 1rem);
+    max-width: 24rem;
+    margin: 2rem auto;
+}
+
+.grid-cell {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    border-radius: 1rem;
+    border: 1px solid #ddd;
+    background: #f8f8f8;
+}
+
+.player-cell {
+    cursor: pointer;
+    touch-action: manipulation;
+
+    &.selected {
+        outline: 4px solid rgb(0 0 0 / 18%);
+        outline-offset: 3px;
+    }
+
+    &.correct {
+        border-color: #17803d;
+    }
+
+    &:focus {
+        outline: 4px solid rgb(0 0 0 / 18%);
+        outline-offset: 3px;
+    }
+}
+
+.preview-cell {
+    background: white;
+}
+
+.hidden-cell,
+.empty-cell {
+    display: grid;
+    place-items: center;
+    width: 60%;
+    height: 60%;
+    border-radius: 0.75rem;
+    background: #ececec;
+    color: #777;
+    font-weight: 700;
+    font-size: 1.25rem;
+}
+
+.shape {
+    display: block;
+    width: 62%;
+    height: 62%;
+    background: currentColor;
+}
+
+.small-shape {
+    width: 1.35rem;
+    height: 1.35rem;
+    color: #555;
+}
+
+.shape-circle {
+    border-radius: 50%;
+}
+
+.shape-square {
+    border-radius: 0.2rem;
+}
+
+.shape-triangle {
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+.shape-losange {
+    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+}
+
+.shape-pentagon {
+    clip-path: polygon(50% 0, 100% 38%, 82% 100%, 18% 100%, 0 38%);
+}
+
+.shape-hexagon {
+    clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
+}
+
+.color-blue {
+    color: #2563eb;
+}
+
+.color-red {
+    color: #dc2626;
+}
+
+.color-gray {
+    color: #6b7280;
+}
+
+.color-yellow {
+    color: #facc15;
+}
+
+.color-green {
+    color: #16a34a;
+}
+
+.color-orange {
+    color: #f97316;
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+button {
+    padding: 0.75rem 1rem;
+    border: 0;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    font-weight: 700;
+    touch-action: manipulation;
+
+    &:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+}
+
+.secondary-button {
+    background: #f2f2f2;
+    color: #222;
+}
+
+.success {
+    margin-top: 1rem;
+    color: #17803d;
+    font-weight: 700;
+}
+
+.error {
+    margin-top: 1rem;
+    color: #b00020;
+    font-weight: 700;
+}
+
+.picker-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    background: rgb(0 0 0 / 35%);
+}
+
+.picker-sheet {
+    position: fixed;
+    left: 50%;
+    bottom: 1rem;
+    z-index: 11;
+    width: min(calc(100% - 2rem), 22rem);
+    max-height: calc(100vh - 2rem);
+    overflow: auto;
+    transform: translateX(-50%);
+    box-sizing: border-box;
+    padding: 0.875rem;
+    border-radius: 1.25rem;
+    background: white;
+    box-shadow: 0 1rem 3rem rgb(0 0 0 / 25%);
+
+    h3 {
+        margin: 0.875rem 0 0.5rem;
+        font-size: 0.9rem;
+    }
+}
+
+.picker-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+
+    h2 {
+        margin: 0;
+        font-size: 1rem;
+    }
+}
+
+.icon-button {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    min-height: 2.75rem;
+    padding: 0;
+    border-radius: 999px;
+    background: #f2f2f2;
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+.selected-preview {
+    display: grid;
+    place-items: center;
+    width: 4rem;
+    height: 4rem;
+    margin: 0.75rem auto 0;
+    border: 1px solid #ddd;
+    border-radius: 1rem;
+    background: #f8f8f8;
+}
+
+.picker-options {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.color-options,
+.shape-options {
+    grid-template-columns: repeat(6, 1fr);
+}
+
+.picker-button {
+    display: grid;
+    place-items: center;
+    min-height: 2.75rem;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 0.875rem;
+    background: #f8f8f8;
+    cursor: pointer;
+    touch-action: manipulation;
+
+    &.selected {
+        border-color: #222;
+        box-shadow: 0 0 0 3px rgb(0 0 0 / 10%);
+    }
+}
+
+.icon-picker-button {
+    aspect-ratio: 1;
+}
+
+.color-dot {
+    display: inline-block;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.picker-actions {
+    margin-top: 0.875rem;
+}
+
+@media (max-width: 600px) {
+    .page {
+        padding: 1rem;
+    }
+
+    .card {
+        padding: 1rem;
+        border-radius: 1rem;
+    }
+
+    .memory-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.625rem;
+        max-width: 100%;
+        margin: 1.5rem auto;
+    }
+
+    .grid-cell {
+        border-radius: 0.75rem;
+    }
+
+    .actions {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    button {
+        width: 100%;
+        min-height: 3rem;
+    }
+
+    .picker-sheet {
+        bottom: 1rem;
+        width: min(calc(100% - 2rem), 22rem);
+        border-radius: 1.25rem;
+    }
+
+    .icon-button,
+    .icon-picker-button {
+        width: auto;
+    }
+}
