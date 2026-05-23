@@ -40,5 +40,11 @@ export class HomePage {
             route: '/memory-grid',
             isAvailable: true,
         },
+        {
+            title: 'Casse-grille',
+            description: 'Comme en audition mais personne pour nous voir échouer.',
+            route: '/jigsaw-grid',
+            isAvailable: true,
+        },
     ];
 }
