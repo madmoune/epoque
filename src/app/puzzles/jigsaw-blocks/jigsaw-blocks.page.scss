@@ -1,0 +1,438 @@
+.page {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 1rem;
+    color: #444;
+}
+
+.card {
+    overflow: hidden;
+    position: relative;
+    padding: 2rem;
+    border: 1px solid #e7def0;
+    border-radius: 1.5rem;
+    background:
+        radial-gradient(circle at 15% 25%, rgb(220 203 255 / 55%), transparent 26%),
+        radial-gradient(circle at 88% 18%, rgb(255 211 232 / 45%), transparent 22%),
+        linear-gradient(135deg, #fffaf5, #f4efff 48%, #fef7fb);
+    box-shadow: 0 1rem 3rem rgb(55 35 90 / 12%);
+
+    &::before,
+    &::after {
+        content: '';
+        position: absolute;
+        border-radius: 999px;
+        pointer-events: none;
+    }
+
+    &::before {
+        width: 18rem;
+        height: 18rem;
+        right: -8rem;
+        top: 8rem;
+        border: 1px solid rgb(122 85 190 / 18%);
+    }
+
+    &::after {
+        width: 14rem;
+        height: 14rem;
+        left: -7rem;
+        bottom: 8rem;
+        background: rgb(78 63 132 / 12%);
+    }
+}
+
+.header {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+}
+
+.eyebrow {
+    margin: 0 0 0.35rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 0.75rem;
+    color: #8b5fc7;
+    font-weight: 800;
+}
+
+h1 {
+    margin: 0;
+    font-size: clamp(2rem, 6vw, 4rem);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #17194f;
+}
+
+.instructions,
+.selected-info {
+    color: #37345f;
+}
+
+.instructions {
+    margin: 0.75rem auto 0;
+    max-width: 34rem;
+}
+
+.game-layout {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 14rem;
+    gap: 1.5rem;
+    align-items: start;
+    margin-top: 2rem;
+}
+
+.puzzle-panel {
+    min-width: 0;
+}
+
+.pyramid-board {
+    display: grid;
+    gap: 0;
+    justify-items: center;
+    max-width: 32rem;
+    margin: 0 auto;
+    padding: 1rem;
+    border: 1px solid rgb(126 100 170 / 20%);
+    border-radius: 1.5rem;
+    background: rgb(255 255 255 / 42%);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 45%);
+    touch-action: none;
+}
+
+.pyramid-row {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+}
+
+.pyramid-slot {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: clamp(4.25rem, 10vw, 6rem);
+    aspect-ratio: 1;
+    margin: -0.03rem;
+    border: 1px solid rgb(80 55 125 / 22%);
+    border-radius: 0.9rem;
+    background: rgb(255 255 255 / 38%);
+    cursor: pointer;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    overflow: visible;
+    box-shadow: inset 0 0 0 2px rgb(255 255 255 / 40%);
+
+    &.filled {
+        border-style: solid;
+        background:
+            linear-gradient(135deg, rgb(255 250 239), rgb(246 235 220));
+        box-shadow:
+            0 0.5rem 1rem rgb(61 39 89 / 15%),
+            inset 0 0 0 2px rgb(255 255 255 / 55%);
+    }
+
+    &.locked {
+        cursor: not-allowed;
+        box-shadow:
+            0 0.5rem 1rem rgb(61 39 89 / 15%),
+            inset 0 0 0 3px rgb(23 128 61 / 25%);
+    }
+
+    &.preview-valid {
+        border-color: #16a34a;
+        background: rgb(220 252 231 / 70%);
+    }
+
+    &.preview-invalid {
+        border-color: #dc2626;
+        background: rgb(254 226 226 / 70%);
+    }
+}
+
+.path-svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+
+    path {
+        fill: none;
+        stroke: #17194f;
+        stroke-width: 13;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+}
+
+.lock-icon {
+    position: absolute;
+    right: 0.25rem;
+    bottom: 0.2rem;
+    font-size: 0.75rem;
+}
+
+.tile-tray {
+    position: sticky;
+    top: 1rem;
+    max-height: calc(100vh - 2rem);
+    overflow: auto;
+    padding: 0.875rem;
+    border: 1px solid rgb(126 100 170 / 20%);
+    border-radius: 1.25rem;
+    background: rgb(255 255 255 / 62%);
+    box-shadow: 0 0.75rem 1.5rem rgb(55 35 90 / 10%);
+
+    h2 {
+        margin: 0 0 0.875rem;
+        font-size: 1rem;
+        color: #17194f;
+    }
+}
+
+.tile-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.65rem;
+}
+
+.tile-button {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    aspect-ratio: 1;
+    padding: 0.35rem;
+    border: 1px solid rgb(126 100 170 / 22%);
+    border-radius: 0.85rem;
+    background:
+        linear-gradient(135deg, rgb(255 250 239), rgb(246 235 220));
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    box-shadow: 0 0.4rem 0.9rem rgb(61 39 89 / 12%);
+
+    &:active {
+        cursor: grabbing;
+    }
+
+    &.selected {
+        border-color: #17194f;
+        box-shadow:
+            0 0.4rem 0.9rem rgb(61 39 89 / 12%),
+            0 0 0 4px rgb(23 25 79 / 10%);
+    }
+}
+
+.actions {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+button {
+    padding: 0.75rem 1rem;
+    border: 0;
+    border-radius: 0.9rem;
+    cursor: pointer;
+    font-weight: 800;
+    touch-action: manipulation;
+
+    &:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+}
+
+.secondary-button {
+    background: rgb(255 255 255 / 65%);
+    color: #17194f;
+}
+
+.actions>button:not(.secondary-button) {
+    background: #7c4fd3;
+    color: white;
+}
+
+.success {
+    position: relative;
+    z-index: 1;
+    margin-top: 1rem;
+    color: #17803d;
+    font-weight: 800;
+}
+
+.error {
+    margin-top: 1rem;
+    color: #b00020;
+    font-weight: 800;
+}
+
+.drag-preview {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 100;
+    display: grid;
+    place-items: center;
+    width: 5.5rem;
+    aspect-ratio: 1;
+    padding: 0.35rem;
+    border-radius: 1rem;
+    pointer-events: none;
+    opacity: 0.92;
+    background:
+        linear-gradient(135deg, rgb(255 250 239), rgb(246 235 220));
+    box-shadow: 0 0.75rem 1.25rem rgb(61 39 89 / 25%);
+
+    .path-svg {
+        width: 100%;
+        height: 100%;
+    }
+}
+
+@media (max-width: 800px) {
+    .game-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .tile-tray {
+        position: static;
+        max-height: none;
+    }
+
+    .tile-list {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .page {
+        padding: 0.5rem;
+    }
+
+    .back-link {
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .card {
+        padding: 0.75rem;
+        border-radius: 1rem;
+    }
+
+    .eyebrow {
+        font-size: 0.65rem;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    .instructions {
+        display: none;
+    }
+
+    .game-layout {
+        gap: 0.75rem;
+        margin-top: 0.75rem;
+    }
+
+    .pyramid-board {
+        width: min(100%, 44vh);
+        gap: 0;
+        padding: 0.45rem;
+        border-radius: 1rem;
+    }
+
+    .pyramid-row {
+        gap: 0;
+    }
+
+    .pyramid-slot {
+        width: min(18.5vw, 3.9rem);
+        margin: -0.025rem;
+        border-radius: 0.6rem;
+    }
+
+    .path-svg path {
+        stroke-width: 14;
+    }
+
+    .selected-info {
+        margin: 0.5rem 0 0;
+        font-size: 0.85rem;
+    }
+
+    .tile-tray {
+        padding: 0.5rem;
+        border-radius: 0.9rem;
+
+        h2 {
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+        }
+    }
+
+    .tile-list {
+        display: flex;
+        gap: 0.5rem;
+        overflow-x: auto;
+        padding-bottom: 0.25rem;
+        scroll-snap-type: x proximity;
+    }
+
+    .tile-button {
+        flex: 0 0 3.4rem;
+        border-radius: 0.65rem;
+        scroll-snap-align: start;
+    }
+
+    .actions {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+    }
+
+    button {
+        width: 100%;
+        min-height: 2.5rem;
+        padding: 0.6rem 0.75rem;
+    }
+
+    .drag-preview {
+        width: 4.75rem;
+    }
+}
+
+@media (max-width: 380px) {
+    .pyramid-board {
+        width: min(100%, 40vh);
+    }
+
+    .pyramid-slot {
+        width: min(17vw, 3.4rem);
+    }
+
+    .tile-button {
+        flex-basis: 3rem;
+    }
+
+    .actions {
+        grid-template-columns: 1fr;
+    }
+}

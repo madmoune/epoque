@@ -38,6 +38,11 @@ export const routes: Routes = [
             ),
     },
     {
+        path: 'jigsaw-blocks',
+        loadComponent: () =>
+            import('./puzzles/jigsaw-blocks/jigsaw-blocks.page').then((m) => m.PathwaysPage),
+    },
+    {
         path: '**',
         redirectTo: '',
     },

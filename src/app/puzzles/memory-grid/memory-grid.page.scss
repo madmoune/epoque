@@ -112,6 +112,12 @@ h1 {
     border-radius: 0.2rem;
 }
 
+.shape-rectangle {
+    width: 72%;
+    height: 44%;
+    border-radius: 0.2rem;
+}
+
 .shape-triangle {
     clip-path: polygon(50% 0, 100% 100%, 0 100%);
 }
@@ -150,6 +156,14 @@ h1 {
 
 .color-orange {
     color: #f97316;
+}
+
+.color-pink {
+    color: #ec4899;
+}
+
+.color-purple {
+    color: #9333ea;
 }
 
 .actions {
@@ -202,7 +216,7 @@ button {
     left: 50%;
     bottom: 1rem;
     z-index: 11;
-    width: min(calc(100% - 2rem), 22rem);
+    width: min(calc(100% - 2rem), 24rem);
     max-height: calc(100vh - 2rem);
     overflow: auto;
     transform: translateX(-50%);
@@ -259,9 +273,12 @@ button {
     gap: 0.5rem;
 }
 
-.color-options,
+.color-options {
+    grid-template-columns: repeat(8, 1fr);
+}
+
 .shape-options {
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(7, 1fr);
 }
 
 .picker-button {
@@ -297,6 +314,76 @@ button {
     margin-top: 0.875rem;
 }
 
+.mnemonic-legend {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e5e5e5;
+
+    h2 {
+        margin: 0 0 1rem;
+        font-size: 1.25rem;
+    }
+}
+
+.legend-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+.legend-card {
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 1rem;
+    background: #fff;
+
+    h3 {
+        margin: 0 0 0.75rem;
+    }
+}
+
+.legend-table-wrapper {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 34rem;
+}
+
+th,
+td {
+    padding: 0.65rem 0.75rem;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+    vertical-align: top;
+}
+
+th {
+    font-size: 0.85rem;
+    color: #555;
+    background: #f8f8f8;
+}
+
+td:first-child {
+    font-weight: 700;
+}
+
+tr:last-child td {
+    border-bottom: 0;
+}
+
+@media (min-width: 900px) {
+    .legend-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    table {
+        min-width: 0;
+    }
+}
+
 @media (max-width: 600px) {
     .page {
         padding: 1rem;
@@ -330,12 +417,38 @@ button {
 
     .picker-sheet {
         bottom: 1rem;
-        width: min(calc(100% - 2rem), 22rem);
+        width: min(calc(100% - 2rem), 24rem);
         border-radius: 1.25rem;
+    }
+
+    .color-options {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .shape-options {
+        grid-template-columns: repeat(4, 1fr);
     }
 
     .icon-button,
     .icon-picker-button {
         width: auto;
+    }
+
+    .mnemonic-legend {
+        margin-top: 1.5rem;
+    }
+
+    .legend-card {
+        padding: 0.75rem;
+    }
+
+    table {
+        min-width: 32rem;
+    }
+
+    th,
+    td {
+        padding: 0.55rem 0.65rem;
+        font-size: 0.9rem;
     }
 }
