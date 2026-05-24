@@ -46,5 +46,11 @@ export class HomePage {
             route: '/jigsaw-grid',
             isAvailable: true,
         },
+        {
+            title: 'Casse-bloques',
+            description: 'Comme dans la saison 1',
+            route: '/jigsaw-blocks',
+            isAvailable: true,
+        },
     ];
 }

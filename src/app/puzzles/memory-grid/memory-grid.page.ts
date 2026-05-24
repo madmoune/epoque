@@ -10,6 +10,12 @@ import { MemoryGridService } from '../../puzzles/memory-grid/memory-grid.service
 
 type GamePhase = 'memorize' | 'play';
 
+type MnemonicLegendItem = {
+    label: string;
+    mnemonic: string;
+    explanation: string;
+};
+
 @Component({
     selector: 'app-memory-grid-page',
     imports: [RouterLink],
@@ -21,6 +27,88 @@ export class MemoryGridPage {
 
     protected readonly colors = this.memoryGridService.colors;
     protected readonly shapes = this.memoryGridService.shapes;
+
+    protected readonly colorMnemonics: MnemonicLegendItem[] = [
+        {
+            label: 'Rouge',
+            mnemonic: 'Arrosé',
+            explanation: 'Rouge pompier "qui arrose" un feu',
+        },
+        {
+            label: 'Jaune',
+            mnemonic: 'Chantant',
+            explanation:
+                'Jaune pâle, la couleur préférée de Sean Paul, le chanteur',
+        },
+        {
+            label: 'Gris',
+            mnemonic: 'Puant',
+            explanation: "Gris-aille, l'ail ça pue.",
+        },
+        {
+            label: 'Vert',
+            mnemonic: 'Sous-terrain',
+            explanation: 'Vert de terre, sous la terre',
+        },
+        {
+            label: 'Bleu',
+            mnemonic: 'Endormi',
+            explanation: 'Bleu nuit, la nuit on dort',
+        },
+        {
+            label: 'Orange',
+            mnemonic: 'Mécanique',
+            explanation: 'Orange Mécanique',
+        },
+        {
+            label: 'Mauve',
+            mnemonic: 'Sexy',
+            explanation: 'Dildo mauve',
+        },
+        {
+            label: 'Rose',
+            mnemonic: 'Équilibré',
+            explanation: 'Faire du slackline professionnellement.',
+        },
+    ];
+
+    protected readonly shapeMnemonics: MnemonicLegendItem[] = [
+        {
+            label: 'Cercle',
+            mnemonic: "Film d'horreur",
+            explanation: 'Le Cercle',
+        },
+        {
+            label: 'Triangle',
+            mnemonic: 'Bac à recyclage',
+            explanation: 'TRIangle, on trie nos déchets',
+        },
+        {
+            label: 'Rectangle',
+            mnemonic: 'Manque de respect',
+            explanation: 'RECKED → Diss → Disrespect',
+        },
+        {
+            label: 'Carré',
+            mnemonic: 'Calendrier',
+            explanation: 'Carré aux dates',
+        },
+        {
+            label: 'Losange',
+            mnemonic: 'Magicien',
+            explanation: "lOZange, magicien d'OZ",
+        },
+        {
+            label: 'Pentagone',
+            mnemonic: 'Diable',
+            explanation: 'Pentagramme',
+        },
+        {
+            label: 'Hexagone',
+            mnemonic: 'Saucisse',
+            explanation: 'SauSIX côté.',
+        },
+    ];
 
     protected readonly answerGrid = signal<MemoryGridCell[]>(
         this.memoryGridService.createAnswerGrid(),
@@ -169,15 +257,32 @@ export class MemoryGridPage {
     }
 
     protected colorLabel(color: MemoryGridColor): string {
-        return color;
+        const labels: Record<MemoryGridColor, string> = {
+            blue: 'bleu',
+            red: 'rouge',
+            gray: 'gris',
+            yellow: 'jaune',
+            green: 'vert',
+            orange: 'orange',
+            pink: 'rose',
+            purple: 'mauve',
+        };
+
+        return labels[color];
     }
 
     protected shapeLabel(shape: MemoryGridShape): string {
-        if (shape === 'losange') {
-            return 'diamond';
-        }
+        const labels: Record<MemoryGridShape, string> = {
+            circle: 'cercle',
+            square: 'carré',
+            rectangle: 'rectangle',
+            triangle: 'triangle',
+            losange: 'losange',
+            pentagon: 'pentagone',
+            hexagon: 'hexagone',
+        };
 
-        return shape;
+        return labels[shape];
     }
 
     private closePickerIfCellComplete(index: number): void {
@@ -201,15 +306,17 @@ export class MemoryGridPage {
     }
 
     private shuffle<T>(items: T[]): T[] {
-        for (let index = items.length - 1; index > 0; index--) {
+        const shuffledItems = [...items];
+
+        for (let index = shuffledItems.length - 1; index > 0; index--) {
             const swapIndex = Math.floor(Math.random() * (index + 1));
 
-            [items[index], items[swapIndex]] = [
-                items[swapIndex],
-                items[index],
+            [shuffledItems[index], shuffledItems[swapIndex]] = [
+                shuffledItems[swapIndex],
+                shuffledItems[index],
             ];
         }
 
-        return items;
+        return shuffledItems;
     }
 }

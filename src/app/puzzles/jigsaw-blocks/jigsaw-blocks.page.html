@@ -1,0 +1,118 @@
+<main class="page">
+    <a routerLink="/" class="back-link">← Back to puzzle selection</a>
+
+    <section class="card">
+        <header class="header">
+            <p class="eyebrow">Pathways</p>
+            <h1>Pyramid puzzle</h1>
+            <p class="instructions">
+                Drag the blocks into the pyramid to complete the abstract path.
+            </p>
+        </header>
+
+        <section class="game-layout">
+            <div class="puzzle-panel">
+                <div class="pyramid-board" aria-label="Pathways pyramid puzzle">
+                    @for (row of [0, 1, 2, 3]; track row) {
+                    <div class="pyramid-row">
+                        @for (slot of puzzle().slots; track slot.id) {
+                        @if (slot.row === row) {
+                        <button type="button" data-pathway-slot="true" [attr.data-slot-id]="slot.id"
+                            [class]="slotClasses(slot)" (click)="handleSlotClick(slot, $event)"
+                            [attr.aria-label]="'Pyramid slot ' + slot.id">
+                            @if (getTileForSlot(slot.id); as tile) {
+                            @if (getPlacedTileForSlot(slot.id); as placedTile) {
+                            <svg viewBox="0 0 100 100" aria-hidden="true" class="path-svg">
+                                <g [attr.transform]="
+                              svgRotationTransform(placedTile.rotation)
+                            ">
+                                    <path [attr.d]="tile.pathData"></path>
+                                </g>
+                            </svg>
+
+                            @if (placedTile.locked) {
+                            <span class="lock-icon" aria-hidden="true">🔒</span>
+                            }
+                            }
+                            }
+                        </button>
+                        }
+                        }
+                    </div>
+                    }
+                </div>
+
+                @if (errorMessage()) {
+                <p class="error" role="status">{{ errorMessage() }}</p>
+                }
+
+                @if (selectedTile(); as tile) {
+                <p class="selected-info">
+                    Selected: <strong>{{ tile.name }}</strong>
+                </p>
+                } @else {
+                <p class="selected-info">
+                    Select a tile to place.
+                </p>
+                }
+            </div>
+
+            <aside class="tile-tray" aria-label="Available pathway tiles">
+                <h2>Blocks</h2>
+
+                <div class="tile-list">
+                    @for (tile of unplacedTiles(); track tile.id) {
+                    <button type="button" class="tile-button" [class.selected]="selectedTileId() === tile.id"
+                        (pointerdown)="startTileDrag(tile.id, $event)" (click)="selectTile(tile.id, $event)"
+                        [attr.aria-label]="'Drag ' + tile.name">
+                        <svg viewBox="0 0 100 100" aria-hidden="true" class="path-svg">
+                            <g [attr.transform]="
+                    svgRotationTransform(tileRotation(tile.id))
+                  ">
+                                <path [attr.d]="tile.pathData"></path>
+                            </g>
+                        </svg>
+                    </button>
+                    }
+                </div>
+            </aside>
+        </section>
+
+        <div class="actions">
+            <button type="button" class="secondary-button" (click)="rotateSelectedTile()" [disabled]="!selectedTile()">
+                Rotate
+            </button>
+
+            <button type="button" class="secondary-button" (click)="placeHintTile()"
+                [disabled]="isSolved() || unplacedTiles().length === 0">
+                Hint
+            </button>
+
+            <button type="button" class="secondary-button" (click)="resetPuzzle()">
+                Reset
+            </button>
+
+            <button type="button" (click)="newPuzzle()">
+                New puzzle
+            </button>
+        </div>
+
+        @if (isSolved()) {
+        <p class="success" role="status">
+            Correct! You completed the path.
+        </p>
+        }
+    </section>
+
+    @if (selectedTile(); as tile) {
+    @if (dragPosition(); as position) {
+    <div class="drag-preview" [style.transform]="dragPreviewTransform(position)">
+        <svg viewBox="0 0 100 100" aria-hidden="true" class="path-svg">
+            <g [attr.transform]="svgRotationTransform(selectedRotation())">
+                <path [attr.d]="tile.pathData"></path>
+            </g>
+        </svg>
+    </div>
+    }
+    }
+</main>

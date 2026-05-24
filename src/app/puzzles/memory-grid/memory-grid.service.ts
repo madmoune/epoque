@@ -17,11 +17,14 @@ export class MemoryGridService {
         'yellow',
         'green',
         'orange',
+        'pink',
+        'purple',
     ];
 
     readonly shapes: MemoryGridShape[] = [
         'circle',
         'square',
+        'rectangle',
         'triangle',
         'losange',
         'pentagon',

@@ -1,17 +1,17 @@
 <main class="page">
-    <a routerLink="/" class="back-link">← On est trop frère l'époque.</a>
+    <a routerLink="/" class="back-link">← Back to puzzle selection</a>
 
     <section class="card">
-        <p class="eyebrow">Grille mémoire</p>
-        <h1>Je me souviens (de la grille)</h1>
+        <p class="eyebrow">Memory Grid</p>
+        <h1>Memorize the grid</h1>
 
         @if (phase() === 'memorize') {
         <p class="instructions">
-            Tu capable de te rappeler de formes et de couleurs?
+            Memorize the revealed cells. The answer is shown in 3 steps.
         </p>
 
         <p class="step-indicator">
-            Prochaine étape {{ revealStep() }} de 3
+            Reveal step {{ revealStep() }} of 3
         </p>
 
         <div class="memory-grid answer-grid" aria-label="Answer grid preview">
@@ -37,7 +37,7 @@
         </div>
         } @else {
         <p class="instructions">
-            Pèse su une cellule pis choisis une forme couleurée.
+            Tap a cell, then choose its color and shape.
         </p>
 
         <div class="memory-grid player-grid" aria-label="Player memory grid">
@@ -58,27 +58,27 @@
 
         <div class="actions">
             <button type="button" class="secondary-button" (click)="resetPlayerGrid()" [disabled]="isSolved()">
-                Clearer toute
+                Clear all
             </button>
 
             <button type="button" class="secondary-button" (click)="nextPuzzle()">
-                Nouvelle grille
+                New grid
             </button>
         </div>
 
         @if (isGridComplete() && !isSolved()) {
         <p class="error" role="status">
-            Calisse, c'mon. {{ correctCellCount() }} sur 9 sont correctes.
+            Not quite. {{ correctCellCount() }} of 9 cells are correct.
         </p>
         }
 
         @if (isSolved()) {
         <p class="success" role="status">
-            Bravo mon p'tit génie!
+            Correct! You rebuilt the full grid.
         </p>
 
         <button type="button" (click)="nextPuzzle()">
-            Prochaine grille
+            Next puzzle
         </button>
         }
 
@@ -126,11 +126,73 @@
 
             <div class="picker-actions">
                 <button type="button" class="secondary-button" (click)="clearSelectedCell()">
-                    Clearer
+                    Clear cell
                 </button>
             </div>
         </section>
         }
         }
+
+        <section class="mnemonic-legend" aria-labelledby="mnemonic-title">
+            <h2 id="mnemonic-title">Mnémoniques</h2>
+            <div>Exemple: <span class="shape-square color-blue"
+                    style="display: inline-block; width: 1.25rem; height: 1.25rem; background: currentColor; border-radius: 0.2rem; vertical-align: middle;"></span>
+                -> Un calendrier endormi</div>
+            <div>Exemple: <span class="color-orange"
+                    style="display: inline-block; width: 1.25rem; height: 1.25rem; background: currentColor; border-radius: 50%; vertical-align: middle;"></span>
+                -> Un film d'horreur mécanique</div><br>
+            <div class="legend-grid">
+                <section class="legend-card">
+                    <h3>Formes</h3>
+
+                    <div class="legend-table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Forme</th>
+                                    <th>Image</th>
+                                    <th>Explication</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                @for (item of shapeMnemonics; track item.label) {
+                                <tr>
+                                    <td>{{ item.label }}</td>
+                                    <td>{{ item.mnemonic }}</td>
+                                    <td>{{ item.explanation }}</td>
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                <section class="legend-card">
+                    <h3>Couleurs</h3>
+
+                    <div class="legend-table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Couleur</th>
+                                    <th>Image</th>
+                                    <th>Explication</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                @for (item of colorMnemonics; track item.label) {
+                                <tr>
+                                    <td>{{ item.label }}</td>
+                                    <td>{{ item.mnemonic }}</td>
+                                    <td>{{ item.explanation }}</td>
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </section>
     </section>
 </main>

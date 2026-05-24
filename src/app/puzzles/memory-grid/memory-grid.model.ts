@@ -4,11 +4,14 @@ export type MemoryGridColor =
     | 'gray'
     | 'yellow'
     | 'green'
-    | 'orange';
+    | 'orange'
+    | 'pink'
+    | 'purple';
 
 export type MemoryGridShape =
     | 'circle'
     | 'square'
+    | 'rectangle'
     | 'triangle'
     | 'losange'
     | 'pentagon'
