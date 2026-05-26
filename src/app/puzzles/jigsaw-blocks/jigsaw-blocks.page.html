@@ -80,7 +80,7 @@
 
         <div class="actions">
             <button type="button" class="secondary-button" (click)="rotateSelectedTile()" [disabled]="!selectedTile()">
-                Rotate
+                Rotationne
             </button>
 
             <button type="button" class="secondary-button" (click)="placeHintTile()"
@@ -93,13 +93,13 @@
             </button>
 
             <button type="button" (click)="newPuzzle()">
-                New puzzle
+                Nouvelle pyramide
             </button>
         </div>
 
         @if (isSolved()) {
         <p class="success" role="status">
-            Correct! You completed the path.
+            Bravo, t'es pas pire-amide!
         </p>
         }
     </section>
