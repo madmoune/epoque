@@ -9,184 +9,142 @@ type MathTemplate = () => MathSequencePuzzle;
 export class SequencesService {
     createPuzzle(): MathSequencePuzzle {
         const templates: MathTemplate[] = [
-            () => this.createSecondDifferenceSequence(),
-            () => this.createAlternatingOperationsSequence(),
-            () => this.createInterleavedSequence(),
-            () => this.createMultiplyThenAddSequence(),
-            () => this.createCubesSequence(),
-            () => this.createFibonacciLikeSequence(),
-            () => this.createReverseDifferenceSequence(),
-            () => this.createPrimeStepSequence(),
+            () => this.createArithmeticSequence(),
+            () => this.createGeometricSequence(),
+            () => this.createIncreasingDifferenceSequence(),
+            () => this.createDecreasingDifferenceSequence(),
             () => this.createAlternatingAddSubtractSequence(),
-            () => this.createDoubleInterleavedSequence(),
-            () => this.createTriangularNumbersSequence(),
-            () => this.createSquareDifferenceSequence(),
-            () => this.createMultiplyMinusSequence(),
             () => this.createAlternatingMultiplyAddSequence(),
-            () => this.createPowerPlusLinearSequence(),
-            () => this.createRepeatedDifferencePairSequence(),
-            () => this.createDescendingMultiplySequence(),
-            () => this.createModuloCycleDifferenceSequence(),
+            () => this.createMultiplyThenAddSequence(),
+            () => this.createMultiplyThenSubtractSequence(),
+            () => this.createInterleavedArithmeticSequence(),
+            () => this.createInterleavedArithmeticAndGeometricSequence(),
+            () => this.createFibonacciLikeSequence(),
+            () => this.createTribonacciLikeSequence(),
+            () => this.createSquaresSequence(),
+            () => this.createCubesSequence(),
+            () => this.createTriangularNumbersSequence(),
+            () => this.createPrimeDifferenceSequence(),
+            () => this.createSquareDifferenceSequence(),
+            () => this.createRepeatedDifferenceCycleSequence(),
+            () => this.createDoublePreviousMinusOffsetSequence(),
+            () => this.createAddIncreasingOddNumbersSequence(),
+            () => this.createAddIncreasingEvenNumbersSequence(),
+            () => this.createAlternatingTwoMultipliersSequence(),
+            () => this.createPositionMultiplierSequence(),
+            () => this.createLinearPlusSquareSequence(),
+
+            // New variety
+            () => this.createPowersOfTwoPlusOffsetSequence(),
+            () => this.createPowersOfThreeMinusOffsetSequence(),
+            () => this.createNFactorSequence(),
+            () => this.createPreviousPlusPositionSquaredSequence(),
+            () => this.createPreviousPlusPositionCubedSequence(),
+            () => this.createAlternatingPrimeAndSquareDifferencesSequence(),
+            () => this.createDoubleInterleavedMultiplicationSequence(),
+            () => this.createTwoPreviousPlusConstantSequence(),
+            () => this.createPreviousDifferenceTimesTwoSequence(),
+            () => this.createDescendingHalvesSequence(),
+            () => this.createMultiplyByIncreasingNumbersSequence(),
+            () => this.createAddThenAddDoubleSequence(),
+            () => this.createNegativeArithmeticSequence(),
+            () => this.createAbsoluteBounceSequence(),
+            () => this.createProductOfPositionSequence(),
+            () => this.createSquareMinusPositionSequence(),
+            () => this.createCubeMinusSquareSequence(),
+            () => this.createAlternatingSignGrowthSequence(),
         ];
 
         return this.getRandomItem(templates)();
     }
 
-    private createSecondDifferenceSequence(): MathSequencePuzzle {
-        const start = this.randomInt(1, 12);
-        const firstStep = this.randomInt(2, 7);
-        const stepIncrease = this.randomInt(2, 5);
-
-        const sequence = [start];
-        let step = firstStep;
-
-        while (sequence.length < 7) {
-            sequence.push(sequence[sequence.length - 1] + step);
-            step += stepIncrease;
-        }
-
-        return this.createMathPuzzleFromSequence(
-            sequence,
-            `Look at the differences between numbers. The difference increases by ${stepIncrease} each time.`,
-        );
-    }
-
-    private createAlternatingOperationsSequence(): MathSequencePuzzle {
-        const start = this.randomInt(3, 12);
-        const addAmount = this.randomInt(4, 11);
-        const multiplyAmount = this.randomInt(2, 3);
-
-        const sequence = [start];
-
-        while (sequence.length < 7) {
-            const previous = sequence[sequence.length - 1];
-
-            if (sequence.length % 2 === 1) {
-                sequence.push(previous + addAmount);
-            } else {
-                sequence.push(previous * multiplyAmount);
-            }
-        }
-
-        return this.createMathPuzzleFromSequence(
-            sequence,
-            `The pattern alternates: add ${addAmount}, then multiply by ${multiplyAmount}.`,
-        );
-    }
-
-    private createInterleavedSequence(): MathSequencePuzzle {
-        const firstStart = this.randomInt(1, 9);
-        const secondStart = this.randomInt(10, 20);
-        const firstStep = this.randomInt(2, 6);
-        const secondStep = this.randomInt(3, 8);
-
-        const sequence = Array.from({ length: 8 }, (_, index) => {
-            if (index % 2 === 0) {
-                return firstStart + firstStep * (index / 2);
-            }
-
-            return secondStart + secondStep * Math.floor(index / 2);
-        });
-
-        return this.createMathPuzzleFromSequence(
-            sequence,
-            `Odd and even positions follow separate patterns. One goes up by ${firstStep}, the other by ${secondStep}.`,
-        );
-    }
-
-    private createMultiplyThenAddSequence(): MathSequencePuzzle {
-        const start = this.randomInt(1, 6);
-        const multiplier = this.randomInt(2, 3);
-        const addition = this.randomInt(1, 8);
-
-        const sequence = [start];
-
-        while (sequence.length < 6) {
-            sequence.push(sequence[sequence.length - 1] * multiplier + addition);
-        }
-
-        return this.createMathPuzzleFromSequence(
-            sequence,
-            `Each step multiplies by ${multiplier}, then adds ${addition}.`,
-        );
-    }
-
-    private createCubesSequence(): MathSequencePuzzle {
-        const start = this.randomInt(1, 3);
-        const addition = this.randomInt(0, 4);
+    private createArithmeticSequence(): MathSequencePuzzle {
+        const start = this.randomInt(-20, 40);
+        const step = this.randomNonZeroInt(-12, 12);
+        const length = this.randomInt(6, 8);
 
         const sequence = Array.from(
-            { length: 6 },
-            (_, index) => (start + index) ** 3 + addition,
+            { length },
+            (_, index) => start + step * index,
         );
 
-        return this.createMathPuzzleFromSequence(
+        return this.createPuzzleFromSequence(
             sequence,
-            addition === 0
-                ? 'These are consecutive cube numbers.'
-                : `These are consecutive cube numbers, then ${addition} is added.`,
+            step > 0
+                ? `Add ${step} each time.`
+                : `Subtract ${Math.abs(step)} each time.`,
         );
     }
 
-    private createFibonacciLikeSequence(): MathSequencePuzzle {
-        const first = this.randomInt(1, 8);
-        const second = this.randomInt(2, 10);
-        const sequence = [first, second];
+    private createGeometricSequence(): MathSequencePuzzle {
+        const start = this.randomInt(1, 8);
+        const multiplier = this.getRandomItem([2, 3, 4]);
+        const length = this.randomInt(5, 7);
 
-        while (sequence.length < 7) {
-            sequence.push(
-                sequence[sequence.length - 1] + sequence[sequence.length - 2],
-            );
-        }
+        const sequence = Array.from(
+            { length },
+            (_, index) => start * multiplier ** index,
+        );
 
-        return this.createMathPuzzleFromSequence(
+        return this.createPuzzleFromSequence(
             sequence,
-            'Each number is the sum of the two numbers before it.',
+            `Multiply by ${multiplier} each time.`,
         );
     }
 
-    private createReverseDifferenceSequence(): MathSequencePuzzle {
-        const start = this.randomInt(70, 120);
-        const firstStep = this.randomInt(18, 30);
-        const stepDecrease = this.randomInt(2, 5);
+    private createIncreasingDifferenceSequence(): MathSequencePuzzle {
+        const start = this.randomInt(1, 25);
+        const firstStep = this.randomInt(2, 8);
+        const increase = this.randomInt(1, 5);
+        const length = this.randomInt(6, 8);
 
         const sequence = [start];
+        const differences: number[] = [];
         let step = firstStep;
 
-        while (sequence.length < 7) {
-            sequence.push(sequence[sequence.length - 1] - step);
-            step -= stepDecrease;
+        while (sequence.length < length) {
+            differences.push(step);
+            sequence.push(sequence[sequence.length - 1] + step);
+            step += increase;
         }
 
-        return this.createMathPuzzleFromSequence(
+        return this.createPuzzleFromSequence(
             sequence,
-            `The amount subtracted decreases by ${stepDecrease} each time.`,
+            `The differences are ${differences.slice(0, 4).join(', ')}... They increase by ${increase}.`,
         );
     }
 
-    private createPrimeStepSequence(): MathSequencePuzzle {
-        const primeSteps = [2, 3, 5, 7, 11, 13, 17];
-        const start = this.randomInt(1, 15);
-        const sequence = [start];
+    private createDecreasingDifferenceSequence(): MathSequencePuzzle {
+        const length = this.randomInt(6, 8);
+        const decrease = this.randomInt(2, 4);
+        const firstStep = decrease * (length + 1) + this.randomInt(4, 10);
+        const start = this.randomInt(90, 160);
 
-        for (let index = 0; index < 6; index++) {
-            sequence.push(sequence[sequence.length - 1] + primeSteps[index]);
+        const sequence = [start];
+        const differences: number[] = [];
+        let step = firstStep;
+
+        while (sequence.length < length) {
+            differences.push(step);
+            sequence.push(sequence[sequence.length - 1] - step);
+            step -= decrease;
         }
 
-        return this.createMathPuzzleFromSequence(
+        return this.createPuzzleFromSequence(
             sequence,
-            'The differences are consecutive prime numbers: 2, 3, 5, 7, 11...',
+            `The subtractions are ${differences.slice(0, 4).join(', ')}... They decrease by ${decrease}.`,
         );
     }
 
     private createAlternatingAddSubtractSequence(): MathSequencePuzzle {
-        const start = this.randomInt(10, 35);
-        const addAmount = this.randomInt(5, 14);
-        const subtractAmount = this.randomInt(2, 9);
+        const start = this.randomInt(10, 50);
+        const addAmount = this.randomInt(5, 16);
+        const subtractAmount = this.randomInt(2, 10);
+        const length = this.randomInt(7, 9);
 
         const sequence = [start];
 
-        while (sequence.length < 8) {
+        while (sequence.length < length) {
             const previous = sequence[sequence.length - 1];
 
             sequence.push(
@@ -196,192 +154,725 @@ export class SequencesService {
             );
         }
 
-        return this.createMathPuzzleFromSequence(
+        return this.createPuzzleFromSequence(
             sequence,
-            `The pattern alternates: add ${addAmount}, then subtract ${subtractAmount}.`,
-        );
-    }
-
-    private createDoubleInterleavedSequence(): MathSequencePuzzle {
-        const firstStart = this.randomInt(2, 12);
-        const secondStart = this.randomInt(3, 15);
-        const firstMultiplier = this.randomInt(2, 3);
-        const secondStep = this.randomInt(4, 9);
-
-        const sequence = Array.from({ length: 8 }, (_, index) => {
-            const innerIndex = Math.floor(index / 2);
-
-            if (index % 2 === 0) {
-                return firstStart * firstMultiplier ** innerIndex;
-            }
-
-            return secondStart + secondStep * innerIndex;
-        });
-
-        return this.createMathPuzzleFromSequence(
-            sequence,
-            `Even positions multiply by ${firstMultiplier}. Odd positions add ${secondStep}.`,
-        );
-    }
-
-    private createTriangularNumbersSequence(): MathSequencePuzzle {
-        const start = this.randomInt(1, 4);
-        const offset = this.randomInt(0, 8);
-
-        const sequence = Array.from({ length: 7 }, (_, index) => {
-            const n = start + index;
-            return (n * (n + 1)) / 2 + offset;
-        });
-
-        return this.createMathPuzzleFromSequence(
-            sequence,
-            offset === 0
-                ? 'These are triangular numbers.'
-                : `These are triangular numbers with ${offset} added.`,
-        );
-    }
-
-    private createSquareDifferenceSequence(): MathSequencePuzzle {
-        const start = this.randomInt(1, 10);
-        const squareSteps = [1, 4, 9, 16, 25, 36];
-
-        const sequence = [start];
-
-        for (const step of squareSteps) {
-            sequence.push(sequence[sequence.length - 1] + step);
-        }
-
-        return this.createMathPuzzleFromSequence(
-            sequence,
-            'The differences are square numbers: 1, 4, 9, 16...',
-        );
-    }
-
-    private createMultiplyMinusSequence(): MathSequencePuzzle {
-        const start = this.randomInt(3, 9);
-        const multiplier = this.randomInt(2, 3);
-        const subtractAmount = this.randomInt(1, 6);
-
-        const sequence = [start];
-
-        while (sequence.length < 6) {
-            sequence.push(
-                sequence[sequence.length - 1] * multiplier - subtractAmount,
-            );
-        }
-
-        return this.createMathPuzzleFromSequence(
-            sequence,
-            `Each step multiplies by ${multiplier}, then subtracts ${subtractAmount}.`,
+            `Alternate operations: add ${addAmount}, then subtract ${subtractAmount}.`,
         );
     }
 
     private createAlternatingMultiplyAddSequence(): MathSequencePuzzle {
         const start = this.randomInt(2, 10);
-        const firstMultiplier = this.randomInt(2, 3);
-        const secondMultiplier = this.randomInt(2, 4);
-        const addition = this.randomInt(1, 5);
+        const multiplier = this.randomInt(2, 3);
+        const addAmount = this.randomInt(3, 12);
+        const length = this.randomInt(6, 8);
 
         const sequence = [start];
 
-        while (sequence.length < 7) {
+        while (sequence.length < length) {
             const previous = sequence[sequence.length - 1];
 
             sequence.push(
                 sequence.length % 2 === 1
-                    ? previous * firstMultiplier + addition
-                    : previous * secondMultiplier + addition,
+                    ? previous * multiplier
+                    : previous + addAmount,
             );
         }
 
-        return this.createMathPuzzleFromSequence(
+        return this.createPuzzleFromSequence(
             sequence,
-            `The multiplier alternates, but ${addition} is added every time.`,
+            `Alternate operations: multiply by ${multiplier}, then add ${addAmount}.`,
         );
     }
 
-    private createPowerPlusLinearSequence(): MathSequencePuzzle {
-        const exponent = this.getRandomItem([2, 3]);
-        const multiplier = this.randomInt(1, 4);
-        const offset = this.randomInt(0, 6);
-        const start = this.randomInt(1, 3);
-
-        const sequence = Array.from({ length: 6 }, (_, index) => {
-            const n = start + index;
-            return n ** exponent + multiplier * n + offset;
-        });
-
-        return this.createMathPuzzleFromSequence(
-            sequence,
-            exponent === 2
-                ? 'The pattern combines square numbers with a steadily increasing amount.'
-                : 'The pattern combines cube numbers with a steadily increasing amount.',
-        );
-    }
-
-    private createRepeatedDifferencePairSequence(): MathSequencePuzzle {
-        const start = this.randomInt(1, 20);
-        const firstStep = this.randomInt(2, 8);
-        const secondStep = this.randomInt(9, 16);
+    private createMultiplyThenAddSequence(): MathSequencePuzzle {
+        const start = this.randomInt(1, 8);
+        const multiplier = this.randomInt(2, 3);
+        const addAmount = this.randomInt(1, 9);
+        const length = this.randomInt(5, 7);
 
         const sequence = [start];
 
-        while (sequence.length < 8) {
-            const step = sequence.length % 2 === 1 ? firstStep : secondStep;
+        while (sequence.length < length) {
+            sequence.push(sequence[sequence.length - 1] * multiplier + addAmount);
+        }
+
+        return this.createPuzzleFromSequence(
+            sequence,
+            `Each step: multiply by ${multiplier}, then add ${addAmount}.`,
+        );
+    }
+
+    private createMultiplyThenSubtractSequence(): MathSequencePuzzle {
+        const start = this.randomInt(4, 12);
+        const multiplier = this.randomInt(2, 3);
+        const subtractAmount = this.randomInt(1, 8);
+        const length = this.randomInt(5, 7);
+
+        const sequence = [start];
+
+        while (sequence.length < length) {
+            sequence.push(
+                sequence[sequence.length - 1] * multiplier - subtractAmount,
+            );
+        }
+
+        return this.createPuzzleFromSequence(
+            sequence,
+            `Each step: multiply by ${multiplier}, then subtract ${subtractAmount}.`,
+        );
+    }
+
+    private createInterleavedArithmeticSequence(): MathSequencePuzzle {
+        const firstStart = this.randomInt(1, 20);
+        const secondStart = this.randomInt(10, 40);
+        const firstStep = this.randomNonZeroInt(2, 9);
+        const secondStep = this.randomNonZeroInt(2, 9);
+        const length = 8;
+
+        const sequence = Array.from({ length }, (_, index) => {
+            const innerIndex = Math.floor(index / 2);
+
+            if (index % 2 === 0) {
+                return firstStart + firstStep * innerIndex;
+            }
+
+            return secondStart + secondStep * innerIndex;
+        });
+
+        return this.createPuzzleFromSequence(
+            sequence,
+            `Look at alternating positions. Positions 1, 3, 5... change by ${firstStep}. Positions 2, 4, 6... change by ${secondStep}.`,
+        );
+    }
+
+    private createInterleavedArithmeticAndGeometricSequence(): MathSequencePuzzle {
+        const firstStart = this.randomInt(2, 10);
+        const secondStart = this.randomInt(1, 8);
+        const firstStep = this.randomInt(3, 10);
+        const secondMultiplier = this.randomInt(2, 3);
+        const length = 8;
+
+        const sequence = Array.from({ length }, (_, index) => {
+            const innerIndex = Math.floor(index / 2);
+
+            if (index % 2 === 0) {
+                return firstStart + firstStep * innerIndex;
+            }
+
+            return secondStart * secondMultiplier ** innerIndex;
+        });
+
+        return this.createPuzzleFromSequence(
+            sequence,
+            `Look at alternating positions. Positions 1, 3, 5... add ${firstStep}. Positions 2, 4, 6... multiply by ${secondMultiplier}.`,
+        );
+    }
+
+    private createFibonacciLikeSequence(): MathSequencePuzzle {
+        const first = this.randomInt(1, 8);
+        const second = this.randomInt(2, 12);
+        const length = this.randomInt(7, 8);
+
+        const sequence = [first, second];
+
+        while (sequence.length < length) {
+            sequence.push(
+                sequence[sequence.length - 1] + sequence[sequence.length - 2],
+            );
+        }
+
+        return this.createPuzzleFromSequence(
+            sequence,
+            'Each number is the sum of the two previous numbers.',
+        );
+    }
+
+    private createTribonacciLikeSequence(): MathSequencePuzzle {
+        const first = this.randomInt(1, 5);
+        const second = this.randomInt(2, 6);
+        const third = this.randomInt(3, 8);
+        const length = 7;
+
+        const sequence = [first, second, third];
+
+        while (sequence.length < length) {
+            sequence.push(
+                sequence[sequence.length - 1] +
+                sequence[sequence.length - 2] +
+                sequence[sequence.length - 3],
+            );
+        }
+
+        return this.createPuzzleFromSequence(
+            sequence,
+            'Each number is the sum of the three previous numbers.',
+        );
+    }
+
+    private createSquaresSequence(): MathSequencePuzzle {
+        const start = this.randomInt(1, 5);
+        const offset = this.randomInt(-5, 8);
+        const length = this.randomInt(6, 8);
+
+        const sequence = Array.from({ length }, (_, index) => {
+            const number = start + index;
+            return number ** 2 + offset;
+        });
+
+        return this.createPuzzleFromSequence(
+            sequence,
+            offset === 0
+                ? `These are square numbers starting at ${start}².`
+                : `These are square numbers starting at ${start}², with ${offset} added.`,
+        );
+    }
+
+    private createCubesSequence(): MathSequencePuzzle {
+        const start = this.randomInt(1, 4);
+        const offset = this.randomInt(-4, 6);
+        const length = this.randomInt(5, 6);
+
+        const sequence = Array.from({ length }, (_, index) => {
+            const number = start + index;
+            return number ** 3 + offset;
+        });
+
+        return this.createPuzzleFromSequence(
+            sequence,
+            offset === 0
+                ? `These are cube numbers starting at ${start}³.`
+                : `These are cube numbers starting at ${start}³, with ${offset} added.`,
+        );
+    }
+
+    private createTriangularNumbersSequence(): MathSequencePuzzle {
+        const start = this.randomInt(1, 5);
+        const offset = this.randomInt(-4, 8);
+        const length = this.randomInt(6, 8);
+
+        const sequence = Array.from({ length }, (_, index) => {
+            const number = start + index;
+            return (number * (number + 1)) / 2 + offset;
+        });
+
+        return this.createPuzzleFromSequence(
+            sequence,
+            offset === 0
+                ? `These are triangular numbers starting at T${start}.`
+                : `These are triangular numbers starting at T${start}, with ${offset} added.`,
+        );
+    }
+
+    private createPrimeDifferenceSequence(): MathSequencePuzzle {
+        const primeSteps = [2, 3, 5, 7, 11, 13, 17];
+        const start = this.randomInt(1, 25);
+        const length = this.randomInt(6, 8);
+
+        const sequence = [start];
+        const usedSteps: number[] = [];
+
+        while (sequence.length < length) {
+            const step = primeSteps[sequence.length - 1];
+            usedSteps.push(step);
             sequence.push(sequence[sequence.length - 1] + step);
         }
 
-        return this.createMathPuzzleFromSequence(
+        return this.createPuzzleFromSequence(
             sequence,
-            `The differences alternate between ${firstStep} and ${secondStep}.`,
+            `The differences are prime numbers: ${usedSteps.slice(0, 5).join(', ')}...`,
         );
     }
 
-    private createDescendingMultiplySequence(): MathSequencePuzzle {
-        const start = this.randomInt(180, 420);
-        const divisor = this.getRandomItem([2, 3]);
-        const addition = this.randomInt(1, 8);
+    private createSquareDifferenceSequence(): MathSequencePuzzle {
+        const squareSteps = [1, 4, 9, 16, 25, 36, 49];
+        const start = this.randomInt(1, 20);
+        const length = this.randomInt(6, 8);
 
         const sequence = [start];
+        const usedSteps: number[] = [];
 
-        while (sequence.length < 6) {
-            sequence.push(
-                Math.floor(sequence[sequence.length - 1] / divisor) + addition,
-            );
+        while (sequence.length < length) {
+            const step = squareSteps[sequence.length - 1];
+            usedSteps.push(step);
+            sequence.push(sequence[sequence.length - 1] + step);
         }
 
-        return this.createMathPuzzleFromSequence(
+        return this.createPuzzleFromSequence(
             sequence,
-            `Each step divides by ${divisor}, then adds ${addition}.`,
+            `The differences are square numbers: ${usedSteps.slice(0, 5).join(', ')}...`,
         );
     }
 
-    private createModuloCycleDifferenceSequence(): MathSequencePuzzle {
-        const start = this.randomInt(1, 12);
-        const steps = this.getRandomDistinctItems([2, 4, 6, 8, 10, 12], 3);
+    private createRepeatedDifferenceCycleSequence(): MathSequencePuzzle {
+        const start = this.randomInt(1, 30);
+        const steps = this.getRandomDistinctItems([2, 3, 4, 5, 6, 7, 8, 9, 10], 3);
+        const length = 8;
+
         const sequence = [start];
 
-        while (sequence.length < 8) {
+        while (sequence.length < length) {
             sequence.push(
                 sequence[sequence.length - 1] +
                 steps[(sequence.length - 1) % steps.length],
             );
         }
 
-        return this.createMathPuzzleFromSequence(
+        return this.createPuzzleFromSequence(
             sequence,
-            `The differences repeat in a cycle: ${steps.join(', ')}.`,
+            `The differences repeat in this cycle: ${steps.join(', ')}.`,
         );
     }
 
-    private createMathPuzzleFromSequence(
+    private createDoublePreviousMinusOffsetSequence(): MathSequencePuzzle {
+        const start = this.randomInt(3, 20);
+        const subtractAmount = this.randomInt(1, 9);
+        const length = this.randomInt(6, 8);
+
+        const sequence = [start];
+
+        while (sequence.length < length) {
+            sequence.push(sequence[sequence.length - 1] * 2 - subtractAmount);
+        }
+
+        return this.createPuzzleFromSequence(
+            sequence,
+            `Each step: double the previous number, then subtract ${subtractAmount}.`,
+        );
+    }
+
+    private createAddIncreasingOddNumbersSequence(): MathSequencePuzzle {
+        const start = this.randomInt(1, 20);
+        const firstOdd = this.getRandomItem([1, 3, 5, 7]);
+        const length = this.randomInt(6, 8);
+
+        const sequence = [start];
+        const differences: number[] = [];
+
+        while (sequence.length < length) {
+            const step = firstOdd + 2 * (sequence.length - 1);
+            differences.push(step);
+            sequence.push(sequence[sequence.length - 1] + step);
+        }
+
+        return this.createPuzzleFromSequence(
+            sequence,
+            `The differences are increasing odd numbers: ${differences.slice(0, 5).join(', ')}...`,
+        );
+    }
+
+    private createAddIncreasingEvenNumbersSequence(): MathSequencePuzzle {
+        const start = this.randomInt(1, 20);
+        const firstEven = this.getRandomItem([2, 4, 6, 8]);
+        const length = this.randomInt(6, 8);
+
+        const sequence = [start];
+        const differences: number[] = [];
+
+        while (sequence.length < length) {
+            const step = firstEven + 2 * (sequence.length - 1);
+            differences.push(step);
+            sequence.push(sequence[sequence.length - 1] + step);
+        }
+
+        return this.createPuzzleFromSequence(
+            sequence,
+            `The differences are increasing even numbers: ${differences.slice(0, 5).join(', ')}...`,
+        );
+    }
+
+    private createAlternatingTwoMultipliersSequence(): MathSequencePuzzle {
+        const start = this.randomInt(1, 6);
+        const firstMultiplier = this.getRandomItem([2, 3]);
+        const secondMultiplier = this.getRandomItem([2, 4]);
+        const length = this.randomInt(6, 7);
+
+        const sequence = [start];
+
+        while (sequence.length < length) {
+            const multiplier =
+                sequence.length % 2 === 1 ? firstMultiplier : secondMultiplier;
+
+            sequence.push(sequence[sequence.length - 1] * multiplier);
+        }
+
+        return this.createPuzzleFromSequence(
+            sequence,
+            `The multipliers alternate: ×${firstMultiplier}, then ×${secondMultiplier}.`,
+        );
+    }
+
+    private createPositionMultiplierSequence(): MathSequencePuzzle {
+        const start = this.randomInt(1, 5);
+        const addAmount = this.randomInt(0, 4);
+        const length = 6;
+
+        const sequence = [start];
+
+        while (sequence.length < length) {
+            const multiplier = sequence.length + 1;
+            sequence.push(sequence[sequence.length - 1] * multiplier + addAmount);
+        }
+
+        return this.createPuzzleFromSequence(
+            sequence,
+            addAmount === 0
+                ? 'Multiply by 2, then 3, then 4, then 5...'
+                : `Multiply by 2, then 3, then 4, then 5... and add ${addAmount} each time.`,
+        );
+    }
+
+    private createLinearPlusSquareSequence(): MathSequencePuzzle {
+        const start = this.randomInt(1, 4);
+        const multiplier = this.randomInt(2, 6);
+        const offset = this.randomInt(-5, 8);
+        const length = this.randomInt(6, 8);
+
+        const sequence = Array.from({ length }, (_, index) => {
+            const number = start + index;
+            return number ** 2 + multiplier * number + offset;
+        });
+
+        return this.createPuzzleFromSequence(
+            sequence,
+            `For each position n, combine n² with ${multiplier} × n, then add ${offset}.`,
+        );
+    }
+
+    private createPowersOfTwoPlusOffsetSequence(): MathSequencePuzzle {
+        const offset = this.randomInt(-5, 10);
+        const length = this.randomInt(6, 8);
+
+        const sequence = Array.from(
+            { length },
+            (_, index) => 2 ** (index + 1) + offset,
+        );
+
+        return this.createPuzzleFromSequence(
+            sequence,
+            offset === 0
+                ? 'These are powers of 2.'
+                : `These are powers of 2, with ${offset} added.`,
+        );
+    }
+
+    private createPowersOfThreeMinusOffsetSequence(): MathSequencePuzzle {
+        const subtractAmount = this.randomInt(1, 8);
+        const length = this.randomInt(5, 6);
+
+        const sequence = Array.from(
+            { length },
+            (_, index) => 3 ** (index + 1) - subtractAmount,
+        );
+
+        return this.createPuzzleFromSequence(
+            sequence,
+            `These are powers of 3, with ${subtractAmount} subtracted.`,
+        );
+    }
+
+    private createNFactorSequence(): MathSequencePuzzle {
+        const factor = this.randomInt(3, 9);
+        const offset = this.randomInt(-5, 8);
+        const length = this.randomInt(6, 8);
+
+        const sequence = Array.from({ length }, (_, index) => {
+            const n = index + 1;
+            return n * factor + offset;
+        });
+
+        return this.createPuzzleFromSequence(
+            sequence,
+            `For each position n, calculate ${factor} × n, then add ${offset}.`,
+        );
+    }
+
+    private createPreviousPlusPositionSquaredSequence(): MathSequencePuzzle {
+        const start = this.randomInt(1, 12);
+        const length = this.randomInt(6, 8);
+        const sequence = [start];
+        const differences: number[] = [];
+
+        while (sequence.length < length) {
+            const position = sequence.length;
+            const step = position ** 2;
+            differences.push(step);
+            sequence.push(sequence[sequence.length - 1] + step);
+        }
+
+        return this.createPuzzleFromSequence(
+            sequence,
+            `Add square-number steps: ${differences.slice(0, 5).join(', ')}...`,
+        );
+    }
+
+    private createPreviousPlusPositionCubedSequence(): MathSequencePuzzle {
+        const start = this.randomInt(1, 10);
+        const length = 6;
+        const sequence = [start];
+        const differences: number[] = [];
+
+        while (sequence.length < length) {
+            const position = sequence.length;
+            const step = position ** 3;
+            differences.push(step);
+            sequence.push(sequence[sequence.length - 1] + step);
+        }
+
+        return this.createPuzzleFromSequence(
+            sequence,
+            `Add cube-number steps: ${differences.join(', ')}...`,
+        );
+    }
+
+    private createAlternatingPrimeAndSquareDifferencesSequence(): MathSequencePuzzle {
+        const primes = [2, 3, 5, 7, 11];
+        const squares = [1, 4, 9, 16, 25];
+        const start = this.randomInt(1, 20);
+        const length = 8;
+        const sequence = [start];
+        const differences: number[] = [];
+
+        while (sequence.length < length) {
+            const stepIndex = Math.floor((sequence.length - 1) / 2);
+            const step =
+                sequence.length % 2 === 1 ? primes[stepIndex] : squares[stepIndex];
+
+            differences.push(step);
+            sequence.push(sequence[sequence.length - 1] + step);
+        }
+
+        return this.createPuzzleFromSequence(
+            sequence,
+            `The differences alternate between primes and squares: ${differences.slice(0, 6).join(', ')}...`,
+        );
+    }
+
+    private createDoubleInterleavedMultiplicationSequence(): MathSequencePuzzle {
+        const firstStart = this.randomInt(1, 5);
+        const secondStart = this.randomInt(2, 8);
+        const firstMultiplier = this.randomInt(2, 3);
+        const secondMultiplier = this.randomInt(2, 4);
+        const length = 8;
+
+        const sequence = Array.from({ length }, (_, index) => {
+            const innerIndex = Math.floor(index / 2);
+
+            if (index % 2 === 0) {
+                return firstStart * firstMultiplier ** innerIndex;
+            }
+
+            return secondStart * secondMultiplier ** innerIndex;
+        });
+
+        return this.createPuzzleFromSequence(
+            sequence,
+            `Alternating positions multiply separately: one by ${firstMultiplier}, the other by ${secondMultiplier}.`,
+        );
+    }
+
+    private createTwoPreviousPlusConstantSequence(): MathSequencePuzzle {
+        const first = this.randomInt(1, 8);
+        const second = this.randomInt(2, 12);
+        const addAmount = this.randomInt(1, 8);
+        const length = this.randomInt(7, 8);
+
+        const sequence = [first, second];
+
+        while (sequence.length < length) {
+            sequence.push(
+                sequence[sequence.length - 1] +
+                sequence[sequence.length - 2] +
+                addAmount,
+            );
+        }
+
+        return this.createPuzzleFromSequence(
+            sequence,
+            `Each number is the sum of the two previous numbers, plus ${addAmount}.`,
+        );
+    }
+
+    private createPreviousDifferenceTimesTwoSequence(): MathSequencePuzzle {
+        const first = this.randomInt(20, 50);
+        const second = this.randomInt(5, 19);
+        const length = 7;
+
+        const sequence = [first, second];
+
+        while (sequence.length < length) {
+            sequence.push(
+                Math.abs(sequence[sequence.length - 2] - sequence[sequence.length - 1]) *
+                2,
+            );
+        }
+
+        return this.createPuzzleFromSequence(
+            sequence,
+            'Each number is twice the difference between the two previous numbers.',
+        );
+    }
+
+    private createDescendingHalvesSequence(): MathSequencePuzzle {
+        const addAmount = this.randomInt(1, 9);
+        const length = 6;
+        const sequence = [this.randomInt(150, 450)];
+
+        while (sequence.length < length) {
+            sequence.push(Math.floor(sequence[sequence.length - 1] / 2) + addAmount);
+        }
+
+        return this.createPuzzleFromSequence(
+            sequence,
+            `Each step divides by 2, rounds down, then adds ${addAmount}.`,
+        );
+    }
+
+    private createMultiplyByIncreasingNumbersSequence(): MathSequencePuzzle {
+        const start = this.randomInt(1, 5);
+        const firstMultiplier = this.randomInt(2, 4);
+        const length = 6;
+        const sequence = [start];
+        const multipliers: number[] = [];
+
+        while (sequence.length < length) {
+            const multiplier = firstMultiplier + sequence.length - 1;
+            multipliers.push(multiplier);
+            sequence.push(sequence[sequence.length - 1] * multiplier);
+        }
+
+        return this.createPuzzleFromSequence(
+            sequence,
+            `Multiply by increasing numbers: ${multipliers.join(', ')}...`,
+        );
+    }
+
+    private createAddThenAddDoubleSequence(): MathSequencePuzzle {
+        const start = this.randomInt(1, 20);
+        const firstStep = this.randomInt(2, 6);
+        const length = this.randomInt(6, 8);
+        const sequence = [start];
+        const differences: number[] = [];
+        let step = firstStep;
+
+        while (sequence.length < length) {
+            differences.push(step);
+            sequence.push(sequence[sequence.length - 1] + step);
+            step *= 2;
+        }
+
+        return this.createPuzzleFromSequence(
+            sequence,
+            `The differences double each time: ${differences.slice(0, 5).join(', ')}...`,
+        );
+    }
+
+    private createNegativeArithmeticSequence(): MathSequencePuzzle {
+        const start = this.randomInt(-80, -10);
+        const step = this.randomInt(5, 18);
+        const length = this.randomInt(6, 8);
+
+        const sequence = Array.from(
+            { length },
+            (_, index) => start + step * index,
+        );
+
+        return this.createPuzzleFromSequence(
+            sequence,
+            `Add ${step} each time. The sequence starts below zero.`,
+        );
+    }
+
+    private createAbsoluteBounceSequence(): MathSequencePuzzle {
+        const start = this.randomInt(15, 40);
+        const subtractAmount = this.randomInt(10, 25);
+        const addAmount = this.randomInt(3, 12);
+        const length = 7;
+        const sequence = [start];
+
+        while (sequence.length < length) {
+            const previous = sequence[sequence.length - 1];
+
+            sequence.push(
+                sequence.length % 2 === 1
+                    ? Math.abs(previous - subtractAmount)
+                    : previous + addAmount,
+            );
+        }
+
+        return this.createPuzzleFromSequence(
+            sequence,
+            `Alternate operations: subtract ${subtractAmount} and take the absolute value, then add ${addAmount}.`,
+        );
+    }
+
+    private createProductOfPositionSequence(): MathSequencePuzzle {
+        const offset = this.randomInt(0, 8);
+        const length = this.randomInt(6, 8);
+
+        const sequence = Array.from({ length }, (_, index) => {
+            const n = index + 1;
+            return n * (n + 1) + offset;
+        });
+
+        return this.createPuzzleFromSequence(
+            sequence,
+            offset === 0
+                ? 'For each position n, calculate n × (n + 1).'
+                : `For each position n, calculate n × (n + 1), then add ${offset}.`,
+        );
+    }
+
+    private createSquareMinusPositionSequence(): MathSequencePuzzle {
+        const start = this.randomInt(2, 6);
+        const length = this.randomInt(6, 8);
+
+        const sequence = Array.from({ length }, (_, index) => {
+            const n = start + index;
+            return n ** 2 - n;
+        });
+
+        return this.createPuzzleFromSequence(
+            sequence,
+            `For each n starting at ${start}, calculate n² - n.`,
+        );
+    }
+
+    private createCubeMinusSquareSequence(): MathSequencePuzzle {
+        const start = this.randomInt(2, 4);
+        const length = 5;
+
+        const sequence = Array.from({ length }, (_, index) => {
+            const n = start + index;
+            return n ** 3 - n ** 2;
+        });
+
+        return this.createPuzzleFromSequence(
+            sequence,
+            `For each n starting at ${start}, calculate n³ - n².`,
+        );
+    }
+
+    private createAlternatingSignGrowthSequence(): MathSequencePuzzle {
+        const start = this.randomInt(1, 8);
+        const step = this.randomInt(2, 6);
+        const length = this.randomInt(7, 9);
+
+        const sequence = Array.from({ length }, (_, index) => {
+            const value = start + step * index;
+            return index % 2 === 0 ? value : -value;
+        });
+
+        return this.createPuzzleFromSequence(
+            sequence,
+            `The absolute value increases by ${step}, and the sign alternates positive, negative, positive...`,
+        );
+    }
+
+    private createPuzzleFromSequence(
         sequence: number[],
         hint: string,
     ): MathSequencePuzzle {
-        const missingIndex = this.randomInt(
-            Math.max(3, sequence.length - 4),
-            sequence.length - 1,
-        );
+        const missingIndex = sequence.length - 1;
 
         return {
             sequence,
@@ -393,6 +884,16 @@ export class SequencesService {
 
     private getRandomDistinctItems<T>(items: T[], count: number): T[] {
         return this.shuffle(items).slice(0, count);
+    }
+
+    private randomNonZeroInt(min: number, max: number): number {
+        let value = this.randomInt(min, max);
+
+        while (value === 0) {
+            value = this.randomInt(min, max);
+        }
+
+        return value;
     }
 
     private randomInt(min: number, max: number): number {

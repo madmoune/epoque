@@ -1,14 +1,12 @@
 <main class="page">
-    <a routerLink="/" class="back-link">← Back to puzzle selection</a>
+    <a routerLink="/" class="back-link">← Retour vers le futur de l'époque</a>
 
     <section class="card">
-        <p class="eyebrow">Jigsaw Grid</p>
-        <h1>Fit the pieces</h1>
+        <p class="eyebrow">Casse-Grille</p>
+        <h1>Place les pièces</h1>
 
         <p class="instructions">
-            Drag a piece onto the board. Right-click to rotate on desktop.
-            On mobile, use the Rotate button before dragging.
-            Blocked cells cannot be covered.
+            Placer les pièces pour compléter la grille.
         </p>
 
         <div class="game-layout">
@@ -62,13 +60,13 @@
                 </div>
                 } @else {
                 <div class="selected-info">
-                    Select a piece to place.
+                    Choisis une pièce
                 </div>
                 }
             </div>
 
             <aside class="piece-tray" aria-label="Pieces to place">
-                <h2>Pieces to place</h2>
+                <h2>Pièces à placer</h2>
 
                 <div class="piece-list">
                     @for (piece of unplacedPieces(); track piece.id) {
@@ -97,12 +95,12 @@
         <div class="actions">
             <button type="button" class="secondary-button" (click)="rotateSelectedPiece()"
                 [disabled]="!selectedPiece()">
-                Rotate
+                Pivoter
             </button>
 
             <button type="button" class="secondary-button" (click)="placeHintPiece()"
                 [disabled]="isSolved() || unplacedPieces().length === 0">
-                Hint
+                Indice
             </button>
 
             <button type="button" class="secondary-button" (click)="resetPuzzle()">
@@ -110,13 +108,13 @@
             </button>
 
             <button type="button" (click)="newPuzzle()">
-                New puzzle
+                Nouvelle grille
             </button>
         </div>
 
         @if (isSolved()) {
         <p class="success" role="status">
-            Correct! The grid is complete.
+            Incroyable!
         </p>
         }
     </section>

@@ -134,49 +134,20 @@
         }
 
         <section class="mnemonic-legend" aria-labelledby="mnemonic-title">
-            <h2 id="mnemonic-title">Mnémoniques</h2>
-            <div>Exemple: <span class="shape-square color-blue"
-                    style="display: inline-block; width: 1.25rem; height: 1.25rem; background: currentColor; border-radius: 0.2rem; vertical-align: middle;"></span>
-                -> Un calendrier endormi</div>
-            <div>Exemple: <span class="color-orange"
-                    style="display: inline-block; width: 1.25rem; height: 1.25rem; background: currentColor; border-radius: 50%; vertical-align: middle;"></span>
-                -> Un film d'horreur mécanique</div><br>
+            <h2 id="mnemonic-title">Mnemonic legend</h2>
+
             <div class="legend-grid">
                 <section class="legend-card">
-                    <h3>Formes</h3>
-
-                    <div class="legend-table-wrapper">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Forme</th>
-                                    <th>Image</th>
-                                    <th>Explication</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                @for (item of shapeMnemonics; track item.label) {
-                                <tr>
-                                    <td>{{ item.label }}</td>
-                                    <td>{{ item.mnemonic }}</td>
-                                    <td>{{ item.explanation }}</td>
-                                </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-                <section class="legend-card">
-                    <h3>Couleurs</h3>
+                    <h3>Colors</h3>
 
                     <div class="legend-table-wrapper">
                         <table>
                             <thead>
                                 <tr>
                                     <th>Couleur</th>
-                                    <th>Image</th>
-                                    <th>Explication</th>
+                                    <th>Objet</th>
+                                    <th>Qualité</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
 
@@ -184,8 +155,37 @@
                                 @for (item of colorMnemonics; track item.label) {
                                 <tr>
                                     <td>{{ item.label }}</td>
-                                    <td>{{ item.mnemonic }}</td>
-                                    <td>{{ item.explanation }}</td>
+                                    <td>{{ item.object }}</td>
+                                    <td>{{ item.quality }}</td>
+                                    <td>{{ item.action }}</td>
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="legend-card">
+                    <h3>Shapes</h3>
+
+                    <div class="legend-table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Forme</th>
+                                    <th>Objet</th>
+                                    <th>Qualité</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                @for (item of shapeMnemonics; track item.label) {
+                                <tr>
+                                    <td>{{ item.label }}</td>
+                                    <td>{{ item.object }}</td>
+                                    <td>{{ item.quality }}</td>
+                                    <td>{{ item.action }}</td>
                                 </tr>
                                 }
                             </tbody>

@@ -12,8 +12,9 @@ type GamePhase = 'memorize' | 'play';
 
 type MnemonicLegendItem = {
     label: string;
-    mnemonic: string;
-    explanation: string;
+    object: string;
+    quality: string;
+    action: string;
 };
 
 @Component({
@@ -31,82 +32,96 @@ export class MemoryGridPage {
     protected readonly colorMnemonics: MnemonicLegendItem[] = [
         {
             label: 'Rouge',
-            mnemonic: 'Arrosé',
-            explanation: 'Rouge pompier "qui arrose" un feu',
+            object: 'Clown',
+            quality: 'Fâché',
+            action: 'Brûler',
         },
         {
             label: 'Jaune',
-            mnemonic: 'Chantant',
-            explanation:
-                'Jaune pâle, la couleur préférée de Sean Paul, le chanteur',
+            object: 'Soleil',
+            quality: 'Surette',
+            action: 'Ralentir',
         },
         {
             label: 'Gris',
-            mnemonic: 'Puant',
-            explanation: "Gris-aille, l'ail ça pue.",
+            object: 'Nuage',
+            quality: 'Fatigué',
+            action: 'Ramer avec un arc',
         },
         {
             label: 'Vert',
-            mnemonic: 'Sous-terrain',
-            explanation: 'Vert de terre, sous la terre',
+            object: 'Grinch',
+            quality: 'Malade',
+            action: 'Vomir',
         },
         {
             label: 'Bleu',
-            mnemonic: 'Endormi',
-            explanation: 'Bleu nuit, la nuit on dort',
+            object: 'Schtroumpf',
+            quality: 'Mouillé',
+            action: 'Pleurer',
         },
         {
             label: 'Orange',
-            mnemonic: 'Mécanique',
-            explanation: 'Orange Mécanique',
+            object: 'Carotte',
+            quality: 'Avec des lunettes',
+            action: 'Voter républicain',
         },
         {
             label: 'Mauve',
-            mnemonic: 'Sexy',
-            explanation: 'Dildo mauve',
+            object: 'Grosse douceur',
+            quality: 'Sexy',
+            action: 'Faire un câlin',
         },
         {
             label: 'Rose',
-            mnemonic: 'Équilibré',
-            explanation: 'Faire du slackline professionnellement.',
+            object: 'Princesse',
+            quality: 'Fleuri',
+            action: 'Faire de la slackline',
         },
     ];
 
     protected readonly shapeMnemonics: MnemonicLegendItem[] = [
         {
             label: 'Cercle',
-            mnemonic: "Film d'horreur",
-            explanation: 'Le Cercle',
+            object: 'Film',
+            quality: 'Gros',
+            action: 'Orbiter',
         },
         {
             label: 'Triangle',
-            mnemonic: 'Bac à recyclage',
-            explanation: 'TRIangle, on trie nos déchets',
+            object: 'Angine de poitrine',
+            quality: 'Pepperoni fromage',
+            action: 'Transpercer',
         },
         {
             label: 'Rectangle',
-            mnemonic: 'Manque de respect',
-            explanation: 'RECKED → Diss → Disrespect',
+            object: 'Télévision',
+            quality: 'Hypnotique',
+            action: 'Exploser',
         },
         {
             label: 'Carré',
-            mnemonic: 'Calendrier',
-            explanation: 'Carré aux dates',
+            object: 'Cric Crac et Croc',
+            quality: 'Croquant',
+            action: 'Danser',
         },
         {
             label: 'Losange',
-            mnemonic: 'Magicien',
-            explanation: "lOZange, magicien d'OZ",
+            object: 'Diamant',
+            quality: 'Sanglant',
+            action: 'Briller',
         },
         {
             label: 'Pentagone',
-            mnemonic: 'Diable',
-            explanation: 'Pentagramme',
+            object: 'Diable',
+            quality: 'Maléfique',
+            action: 'Invoquer',
         },
         {
             label: 'Hexagone',
-            mnemonic: 'Saucisse',
-            explanation: 'SauSIX côté.',
+            object: 'Ruche',
+            quality: 'Collant',
+            action: 'Bourdonner',
         },
     ];
 

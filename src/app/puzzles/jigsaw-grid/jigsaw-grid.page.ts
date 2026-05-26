@@ -136,13 +136,49 @@ export class JigsawGridPage {
     });
 
     protected readonly isSolved = computed(() => {
+        const puzzle = this.puzzle();
+
         if (this.unplacedPieces().length > 0) {
             return false;
         }
 
-        return this.placedPieces().every((placedPiece) =>
-            this.isPlacedPieceInSolutionPosition(placedPiece),
-        );
+        const fillableCellCount =
+            puzzle.size * puzzle.size - puzzle.blockedCells.length;
+
+        const occupiedCellKeys = new Set<string>();
+
+        for (const placedPiece of this.placedPieces()) {
+            const piece = this.getPieceById(placedPiece.pieceId);
+
+            if (!piece) {
+                return false;
+            }
+
+            const absoluteCells = this.jigsawGridService.getAbsoluteCells(
+                piece,
+                placedPiece,
+            );
+
+            for (const cell of absoluteCells) {
+                if (!this.isInsideBoard(cell)) {
+                    return false;
+                }
+
+                if (this.isBlockedCell(cell)) {
+                    return false;
+                }
+
+                const cellKey = this.jigsawGridService.cellKey(cell);
+
+                if (occupiedCellKeys.has(cellKey)) {
+                    return false;
+                }
+
+                occupiedCellKeys.add(cellKey);
+            }
+        }
+
+        return occupiedCellKeys.size === fillableCellCount;
     });
 
     @HostListener('document:pointermove', ['$event'])
@@ -703,24 +739,6 @@ export class JigsawGridPage {
             coordinate.column >= 0 &&
             coordinate.row < this.puzzle().size &&
             coordinate.column < this.puzzle().size
-        );
-    }
-
-    private isPlacedPieceInSolutionPosition(
-        placedPiece: PlacedJigsawPiece,
-    ): boolean {
-        const solutionPlacement = this.puzzle().solution.find(
-            (solution) => solution.pieceId === placedPiece.pieceId,
-        );
-
-        if (!solutionPlacement) {
-            return false;
-        }
-
-        return (
-            solutionPlacement.anchor.row === placedPiece.anchor.row &&
-            solutionPlacement.anchor.column === placedPiece.anchor.column &&
-            solutionPlacement.rotation === placedPiece.rotation
         );
     }
 

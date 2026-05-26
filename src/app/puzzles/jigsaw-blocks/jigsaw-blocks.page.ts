@@ -16,6 +16,11 @@ type DragPosition = {
 
 type TileRotationMap = Record<string, number>;
 
+type Point = {
+    x: number;
+    y: number;
+};
+
 @Component({
     selector: 'app-pathways-page',
     imports: [RouterLink],
@@ -389,21 +394,50 @@ export class PathwaysPage {
     }
 
     private findHintPlacement(): PlacedPathwayTile | null {
-        const placedTileIds = new Set(
-            this.placedTiles().map((tile) => tile.tileId),
-        );
-
         const filledSlotIds = new Set(
             this.placedTiles().map((tile) => tile.slotId),
         );
 
-        return (
-            this.puzzle().solution.find(
-                (solutionTile) =>
-                    !placedTileIds.has(solutionTile.tileId) &&
-                    !filledSlotIds.has(solutionTile.slotId),
-            ) ?? null
+        const placedTileIds = new Set(
+            this.placedTiles().map((tile) => tile.tileId),
         );
+
+        const availableTiles = this.puzzle().tiles.filter(
+            (tile) => !placedTileIds.has(tile.id),
+        );
+
+        for (const solutionTile of this.puzzle().solution) {
+            if (filledSlotIds.has(solutionTile.slotId)) {
+                continue;
+            }
+
+            const expectedTile = this.getTileById(solutionTile.tileId);
+
+            if (!expectedTile) {
+                continue;
+            }
+
+            const matchingAvailableTile = availableTiles.find((tile) =>
+                this.haveSameVisualSignature(
+                    tile,
+                    solutionTile.rotation,
+                    expectedTile,
+                    solutionTile.rotation,
+                ),
+            );
+
+            if (!matchingAvailableTile) {
+                continue;
+            }
+
+            return {
+                tileId: matchingAvailableTile.id,
+                slotId: solutionTile.slotId,
+                rotation: solutionTile.rotation,
+            };
+        }
+
+        return null;
     }
 
     private cancelSelectedTile(): void {
@@ -454,66 +488,90 @@ export class PathwaysPage {
             return false;
         }
 
-        const placedPorts = this.getRotatedPorts(
-            placedTileData.ports,
+        return this.haveSameVisualSignature(
+            placedTileData,
             placedTile.rotation,
-        );
-
-        const expectedPorts = this.getRotatedPorts(
-            expectedTileData.ports,
+            expectedTileData,
             expectedSolutionTile.rotation,
         );
-
-        return this.haveSamePorts(placedPorts, expectedPorts);
     }
 
-    private getRotatedPorts(
-        ports: PathwayPort[],
-        rotation: number,
-    ): PathwayPort[] {
+    private haveSameVisualSignature(
+        firstTile: PathwayTile,
+        firstRotation: number,
+        secondTile: PathwayTile,
+        secondRotation: number,
+    ): boolean {
+        return (
+            this.createVisualSignature(firstTile, firstRotation) ===
+            this.createVisualSignature(secondTile, secondRotation)
+        );
+    }
+
+    private createVisualSignature(tile: PathwayTile, rotation: number): string {
+        return tile.ports
+            .map((port) => this.getRotatedPortPoint(port, rotation))
+            .map((point) => `${point.x}:${point.y}`)
+            .sort()
+            .join('|');
+    }
+
+    private getRotatedPortPoint(port: PathwayPort, rotation: number): Point {
+        const point = this.getPortPoint(port);
         const normalizedRotation = this.normalizeRotation(rotation);
-        const quarterTurns = normalizedRotation / 90;
+        const radians = (normalizedRotation * Math.PI) / 180;
 
-        return ports.map((port) => {
-            let rotatedPort = port;
-
-            for (let turn = 0; turn < quarterTurns; turn++) {
-                rotatedPort = this.rotatePortClockwise(rotatedPort);
-            }
-
-            return rotatedPort;
-        });
-    }
-
-    private rotatePortClockwise(port: PathwayPort): PathwayPort {
-        const rotatedPorts: Record<PathwayPort, PathwayPort> = {
-            topLeft: 'topRight',
-            topRight: 'bottomRight',
-            bottomRight: 'bottomLeft',
-            bottomLeft: 'topLeft',
-            left: 'topLeft',
-            right: 'bottomRight',
+        const center = {
+            x: 50,
+            y: 50,
         };
 
-        return rotatedPorts[port];
+        const translatedX = point.x - center.x;
+        const translatedY = point.y - center.y;
+
+        return {
+            x: this.round(
+                center.x +
+                translatedX * Math.cos(radians) -
+                translatedY * Math.sin(radians),
+            ),
+            y: this.round(
+                center.y +
+                translatedX * Math.sin(radians) +
+                translatedY * Math.cos(radians),
+            ),
+        };
     }
 
-    private haveSamePorts(
-        firstPorts: PathwayPort[],
-        secondPorts: PathwayPort[],
-    ): boolean {
-        if (firstPorts.length !== secondPorts.length) {
-            return false;
-        }
+    private getPortPoint(port: PathwayPort): Point {
+        const points: Record<PathwayPort, Point> = {
+            left: {
+                x: 0,
+                y: 50,
+            },
+            right: {
+                x: 100,
+                y: 50,
+            },
+            topLeft: {
+                x: 25,
+                y: 0,
+            },
+            topRight: {
+                x: 75,
+                y: 0,
+            },
+            bottomLeft: {
+                x: 25,
+                y: 100,
+            },
+            bottomRight: {
+                x: 75,
+                y: 100,
+            },
+        };
 
-        const firstSignature = this.createPortsSignature(firstPorts);
-        const secondSignature = this.createPortsSignature(secondPorts);
-
-        return firstSignature === secondSignature;
-    }
-
-    private createPortsSignature(ports: PathwayPort[]): string {
-        return [...ports].sort().join('|');
+        return points[port];
     }
 
     private createRandomTileRotations(tiles: PathwayTile[]): TileRotationMap {
@@ -531,6 +589,10 @@ export class PathwaysPage {
 
     private normalizeRotation(rotation: number): number {
         return ((rotation % 360) + 360) % 360;
+    }
+
+    private round(value: number): number {
+        return Math.round(value * 100) / 100;
     }
 
     private getRandomRotation(): number {

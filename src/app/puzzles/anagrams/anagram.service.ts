@@ -58,6 +58,10 @@ export class AnagramService {
     }
 
     private normalize(value: string): string {
-        return value.trim().toLowerCase();
+        return value
+            .normalize('NFD')
+            .replace(/\p{Diacritic}/gu, '')
+            .trim()
+            .toLowerCase();
     }
 }

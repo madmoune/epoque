@@ -40,10 +40,10 @@
             }
         </div>
         <button type="button" class="secondary-button" (click)="showHint()" [disabled]="isCorrect()">
-            Hint
+            Indice
         </button>
         <button type="button" class="secondary-button" (click)="clearGuesses()" [disabled]="isCorrect()">
-            Clear all
+            Vider les champs
         </button>
         @if (!isCorrect()) {
         <div class="actions">
