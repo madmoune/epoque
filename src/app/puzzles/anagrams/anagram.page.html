@@ -24,7 +24,7 @@
         <div class="hint">
             <button type="button" class="secondary-button" (click)="showNextHintLetter()"
                 [disabled]="isCorrect() || hintLetterCount() >= word.answer.length">
-                Hint
+                Indice
             </button>
 
             @if (revealedHint()) {

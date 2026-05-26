@@ -1,12 +1,12 @@
 <main class="page">
-    <a routerLink="/" class="back-link">← Back to puzzle selection</a>
+    <a routerLink="/" class="back-link">← Déguerpi!</a>
 
     <section class="card">
         <header class="header">
-            <p class="eyebrow">Pathways</p>
-            <h1>Pyramid puzzle</h1>
+            <p class="eyebrow">Casse-bloques</p>
+            <h1>Casse-tête en pyramide</h1>
             <p class="instructions">
-                Drag the blocks into the pyramid to complete the abstract path.
+                Place les bloques pour compléter la ligne.
             </p>
         </header>
 
@@ -48,17 +48,17 @@
 
                 @if (selectedTile(); as tile) {
                 <p class="selected-info">
-                    Selected: <strong>{{ tile.name }}</strong>
+                    Sélectionné: <strong>{{ tile.name }}</strong>
                 </p>
                 } @else {
                 <p class="selected-info">
-                    Select a tile to place.
+                    Choisis une pièce à placer
                 </p>
                 }
             </div>
 
             <aside class="tile-tray" aria-label="Available pathway tiles">
-                <h2>Blocks</h2>
+                <h2>Pièces</h2>
 
                 <div class="tile-list">
                     @for (tile of unplacedTiles(); track tile.id) {
@@ -85,11 +85,11 @@
 
             <button type="button" class="secondary-button" (click)="placeHintTile()"
                 [disabled]="isSolved() || unplacedTiles().length === 0">
-                Hint
+                Indice
             </button>
 
             <button type="button" class="secondary-button" (click)="resetPuzzle()">
-                Reset
+                Recommencer
             </button>
 
             <button type="button" (click)="newPuzzle()">

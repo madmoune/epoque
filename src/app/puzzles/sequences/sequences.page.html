@@ -1,9 +1,9 @@
 <main class="page">
-    <a routerLink="/" class="back-link">← Back to puzzle selection</a>
+    <a routerLink="/" class="back-link">← Le menu par ici</a>
 
     <section class="card">
-        <p class="eyebrow">Sequences</p>
-        <h1>Find the number</h1>
+        <p class="eyebrow">Séquences</p>
+        <h1>Trouve le bon nombre</h1>
 
         <section class="puzzle-area">
             <div class="number-sequence" aria-label="Math sequence">
@@ -19,7 +19,7 @@
             </div>
 
             <label class="answer-label" for="math-answer">
-                Your answer
+                Ta réponse
             </label>
 
             <input id="math-answer" type="number" inputmode="numeric" [value]="mathAnswer()"
@@ -28,14 +28,14 @@
             <div class="actions">
                 <button type="button" class="secondary-button" (click)="showHint()">
                     @if (hintCount() === 0) {
-                    Hint
+                    Indice
                     } @else {
-                    Show answer
+                    Montrer la réponse
                     }
                 </button>
 
                 <button type="button" class="secondary-button" (click)="nextPuzzle()">
-                    Next puzzle
+                    Prochaine séquence
                 </button>
             </div>
 
@@ -54,13 +54,13 @@
 
             @if (isCorrect()) {
             <p class="success" role="status">
-                Correct!
+                Correcte!
             </p>
             }
 
             @if (isIncorrect()) {
             <p class="error" role="status">
-                Not quite. Try again.
+                Ben non c'pas ça.
             </p>
             }
         </section>
