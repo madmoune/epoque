@@ -169,9 +169,10 @@ export class PhrasesPage {
         return value
             .normalize('NFD')
             .replace(/\p{Diacritic}/gu, '')
-            .trim()
+            .replace(/[^\p{Letter}\p{Number}\s]/gu, '')
             .replace(/\s+/g, ' ')
-            .toUpperCase();
+            .trim()
+            .toLowerCase();
     }
 
     private isLetter(character: string): boolean {
