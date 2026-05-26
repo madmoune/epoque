@@ -1,0 +1,68 @@
+<main class="page">
+    <a routerLink="/" class="back-link">← Back to puzzle selection</a>
+
+    <section class="card">
+        <p class="eyebrow">Sequences</p>
+        <h1>Find the number</h1>
+
+        <section class="puzzle-area">
+            <div class="number-sequence" aria-label="Math sequence">
+                @for (value of puzzle().sequence; track $index) {
+                <div class="number-card" [class.missing]="$index === puzzle().missingIndex">
+                    @if ($index === puzzle().missingIndex) {
+                    ?
+                    } @else {
+                    {{ value }}
+                    }
+                </div>
+                }
+            </div>
+
+            <label class="answer-label" for="math-answer">
+                Your answer
+            </label>
+
+            <input id="math-answer" type="number" inputmode="numeric" [value]="mathAnswer()"
+                (input)="updateMathAnswer($event)" [disabled]="isCorrect()" autocomplete="off" />
+
+            <div class="actions">
+                <button type="button" class="secondary-button" (click)="showHint()">
+                    @if (hintCount() === 0) {
+                    Hint
+                    } @else {
+                    Show answer
+                    }
+                </button>
+
+                <button type="button" class="secondary-button" (click)="nextPuzzle()">
+                    Next puzzle
+                </button>
+            </div>
+
+            @if (isHintVisible()) {
+            <p class="hint" role="status">
+                Hint: {{ puzzle().hint }}
+            </p>
+            }
+
+            @if (isAnswerHintVisible()) {
+            <div class="answer-hint" role="status">
+                <strong>Answer:</strong>
+                <span>{{ puzzle().answer }}</span>
+            </div>
+            }
+
+            @if (isCorrect()) {
+            <p class="success" role="status">
+                Correct!
+            </p>
+            }
+
+            @if (isIncorrect()) {
+            <p class="error" role="status">
+                Not quite. Try again.
+            </p>
+            }
+        </section>
+    </section>
+</main>

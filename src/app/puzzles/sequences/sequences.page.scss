@@ -1,0 +1,189 @@
+.page {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 1rem;
+    color: #444;
+}
+
+.card {
+    padding: 2rem;
+    border: 1px solid #ddd;
+    border-radius: 1.25rem;
+    box-shadow: 0 0.75rem 2rem rgb(0 0 0 / 6%);
+}
+
+.eyebrow {
+    margin: 0 0 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+h1 {
+    margin: 0 0 1.5rem;
+}
+
+.puzzle-area {
+    padding: 1.5rem;
+    border: 1px solid #eee;
+    border-radius: 1rem;
+    background: #fff;
+}
+
+.number-sequence {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 1.5rem 0;
+}
+
+.number-card {
+    display: grid;
+    place-items: center;
+    min-width: 4.5rem;
+    aspect-ratio: 1;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 1rem;
+    background: #f8f8f8;
+    font-size: 1.5rem;
+    font-weight: 800;
+    line-height: 1;
+
+    &.missing {
+        border-style: dashed;
+        background: white;
+        color: #777;
+    }
+}
+
+.answer-label {
+    display: block;
+    margin-bottom: 0.35rem;
+    font-weight: 700;
+}
+
+input {
+    width: min(100%, 16rem);
+    padding: 0.8rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 0.75rem;
+    font: inherit;
+
+    &:disabled {
+        opacity: 0.7;
+        background: #f8f8f8;
+    }
+
+    &:focus {
+        outline: 4px solid rgb(0 0 0 / 10%);
+        border-color: #999;
+    }
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+button {
+    padding: 0.75rem 1rem;
+    border: 0;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    font-weight: 700;
+    touch-action: manipulation;
+
+    &:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+}
+
+.secondary-button {
+    background: #f2f2f2;
+    color: #222;
+}
+
+.success {
+    margin-top: 1rem;
+    color: #17803d;
+    font-weight: 700;
+}
+
+.error {
+    margin-top: 1rem;
+    color: #b00020;
+    font-weight: 700;
+}
+
+.hint {
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    background: #fff8dc;
+    color: #5f4b00;
+    font-weight: 700;
+}
+
+.answer-hint {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    background: #eef7ff;
+    color: #12395f;
+    font-weight: 700;
+}
+
+@media (max-width: 600px) {
+    .page {
+        padding: 1rem;
+    }
+
+    .card {
+        padding: 1rem;
+        border-radius: 1rem;
+    }
+
+    .puzzle-area {
+        padding: 1rem;
+    }
+
+    .number-sequence {
+        justify-content: center;
+        gap: 0.5rem;
+        margin: 1.25rem 0;
+    }
+
+    .number-card {
+        min-width: 3.4rem;
+        padding: 0.55rem;
+        border-radius: 0.75rem;
+        font-size: 1.2rem;
+    }
+
+    input {
+        width: 100%;
+    }
+
+    .actions {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    button {
+        width: 100%;
+        min-height: 3rem;
+    }
+}

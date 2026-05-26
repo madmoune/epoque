@@ -43,6 +43,11 @@ export const routes: Routes = [
             import('./puzzles/jigsaw-blocks/jigsaw-blocks.page').then((m) => m.PathwaysPage),
     },
     {
+        path: 'sequences',
+        loadComponent: () =>
+            import('./puzzles/sequences/sequences.page').then((m) => m.SequencesPage),
+    },
+    {
         path: '**',
         redirectTo: '',
     },

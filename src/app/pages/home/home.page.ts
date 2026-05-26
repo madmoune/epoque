@@ -52,5 +52,11 @@ export class HomePage {
             route: '/jigsaw-blocks',
             isAvailable: true,
         },
+        {
+            title: 'Séquences',
+            description: 'Reconnaître des séquences.',
+            route: '/sequences',
+            isAvailable: true,
+        },
     ];
 }
