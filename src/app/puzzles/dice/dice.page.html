@@ -1,0 +1,73 @@
+<main class="page">
+    <a routerLink="/" class="back-link">← Retour à la sélection des jeux</a>
+
+    <section class="card">
+        <p class="eyebrow">Dé logique</p>
+        <h1>Retrouve le dernier symbole</h1>
+
+        <p class="instructions">
+            Le dé roule en suivant le parcours. Chaque case montre le symbole laissé
+            par la face du dessous. Trouve le symbole de la dernière case.
+        </p>
+
+        <section class="path-section" aria-labelledby="path-title">
+            <h2 id="path-title">Parcours</h2>
+
+            <div class="compact-path-grid" [style.grid-template-columns]="gridTemplateColumns()">
+                @for (row of compactRows(); track row) {
+                @for (col of compactCols(); track col) {
+                <div class="grid-cell" [class.path-cell]="!!getCell(row, col)"
+                    [class.conn-up]="hasConnection(row, col, 'up')" [class.conn-down]="hasConnection(row, col, 'down')"
+                    [class.conn-left]="hasConnection(row, col, 'left')"
+                    [class.conn-right]="hasConnection(row, col, 'right')">
+                    @if (getCell(row, col); as cell) {
+                    <div class="step-badge">{{ cell.step }}</div>
+
+                    <div class="stamp-symbol">
+                        {{ cell.hidden ? '?' : getSymbolIcon(cell.symbolId) }}
+                    </div>
+                    }
+                </div>
+                }
+                }
+            </div>
+        </section>
+
+        <section class="answer-section" aria-labelledby="answer-title">
+            <h2 id="answer-title">Réponse</h2>
+
+            <div class="symbol-options">
+                @for (symbol of puzzle().symbols; track symbol.id) {
+                <button type="button" class="symbol-button" [class.selected]="selectedSymbolId() === symbol.id"
+                    [class.correct]="hasAnswered() && symbol.id === puzzle().answerSymbolId" [class.incorrect]="
+              hasAnswered() &&
+              selectedSymbolId() === symbol.id &&
+              symbol.id !== puzzle().answerSymbolId
+            " [disabled]="hasAnswered()" (click)="selectSymbol(symbol)">
+                    <span class="symbol-icon">{{ symbol.icon }}</span>
+                    <span>{{ symbol.label }}</span>
+                </button>
+                }
+            </div>
+        </section>
+
+        @if (isCorrect()) {
+        <p class="success" role="status">
+            Bravo! C’est la bonne réponse.
+        </p>
+        }
+
+        @if (isIncorrect()) {
+        <p class="error" role="status">
+            Pas tout à fait. La bonne réponse était
+            {{ getSymbolLabel(puzzle().answerSymbolId) }}.
+        </p>
+        }
+
+        <div class="actions">
+            <button type="button" class="secondary-button" (click)="nextPuzzle()">
+                Nouveau puzzle
+            </button>
+        </div>
+    </section>
+</main>

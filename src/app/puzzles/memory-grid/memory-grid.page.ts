@@ -17,6 +17,11 @@ type MnemonicLegendItem = {
     action: string;
 };
 
+type MemoryPalaceLocation = {
+    position: number;
+    location: string;
+};
+
 @Component({
     selector: 'app-memory-grid-page',
     imports: [RouterLink],
@@ -122,6 +127,49 @@ export class MemoryGridPage {
             object: 'Ruche',
             quality: 'Collant',
             action: 'Bourdonner',
+        },
+    ];
+
+    protected readonly memoryPalaceLocations: MemoryPalaceLocation[] = [
+        {
+            position: 1,
+            location: 'Balcon avant',
+        },
+        {
+            position: 2,
+            location: 'Portique',
+        },
+        {
+            position: 3,
+            location: 'Salle de bain',
+        },
+        {
+            position: 4,
+            location: 'Garde-manger',
+        },
+        {
+            position: 5,
+            location: 'Îlot de cuisine',
+        },
+        {
+            position: 6,
+            location: 'Divan du salon',
+        },
+        {
+            position: 7,
+            location: 'Télévision',
+        },
+        {
+            position: 8,
+            location: 'Table de la cuisine',
+        },
+        {
+            position: 9,
+            location: 'Patio arrière',
+        },
+        {
+            position: 10,
+            location: 'Piscine',
         },
     ];
 
