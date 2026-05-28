@@ -48,6 +48,16 @@ export const routes: Routes = [
             import('./puzzles/sequences/sequences.page').then((m) => m.SequencesPage),
     },
     {
+        path: 'mnemonic',
+        loadComponent: () =>
+            import('./puzzles/mnemonic/mnemonic.page').then((m) => m.MnemonicPage),
+    },
+    {
+        path: 'dice',
+        loadComponent: () =>
+            import('./puzzles/dice/dice.page').then((m) => m.DicePage),
+    },
+    {
         path: '**',
         redirectTo: '',
     },

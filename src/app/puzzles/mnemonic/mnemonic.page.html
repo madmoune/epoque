@@ -1,0 +1,140 @@
+<main class="page">
+    <a routerLink="/" class="back-link">← Retour à la sélection des jeux</a>
+
+    <section class="card">
+        <p class="eyebrow">Mnémotechnique</p>
+        <h1>Retrouve l’image mentale</h1>
+
+        @if (decodePuzzle(); as puzzle) {
+        <section class="question-card">
+            <p class="mode-label">Mode 1 : retrouver la couleur, la forme et la position</p>
+
+            <p class="instructions">
+                Lis l’image mentale, puis choisis la bonne couleur, la bonne forme et la bonne position.
+            </p>
+
+            <div class="prompt-box">
+                {{ puzzle.sentence }}
+            </div>
+
+            <section class="answer-section">
+                <h2>Couleur</h2>
+
+                <div class="option-grid">
+                    @for (color of mnemonicService.colors; track color.id) {
+                    <button type="button" class="choice-button" [class.selected]="selectedColorId() === color.id"
+                        [disabled]="isCorrect()" (click)="selectColor(color.id)">
+                        {{ color.label }}
+                    </button>
+                    }
+                </div>
+            </section>
+
+            <section class="answer-section">
+                <h2>Forme</h2>
+
+                <div class="option-grid">
+                    @for (shape of mnemonicService.shapes; track shape.id) {
+                    <button type="button" class="choice-button" [class.selected]="selectedShapeId() === shape.id"
+                        [disabled]="isCorrect()" (click)="selectShape(shape.id)">
+                        {{ shape.label }}
+                    </button>
+                    }
+                </div>
+            </section>
+
+            <section class="answer-section">
+                <h2>Position</h2>
+
+                <div class="position-grid compact-position-grid">
+                    @for (location of mnemonicService.memoryPalaceLocations; track location.position) {
+                    <button type="button" class="choice-button number-position-button"
+                        [class.selected]="selectedPosition() === location.position" [disabled]="isCorrect()"
+                        (click)="selectPosition(location.position)">
+                        {{ location.position }}
+                    </button>
+                    }
+                </div>
+            </section>
+
+            <div class="actions">
+                <button type="button" class="secondary-button" (click)="nextPuzzle()">
+                    Question suivante
+                </button>
+            </div>
+        </section>
+        }
+
+        @if (encodePuzzle(); as puzzle) {
+        <section class="question-card">
+            <p class="mode-label">Mode 2 : retrouver la bonne image mentale</p>
+
+            <p class="instructions">
+                Choisis l’image mentale qui correspond à cette forme, cette couleur et cette position.
+            </p>
+
+            <div class="prompt-box visual-prompt-box">
+                <div class="visual-target">
+                    <span class="shape prompt-shape" [class]="
+                'shape prompt-shape shape-' +
+                puzzle.shapeId +
+                ' color-' +
+                puzzle.colorId
+              " [attr.aria-label]="
+                mnemonicService.getColorLabel(puzzle.colorId) +
+                ' ' +
+                mnemonicService.getShapeLabel(puzzle.shapeId)
+              "></span>
+
+                    <div class="target-text">
+                        <strong>
+                            Position {{ puzzle.position }}
+                        </strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="encode-options">
+                @for (option of puzzle.options; track option.id) {
+                <button type="button" class="encode-option" [class.selected]="selectedOptionId() === option.id"
+                    [class.correct]="hasAnswered() && option.id === puzzle.answerOptionId" [class.incorrect]="
+                hasAnswered() &&
+                selectedOptionId() === option.id &&
+                option.id !== puzzle.answerOptionId
+              " [disabled]="hasAnswered()" (click)="selectOption(option)">
+                    <span class="option-sentence">
+                        {{ option.sentence.split(' — ')[0] }}
+                    </span>
+
+                    <span class="option-position">
+                        {{ mnemonicService.getLocationLabel(option.position) }}
+                    </span>
+                </button>
+                }
+            </div>
+
+            <div class="actions">
+                <button type="button" class="secondary-button" (click)="nextPuzzle()">
+                    Question suivante
+                </button>
+            </div>
+        </section>
+        }
+
+        @if (isCorrect()) {
+        <p class="success" role="status">
+            Barvo! C’est la bonne réponse.
+        </p>
+        }
+
+        @if (isIncorrect()) {
+        <p class="error" role="status">
+            Pas tout à fait.
+            La bonne réponse était :
+            {{ mnemonicService.getColorLabel(puzzle().colorId) }},
+            {{ mnemonicService.getShapeLabel(puzzle().shapeId) }},
+            position {{ puzzle().position }}.
+        </p>
+        }
+    </section>
+</main>

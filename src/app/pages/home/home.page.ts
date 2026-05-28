@@ -58,5 +58,17 @@ export class HomePage {
             route: '/sequences',
             isAvailable: true,
         },
+        {
+            title: 'Mnémotechnique',
+            description: 'Associe les couleurs, formes et lieux à leurs images mentales.',
+            route: '/mnemonic',
+            isAvailable: true,
+        },
+        {
+            title: 'Dé logique',
+            description: 'Observe plusieurs vues du même dé et déduis la face manquante.',
+            route: '/dice',
+            isAvailable: true,
+        },
     ];
 }
