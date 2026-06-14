@@ -1,74 +1,117 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-type PuzzleType = {
+type PuzzleCard = {
     title: string;
     description: string;
     route: string;
-    isAvailable: boolean;
+    tag?: string;
+};
+
+type PuzzleCategory = {
+    title: string;
+    description: string;
+    puzzles: PuzzleCard[];
+    emptyText?: string;
 };
 
 @Component({
     selector: 'app-home-page',
     imports: [RouterLink],
-    templateUrl: 'home.page.html',
-    styleUrl: 'home.page.scss',
+    templateUrl: './home.page.html',
+    styleUrl: './home.page.scss',
 })
 export class HomePage {
-    protected readonly puzzleTypes: PuzzleType[] = [
+    protected readonly categories: PuzzleCategory[] = [
         {
-            title: 'Anagrammes',
-            description: 'Réordonner les lettres pour trouver le mot.',
-            route: '/anagrams',
-            isAvailable: true,
+            title: 'Puzzles de mots',
+            description: 'Jeux de lettres, de phrases et de déchiffrement.',
+            puzzles: [
+                {
+                    title: 'Anagrammes',
+                    description: 'Réarrange les lettres pour retrouver le mot caché.',
+                    route: '/anagrams',
+                    tag: 'Lettres',
+                },
+                {
+                    title: 'Crypto',
+                    description: 'Déchiffre un message codé à partir d’indices.',
+                    route: '/cryptograms',
+                    tag: 'Code',
+                },
+                {
+                    title: 'Phrases',
+                    description: 'Reconstruis ou devine la phrase cachée.',
+                    route: '/phrases',
+                    tag: 'Langage',
+                },
+            ],
         },
         {
-            title: 'Cryptogrammes',
-            description: 'Décoder comme un malade.',
-            route: '/cryptograms',
-            isAvailable: true,
+            title: 'Puzzles de mémoire',
+            description:
+                'Jeux basés sur la mémorisation, les symboles et les associations.',
+            puzzles: [
+                {
+                    title: 'Grille mémoire',
+                    description: 'Mémorise une grille de formes et de couleurs.',
+                    route: '/memory-grid',
+                    tag: 'Mémoire',
+                },
+                {
+                    title: 'Mnémotechnique',
+                    description:
+                        'Pratique les associations objet, qualité, action et lieu.',
+                    route: '/mnemonic',
+                    tag: 'Méthode',
+                },
+            ],
         },
         {
-            title: 'Phrases',
-            description: 'Découvrir une lettre à la fois',
-            route: '/phrases',
-            isAvailable: true,
+            title: 'Puzzles mathématiques',
+            description: 'Suites, logique numérique et raisonnement mathématique.',
+            puzzles: [
+                {
+                    title: 'Suites mathématiques',
+                    description: 'Trouve le prochain nombre dans une suite logique.',
+                    route: '/sequences',
+                    tag: 'Nombres',
+                },
+            ],
         },
         {
-            title: 'Grille de mémoire',
-            description: 'Mémoriser des couleurs et des formes dans une grille.',
-            route: '/memory-grid',
-            isAvailable: true,
+            title: 'Puzzles de casse-tête',
+            description:
+                'Puzzles de placement, de blocs et de reconstruction visuelle.',
+            puzzles: [
+                {
+                    title: 'Grille de pièces',
+                    description:
+                        'Place les pièces dans la grille pour compléter le puzzle.',
+                    route: '/jigsaw-grid',
+                    tag: 'Placement',
+                },
+                {
+                    title: 'Chemins',
+                    description:
+                        'Reconstruis le chemin continu avec les blocs disponibles.',
+                    route: '/jigsaw-blocks',
+                    tag: 'Chemin',
+                },
+                {
+                    title: 'Dé logique',
+                    description:
+                        'Suis le parcours d’un dé et retrouve le dernier symbole.',
+                    route: '/dice',
+                    tag: 'Spatial',
+                },
+            ],
         },
         {
-            title: 'Casse-grille',
-            description: 'Comme en audition mais personne pour nous voir échouer.',
-            route: '/jigsaw-grid',
-            isAvailable: true,
-        },
-        {
-            title: 'Casse-bloques',
-            description: 'Comme dans la saison 1',
-            route: '/jigsaw-blocks',
-            isAvailable: true,
-        },
-        {
-            title: 'Séquences',
-            description: 'Reconnaître des séquences.',
-            route: '/sequences',
-            isAvailable: true,
-        },
-        {
-            title: 'Mnémotechnique',
-            description: 'Associe les couleurs, formes et lieux à leurs images mentales.',
-            route: '/mnemonic',
-            isAvailable: true,
-        },
-        {
-            title: 'Dé logique',
-            description: 'Observe plusieurs vues du même dé et déduis la face manquante.',
-            route: '/dice',
-            isAvailable: true,
+            title: 'Puzzles',
+            description: 'Vrais puzzles de type jeu d’évasion ou puzzle hunt.',
+            puzzles: [],
+            emptyText: 'Aucun puzzle ajouté pour le moment.',
         },
     ];
 }
