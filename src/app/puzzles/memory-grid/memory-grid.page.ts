@@ -37,20 +37,20 @@ export class MemoryGridPage {
     protected readonly colorMnemonics: MnemonicLegendItem[] = [
         {
             label: 'Rouge',
-            object: 'Clown',
-            quality: 'Fâché',
+            object: 'Pompier',
+            quality: 'Roti',
             action: 'Brûler',
         },
         {
             label: 'Jaune',
-            object: 'Soleil',
+            object: 'Citron',
             quality: 'Surette',
-            action: 'Ralentir',
+            action: 'Grimacer de surette',
         },
         {
             label: 'Gris',
-            object: 'Nuage',
-            quality: 'Fatigué',
+            object: 'Nassim',
+            quality: 'Riche',
             action: 'Ramer avec un arc',
         },
         {
@@ -62,14 +62,14 @@ export class MemoryGridPage {
         {
             label: 'Bleu',
             object: 'Schtroumpf',
-            quality: 'Mouillé',
+            quality: 'Triste',
             action: 'Pleurer',
         },
         {
             label: 'Orange',
-            object: 'Carotte',
-            quality: 'Avec des lunettes',
-            action: 'Voter républicain',
+            object: 'Citrouille',
+            quality: 'Déguisé',
+            action: 'Demander des bonbons',
         },
         {
             label: 'Mauve',
@@ -88,33 +88,33 @@ export class MemoryGridPage {
     protected readonly shapeMnemonics: MnemonicLegendItem[] = [
         {
             label: 'Cercle',
-            object: 'Film',
-            quality: 'Gros',
+            object: 'Soleil',
+            quality: 'Chaud',
             action: 'Orbiter',
         },
         {
             label: 'Triangle',
-            object: 'Angine de poitrine',
-            quality: 'Pepperoni fromage',
-            action: 'Transpercer',
+            object: 'Pizza',
+            quality: 'Gratiné',
+            action: 'Manger',
         },
         {
             label: 'Rectangle',
-            object: 'Télévision',
-            quality: 'Hypnotique',
-            action: 'Exploser',
+            object: 'Lit',
+            quality: 'Fatigué',
+            action: 'Dormir',
         },
         {
             label: 'Carré',
             object: 'Cric Crac et Croc',
-            quality: 'Croquant',
+            quality: 'Trempé de lait',
             action: 'Danser',
         },
         {
             label: 'Losange',
             object: 'Diamant',
-            quality: 'Sanglant',
-            action: 'Briller',
+            quality: 'Brille',
+            action: 'Porter une bague',
         },
         {
             label: 'Pentagone',
@@ -125,8 +125,8 @@ export class MemoryGridPage {
         {
             label: 'Hexagone',
             object: 'Ruche',
-            quality: 'Collant',
-            action: 'Bourdonner',
+            quality: 'Bourdonne',
+            action: 'Faire une réaction allergique',
         },
     ];
 

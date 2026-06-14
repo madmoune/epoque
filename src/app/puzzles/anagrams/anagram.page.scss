@@ -29,11 +29,31 @@ h1 {
     margin-top: 0;
 }
 
-.letters {
+.letter-tools {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
+    margin: 1.25rem 0 0.75rem;
+}
+
+.compact-button {
+    margin-top: 0;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.9rem;
+
+    &.active {
+        background: #222;
+        color: #fff;
+    }
+}
+
+.letters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
     margin: 1.5rem 0;
+    min-height: 3rem;
 }
 
 .letters span {
@@ -46,6 +66,42 @@ h1 {
     font-size: 1.5rem;
     font-weight: 700;
     text-transform: uppercase;
+}
+
+.letters.vowels-first .vowel-letter {
+    background: #fff7d6;
+}
+
+.letter-divider {
+    width: 0.15rem;
+    align-self: stretch;
+    min-height: 3rem;
+    border-radius: 999px;
+    background: #d7d7d7;
+    margin: 0 0.2rem;
+}
+
+.circle-letters {
+    position: relative;
+    display: block;
+    width: 15rem;
+    height: 15rem;
+    margin: 1.75rem auto;
+    border: 1px dashed #d7d7d7;
+    border-radius: 50%;
+    min-height: 15rem;
+}
+
+.circle-letters span {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin-left: -1.5rem;
+    margin-top: -1.5rem;
+}
+
+.circle-letters .letter-divider {
+    display: none;
 }
 
 label {
@@ -79,6 +135,12 @@ input {
     font-weight: 700;
 }
 
+.error {
+    margin-top: 1rem;
+    color: #b00020;
+    font-weight: 700;
+}
+
 button {
     margin-top: 1rem;
     padding: 0.75rem 1rem;
@@ -89,18 +151,14 @@ button {
 }
 
 .actions {
+    display: flex;
+    gap: 0.75rem;
     margin-top: 1rem;
 }
 
 .secondary-button {
     background: #f2f2f2;
     color: #222;
-}
-
-.actions {
-    display: flex;
-    gap: 0.75rem;
-    margin-top: 1rem;
 }
 
 .hint-text {
@@ -116,4 +174,35 @@ button {
 button:disabled {
     cursor: not-allowed;
     opacity: 0.6;
+}
+
+@media (max-width: 520px) {
+    .page {
+        padding: 1rem;
+    }
+
+    .card {
+        padding: 1rem;
+    }
+
+    .letter-tools {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .compact-button {
+        width: 100%;
+    }
+
+    .letters span {
+        width: 2.7rem;
+        height: 2.7rem;
+        font-size: 1.3rem;
+    }
+
+    .circle-letters {
+        width: 13rem;
+        height: 13rem;
+        min-height: 13rem;
+    }
 }

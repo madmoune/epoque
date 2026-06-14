@@ -43,44 +43,9 @@ h2 {
     line-height: 1.5;
 }
 
-.orientation-section,
 .path-section,
 .answer-section {
     margin-top: 1.75rem;
-}
-
-.face-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.75rem;
-}
-
-.face-card {
-    display: grid;
-    justify-items: center;
-    gap: 0.3rem;
-    padding: 0.9rem;
-    border: 1px solid #ececec;
-    border-radius: 1rem;
-    background: #f8f8f8;
-    text-align: center;
-}
-
-.face-name {
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: #555;
-}
-
-.face-symbol {
-    font-size: 1.8rem;
-    font-weight: 900;
-    line-height: 1;
-}
-
-.face-label {
-    font-size: 0.9rem;
-    color: #333;
 }
 
 .compact-path-grid {
@@ -112,6 +77,11 @@ h2 {
     background: #fff;
     border: 1px solid #cfcfcf;
     box-shadow: 0 0.3rem 0.9rem rgb(0 0 0 / 6%);
+}
+
+.hidden-path-cell {
+    border-style: dashed;
+    background: #fffbea;
 }
 
 .path-cell::before,
@@ -182,10 +152,6 @@ h2 {
     font-size: 1.7rem;
     font-weight: 900;
     z-index: 1;
-}
-
-.path-cell:has(.stamp-symbol:contains('?')) {
-    border-style: dashed;
 }
 
 .symbol-options {
@@ -279,10 +245,6 @@ button {
         padding: 1rem;
     }
 
-    .face-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
     .compact-path-grid {
         --dice-cell-size: 3.45rem;
         --dice-gap: 0.45rem;
@@ -324,10 +286,6 @@ button {
 }
 
 @media (max-width: 420px) {
-    .face-grid {
-        grid-template-columns: 1fr;
-    }
-
     .compact-path-grid {
         --dice-cell-size: 2.95rem;
         --dice-gap: 0.35rem;

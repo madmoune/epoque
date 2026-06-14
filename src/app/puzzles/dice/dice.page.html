@@ -17,7 +17,8 @@
                 @for (row of compactRows(); track row) {
                 @for (col of compactCols(); track col) {
                 <div class="grid-cell" [class.path-cell]="!!getCell(row, col)"
-                    [class.conn-up]="hasConnection(row, col, 'up')" [class.conn-down]="hasConnection(row, col, 'down')"
+                    [class.hidden-path-cell]="getCell(row, col)?.hidden" [class.conn-up]="hasConnection(row, col, 'up')"
+                    [class.conn-down]="hasConnection(row, col, 'down')"
                     [class.conn-left]="hasConnection(row, col, 'left')"
                     [class.conn-right]="hasConnection(row, col, 'right')">
                     @if (getCell(row, col); as cell) {

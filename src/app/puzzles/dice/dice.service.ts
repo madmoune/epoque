@@ -51,36 +51,49 @@ export class DiceService {
     ];
 
     createPuzzle(): DicePuzzle {
-        const shuffledSymbols = this.shuffle(this.symbols);
-
-        const orientation: DiceOrientation = {
-            top: shuffledSymbols[0].id,
-            bottom: shuffledSymbols[1].id,
-            front: shuffledSymbols[2].id,
-            back: shuffledSymbols[3].id,
-            left: shuffledSymbols[4].id,
-            right: shuffledSymbols[5].id,
-        };
-
+        const maxAttempts = 1000;
         const gridSize = 5;
-        const pathLength = this.randomInt(6, 8);
+        const minimumVisibleStamps = 6;
 
-        const positions = this.createPathPositions(gridSize, pathLength);
-        const path = this.createStampedPath(positions, orientation);
-        const answerSymbolId = path[path.length - 1].symbolId;
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
+            const shuffledSymbols = this.shuffle(this.symbols);
 
-        const hiddenPath = path.map((cell, index) => ({
-            ...cell,
-            hidden: index === path.length - 1,
-        }));
+            const orientation: DiceOrientation = {
+                top: shuffledSymbols[0].id,
+                bottom: shuffledSymbols[1].id,
+                front: shuffledSymbols[2].id,
+                back: shuffledSymbols[3].id,
+                left: shuffledSymbols[4].id,
+                right: shuffledSymbols[5].id,
+            };
 
-        return {
-            symbols: this.symbols,
-            orientation,
-            gridSize,
-            path: hiddenPath,
-            answerSymbolId,
-        };
+            const pathLength = this.randomInt(minimumVisibleStamps + 1, 10);
+            const positions = this.createPathPositions(gridSize, pathLength);
+            const path = this.createStampedPath(positions, orientation);
+            const answerSymbolId = path[path.length - 1].symbolId;
+
+            const hiddenPath = path.map((cell, index) => ({
+                ...cell,
+                hidden: index === path.length - 1,
+            }));
+
+            const possibleAnswers = this.findPossibleLastSymbols(hiddenPath);
+
+            if (
+                possibleAnswers.size === 1 &&
+                possibleAnswers.has(answerSymbolId)
+            ) {
+                return {
+                    symbols: this.symbols,
+                    orientation,
+                    gridSize,
+                    path: hiddenPath,
+                    answerSymbolId,
+                };
+            }
+        }
+
+        return this.createFallbackPuzzle();
     }
 
     getSymbolById(symbolId: string): DiceSymbol {
@@ -93,11 +106,93 @@ export class DiceService {
         return symbol;
     }
 
+    private createFallbackPuzzle(): DicePuzzle {
+        const orientation: DiceOrientation = {
+            top: 'star',
+            bottom: 'moon',
+            front: 'heart',
+            back: 'bolt',
+            left: 'flower',
+            right: 'diamond',
+        };
+
+        const positions: Position[] = [
+            { row: 2, col: 0 },
+            { row: 2, col: 1 },
+            { row: 1, col: 1 },
+            { row: 1, col: 2 },
+            { row: 2, col: 2 },
+            { row: 2, col: 3 },
+            { row: 3, col: 3 },
+            { row: 3, col: 2 },
+            { row: 4, col: 2 },
+        ];
+
+        const path = this.createStampedPath(positions, orientation);
+        const answerSymbolId = path[path.length - 1].symbolId;
+
+        const hiddenPath = path.map((cell, index) => ({
+            ...cell,
+            hidden: index === path.length - 1,
+        }));
+
+        return {
+            symbols: this.symbols,
+            orientation,
+            gridSize: 5,
+            path: hiddenPath,
+            answerSymbolId,
+        };
+    }
+
+    private findPossibleLastSymbols(path: DicePathCell[]): Set<string> {
+        const possibleAnswers = new Set<string>();
+        const symbolIds = this.symbols.map((symbol) => symbol.id);
+        const possibleOrientations = this.createAllPossibleOrientations(symbolIds);
+
+        for (const orientation of possibleOrientations) {
+            const simulatedPath = this.createStampedPath(path, orientation);
+
+            const matchesVisibleStamps = path.every((cell, index) => {
+                if (cell.hidden) {
+                    return true;
+                }
+
+                return cell.symbolId === simulatedPath[index].symbolId;
+            });
+
+            if (!matchesVisibleStamps) {
+                continue;
+            }
+
+            const hiddenCellIndex = path.findIndex((cell) => cell.hidden);
+
+            if (hiddenCellIndex === -1) {
+                continue;
+            }
+
+            possibleAnswers.add(simulatedPath[hiddenCellIndex].symbolId);
+        }
+
+        return possibleAnswers;
+    }
+
+    private createAllPossibleOrientations(symbolIds: string[]): DiceOrientation[] {
+        return this.permute(symbolIds).map((permutation) => ({
+            top: permutation[0],
+            bottom: permutation[1],
+            front: permutation[2],
+            back: permutation[3],
+            left: permutation[4],
+            right: permutation[5],
+        }));
+    }
+
     private createPathPositions(
         gridSize: number,
         pathLength: number,
     ): Position[] {
-        const maxAttempts = 200;
+        const maxAttempts = 500;
 
         for (let attempt = 0; attempt < maxAttempts; attempt++) {
             const start: Position = {
@@ -132,10 +227,11 @@ export class DiceService {
         }
 
         return [
+            { row: 2, col: 0 },
             { row: 2, col: 1 },
-            { row: 2, col: 2 },
+            { row: 1, col: 1 },
             { row: 1, col: 2 },
-            { row: 1, col: 3 },
+            { row: 2, col: 2 },
             { row: 2, col: 3 },
             { row: 3, col: 3 },
         ];
@@ -278,6 +374,28 @@ export class DiceService {
 
     private positionKey(position: Position): string {
         return `${position.row},${position.col}`;
+    }
+
+    private permute<T>(items: T[]): T[][] {
+        if (items.length <= 1) {
+            return [items];
+        }
+
+        const permutations: T[][] = [];
+
+        for (let index = 0; index < items.length; index++) {
+            const currentItem = items[index];
+            const remainingItems = [
+                ...items.slice(0, index),
+                ...items.slice(index + 1),
+            ];
+
+            for (const permutation of this.permute(remainingItems)) {
+                permutations.push([currentItem, ...permutation]);
+            }
+        }
+
+        return permutations;
     }
 
     private randomInt(min: number, max: number): number {

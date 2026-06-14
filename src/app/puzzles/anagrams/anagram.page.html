@@ -10,9 +10,43 @@
         } @else if (loadError()) {
         <p class="error">{{ loadError() }}</p>
         } @else if (currentWord(); as word) {
-        <div class="letters" aria-label="Scrambled letters">
-            @for (letter of scrambledLetters().split(''); track $index) {
-            <span>{{ letter }}</span>
+        <div class="letter-tools" aria-label="Options d'affichage des lettres">
+            <button type="button" class="secondary-button compact-button"
+                [class.active]="letterDisplayMode() === 'default' && letterLayoutMode() === 'line'"
+                (click)="resetLetters()">
+                Défaut
+            </button>
+
+            <button type="button" class="secondary-button compact-button"
+                [class.active]="letterDisplayMode() === 'alphabetical'" (click)="setAlphabeticalOrder()">
+                A-Z
+            </button>
+
+            <button type="button" class="secondary-button compact-button"
+                [class.active]="letterDisplayMode() === 'vowelsFirst'" (click)="setVowelsFirstOrder()">
+                Voyelles / consonnes
+            </button>
+
+            <button type="button" class="secondary-button compact-button"
+                [class.active]="letterLayoutMode() === 'circle'" (click)="setCircleLayout()">
+                Cercle
+            </button>
+        </div>
+
+        <div class="letters" [class.circle-letters]="letterLayoutMode() === 'circle'"
+            [class.vowels-first]="letterDisplayMode() === 'vowelsFirst'" aria-label="Lettres mélangées">
+            @for (letter of displayedLetters(); track $index) {
+            <span [class.vowel-letter]="isVowel(letter)" [style.transform]="
+                    letterLayoutMode() === 'circle'
+                        ? getCircleLetterStyle($index)['transform']
+                        : null
+                ">
+                {{ letter }}
+            </span>
+
+            @if (shouldShowVowelDivider($index) && letterLayoutMode() === 'line') {
+            <div class="letter-divider" aria-hidden="true"></div>
+            }
             }
         </div>
 
@@ -29,7 +63,7 @@
 
             @if (revealedHint()) {
             <p>
-                Starts with:
+                Commence par:
                 <strong>{{ revealedHint() }}</strong>
             </p>
             }
