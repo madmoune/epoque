@@ -7,8 +7,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "github-build": "ng build --configuration production --base-href ./ --deploy-url ./",
-    "github-push": "ng build --configuration production --base-href ./ --deploy-url ./ && npx angular-cli-ghpages --dir=dist/epique/browser --no-silent"
+    "github-build": "ng build --configuration production --base-href /epoque/ --deploy-url /epoque/ && node -e \"require('fs').copyFileSync('dist/epique/browser/index.html','dist/epique/browser/404.html')\"",
+    "github-push": "npm run github-build && npx angular-cli-ghpages --dir=dist/epique/browser --no-silent"
   },
   "private": true,
   "packageManager": "npm@11.13.0",
