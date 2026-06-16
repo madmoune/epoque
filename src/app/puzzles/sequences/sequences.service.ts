@@ -43,11 +43,9 @@ export class SequencesService {
       () => this.createAlternatingPrimeAndSquareDifferencesSequence(),
       () => this.createDoubleInterleavedMultiplicationSequence(),
       () => this.createTwoPreviousPlusConstantSequence(),
-      () => this.createPreviousDifferenceTimesTwoSequence(),
       () => this.createDescendingHalvesSequence(),
       () => this.createMultiplyByIncreasingNumbersSequence(),
       () => this.createAddThenAddDoubleSequence(),
-      () => this.createAbsoluteBounceSequence(),
       () => this.createProductOfPositionSequence(),
       () => this.createSquareMinusPositionSequence(),
       () => this.createCubeMinusSquareSequence(),
@@ -55,7 +53,6 @@ export class SequencesService {
       () => this.createAlternatingGrowingAddSubtractSequence(),
       () => this.createMultiplyThenAddIncreasingOffsetSequence(),
       () => this.createInterleavedFibonacciAndSquaresSequence(),
-      () => this.createPreviousTwoDifferencePlusPositionSequence(),
       () => this.createSecondDifferenceCycleSequence(),
     ];
 
