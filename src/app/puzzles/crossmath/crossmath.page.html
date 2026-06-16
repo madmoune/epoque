@@ -1,0 +1,136 @@
+<main class="page">
+  <a routerLink="/" class="back-link">← Le menu par ici</a>
+
+  <section class="card">
+    <p class="eyebrow">Crossmath</p>
+    <h1>Complète la grille</h1>
+    <p class="intro">
+      Utilise seulement les chiffres de 1 à 9. Les équations se calculent dans l'ordre où on les
+      lit, de gauche à droite ou de haut en bas, sans priorité PEDMAS.
+    </p>
+
+    <div class="toolbar" aria-label="Taille de la grille">
+      <button
+        type="button"
+        class="secondary-button compact-button"
+        [class.active]="selectedSize() === 3"
+        (click)="setSize(3)"
+      >
+        3x3
+      </button>
+      <button
+        type="button"
+        class="secondary-button compact-button"
+        [class.active]="selectedSize() === 4"
+        (click)="setSize(4)"
+      >
+        4x4
+      </button>
+    </div>
+
+    <section class="puzzle-area">
+      <div
+        class="crossmath-grid"
+        [class.size-four]="puzzle().size === 4"
+        [style.grid-template-columns]="gridTemplateColumns()"
+      >
+        @for (row of puzzle().cells; track $index; let rowIndex = $index) {
+          @for (cell of row; track cell.row + ':' + cell.col; let colIndex = $index) {
+            <div
+              class="number-cell"
+              [class.given]="cell.given"
+              [class.hinted]="isHinted(cell.row, cell.col)"
+            >
+              @if (cell.given) {
+                {{ cell.value }}
+              } @else if (isHinted(cell.row, cell.col)) {
+                {{ cellAnswer(cell.row, cell.col) }}
+              } @else {
+                <input
+                  type="number"
+                  inputmode="numeric"
+                  min="1"
+                  max="9"
+                  autocomplete="off"
+                  [value]="cellAnswer(cell.row, cell.col)"
+                  (input)="updateAnswer(cell.row, cell.col, $any($event.target).value)"
+                  aria-label="Case de réponse"
+                />
+              }
+            </div>
+
+            @if (colIndex < puzzle().size - 1) {
+              <div class="operator-cell">{{ puzzle().rowOperators[rowIndex][colIndex] }}</div>
+            }
+          }
+
+          <div class="operator-cell">=</div>
+          <div class="target-cell">{{ puzzle().rowTargets[rowIndex] }}</div>
+
+          @if (rowIndex < puzzle().size - 1) {
+            @for (
+              cell of row;
+              track 'operator-' + cell.row + ':' + cell.col;
+              let colIndex = $index
+            ) {
+              <div class="operator-cell">{{ puzzle().columnOperators[colIndex][rowIndex] }}</div>
+
+              @if (colIndex < puzzle().size - 1) {
+                <div class="empty-cell"></div>
+              }
+            }
+
+            <div class="empty-cell"></div>
+            <div class="empty-cell"></div>
+          }
+        }
+
+        @for (target of puzzle().columnTargets; track $index) {
+          <div class="operator-cell">=</div>
+
+          @if ($index < puzzle().size - 1) {
+            <div class="empty-cell"></div>
+          }
+        }
+
+        <div class="empty-cell"></div>
+        <div class="empty-cell"></div>
+
+        @for (target of puzzle().columnTargets; track $index) {
+          <div class="target-cell">{{ target }}</div>
+
+          @if ($index < puzzle().size - 1) {
+            <div class="empty-cell"></div>
+          }
+        }
+
+        <div class="empty-cell"></div>
+        <div class="empty-cell"></div>
+      </div>
+
+      <div class="actions">
+        <button type="button" (click)="checkPuzzle()">Vérifier</button>
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="showHint()"
+          [disabled]="!hasAvailableHint() || isCorrect()"
+        >
+          Indice
+        </button>
+        <button type="button" class="secondary-button" (click)="resetGrid()">Reset</button>
+        <button type="button" class="secondary-button" (click)="newPuzzle()">
+          Nouvelle grille
+        </button>
+      </div>
+
+      @if (isCorrect()) {
+        <p class="success" role="status">Grille résolue! Toutes les équations fonctionnent.</p>
+      }
+
+      @if (hasChecked() && !isCorrect()) {
+        <p class="error" role="status">Il reste au moins une équation à corriger.</p>
+      }
+    </section>
+  </section>
+</main>

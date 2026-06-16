@@ -75,6 +75,12 @@ export class HomePage {
           route: '/sequences',
           tag: 'Nombres',
         },
+        {
+          title: 'Crossmath',
+          description: 'Complète une grille où les lignes et les colonnes forment des équations.',
+          route: '/crossmath',
+          tag: 'Calcul',
+        },
       ],
     },
     {

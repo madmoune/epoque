@@ -38,6 +38,10 @@ export const routes: Routes = [
     loadComponent: () => import('./puzzles/sequences/sequences.page').then((m) => m.SequencesPage),
   },
   {
+    path: 'crossmath',
+    loadComponent: () => import('./puzzles/crossmath/crossmath.page').then((m) => m.CrossmathPage),
+  },
+  {
     path: 'mnemonic',
     loadComponent: () => import('./puzzles/mnemonic/mnemonic.page').then((m) => m.MnemonicPage),
   },
