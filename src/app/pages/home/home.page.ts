@@ -81,6 +81,12 @@ export class HomePage {
           route: '/crossmath',
           tag: 'Calcul',
         },
+        {
+          title: 'Latin square',
+          description: 'Place chaque chiffre une seule fois par ligne et par colonne.',
+          route: '/latin-square',
+          tag: 'Logique',
+        },
       ],
     },
     {

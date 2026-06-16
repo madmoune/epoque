@@ -42,6 +42,11 @@ export const routes: Routes = [
     loadComponent: () => import('./puzzles/crossmath/crossmath.page').then((m) => m.CrossmathPage),
   },
   {
+    path: 'latin-square',
+    loadComponent: () =>
+      import('./puzzles/latin-square/latin-square.page').then((m) => m.LatinSquarePage),
+  },
+  {
     path: 'mnemonic',
     loadComponent: () => import('./puzzles/mnemonic/mnemonic.page').then((m) => m.MnemonicPage),
   },

@@ -1,0 +1,90 @@
+<main class="page">
+  <a routerLink="/" class="back-link">← Le menu par ici</a>
+
+  <section class="card">
+    <p class="eyebrow">Latin square</p>
+    <h1>Complète le carré</h1>
+    <p class="intro">
+      Chaque ligne et chaque colonne doit contenir une seule fois chaque chiffre de
+      {{ symbols()[0] }} à {{ symbols()[symbols().length - 1] }}.
+    </p>
+
+    <div class="toolbar" aria-label="Taille de la grille">
+      <button
+        type="button"
+        class="secondary-button compact-button"
+        [class.active]="selectedSize() === 4"
+        (click)="setSize(4)"
+      >
+        4x4
+      </button>
+      <button
+        type="button"
+        class="secondary-button compact-button"
+        [class.active]="selectedSize() === 5"
+        (click)="setSize(5)"
+      >
+        5x5
+      </button>
+    </div>
+
+    <section class="puzzle-area">
+      <div
+        class="latin-grid"
+        [class.size-five]="puzzle().size === 5"
+        [style.grid-template-columns]="gridTemplateColumns()"
+      >
+        @for (row of puzzle().cells; track $index) {
+          @for (cell of row; track cell.row + ':' + cell.col) {
+            <div
+              class="number-cell"
+              [class.given]="cell.given"
+              [class.hinted]="isHinted(cell.row, cell.col)"
+            >
+              @if (cell.given) {
+                {{ cell.value }}
+              } @else if (isHinted(cell.row, cell.col)) {
+                {{ cellAnswer(cell.row, cell.col) }}
+              } @else {
+                <input
+                  type="number"
+                  inputmode="numeric"
+                  min="1"
+                  [max]="selectedSize()"
+                  autocomplete="off"
+                  [value]="cellAnswer(cell.row, cell.col)"
+                  (input)="updateAnswer(cell.row, cell.col, $any($event.target).value)"
+                  aria-label="Case de réponse"
+                />
+              }
+            </div>
+          }
+        }
+      </div>
+
+      <div class="actions">
+        <button type="button" (click)="checkPuzzle()">Vérifier</button>
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="showHint()"
+          [disabled]="!hasAvailableHint() || isSolved()"
+        >
+          Indice
+        </button>
+        <button type="button" class="secondary-button" (click)="resetGrid()">Reset</button>
+        <button type="button" class="secondary-button" (click)="newPuzzle()">
+          Nouvelle grille
+        </button>
+      </div>
+
+      @if (isSolved()) {
+        <p class="success" role="status">Carré résolu! Chaque ligne et colonne est complète.</p>
+      }
+
+      @if (hasChecked() && !isSolved()) {
+        <p class="error" role="status">Il reste au moins une ligne ou une colonne à corriger.</p>
+      }
+    </section>
+  </section>
+</main>
