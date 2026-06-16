@@ -1,0 +1,46 @@
+<form class="answer-form" (ngSubmit)="submitAnswer()">
+  <label for="puzzle-answer">{{ label }}</label>
+
+  <div class="answer-row">
+    <input
+      id="puzzle-answer"
+      name="puzzle-answer"
+      type="text"
+      autocomplete="off"
+      [placeholder]="placeholder"
+      [ngModel]="answerInput()"
+      (ngModelChange)="updateAnswer($event)"
+      [disabled]="isLocked()"
+    />
+
+    <button type="submit" [disabled]="isLocked()">
+      {{ submitLabel }}
+    </button>
+  </div>
+
+  @if (formMessage()) {
+    <p class="form-message" role="status">{{ formMessage() }}</p>
+  }
+</form>
+
+@if (attempts().length > 0) {
+  <section class="answer-log" aria-label="Réponses essayées">
+    @for (attempt of attempts(); track attempt.id) {
+      <div
+        class="answer-attempt"
+        [class.correct]="attempt.result.status === 'correct'"
+        [class.incorrect]="attempt.result.status === 'incorrect'"
+        [class.partial]="attempt.result.status === 'partial'"
+      >
+        <span class="attempt-answer">{{ attempt.answer }}</span>
+
+        <span class="attempt-result">
+          <strong>{{ statusText(attempt.result) }}</strong>
+          @if (resultMessage(attempt.result); as message) {
+            <span>{{ message }}</span>
+          }
+        </span>
+      </div>
+    }
+  </section>
+}
