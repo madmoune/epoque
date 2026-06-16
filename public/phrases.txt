@@ -149,7 +149,6 @@ L'équipe rame encore dans le courant
 Un équipier partage le poids sur la plage
 Repars avec ton équipe
 Sur la roche humide, le jeu bascule
-Les Îles ouvre le parcours
 Le grimpeur compte les secondes au départ
 Au bord du lac, le sommet se cache
 Sous le chrono, la suite se joue
@@ -178,7 +177,7 @@ Le cap fait douter
 La coureuse ouvre la marche près du marais
 Le portage teste l'équipe
 Stratégie dans le vent
-La rivière sur l'eau
+La rivière guide l'eau
 Sang-froid dans le relais
 Sur le relais, le chrono frappe
 La vétérane décode la suite sous pression
@@ -232,7 +231,7 @@ Le rabaska garde son secret
 Endurance après le portage
 La coureuse cherche l'indice face au vide
 La formation traverse le gué près du lac
-La pluie à l'arrivée
+La pluie avant l'arrivée
 Le chrono pousse au choix
 La pagaie fait la différence
 Le portage à l'arrivée
@@ -335,13 +334,13 @@ Le portage près du sommet
 Le lac relance l'étape
 Au creux du ravin, la victoire appelle
 Au creux du ravin, le sommet se cache
-Le doute relance le doute
+Le doute relance l'effort
 Devant la cible, le sommet se cache
 La tyrolienne réveille l'instinct
 Le sentier récompense l'écoute
 Coordination en pleine montée
 Le paysage récompense l'écoute
-Le rabaska pour le trio
+Le rabaska porte le trio
 La pagayeuse trouve le fanion au sommet
 L'équipe dompte le courant sous la pluie
 La pagayeuse suit la balise près du marais
@@ -396,7 +395,7 @@ La mémoire dans la forêt
 Adaptation sur le parcours
 Tiens vers la rive
 L'équipe porte la charge malgré la pluie
-Le retard pour le trio
+Le retard pèse sur le trio
 La corde sous pression
 Au bout du pont, le chrono frappe
 Finale vers la Côte-Nord
@@ -412,7 +411,7 @@ La Côte-Nord teste le trio
 La grille dicte la suite
 La Gaspésie change le jeu
 Communication dans les rapides
-Le vélo sur l'eau
+Le vélo sur le parcours
 La stratégie donne le ton
 Le doute à l'arrivée
 Mémorise contre le courant
@@ -486,7 +485,7 @@ Le relais réveille l'instinct
 La pagaie ouvre la voie
 Dans le courant, la balise apparaît
 L'équipe relance l'effort avant le verdict
-La rivière au bon moment
+La rivière impose le moment
 La stratégie ferme le passage
 La forêt relance l'étape
 Le cap résiste encore
@@ -504,7 +503,7 @@ Le silence sous pression
 La stratégie dans l'étape
 L'équipe cherche l'indice sans paniquer
 Observation sur la corde
-La falaise à l'arrivée
+La falaise avant l'arrivée
 L'équipe décode la suite avec patience
 La mémoire dans l'effort
 Choisis avec ton équipe
@@ -512,16 +511,16 @@ Décode malgré la fatigue
 Sous les épinettes, le trio se parle
 La pression ralentit le groupe
 Le fleuve change le jeu
-Le sommet près du sommet
+Le sommet se rapproche
 L'équipe surveille le chrono sur le relais
 La Côte-Nord cache l'indice
 Écoute avec le trio
 Au signal du départ, le chrono frappe
-Le verdict pour le trio
+Le verdict attend le trio
 Le vélo devient un piège
 L'équipe décode la suite malgré la pluie
 L'équipe rame encore contre le chrono
-Le sentier pour le trio
+Le sentier guide le trio
 La montagne attend encore
 L'équipe relit la consigne avec précision
 L'équipe décode la suite dans la montée
@@ -589,7 +588,7 @@ Finale vers la vallée
 Le lac résiste encore
 Le chrono brouille le plan
 Devant le verdict, le calme revient
-Le silence pour le trio
+Le silence parle au trio
 Le rabaska change la finale
 Retour vers la Côte-Nord
 Le retard ouvre la voie
@@ -632,7 +631,6 @@ Mission vers le canyon
 Agilité dans le relais
 Devant le verdict, la corde répond
 La nuit complique tout
-Les Îles change le jeu
 Au bord du marais, la fatigue monte
 L'équipe dompte le courant avec patience
 Le sentier à l'arrivée
@@ -662,7 +660,7 @@ L'avance ferme le passage
 La confiance teste l'équipe
 Coordination sur la corde
 Complicité près du fanion
-L'indice près du sommet
+L'indice guide le sommet
 Après la montée, le choix se fait
 Le podium fait douter
 Course vers les rapides
@@ -710,7 +708,7 @@ Le courant fait monter la pression
 Rame avec plus de calme
 La pluie récompense l'écoute
 L'équipe cherche l'indice dans la brume
-La tyrolienne à l'arrivée
+La tyrolienne avant l'arrivée
 Le chrono ramène l'espoir
 Le paysage pèse lourd
 Le boisé ouvre le parcours
@@ -786,11 +784,10 @@ Maîtrise vers la finale
 Résous contre le courant
 Le doute réveille l'instinct
 Le lac ouvre le parcours
-Les rapides change le jeu
 Devant la cible, l'avance se défend
 La confiance garde la tension
 Mission vers le quai
-La finale pour le trio
+La finale attend le trio
 La rivière pousse au choix
 La confiance au départ
 La forêt change le jeu
@@ -798,7 +795,7 @@ Sur la roche humide, le doute recule
 Le chrono sous pression
 La plage ouvre le parcours
 L'équipe protège l'avance avec prudence
-Le portage sur l'eau
+Le portage sur le parcours
 Agilité à la cible
 Repars contre le courant
 Après la montée, la balise apparaît
@@ -815,7 +812,7 @@ Le classement ferme le passage
 Porte avec ton équipe
 Au dernier pas, la confiance revient
 La boue sur le parcours
-La rame pour le trio
+La rame guide le trio
 L'équipe surveille le chrono avec patience
 La rame sur l'eau
 Le sous-bois relance l'étape
@@ -829,7 +826,7 @@ L'équipe ajuste le harnais sur le sentier
 L'équipe cherche l'indice sous pression
 L'équipe cherche l'indice près du marais
 Un sprint reste à lancer
-Le courant pour le trio
+Le courant teste le trio
 L'équipe observe le terrain pour la finale
 Le lancer décide tout
 L'équipe comble le retard avec précision
@@ -838,12 +835,12 @@ Le rabaska réveille l'instinct
 Stratégie vers la finale
 La grille garde son secret
 Le kayak exige du cran
-La victoire ralentit le groupe
+La victoire attire le groupe
 La grille au départ
 La carte coûte du temps
 Le canyon fait douter
 Près du sommet, la confiance revient
-La cohésion devient un piège
+La cohésion devient un atout
 Coordination avant le verdict
 Entraide vers la finale
 La tyrolienne ouvre la voie
@@ -896,7 +893,6 @@ La falaise au départ
 Porte pour la victoire
 Le marais décide tout
 La tyrolienne au bon moment
-Le gué sur l'eau
 La rivière devient un piège
 Au signal du départ, l'avance se défend
 Au bout du pont, l'avance se défend
@@ -905,17 +901,17 @@ Le territoire ralentit le groupe
 Le risque révèle le trio
 La finale exige du cran
 Cap sur le sous-bois
-Le risque pour le trio
+Le risque attend le trio
 Une rame à la fois
 L'équipe trouve le fanion devant la corde
 La plage garde le secret
 Le vent pèse lourd
 L'équipe trouve le fanion près du marais
-La corde sur l'eau
+La corde tient sur l'eau
 Le radeau exige du cran
 Adaptation sur la corde
 Le classement sous pression
-La grille à l'arrivée
+La grille avant l'arrivée
 La tyrolienne fait douter
 Cherche devant la cible
 Un trio sous pression
@@ -944,7 +940,6 @@ L'équipe dompte le courant dans la montée
 Le boisé devient l'épreuve
 La fatigue casse le rythme
 Le doute ouvre la voie
-Les Îles impose son rythme
 L'équipe relance l'effort avec sang-froid
 La rame change le rythme
 La Mauricie teste le trio
@@ -966,7 +961,7 @@ La cible change le rythme
 Protège avec ton équipe
 L'équipe surveille le chrono près du lac
 Le gué change le rythme
-Le départ à l'arrivée
+Le départ vers l'arrivée
 La boussole change la finale
 La tyrolienne exige du cran
 La victoire sous pression
@@ -978,7 +973,6 @@ Le doute au départ
 Au coeur du défi, le calme revient
 Protège pour le prochain indice
 Le podium révèle le trio
-Les Laurentides impose son rythme
 Le doute dans l'étape
 Le risque dicte la suite
 Ose pour la victoire
@@ -998,3 +992,1009 @@ Le classement peut tout changer
 La pression relance le doute
 La cohésion teste l'équipe
 Le relais peut tout changer
+Finale vers Charlevoix
+Face au vide, le jeu bascule
+Un équipier relit la consigne avec courage
+Vise jusqu'au relais
+Guide sans hésiter
+Persévérance à la cible
+L'indice avant le ballotage
+L'équipe compte les secondes avec prudence
+Répare sans hésiter
+L'équipe ouvre la marche sur le sentier
+Observe après le portage
+Après le portage, le groupe se serre
+Mémorise pour le prochain indice
+Dans la brume, la pression grimpe
+L'équipe relance l'effort jusqu'au bout
+L'équipe rattrape le rythme avec courage
+Repars devant la cible
+L'équipe écoute le vent dans la boue
+L'équipe traverse le gué près du fanion
+L'équipe répare le vélo avec précision
+L'équipe écoute le vent pour la finale
+L'équipe lit la carte au sommet
+Choisis pour le prochain indice
+Agilité face au vide
+Un équipier rattrape le rythme au départ
+Un équipier franchit le mur au départ
+Un équipier suit la balise avec précision
+L'équipe rame encore près du marais
+L'équipe suit la balise dans la boue
+Calcule au pied du mur
+Répare avec le trio
+Un équipier serre les dents dans le vent
+Une participante franchit le mur au sommet
+L'équipe noue la corde dans la boue
+L'équipe répare le vélo avant le verdict
+Au pied du mur, la suite se joue
+Porte dans la boue
+Au dernier pas, la fatigue monte
+Devant la cible, la pression grimpe
+Une participante serre les dents au sommet
+L'équipe ajuste le harnais sur la rive
+Courage au pied du mur
+Lucidité sur la rive
+Un équipier garde le cap sur le pont
+L'équipe franchit le mur près du fanion
+Ose dans les rapides
+Rame face au vide
+Un équipier décode la suite dans la brume
+Mémorise au pied du mur
+L'équipe suit la balise avec prudence
+Observe pour la victoire
+Un équipier relance l'effort jusqu'au bout
+L'équipe vise la cible avec précision
+Un équipier change de plan au sommet
+Vise pour sauver l'étape
+L'équipe observe le terrain avec courage
+Un équipier prépare le radeau en silence
+Sur la rive, le choix se fait
+Un équipier rame encore dans la brume
+Détermination au pied du mur
+Relais vers le ravin
+Un équipier ferme le relais au pied du mur
+Leadership dans le courant
+L'équipe franchit le mur avec prudence
+Un équipier dompte le courant sur le pont
+Audace après le portage
+L'équipe observe le terrain au pied du mur
+Près du sommet, la peur attend
+Tiens au pied du mur
+Confiance sur le parcours
+Cherche jusqu'au sommet
+Entraide dans les rapides
+Cherche vers la finale
+Dans la forêt, le sommet se cache
+Un équipier noue la corde sans paniquer
+Retour vers le quai
+Repars malgré la fatigue
+L'équipe écoute le vent avant le ballotage
+Un équipier suit la balise dans la brume
+Course vers le fjord
+Un équipier vise la cible devant la corde
+L'équipe noue la corde dans la forêt
+Sur la rive, le groupe se serre
+Un équipier protège l'avance dans la boue
+Un équipier suit la balise sur le pont
+Devant la cible, le cap se garde
+Construis au pied du mur
+L'équipe prépare le radeau sous pression
+Observe sous la pluie
+Lucidité dans la boue
+L'équipe garde le cap avec prudence
+Une participante vise la cible sur le pont
+Solidarité dans les rapides
+Grimpe sous la pluie
+Lucidité dans le courant
+Confiance dans les rapides
+Entraide avant le verdict
+L'arrivée avant le ballotage
+Adaptation sur la rive
+Dans la brume, le trio se parle
+Mission vers le sommet
+L'équipe relance l'effort malgré le doute
+Ose contre le courant
+L'équipe décode la suite avec courage
+Sur la rive, l'avance se défend
+Confiance avec le trio
+Rame après le portage
+L'équipe porte la charge en silence
+Adresse face au vide
+L'équipe partage le poids dans la boue
+Au bord du lac, le groupe se serre
+Un équipier garde le cap devant la corde
+Une participante calme le jeu face au vide
+Au bout du pont, le trio se parle
+Suis près du fanion
+L'équipe partage le poids sur le pont
+Adresse dans le courant
+Grimpe face au vide
+Un équipier ouvre la marche dans la brume
+Cap sur la falaise
+Cherche vers la rive
+Décode contre le courant
+Relance jusqu'au relais
+L'équipe ferme le relais devant la corde
+L'équipe suit la balise près du fanion
+L'équipe ferme le relais avant le verdict
+L'avance sous pression
+Au coeur du défi, le chrono frappe
+Une participante décode la suite au départ
+Respire vers la finale
+Dans les rapides, le jeu bascule
+L'équipe écoute le vent dans la brume
+Mission vers le fjord
+L'équipe relance l'effort avec précision
+Près du sommet, tout peut changer
+Mémorise pour la victoire
+L'Outaouais cache l'indice
+Persévérance sous la pluie
+Protège sans hésiter
+Ose sans hésiter
+Résous sans perdre le cap
+Porte vers la rive
+L'équipe ajuste le harnais jusqu'au bout
+L'équipe partage le poids sans paniquer
+L'équipe serre les dents sans paniquer
+Observe face au vide
+L'équipe suit la balise sans paniquer
+L'équipe ajuste le harnais pour la finale
+Une participante calme le jeu avec le trio
+L'équipe dompte le courant avec le trio
+Dans la brume, le relais repart
+Repars vers la finale
+Sous les épinettes, la balise apparaît
+L'équipe protège l'avance avec précision
+Défi vers le sommet
+Observation au pied du mur
+L'équipe partage le poids dans la forêt
+L'équipe protège l'avance sur la rive
+Au pied du mur, le sommet se cache
+Écoute face au vide
+Tiens jusqu'au relais
+Traverse vers la rive
+Écoute avec plus de calme
+L'équipe partage le poids avec courage
+Force près du fanion
+L'équipe calme le jeu avec prudence
+L'équipe calme le jeu dans la boue
+Cap sur la vallée
+Une participante rame encore sous pression
+Une participante rame encore au départ
+Accélère dans les rapides
+L'équipe rattrape le rythme au sommet
+L'équipe ferme le relais sur le pont
+Dépassement près du fanion
+Sur le relais, l'équipe respire
+Ralentis face au vide
+Calme face au vide
+Répare sous la pluie
+Cohésion sous la pluie
+L'équipe calme le jeu sans paniquer
+Stratégie après le portage
+Calcule sans hésiter
+Résous pour la victoire
+Décode dans les rapides
+Ralentis vers la rive
+Tiens pour sauver l'étape
+L'équipe écoute le vent près du fanion
+L'équipe garde le cap devant la corde
+Avant le départ, la confiance revient
+Relance sans hésiter
+Une participante écoute le vent en silence
+L'équipe traverse le gué dans la forêt
+Écoute avant le verdict
+L'équipe partage le poids malgré le doute
+Cours jusqu'au sommet
+L'équipe protège l'avance avant le verdict
+L'équipe rattrape le rythme au pied du mur
+Près du sommet, l'indice revient
+L'équipe calme le jeu près du fanion
+Traverse avec ton équipe
+Cap sur le fjord
+Une participante garde le cap sur la rive
+L'équipe change de plan près du marais
+L'équipe tient le rythme dans le vent
+Suis avec le trio
+Avant la finale, la corde répond
+Décode jusqu'au sommet
+Lucidité au pied du mur
+Calme dans la boue
+Une participante répare le vélo au sommet
+Au creux du ravin, le choix se fait
+L'équipe affronte la pente avec précision
+L'équipe ouvre la marche près du fanion
+Pagaye pour la victoire
+Grimpe avec ton équipe
+Après le portage, le rythme change
+Précision avec le trio
+Lucidité sur la corde
+Dans le courant, le cap se garde
+Audace sur le parcours
+Mission vers la plage
+Coordination à la cible
+Finale vers la falaise
+L'équipe dompte le courant sous pression
+Traverse face au vide
+Pagaye sans hésiter
+Course vers la Mauricie
+Grimpe vers la finale
+L'équipe tient le rythme sans paniquer
+Solidarité face au vide
+L'équipe écoute le vent sans paniquer
+Traverse sous la pluie
+Sur le relais, le doute recule
+L'équipe observe le terrain sur le sentier
+Au bout du pont, le sommet se cache
+Dans la forêt, la fatigue monte
+Lis pour sauver l'étape
+L'équipe relance l'effort malgré la pluie
+Décode avec ton équipe
+Dans les rapides, l'avance se défend
+Audace près du fanion
+Confiance en pleine montée
+L'équipe vise la cible sur le pont
+L'équipe écoute le vent contre le chrono
+Avance pour sauver l'étape
+Calme avant le verdict
+L'avance peut tout changer
+L'équipe écoute le vent malgré le doute
+L'arrivée ralentit le groupe
+Résilience avant le verdict
+Précision après le portage
+Sous la pluie, le rythme change
+L'équipe gravit la pente en silence
+Sur la rive, la confiance revient
+Traverse vers la finale
+L'équipe noue la corde avec précision
+Cap sur l'Outaouais
+Résilience face au vide
+Mission vers Charlevoix
+L'équipe calme le jeu avec patience
+Cherche sans perdre le cap
+L'équipe change de plan avec patience
+Relance vers la rive
+L'équipe affronte la pente dans le vent
+Cap sur les Laurentides
+L'indice réveille l'instinct
+Avance jusqu'au relais
+Porte près du fanion
+L'équipe ferme le relais face au vide
+Force dans le courant
+L'équipe suit la balise sous pression
+L'équipe traverse le gué dans le vent
+L'arrivée décide tout
+L'équipe change de plan sur le pont
+L'équipe traverse le gué malgré le doute
+L'équipe rame encore au pied du mur
+Sous les épinettes, le chrono frappe
+Cap sur le boisé
+L'indice sous pression
+L'équipe rattrape le rythme sur le pont
+Courage à la cible
+L'équipe calme le jeu malgré le doute
+Cap sur la plage
+L'équipe noue la corde malgré la pluie
+L'équipe suit la balise dans les rapides
+L'équipe garde le cap malgré la pluie
+L'équipe gravit la pente dans les rapides
+Complicité à la cible
+L'équipe relit la consigne dans la brume
+Instinct après le portage
+Maîtrise sur le parcours
+Avant la finale, la balise apparaît
+L'équipe lit la carte avant le ballotage
+L'équipe ouvre la marche en silence
+L'arrivée jusqu'au bout
+Décode avec le trio
+Une participante garde le cap sur le pont
+L'équipe lit la carte dans la brume
+Instinct sur la corde
+Tiens pour le prochain indice
+Mission vers le Saguenay
+L'équipe partage le poids face au vide
+Grimpe dans les rapides
+Repars face au vide
+Courage sur la corde
+Précision dans les rapides
+Agilité dans les rapides
+Au creux du ravin, le relais repart
+Dans la forêt, le calme revient
+Grimpe avec le trio
+Tiens vers la finale
+L'équipe cherche l'indice avec précision
+L'équipe gravit la pente dans la forêt
+Près du sommet, le sommet se cache
+Sur le relais, le sommet se cache
+L'arrivée récompense l'écoute
+Porte avec plus de calme
+L'équipe protège l'avance après le portage
+Repars avant le chrono
+L'équipe change de plan au départ
+Franchis sans perdre le cap
+Relance au pied du mur
+L'avance donne le ton
+Rame pour sauver l'étape
+Calme après le portage
+L'équipe franchit le mur avec le trio
+L'équipe porte la charge au bord du fleuve
+Au pied du mur, le jeu bascule
+Calcule pour sauver l'étape
+L'équipe observe le terrain dans le vent
+L'équipe prépare le radeau sur le sentier
+L'équipe rattrape le rythme dans la brume
+Dans les rapides, la pression grimpe
+Cherche près du fanion
+Dépassement avant le verdict
+Avance avec ton équipe
+Suis au pied du mur
+L'équipe cherche l'indice au pied du mur
+L'équipe traverse le gué dans les rapides
+Relance vers la finale
+L'équipe vise la cible contre le chrono
+Adresse dans la boue
+L'équipe protège l'avance avec courage
+Une participante garde le cap au départ
+Mission vers la vallée
+Dans le courant, la suite se joue
+L'équipe vise la cible au bord du fleuve
+Défi vers le Saguenay
+Traverse devant la cible
+L'équipe suit la balise avec le trio
+Après le portage, le chrono frappe
+Dans la brume, le cap se garde
+Force dans le relais
+L'équipe ouvre la marche avec le trio
+L'avance avec prudence
+Écoute sur la rive
+L'équipe prépare le radeau malgré la pluie
+L'avance change le jeu
+Sous la pluie, le choix se fait
+Dépassement avec le trio
+Sur le relais, la peur attend
+L'équipe noue la corde sans paniquer
+Course vers Charlevoix
+L'équipe lit la carte dans les rapides
+Cherche contre le courant
+Mémorise vers la rive
+Audace en pleine montée
+L'équipe ajuste le harnais au pied du mur
+Tiens dans la boue
+Près du sommet, le relais repart
+Écoute contre le chrono
+Relais vers Charlevoix
+Une participante rame encore dans le vent
+Une participante tient le rythme au sommet
+Face au vide, l'équipe respire
+Sang-froid sur le parcours
+Calme avec le trio
+Entraide à la cible
+Franchis pour la victoire
+Mission vers le marais
+Guide près du fanion
+Une participante rame encore avec prudence
+Complicité avant le verdict
+L'équipe lit la carte avec prudence
+Relais vers les Laurentides
+Retour vers le fjord
+Une participante calme le jeu avec courage
+L'équipe dompte le courant malgré la pluie
+Au dernier pas, le doute recule
+Instinct au dernier relais
+Avant le départ, le cap se garde
+Franchis face au vide
+Dans la forêt, le doute recule
+Une participante calme le jeu dans la boue
+L'équipe gravit la pente avec précision
+Dans la forêt, le retard fond
+Finale vers la rive
+Une participante vise la cible au départ
+Près du fanion, le relais repart
+Observe avec le trio
+Mission vers la Côte-Nord
+L'avance cache l'indice
+L'équipe cherche l'indice malgré le doute
+L'équipe décode la suite près du fanion
+L'équipe vise la cible près du marais
+Persévérance sur la corde
+L'indice récompense l'écoute
+Tiens contre le courant
+Leadership à la cible
+L'équipe relit la consigne sur la rive
+Mémorise sans perdre le cap
+L'équipe prépare le radeau pour la finale
+Observe avec plus de calme
+L'équipe change de plan sur le sentier
+L'équipe trouve le fanion avec prudence
+Lucidité face au vide
+Résilience contre le chrono
+Ose pour le prochain indice
+Stratégie contre le chrono
+L'arrivée réveille l'instinct
+Près du sommet, la suite se joue
+Charlevoix teste le trio
+L'équipe noue la corde au bord du fleuve
+Mission vers la rive
+Dans la brume, l'équipe respire
+Dans la forêt, la confiance revient
+L'avance près du fanion
+Dans la brume, la suite se joue
+L'équipe relance l'effort sur la rive
+Sous la pluie, la victoire appelle
+Face au vide, la victoire appelle
+L'équipe écoute le vent sur la rive
+Relance face au vide
+Agilité sur la rive
+Audace face au vide
+Saute sans perdre le cap
+Écoute sur le parcours
+Écoute après le portage
+Au coeur du défi, le relais repart
+L'équipe franchit le mur devant la corde
+Coordination dans les rapides
+Respire pour sauver l'étape
+L'équipe garde le cap avant le verdict
+Cours au pied du mur
+Lis dans la boue
+L'équipe affronte la pente avec patience
+Dans la forêt, le groupe se serre
+Agilité contre le chrono
+Maîtrise dans la boue
+Endurance dans les rapides
+L'équipe partage le poids sur la rive
+Maîtrise après le portage
+L'équipe décode la suite dans la boue
+L'équipe franchit le mur au pied du mur
+Endurance face au vide
+L'équipe garde le cap sur le sentier
+Sur la rive, l'équipe respire
+L'équipe gravit la pente face au vide
+L'arrivée ramène l'espoir
+L'équipe ferme le relais contre le chrono
+Suis après le portage
+L'équipe prépare le radeau avec patience
+L'arrivée révèle le trio
+L'équipe change de plan avec précision
+Avant le départ, le doute recule
+Course vers le canyon
+L'équipe compte les secondes dans la brume
+Dans les rapides, le chrono frappe
+Face au vide, le chrono frappe
+Après le portage, le calme revient
+Adaptation à la cible
+Décode pour la victoire
+Protège près du fanion
+Écoute sous la pluie
+Au dernier pas, le relais repart
+L'avance ralentit le groupe
+L'équipe rame encore sur le pont
+L'avance avec patience
+L'arrivée avant le verdict
+Agilité au pied du mur
+Près du fanion, la victoire appelle
+Suis dans la boue
+Observe avant le chrono
+Sous les épinettes, la pression grimpe
+L'équipe dompte le courant sur le sentier
+L'équipe prépare le radeau dans la forêt
+L'équipe trouve le fanion face au vide
+L'avance brouille le plan
+Adaptation dans la boue
+Coordination vers la finale
+Mémorise jusqu'au sommet
+Retour vers la vallée
+L'équipe répare le vélo sur la rive
+Dans le courant, le chrono frappe
+Accélère après le portage
+Au dernier pas, le retard fond
+Communication sous la pluie
+Dans la forêt, la peur attend
+Une participante répare le vélo en silence
+Concentration dans le courant
+L'équipe ajuste le harnais face au vide
+Près du sommet, le retard fond
+L'équipe franchit le mur dans la brume
+Relais vers la baie
+L'équipe serre les dents jusqu'au bout
+Cours sous la pluie
+L'arrivée coûte du temps
+Dans la forêt, le chrono frappe
+Au creux du ravin, le calme revient
+Au coeur du défi, la pression grimpe
+L'équipe garde le cap dans la boue
+Communication près du fanion
+Résous sous la pluie
+Mémorise face au vide
+L'équipe suit la balise pour la finale
+Sur la roche humide, le rythme change
+L'équipe relance l'effort près du marais
+Guide après le portage
+Après l'indice, l'équipe respire
+L'équipe porte la charge sans paniquer
+Concentration sous la pluie
+L'équipe dompte le courant en silence
+Audace contre le chrono
+Dans les rapides, le groupe se serre
+Sur la roche humide, le choix se fait
+Sous la pluie, le sommet se cache
+Maîtrise dans le relais
+Course vers la forêt
+L'équipe protège l'avance sous pression
+L'équipe ouvre la marche avec patience
+L'équipe protège l'avance au pied du mur
+Repars jusqu'au sommet
+Leadership après le portage
+Cours avec ton équipe
+Respire malgré la fatigue
+L'équipe relit la consigne avec patience
+Lis pour le prochain indice
+L'équipe trouve le fanion dans la brume
+L'équipe calme le jeu au bord du fleuve
+Lucidité au dernier relais
+Calcule malgré la fatigue
+Audace sur la corde
+Agilité dans la boue
+Près du fanion, le calme revient
+Lis sous la pluie
+Instinct dans les rapides
+L'équipe affronte la pente avec le trio
+Stratégie avec le trio
+Leadership contre le chrono
+Dans le courant, la victoire appelle
+L'équipe vise la cible avec le trio
+Sur la roche humide, la confiance revient
+Décode jusqu'au relais
+Cap sur la Côte-Nord
+Au dernier pas, l'indice revient
+Calcule devant la cible
+Avance vers la finale
+Au bout du pont, le calme revient
+Relance pour la victoire
+Dans la brume, l'avance se défend
+Instinct près du fanion
+Lis sans perdre le cap
+L'équipe dompte le courant dans le vent
+Protège contre le courant
+L'équipe relance l'effort contre le chrono
+L'équipe répare le vélo sur le sentier
+Mémorise dans la boue
+Pagaye contre le courant
+Pagaye dans la boue
+Après l'indice, le trio se parle
+Devant la cible, le relais repart
+Près du fanion, le jeu bascule
+Choisis face au vide
+Force sous la pluie
+Coordination sous la pluie
+Face au vide, la pression grimpe
+Franchis près du fanion
+Endurance sur la rive
+Une participante garde le cap en silence
+L'équipe rattrape le rythme sur le sentier
+Écoute près du fanion
+Relance sous la pluie
+L'équipe répare le vélo avec prudence
+L'équipe serre les dents sur le pont
+Choisis sous la pluie
+Porte pour sauver l'étape
+Décode près du fanion
+Avance jusqu'au sommet
+L'équipe noue la corde avec prudence
+L'avance avant le verdict
+L'équipe suit la balise au sommet
+Sang-froid avant le verdict
+Course vers le ravin
+L'avance sur le pont
+Écoute dans les rapides
+Vise devant la cible
+L'équipe observe le terrain face au vide
+Relais vers le Saguenay
+Construis pour la victoire
+Écoute vers la finale
+Instinct face au vide
+Solidarité avant le verdict
+Patience dans les rapides
+L'indice pousse au choix
+Une participante rame encore avec courage
+L'équipe protège l'avance dans le vent
+Audace à la cible
+L'équipe relance l'effort sous pression
+Près du fanion, la balise apparaît
+L'équipe traverse le gué avec précision
+Dans la forêt, l'indice revient
+Leadership dans le relais
+L'équipe rame encore malgré le doute
+L'équipe franchit le mur avec courage
+Agilité en pleine montée
+Franchis jusqu'au relais
+Calcule pour la victoire
+L'équipe compte les secondes sous pression
+L'indice sans paniquer
+L'avance relance la course
+Endurance avant le verdict
+Confiance face au vide
+Au coeur du défi, le trio se parle
+Accélère avec plus de calme
+Sous les épinettes, le groupe se serre
+Agilité dans le courant
+Entraide sous la pluie
+Agilité sous la pluie
+Ralentis avec le trio
+Au bord du lac, l'indice revient
+Cap sur la forêt
+Guide contre le courant
+L'équipe porte la charge sur la rive
+Écoute au dernier relais
+Sur la rive, le sommet se cache
+L'équipe calme le jeu au départ
+Écoute sans hésiter
+Ose près du fanion
+L'équipe rattrape le rythme près du fanion
+Concentration vers la finale
+Course vers le sommet
+Protège avec le trio
+Une participante rame encore avec patience
+Face au vide, l'indice revient
+Au bord du lac, le jeu bascule
+L'équipe noue la corde malgré le doute
+Dans le courant, la corde répond
+Patience dans le relais
+Complicité dans le relais
+Vise avec plus de calme
+Cours jusqu'au relais
+Franchis pour le prochain indice
+Dans la brume, le retard fond
+L'équipe suit la balise avec courage
+L'équipe prépare le radeau près du fanion
+Au coeur du défi, la balise apparaît
+Face au vide, la suite se joue
+L'équipe tient le rythme au pied du mur
+Calme contre le chrono
+Endurance contre le chrono
+Mémoire au dernier relais
+Avant le départ, le jeu bascule
+Défi vers la Gaspésie
+Détermination dans le courant
+L'équipe ferme le relais avec courage
+Protège pour sauver l'étape
+Maîtrise à la cible
+Adresse sur la corde
+Au pied du mur, la fatigue monte
+Cherche jusqu'au relais
+Rame jusqu'au sommet
+L'équipe lit la carte jusqu'au bout
+L'équipe écoute le vent après le portage
+Défi vers le sous-bois
+Confiance au pied du mur
+Pagaye pour le prochain indice
+Mémoire contre le chrono
+L'indice ralentit le groupe
+Lucidité sur le parcours
+Devant la cible, la peur attend
+L'indice ramène l'espoir
+Dans la forêt, la corde répond
+Observation vers la finale
+Accélère malgré la fatigue
+L'équipe affronte la pente près du marais
+Communication sur la rive
+Ralentis pour le prochain indice
+L'équipe lit la carte sans paniquer
+Saute près du fanion
+Ose après le portage
+Force sur la rive
+L'équipe serre les dents malgré le doute
+Au bord du lac, la suite se joue
+Grimpe sans hésiter
+Relais vers la Gaspésie
+Solidarité vers la finale
+Cherche malgré la fatigue
+Avance devant la cible
+L'équipe compte les secondes avec patience
+Sur la roche humide, la balise apparaît
+L'arrivée sous pression
+L'équipe relance l'effort dans la brume
+Entraide sur la rive
+L'indice avec précision
+Défi vers la rive
+L'équipe écoute le vent avant le verdict
+L'équipe relit la consigne sur le pont
+Saute au pied du mur
+Au coeur du défi, le rythme change
+L'équipe décode la suite dans le vent
+Observe sans perdre le cap
+Ralentis jusqu'au sommet
+L'équipe garde le cap sous pression
+Communication avant le verdict
+Courage près du fanion
+Cap sur les rapides
+Après le portage, le trio se parle
+Cours malgré la fatigue
+Courage vers la finale
+L'équipe observe le terrain avec précision
+Défi vers le fleuve
+Sous le chrono, le retard fond
+Mission vers la falaise
+Adresse avant le verdict
+L'équipe lit la carte sur la rive
+Au bout du pont, la confiance revient
+Adaptation dans les rapides
+L'équipe décode la suite contre le chrono
+Confiance dans le courant
+Construis pour sauver l'étape
+Endurance dans la boue
+Observe au pied du mur
+Mission vers les Laurentides
+L'équipe calme le jeu dans la brume
+L'équipe serre les dents en silence
+Sous les épinettes, tout peut changer
+Repars pour le prochain indice
+L'arrivée ferme le passage
+L'équipe porte la charge au pied du mur
+L'indice avant le verdict
+L'équipe protège l'avance sans paniquer
+Confiance près du fanion
+Une participante calme le jeu dans le vent
+Précision dans la boue
+Saute avec ton équipe
+Stratégie en pleine montée
+Suis malgré la fatigue
+Avant le départ, la pression grimpe
+L'équipe écoute le vent avec le trio
+L'avance sans paniquer
+Au bord du lac, le retard fond
+L'équipe ferme le relais dans la boue
+L'équipe tient le rythme en silence
+Résilience dans les rapides
+Au creux du ravin, le groupe se serre
+Avant le départ, le chrono frappe
+L'équipe noue la corde sur le pont
+Cherche dans la boue
+Solidarité avec le trio
+Défi vers la grève
+Protège face au vide
+Audace au dernier relais
+Mission vers les rapides
+L'équipe calme le jeu après le portage
+Protège sans perdre le cap
+L'équipe répare le vélo avec le trio
+Pagaye avec le trio
+Relance avec le trio
+L'équipe ouvre la marche dans la boue
+Choisis sans perdre le cap
+L'équipe rame encore avec patience
+L'équipe ajuste le harnais avec patience
+L'équipe répare le vélo dans la brume
+Lucidité dans les rapides
+Course vers la Gaspésie
+L'équipe vise la cible après le portage
+Vise avant le chrono
+Dans le courant, l'avance se défend
+Grimpe après le portage
+Après le portage, le jeu bascule
+Agilité vers la finale
+L'équipe lit la carte en silence
+L'équipe cherche l'indice contre le chrono
+Cours avant le chrono
+Solidarité sur la rive
+L'avance pousse au choix
+Relais vers la plage
+Adaptation au pied du mur
+Observe avec ton équipe
+L'équipe prépare le radeau sans paniquer
+Grimpe dans la boue
+Pagaye avant le chrono
+L'équipe porte la charge dans les rapides
+Endurance dans le relais
+Une participante calme le jeu sur la rive
+Au coeur du défi, le doute recule
+Coordination sur le parcours
+L'équipe trouve le fanion après le portage
+Choisis devant la cible
+Une participante change de plan au départ
+Avance après le portage
+L'équipe tient le rythme jusqu'au bout
+Une participante lit la carte en silence
+Observe pour le prochain indice
+Grimpe sans perdre le cap
+Cap sur le sommet
+Retour vers le marais
+Pagaye devant la cible
+L'équipe décode la suite après le portage
+L'équipe rattrape le rythme face au vide
+L'équipe ouvre la marche sous pression
+Endurance à la cible
+Dépassement sous la pluie
+Concentration avec le trio
+Cohésion sur la corde
+Cours vers la rive
+Relance pour sauver l'étape
+Relais vers le quai
+L'indice fait douter
+Dans le courant, la confiance revient
+L'équipe trouve le fanion sans paniquer
+L'équipe rame encore avant le verdict
+Cours avec plus de calme
+L'équipe ouvre la marche pour la finale
+Sous les épinettes, l'équipe respire
+Après l'indice, le cap se garde
+Pagaye face au vide
+Au bord du lac, le calme revient
+L'équipe ouvre la marche dans les rapides
+Au bord du lac, la victoire appelle
+Écoute avant le chrono
+L'équipe répare le vélo malgré le doute
+Au pied du mur, le chrono frappe
+Mission vers le sentier
+Sur la roche humide, le chrono frappe
+Sur le relais, la pression grimpe
+L'équipe gravit la pente avec patience
+L'équipe cherche l'indice avec courage
+Coordination sur la rive
+L'équipe porte la charge au départ
+Sous les épinettes, le doute recule
+Sous les épinettes, le retard fond
+Complicité sur la rive
+Rame malgré la fatigue
+L'avance pour la finale
+Détermination sur le parcours
+L'équipe serre les dents pour la finale
+Relais vers le lac
+Répare avec plus de calme
+L'équipe garde le cap avec courage
+Concentration au dernier relais
+Mémorise après le portage
+Saute pour la victoire
+Répare après le portage
+Près du fanion, le groupe se serre
+Au bord du lac, la balise apparaît
+L'équipe rattrape le rythme avec prudence
+L'équipe cherche l'indice dans la boue
+Cohésion au pied du mur
+Traverse malgré la fatigue
+Protège devant la cible
+L'indice dicte la suite
+Observation dans le courant
+L'équipe ajuste le harnais sur le pont
+Au creux du ravin, le trio se parle
+Vise dans la boue
+Calcule vers la finale
+Construis dans la boue
+L'équipe tient le rythme au départ
+L'équipe serre les dents avec courage
+Communication sur le parcours
+Sur le relais, la balise apparaît
+Mission vers la montagne
+L'équipe lit la carte avec courage
+L'équipe répare le vélo près du marais
+Ralentis malgré la fatigue
+Rame au pied du mur
+L'équipe serre les dents dans les rapides
+Calcule après le portage
+Sang-froid sur la corde
+Grimpe jusqu'au sommet
+L'avance malgré le doute
+Résous vers la finale
+Devant la cible, la victoire appelle
+Construis pour le prochain indice
+Traverse pour sauver l'étape
+L'équipe ouvre la marche malgré le doute
+Cap sur la Gaspésie
+L'équipe suit la balise dans la brume
+Courage avec le trio
+Cours contre le courant
+Répare dans la boue
+L'équipe calme le jeu devant la corde
+Saute devant la cible
+L'équipe ferme le relais sans paniquer
+Retour vers le sous-bois
+L'équipe gravit la pente sur la rive
+Au creux du ravin, le chrono frappe
+Suis jusqu'au sommet
+Après le portage, la suite se joue
+Sur la roche humide, le trio se parle
+Respire dans les rapides
+Adaptation au dernier relais
+Au bout du pont, la fatigue monte
+Traverse sans perdre le cap
+L'équipe vise la cible avec patience
+Traverse pour la victoire
+L'équipe répare le vélo malgré la pluie
+Observe vers la finale
+Relance avec plus de calme
+Suis avant le chrono
+Persévérance sur le parcours
+Relance près du fanion
+Cohésion avant le verdict
+Sur la rive, tout peut changer
+Entraide face au vide
+L'équipe ferme le relais sur la rive
+Au dernier pas, tout peut changer
+Concentration sur le parcours
+Franchis avec ton équipe
+Calcule vers la rive
+Dépassement après le portage
+Franchis vers la rive
+Adresse après le portage
+Relais vers la vallée
+L'équipe gravit la pente sans paniquer
+Mémorise malgré la fatigue
+Accélère avant le chrono
+Précision sur la corde
+Lis près du fanion
+L'équipe trouve le fanion au départ
+Endurance dans le courant
+Tiens dans les rapides
+Dans les rapides, la peur attend
+Au bout du pont, le retard fond
+L'équipe trouve le fanion dans le vent
+Devant la cible, le trio se parle
+L'équipe ferme le relais au pied du mur
+Mission vers la baie
+Vise près du fanion
+Écoute pour la victoire
+Relais vers le fleuve
+Patience en pleine montée
+L'équipe serre les dents au sommet
+L'équipe compte les secondes sur la rive
+Devant la cible, le chrono frappe
+Instinct avec le trio
+Après le portage, la balise apparaît
+Devant la cible, la fatigue monte
+Près du fanion, l'équipe respire
+Suis pour le prochain indice
+Au bord du lac, le choix se fait
+Calme au pied du mur
+Accélère sous la pluie
+L'équipe trouve le fanion dans la forêt
+Maîtrise dans les rapides
+Au bout du pont, tout peut changer
+Construis près du fanion
+Confiance à la cible
+Maîtrise au dernier relais
+L'arrivée brouille le plan
+L'arrivée donne le ton
+L'équipe relit la consigne avec prudence
+Dépassement dans la boue
+Choisis dans la boue
+L'équipe vise la cible sous pression
+L'équipe tient le rythme dans la brume
+Agilité sur le parcours
+L'équipe gravit la pente dans la boue
+Mission vers la grève
+L'équipe garde le cap dans les rapides
+Détermination face au vide
+L'équipe ajuste le harnais au sommet
+L'équipe affronte la pente sur le sentier
+L'arrivée avec patience
+Leadership près du fanion
+L'équipe relit la consigne jusqu'au bout
+Force dans la boue
+Au dernier pas, l'équipe respire
+Au pied du mur, la corde répond
+Au pied du mur, tout peut changer
+L'avance fait douter
+Retour vers le Saguenay
+L'arrivée teste l'équipe
+L'équipe noue la corde au départ
+L'équipe garde le cap sur le pont
+Au dernier pas, la peur attend
+Avance sous la pluie
+Persévérance après le portage
+L'équipe franchit le mur en silence
+Décode avec plus de calme
+Retour vers la falaise
+Observation sur le parcours
+Adaptation face au vide
+L'équipe gravit la pente sur le pont
+Course vers la montagne
+Saute avant le chrono
+L'équipe trouve le fanion malgré le doute
+L'équipe prépare le radeau au pied du mur
+L'équipe rame encore avec courage
+Protège dans les rapides
+Entraide au dernier relais
+Tiens avec plus de calme
+Sur le relais, le groupe se serre
+Respire après le portage
+Sous le chrono, le calme revient

@@ -1,67 +1,66 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { RecentRandomPicker } from '../shared/recent-random-picker';
 import { AnagramWord } from './anagram-word.model';
 
 @Injectable({
-    providedIn: 'root',
+  providedIn: 'root',
 })
 export class AnagramService {
-    private readonly http = inject(HttpClient);
+  private readonly http = inject(HttpClient);
+  private readonly randomWords = new RecentRandomPicker<AnagramWord>(40);
 
-    private words: AnagramWord[] = [];
+  private words: AnagramWord[] = [];
 
-    async loadWords(): Promise<void> {
-        if (this.words.length > 0) {
-            return;
-        }
-
-        const text = await firstValueFrom(
-            this.http.get('words.txt', {
-                responseType: 'text',
-            }),
-        );
-
-        this.words = text
-            .split(/\r?\n/)
-            .map((word) => word.trim())
-            .filter(Boolean)
-            .map((answer) => ({ answer }));
+  async loadWords(): Promise<void> {
+    if (this.words.length > 0) {
+      return;
     }
 
-    getRandomWord(): AnagramWord {
-        if (this.words.length === 0) {
-            throw new Error('Anagram words have not been loaded yet.');
-        }
+    const text = await firstValueFrom(
+      this.http.get('words.txt', {
+        responseType: 'text',
+      }),
+    );
 
-        const index = Math.floor(Math.random() * this.words.length);
-        return this.words[index];
+    this.words = text
+      .split(/\r?\n/)
+      .map((word) => word.trim())
+      .filter(Boolean)
+      .map((answer) => ({ answer }));
+  }
+
+  getRandomWord(): AnagramWord {
+    if (this.words.length === 0) {
+      throw new Error('Anagram words have not been loaded yet.');
     }
 
-    scrambleWord(word: string): string {
-        const letters = word.split('');
+    return this.randomWords.pick(this.words, (word) => this.normalize(word.answer));
+  }
 
-        for (let index = letters.length - 1; index > 0; index--) {
-            const swapIndex = Math.floor(Math.random() * (index + 1));
-            [letters[index], letters[swapIndex]] = [letters[swapIndex], letters[index]];
-        }
+  scrambleWord(word: string): string {
+    const letters = word.split('');
 
-        const scrambled = letters.join('');
-
-        return scrambled.toLowerCase() === word.toLowerCase()
-            ? this.scrambleWord(word)
-            : scrambled;
+    for (let index = letters.length - 1; index > 0; index--) {
+      const swapIndex = Math.floor(Math.random() * (index + 1));
+      [letters[index], letters[swapIndex]] = [letters[swapIndex], letters[index]];
     }
 
-    isCorrectAnswer(input: string, answer: string): boolean {
-        return this.normalize(input) === this.normalize(answer);
-    }
+    const scrambled = letters.join('');
 
-    private normalize(value: string): string {
-        return value
-            .normalize('NFD')
-            .replace(/\p{Diacritic}/gu, '')
-            .trim()
-            .toLowerCase();
-    }
+    return scrambled.toLowerCase() === word.toLowerCase() ? this.scrambleWord(word) : scrambled;
+  }
+
+  isCorrectAnswer(input: string, answer: string): boolean {
+    return this.normalize(input) === this.normalize(answer);
+  }
+
+  private normalize(value: string): string {
+    return value
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu, '')
+      .trim()
+      .toLowerCase();
+  }
 }
