@@ -55,6 +55,10 @@ export const routes: Routes = [
     loadComponent: () => import('./puzzles/dice/dice.page').then((m) => m.DicePage),
   },
   {
+    path: 'nim',
+    loadComponent: () => import('./puzzles/games/nim/nim.page').then((m) => m.NimPage),
+  },
+  {
     path: 'puzzlehunt/navigation',
     loadComponent: () =>
       import('./puzzles/puzzlehunt/Navigation/navigation.page').then((m) => m.NavigationPuzzlePage),

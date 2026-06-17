@@ -1,0 +1,82 @@
+<main class="page">
+  <a routerLink="/" class="back-link">← Le menu par ici</a>
+
+  <section class="shell">
+    <header class="hero">
+      <p class="eyebrow">Nim</p>
+      <h1>Prends le dernier</h1>
+      <p class="intro">
+        Clique une pierre pour retirer cette pierre et toutes celles qui suivent dans le même tas.
+      </p>
+    </header>
+
+    <section class="game-layout">
+      <div class="board" aria-label="Jeu de Nim">
+        <div class="status-row">
+          <p class="status" role="status">{{ statusText() }}</p>
+          <p class="last-move">{{ lastMove() }}</p>
+        </div>
+
+        @if (winner()) {
+          <section
+            class="result-banner"
+            [class.win]="winner() === 'human'"
+            [class.loss]="winner() === 'cpu'"
+            role="status"
+            aria-live="polite"
+          >
+            <strong>{{ resultTitle() }}</strong>
+            <span>{{ resultText() }}</span>
+          </section>
+        }
+
+        <div class="pile-grid">
+          @for (pile of piles(); track trackByIndex($index); let pileIndex = $index) {
+            <article
+              class="pile"
+              [class.empty]="pile === 0"
+              [class.hinted]="hintVisible() && bestMove()?.pileIndex === pileIndex"
+              [attr.aria-label]="'Tas avec ' + pile + ' pierres'"
+            >
+              <span class="stones">
+                @for (stone of stonesFor(pile); track stone) {
+                  <button
+                    type="button"
+                    class="stone-button"
+                    [class.hint-stone]="isHintStone(pileIndex, stone)"
+                    [class.removing]="isRemovingStone(pileIndex, stone)"
+                    [disabled]="!isHumanTurn()"
+                    (pointerdown)="playStone(pileIndex, stone, $event)"
+                    (keydown.enter)="playStone(pileIndex, stone, $event)"
+                    (keydown.space)="playStone(pileIndex, stone, $event)"
+                    aria-label="Retirer cette pierre et les suivantes"
+                  >
+                    <span aria-hidden="true"></span>
+                  </button>
+                }
+              </span>
+            </article>
+          }
+        </div>
+      </div>
+
+      <aside class="side-panel" aria-label="Analyse Nim">
+        <div class="metric">
+          <span>XOR</span>
+          <strong>{{ nimSum() }}</strong>
+          <small>binaire {{ nimSumBinary() }}</small>
+        </div>
+
+        <button type="button" class="secondary-button" (click)="showHint()" [disabled]="!isHumanTurn()">
+          Indice
+        </button>
+
+        @if (hintVisible()) {
+          <p class="hint">{{ hintText() }}</p>
+        }
+
+        <button type="button" class="secondary-button" (click)="newGame()">Nouvelle partie</button>
+      </aside>
+    </section>
+  </section>
+</main>

@@ -1,0 +1,387 @@
+.page {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: #444;
+}
+
+.shell {
+  padding: 2rem;
+  border: 1px solid #ddd;
+  border-radius: 1.25rem;
+  background: #fff;
+  box-shadow: 0 0.75rem 2rem rgb(0 0 0 / 6%);
+}
+
+.hero {
+  margin-bottom: 1.25rem;
+}
+
+.eyebrow {
+  margin: 0 0 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.8rem;
+  color: #666;
+  font-weight: 800;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  line-height: 1;
+}
+
+.intro {
+  max-width: 720px;
+  margin: 0.75rem 0 0;
+  color: #555;
+  line-height: 1.5;
+}
+
+.game-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 18rem;
+  gap: 1rem;
+  align-items: start;
+}
+
+.board,
+.side-panel {
+  border: 1px solid #eee;
+  border-radius: 1rem;
+  background: #fbfbfb;
+}
+
+.board {
+  padding: 1.25rem;
+}
+
+.status-row {
+  display: grid;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+.status,
+.last-move {
+  margin: 0;
+}
+
+.status {
+  font-weight: 800;
+}
+
+.last-move {
+  color: #666;
+}
+
+.result-banner {
+  display: grid;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border: 1px solid;
+  border-radius: 0.75rem;
+  background: #fff;
+
+  strong {
+    font-size: 1.35rem;
+    line-height: 1.1;
+  }
+
+  span {
+    line-height: 1.4;
+  }
+
+  &.win {
+    border-color: #7bc99a;
+    background: #eefaf2;
+    color: #126334;
+  }
+
+  &.loss {
+    border-color: #efaaa2;
+    background: #fff1ef;
+    color: #8a251a;
+  }
+}
+
+.pile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+  gap: 0.85rem;
+}
+
+.pile {
+  display: grid;
+  min-height: 7rem;
+  padding: 0.75rem;
+  border: 2px solid #e4e4e4;
+  border-radius: 0.75rem;
+  background: #fff;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+
+  &:has(button:not(:disabled):hover),
+  &:has(button:not(:disabled):focus-visible) {
+    border-color: #222;
+    box-shadow: 0 0.65rem 1.25rem rgb(0 0 0 / 8%);
+    transform: translateY(-1px);
+  }
+
+  &.hinted {
+    border-color: #155f7a;
+    box-shadow: 0 0 0 4px rgb(21 95 122 / 14%);
+  }
+
+  &.empty {
+    place-items: center;
+    background: #f2f2f2;
+    opacity: 0.75;
+  }
+}
+
+.stones {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  gap: 0.2rem;
+  min-height: 4.75rem;
+}
+
+.stone-button {
+  display: grid;
+  place-items: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  touch-action: manipulation;
+
+  span {
+    width: 1.15rem;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 35% 30%, #ffffff 0 12%, transparent 13%),
+      #19718f;
+    box-shadow: inset 0 -0.18rem 0 rgb(0 0 0 / 16%);
+    transition:
+      background 160ms ease,
+      box-shadow 160ms ease,
+      transform 160ms ease;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.75;
+  }
+
+  &:focus-visible {
+    outline: 3px solid rgb(21 95 122 / 28%);
+    outline-offset: 0.1rem;
+  }
+
+  &:not(:disabled):hover span,
+  &:not(:disabled):focus-visible span,
+  &:not(:disabled):hover ~ .stone-button span,
+  &:not(:disabled):focus-visible ~ .stone-button span {
+    background:
+      radial-gradient(circle at 35% 30%, #ffffff 0 12%, transparent 13%),
+      #d65b2a;
+    box-shadow:
+      inset 0 -0.18rem 0 rgb(0 0 0 / 16%),
+      0 0 0 0.2rem rgb(214 91 42 / 16%);
+    transform: scale(1.1);
+  }
+
+  &.hint-stone span,
+  &.hint-stone ~ .stone-button span {
+    background:
+      radial-gradient(circle at 35% 30%, #ffffff 0 12%, transparent 13%),
+      #d65b2a;
+    box-shadow:
+      inset 0 -0.18rem 0 rgb(0 0 0 / 16%),
+      0 0 0 0.24rem rgb(214 91 42 / 22%);
+    transform: scale(1.12);
+  }
+
+  &.removing {
+    pointer-events: none;
+  }
+
+  &.removing span {
+    animation: remove-stone 900ms ease forwards;
+    background:
+      radial-gradient(circle at 35% 30%, #ffffff 0 12%, transparent 13%),
+      #d65b2a;
+    box-shadow:
+      inset 0 -0.18rem 0 rgb(0 0 0 / 16%),
+      0 0 0 0.24rem rgb(214 91 42 / 20%);
+  }
+}
+
+@keyframes remove-stone {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  45% {
+    opacity: 1;
+    transform: translateY(-0.28rem) scale(1.18);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-0.55rem) scale(0.35);
+  }
+}
+
+.pile.empty .stones {
+  display: grid;
+  place-items: center;
+
+  &::before {
+    content: '';
+    width: min(5rem, 70%);
+    border-top: 2px dashed #d6d6d6;
+    transform: translateY(-0.8rem);
+  }
+
+  &::after {
+    content: 'vide';
+    color: #777;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transform: translateY(0.8rem);
+  }
+}
+
+button {
+  border: 0;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  font-weight: 800;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+}
+
+.secondary-button {
+  min-height: 2.75rem;
+  padding: 0.75rem 1rem;
+  background: #eeeeee;
+  color: #222;
+}
+
+.side-panel {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1rem;
+}
+
+.metric {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.85rem;
+  border: 1px solid #e7e7e7;
+  border-radius: 0.75rem;
+  background: #fff;
+
+  span,
+  small {
+    color: #666;
+    font-weight: 800;
+  }
+
+  strong {
+    font-size: 2rem;
+    line-height: 1;
+  }
+}
+
+.hint {
+  margin: 0;
+  padding: 0.85rem;
+  border-left: 4px solid #155f7a;
+  border-radius: 0.5rem;
+  background: #eef8fb;
+  color: #173f4c;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+@media (max-width: 840px) {
+  .game-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .side-panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .page {
+    padding: 1rem;
+  }
+
+  .shell,
+  .board {
+    padding: 1rem;
+  }
+
+  .pile-grid {
+    grid-template-columns: repeat(auto-fit, minmax(3.65rem, 1fr));
+    gap: 0.45rem;
+  }
+
+  .side-panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pile {
+    min-height: 5.75rem;
+    padding: 0.4rem;
+    border-radius: 0.6rem;
+  }
+
+  .stones {
+    gap: 0.05rem;
+    min-height: 4.25rem;
+  }
+
+  .stone-button {
+    width: 1.65rem;
+    height: 1.65rem;
+  }
+
+  .stone-button span {
+    width: 0.9rem;
+  }
+
+  .secondary-button,
+  .metric {
+    min-width: 0;
+  }
+
+  .metric strong {
+    font-size: 1.5rem;
+  }
+}

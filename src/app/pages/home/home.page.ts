@@ -114,6 +114,18 @@ export class HomePage {
       ],
     },
     {
+      title: 'Jeux',
+      description: 'Jeux de stratégie contre un adversaire automatisé.',
+      puzzles: [
+        {
+          title: 'Nim',
+          description: 'Retire des objets face à un CPU presque parfait.',
+          route: '/nim',
+          tag: 'Stratégie',
+        },
+      ],
+    },
+    {
       title: 'Puzzles',
       description: 'Vraies énigmes de type jeu d’évasion.',
       puzzles: [
