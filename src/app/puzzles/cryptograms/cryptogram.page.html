@@ -56,6 +56,7 @@
         @if (isCorrect()) {
         <p class="success" role="status">
             Bravo, t'es pas ultra CON!
+            <span class="answer-sentence">{{ puzzle()!.answer }}</span>
         </p>
 
         <button type="button" (click)="nextPuzzle()">

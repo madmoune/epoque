@@ -216,7 +216,7 @@ button {
     left: 50%;
     bottom: 1rem;
     z-index: 11;
-    width: min(calc(100% - 2rem), 24rem);
+    width: min(calc(100% - 2rem), 28rem);
     max-height: calc(100vh - 2rem);
     overflow: auto;
     transform: translateX(-50%);
@@ -274,17 +274,18 @@ button {
 }
 
 .color-options {
-    grid-template-columns: repeat(8, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .shape-options {
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(7, minmax(0, 1fr));
 }
 
 .picker-button {
     display: grid;
     place-items: center;
     min-height: 2.75rem;
+    min-width: 0;
     padding: 0.5rem;
     border: 1px solid #ddd;
     border-radius: 0.875rem;
@@ -419,10 +420,6 @@ tr:last-child td {
         bottom: 1rem;
         width: min(calc(100% - 2rem), 24rem);
         border-radius: 1.25rem;
-    }
-
-    .color-options {
-        grid-template-columns: repeat(4, 1fr);
     }
 
     .shape-options {

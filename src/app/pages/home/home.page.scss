@@ -145,19 +145,84 @@ h1 {
 
 @media (max-width: 560px) {
     .home-page {
-        padding: 1rem;
+        padding: 0.75rem;
     }
 
     .hero,
     .category-card {
-        padding: 1rem;
+        padding: 0.75rem;
+        border-radius: 0.9rem;
+    }
+
+    .hero {
+        box-shadow: 0 0.35rem 1rem rgb(0 0 0 / 5%);
+    }
+
+    .eyebrow {
+        margin-bottom: 0.25rem;
+        font-size: 0.68rem;
+    }
+
+    h1 {
+        font-size: 1.6rem;
+    }
+
+    .hero-text {
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+        line-height: 1.35;
+    }
+
+    .category-list {
+        gap: 0.65rem;
+        margin-top: 0.75rem;
+    }
+
+    .category-header {
+        margin-bottom: 0.55rem;
+
+        h2 {
+            font-size: 1rem;
+        }
+
+        p {
+            display: none;
+        }
     }
 
     .puzzle-grid {
         grid-template-columns: 1fr;
+        gap: 0.45rem;
     }
 
     .puzzle-card {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 0.45rem;
         min-height: auto;
+        padding: 0.55rem 0.65rem;
+        border-radius: 0.65rem;
+
+        h3 {
+            font-size: 0.95rem;
+            line-height: 1.15;
+            overflow-wrap: anywhere;
+        }
+
+        p {
+            display: none;
+        }
+    }
+
+    .puzzle-tag {
+        min-width: 0;
+        padding: 0.2rem 0.45rem;
+        font-size: 0.68rem;
+    }
+
+    .play-link {
+        margin-top: 0;
+        font-size: 0.82rem;
+        white-space: nowrap;
     }
 }
