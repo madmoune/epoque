@@ -59,6 +59,11 @@ export const routes: Routes = [
     loadComponent: () => import('./puzzles/games/nim/nim.page').then((m) => m.NimPage),
   },
   {
+    path: 'mastermind',
+    loadComponent: () =>
+      import('./puzzles/games/mastermind/mastermind.page').then((m) => m.MastermindPage),
+  },
+  {
     path: 'puzzlehunt/navigation',
     loadComponent: () =>
       import('./puzzles/puzzlehunt/Navigation/navigation.page').then((m) => m.NavigationPuzzlePage),

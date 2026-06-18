@@ -1,0 +1,185 @@
+<main class="page">
+  <a routerLink="/" class="back-link">← Le menu par ici</a>
+
+  <section class="shell">
+    <header class="hero">
+      <p class="eyebrow">Mastermind</p>
+      <h1>Trouve la combinaison</h1>
+      <p class="intro">
+        @if (isClassic()) {
+          Trouve les quatre couleurs et leur position.
+        } @else {
+          Chaque position a une forme et une couleur, avec un retour séparé pour chacune.
+        }
+      </p>
+      <div class="mode-switch" aria-label="Mode de jeu">
+        <button
+          type="button"
+          class="mode-button"
+          [class.active]="isClassic()"
+          [attr.aria-pressed]="isClassic()"
+          (click)="setMode('classic')"
+        >
+          Classique
+        </button>
+        <button
+          type="button"
+          class="mode-button"
+          [class.active]="!isClassic()"
+          [attr.aria-pressed]="!isClassic()"
+          (click)="setMode('duo')"
+        >
+          Formes + couleurs
+        </button>
+      </div>
+    </header>
+
+    @if (isSolved()) {
+      <section class="success" role="status">
+        <strong>Victoire!</strong>
+        <span>Tu as trouvé la combinaison en {{ results().length }} essais.</span>
+      </section>
+    }
+
+    <section class="play-area">
+      <div class="guess-panel">
+        <h2>Essai en cours</h2>
+
+        <div class="guess-row" aria-label="Essai courant">
+          @for (slot of slots; track slot) {
+            <button
+              type="button"
+              class="piece-slot"
+              [class.selected]="selectedIndex() === slot"
+              [disabled]="isSolved()"
+              (click)="selectSlot(slot)"
+              [attr.aria-label]="'Position ' + (slot + 1)"
+            >
+              @if (currentGuess()[slot].color || currentGuess()[slot].shape) {
+                <span
+                  class="piece"
+                  [class]="'piece shape-' + (isClassic() ? 'circle' : (currentGuess()[slot].shape ?? 'circle')) + ' color-' + (currentGuess()[slot].color ?? 'gray')"
+                ></span>
+              } @else {
+                <span class="empty-piece"></span>
+              }
+            </button>
+          }
+        </div>
+
+        <section class="picker-section" aria-label="Choisir la couleur">
+          <h3>Couleur</h3>
+          <div class="picker-grid color-grid">
+            @for (color of colors; track color) {
+              <button
+                type="button"
+                class="picker-button"
+                [class.selected]="currentGuess()[selectedIndex()].color === color"
+                [disabled]="isSolved()"
+                (click)="selectColor(color)"
+                [attr.aria-label]="colorLabel(color)"
+              >
+                <span [class]="'color-dot color-' + color"></span>
+              </button>
+            }
+          </div>
+        </section>
+
+        @if (!isClassic()) {
+          <section class="picker-section" aria-label="Choisir la forme">
+            <h3>Forme</h3>
+            <div class="picker-grid shape-grid">
+              @for (shape of shapes; track shape) {
+                <button
+                  type="button"
+                  class="picker-button"
+                  [class.selected]="currentGuess()[selectedIndex()].shape === shape"
+                  [disabled]="isSolved()"
+                  (click)="selectShape(shape)"
+                  [attr.aria-label]="shapeLabel(shape)"
+                >
+                  <span [class]="'piece small-piece shape-' + shape"></span>
+                </button>
+              }
+            </div>
+          </section>
+        }
+
+        <div class="actions">
+          <button type="button" class="secondary-button" (click)="clearGuess()" [disabled]="isSolved()">
+            Effacer
+          </button>
+          <button type="button" class="secondary-button" (click)="newGame()">Nouvelle partie</button>
+        </div>
+      </div>
+
+      <section class="history-panel" aria-label="Historique des essais">
+        <h2>Essais</h2>
+        <div class="feedback-legend" aria-label="Légende du résultat">
+          <span class="legend-item">
+            <span class="feedback-mark placed" aria-hidden="true"></span>
+            Bien placé
+          </span>
+          <span class="legend-item">
+            <span class="feedback-mark present" aria-hidden="true"></span>
+            Présent ailleurs
+          </span>
+        </div>
+
+        @if (results().length === 0) {
+          <p class="empty-history">Aucun essai pour le moment.</p>
+        } @else {
+          <div class="history-list">
+            @for (result of results(); track $index) {
+              <article class="history-item">
+                <div class="history-pieces">
+                  @for (piece of result.pieces; track $index) {
+                    <span [class]="'piece shape-' + (isClassic() ? 'circle' : piece.shape) + ' color-' + piece.color"></span>
+                  }
+                </div>
+
+                <div class="feedback-grid" aria-label="Résultat de l'essai">
+                  @if (!isClassic()) {
+                    <div
+                      class="feedback-row"
+                      [attr.aria-label]="result.shapeFeedback.placed + ' formes bien placées, ' + result.shapeFeedback.present + ' formes ailleurs'"
+                      title="Formes"
+                    >
+                      <span class="feedback-kind shape-kind" aria-hidden="true"></span>
+                      <span class="feedback-marks" aria-hidden="true">
+                        @for (slot of slots; track slot) {
+                          <span
+                            class="feedback-mark"
+                            [class.placed]="slot < result.shapeFeedback.placed"
+                            [class.present]="slot >= result.shapeFeedback.placed && slot < result.shapeFeedback.placed + result.shapeFeedback.present"
+                          ></span>
+                        }
+                      </span>
+                    </div>
+                  }
+
+                  <div
+                    class="feedback-row"
+                    [attr.aria-label]="result.colorFeedback.placed + ' couleurs bien placées, ' + result.colorFeedback.present + ' couleurs ailleurs'"
+                    title="Couleurs"
+                  >
+                    <span class="feedback-kind color-kind" aria-hidden="true"></span>
+                    <span class="feedback-marks" aria-hidden="true">
+                      @for (slot of slots; track slot) {
+                        <span
+                          class="feedback-mark"
+                          [class.placed]="slot < result.colorFeedback.placed"
+                          [class.present]="slot >= result.colorFeedback.placed && slot < result.colorFeedback.placed + result.colorFeedback.present"
+                        ></span>
+                      }
+                    </span>
+                  </div>
+                </div>
+              </article>
+            }
+          </div>
+        }
+      </section>
+    </section>
+  </section>
+</main>

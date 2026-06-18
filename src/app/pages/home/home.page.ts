@@ -123,6 +123,12 @@ export class HomePage {
           route: '/nim',
           tag: 'Stratégie',
         },
+        {
+          title: 'Mastermind',
+          description: 'Devine une suite de formes et de couleurs.',
+          route: '/mastermind',
+          tag: 'Déduction',
+        },
       ],
     },
     {
