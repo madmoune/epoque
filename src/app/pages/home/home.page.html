@@ -18,7 +18,7 @@
             @if (category.puzzles.length > 0) {
             <div class="puzzle-grid">
                 @for (puzzle of category.puzzles; track puzzle.route) {
-                <a class="puzzle-card" [routerLink]="puzzle.route">
+                <a class="puzzle-card" [routerLink]="puzzle.route" [attr.id]="puzzle.route.slice(1)">
                     @if (puzzle.tag) {
                     <span class="puzzle-tag">{{ puzzle.tag }}</span>
                     }
