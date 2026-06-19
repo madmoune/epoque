@@ -145,7 +145,6 @@ html[data-theme] body :is(.card, .shell, .home-page > .hero, .category-card) {
   background: var(--surface) !important;
   color: var(--text);
   box-shadow: 0 0.9rem 2.5rem var(--shadow) !important;
-  backdrop-filter: blur(10px);
 }
 
 html[data-theme] body :is(

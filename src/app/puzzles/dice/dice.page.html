@@ -22,6 +22,12 @@
                     [class.conn-left]="hasConnection(row, col, 'left')"
                     [class.conn-right]="hasConnection(row, col, 'right')">
                     @if (getCell(row, col); as cell) {
+                    <div class="path-connectors" aria-hidden="true">
+                        <span class="connector-up"></span>
+                        <span class="connector-down"></span>
+                        <span class="connector-left"></span>
+                        <span class="connector-right"></span>
+                    </div>
                     <div class="step-badge">{{ cell.step }}</div>
 
                     <div class="stamp-symbol">
