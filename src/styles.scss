@@ -13,7 +13,7 @@
   --muted-strong: #d7e0dc;
   --border: #32463f;
   --border-strong: #496159;
-  --accent: #ef8246;
+  --accent: #dc7a46;
   --accent-contrast: #1b0e08;
   --focus: #62c6b1;
   --shadow: rgb(0 0 0 / 38%);
@@ -32,7 +32,7 @@
   --muted-strong: #34463f;
   --border: #c6d2cd;
   --border-strong: #9eb0a9;
-  --accent: #c95d25;
+  --accent: #b55a32;
   --accent-contrast: #ffffff;
   --focus: #147d70;
   --shadow: rgb(26 47 40 / 16%);
@@ -103,6 +103,22 @@ app-root {
   z-index: 1;
   display: block;
   min-height: 100vh;
+}
+
+html.theme-transition-fallback,
+html.theme-transition-fallback body,
+html.theme-transition-fallback body::before,
+html.theme-transition-fallback body::after,
+html.theme-transition-fallback body * {
+  transition-duration: 280ms;
+  transition-property: background-color, border-color, box-shadow, color, fill, stroke;
+  transition-timing-function: ease-in-out;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 320ms;
+  animation-timing-function: ease-in-out;
 }
 
 html[data-theme] body :is(h1, h2, h3, p, label, strong) {

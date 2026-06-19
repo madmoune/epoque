@@ -1,0 +1,64 @@
+:host {
+  --panel: var(--surface-soft, #f7f8f8);
+  --raised: var(--surface-raised, #fff);
+  --line: var(--border, #d5dcda);
+  --copy: var(--text, #1f2926);
+  --quiet: var(--muted, #5f6d68);
+}
+
+.page { max-width: 980px; margin: 0 auto; padding: 1.25rem; }
+.back-link { display: inline-block; margin-bottom: 0.75rem; color: var(--copy); }
+.shell { padding: 1.25rem; border: 1px solid var(--line); border-radius: 1.2rem; background: var(--raised); box-shadow: 0 0.75rem 2rem var(--shadow, rgb(0 0 0 / 8%)); }
+.hero { display: flex; gap: 1rem; align-items: end; justify-content: space-between; }
+.eyebrow { margin: 0 0 0.3rem; color: var(--quiet); font-size: 0.75rem; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; }
+h1, h2 { margin: 0; }
+h1 { font-size: clamp(1.8rem, 5vw, 2.8rem); line-height: 1; }
+h2 { font-size: 1.1rem; }
+.intro { max-width: 670px; margin: 0.65rem 0 0; color: var(--quiet); line-height: 1.45; }
+
+.count-picker { display: flex; gap: 0.2rem; padding: 0.2rem; border: 1px solid var(--line); border-radius: 0.7rem; background: var(--panel); }
+.count-picker button { width: 2.25rem; min-height: 2.15rem; padding: 0.3rem; border: 0; border-radius: 0.5rem; background: transparent !important; color: var(--copy) !important; cursor: pointer; font-size: 0.82rem; font-weight: 900; }
+.count-picker button.active { background: var(--accent) !important; color: var(--accent-contrast) !important; }
+
+.progress-row { display: flex; gap: 0.75rem; align-items: center; justify-content: space-between; margin: 1rem 0 0.65rem; color: var(--quiet); font-size: 0.83rem; font-weight: 750; }
+.progress-row p { margin: 0; text-align: right; }
+.progress-row p.error { color: #dc5d5d; }
+
+.people-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.7rem; }
+.person-card { display: grid; grid-template-rows: auto 1fr auto; gap: 0.7rem; min-width: 0; padding: 0.85rem; border: 1px solid var(--line); border-radius: 1rem; background: var(--panel); }
+.person-card.hinted { border-color: #b7791f; box-shadow: inset 0 0 0 2px rgb(183 121 31 / 18%); }
+.person-heading { display: flex; gap: 0.65rem; align-items: center; }
+.avatar { display: grid; place-items: center; width: 2.5rem; aspect-ratio: 1; border-radius: 50%; background: var(--accent); color: var(--accent-contrast); font-weight: 950; }
+.hint-badge { display: inline-block; margin-top: 0.12rem; color: #c48a2c; font-size: 0.68rem; font-weight: 900; text-transform: uppercase; }
+.statements { display: grid; gap: 0.4rem; align-content: start; }
+blockquote { margin: 0; padding: 0.65rem 0.75rem; border-left: 3px solid var(--focus); border-radius: 0 0.65rem 0.65rem 0; background: var(--raised); color: var(--copy); line-height: 1.4; }
+
+.role-picker { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.4rem; }
+.role-picker button { display: inline-flex; gap: 0.3rem; align-items: center; justify-content: center; min-width: 0; min-height: 2.3rem; padding: 0.38rem 0.5rem; border: 1px solid var(--line); border-radius: 0.6rem; background: var(--raised) !important; color: var(--copy) !important; cursor: pointer; font-size: 0.8rem; font-weight: 850; touch-action: manipulation; }
+.role-picker button.selected { border-color: var(--focus); background: color-mix(in srgb, var(--focus) 18%, var(--raised)) !important; box-shadow: inset 0 0 0 2px var(--focus); }
+.role-picker button:disabled { cursor: default; opacity: 0.72; }
+
+.actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.8rem; }
+.actions button { min-height: 2.8rem; padding: 0.65rem 0.9rem; border: 0; border-radius: 0.7rem; background: var(--accent); color: var(--accent-contrast); cursor: pointer; font-weight: 850; }
+.actions > button { min-height: 2.35rem !important; padding: 0.45rem 0.7rem !important; font-size: 0.82rem; }
+.actions button:disabled { cursor: not-allowed; opacity: 0.5; }
+.secondary-button { border: 1px solid var(--line) !important; background: var(--raised) !important; color: var(--copy) !important; }
+
+@media (max-width: 700px) {
+  .page { padding: 0.6rem; }
+  .shell { padding: 0.7rem; border-radius: 1rem; }
+  .hero { display: grid; align-items: start; }
+  .count-picker { width: 100%; }
+  .count-picker button { flex: 1; width: auto; }
+  .people-grid { grid-template-columns: 1fr; }
+  .progress-row { align-items: start; }
+  .person-card { padding: 0.7rem; }
+  .actions { display: grid; grid-template-columns: 1fr 1fr; }
+  .actions button:first-child { grid-column: 1 / -1; }
+  .role-picker button { min-height: 2.6rem; }
+  .actions > button { min-height: 2.6rem !important; }
+}
+
+@media (max-width: 380px) {
+  .role-picker { grid-template-columns: 1fr; }
+}

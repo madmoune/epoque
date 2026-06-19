@@ -106,6 +106,12 @@ export class HomePage {
           tag: 'Chemin',
         },
         {
+          title: 'Chevaliers et menteurs',
+          description: 'Déduis qui dit toujours vrai et qui ment toujours.',
+          route: '/knights-and-knaves',
+          tag: 'Logique',
+        },
+        {
           title: 'Dé logique',
           description: 'Suis le parcours d’un dé et retrouve le dernier symbole.',
           route: '/dice',
