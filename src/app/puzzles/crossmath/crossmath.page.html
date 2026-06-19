@@ -1,8 +1,8 @@
 <main class="page">
-  <a routerLink="/" class="back-link">← Le menu par ici</a>
+  <a routerLink="/" class="back-link">← Retour au menu</a>
 
   <section class="card">
-    <p class="eyebrow">Crossmath</p>
+    <p class="eyebrow">Calcul croisé</p>
     <h1>Complète la grille</h1>
     <p class="intro">
       Utilise seulement les chiffres de 1 à 9. Les équations se calculent dans l'ordre où on les
@@ -118,14 +118,19 @@
         >
           Indice
         </button>
-        <button type="button" class="secondary-button" (click)="resetGrid()">Reset</button>
+        <button type="button" class="secondary-button" (click)="resetGrid()">Recommencer</button>
         <button type="button" class="secondary-button" (click)="newPuzzle()">
           Nouvelle grille
         </button>
       </div>
 
       @if (isCorrect()) {
-        <p class="success" role="status">Grille résolue! Toutes les équations fonctionnent.</p>
+        <app-puzzle-success-popup
+          title="Grille résolue!"
+          message="Toutes les équations fonctionnent."
+          actionLabel="Nouvelle grille"
+          (action)="newPuzzle()"
+        />
       }
 
       @if (hasChecked() && !isCorrect()) {

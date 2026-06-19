@@ -1,0 +1,15 @@
+<section class="success-popup" [class.partial]="tone === 'partial'" role="alert" aria-live="assertive">
+  <span class="success-icon" aria-hidden="true">{{ tone === 'partial' ? '!' : '✓' }}</span>
+  <span class="success-copy">
+    <strong>{{ title }}</strong>
+    @if (message) {
+      <span>{{ message }}</span>
+    }
+    @if (answer) {
+      <span class="success-answer">{{ answer }}</span>
+    }
+  </span>
+  @if (showAction) {
+    <button type="button" (click)="action.emit()">{{ actionLabel }}</button>
+  }
+</section>

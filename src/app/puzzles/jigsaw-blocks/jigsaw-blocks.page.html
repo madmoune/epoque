@@ -1,25 +1,25 @@
 <main class="page">
-    <a routerLink="/" class="back-link">← Déguerpi!</a>
+    <a routerLink="/" class="back-link">← Retour au menu</a>
 
     <section class="card">
         <header class="header">
-            <p class="eyebrow">Casse-bloques</p>
-            <h1>Casse-tête en pyramide</h1>
+            <p class="eyebrow">Chemins</p>
+            <h1>Complète la pyramide</h1>
             <p class="instructions">
-                Place les bloques pour compléter la ligne.
+                Place les pièces pour former un chemin continu dans la pyramide.
             </p>
         </header>
 
         <section class="game-layout">
             <div class="puzzle-panel">
-                <div class="pyramid-board" aria-label="Pathways pyramid puzzle">
+                <div class="pyramid-board" aria-label="Casse-tête de chemins en pyramide">
                     @for (row of [0, 1, 2, 3]; track row) {
                     <div class="pyramid-row">
                         @for (slot of puzzle().slots; track slot.id) {
                         @if (slot.row === row) {
                         <button type="button" data-pathway-slot="true" [attr.data-slot-id]="slot.id"
                             [class]="slotClasses(slot)" (click)="handleSlotClick(slot, $event)"
-                            [attr.aria-label]="'Pyramid slot ' + slot.id">
+                            [attr.aria-label]="'Emplacement de pyramide ' + slot.id">
                             @if (getTileForSlot(slot.id); as tile) {
                             @if (getPlacedTileForSlot(slot.id); as placedTile) {
                             <svg viewBox="0 0 100 100" aria-hidden="true" class="path-svg">
@@ -57,14 +57,14 @@
                 }
             </div>
 
-            <aside class="tile-tray" aria-label="Available pathway tiles">
+            <aside class="tile-tray" aria-label="Pièces de chemin disponibles">
                 <h2>Pièces</h2>
 
                 <div class="tile-list">
                     @for (tile of unplacedTiles(); track tile.id) {
                     <button type="button" class="tile-button" [class.selected]="selectedTileId() === tile.id"
                         (pointerdown)="startTileDrag(tile.id, $event)" (click)="selectTile(tile.id, $event)"
-                        [attr.aria-label]="'Drag ' + tile.name">
+                        [attr.aria-label]="'Déplacer ' + tile.name">
                         <svg viewBox="0 0 100 100" aria-hidden="true" class="path-svg">
                             <g [attr.transform]="
                     svgRotationTransform(tileRotation(tile.id))
@@ -80,7 +80,7 @@
 
         <div class="actions">
             <button type="button" class="secondary-button" (click)="rotateSelectedTile()" [disabled]="!selectedTile()">
-                Rotationne
+                Pivoter
             </button>
 
             <button type="button" class="secondary-button" (click)="placeHintTile()"
@@ -98,9 +98,12 @@
         </div>
 
         @if (isSolved()) {
-        <p class="success" role="status">
-            Bravo, t'es pas pire-amide!
-        </p>
+        <app-puzzle-success-popup
+            title="Chemin complété!"
+            message="Toutes les connexions forment un chemin continu."
+            actionLabel="Nouveau puzzle"
+            (action)="newPuzzle()"
+        />
         }
     </section>
 

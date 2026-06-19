@@ -23,6 +23,16 @@
   }
 </form>
 
+@if (popupAttempt(); as attempt) {
+  <app-puzzle-success-popup
+    [title]="popupTitle(attempt)"
+    [message]="popupMessage(attempt)"
+    [answer]="attempt.answer"
+    [tone]="attempt.result.status === 'partial' ? 'partial' : 'success'"
+    [showAction]="false"
+  />
+}
+
 @if (attempts().length > 0) {
   <section class="answer-log" aria-label="Réponses essayées">
     @for (attempt of attempts(); track attempt.id) {

@@ -68,7 +68,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      step > 0 ? `Add ${step} each time.` : `Subtract ${Math.abs(step)} each time.`,
+      step > 0 ? `Ajoute ${step} chaque fois.` : `Soustrais ${Math.abs(step)} chaque fois.`,
     );
   }
 
@@ -79,7 +79,7 @@ export class SequencesService {
 
     const sequence = Array.from({ length }, (_, index) => start * multiplier ** index);
 
-    return this.createPuzzleFromSequence(sequence, `Multiply by ${multiplier} each time.`);
+    return this.createPuzzleFromSequence(sequence, `Multiplie par ${multiplier} chaque fois.`);
   }
 
   private createIncreasingDifferenceSequence(): MathSequencePuzzle {
@@ -100,7 +100,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `The differences are ${differences.slice(0, 4).join(', ')}... They increase by ${increase}.`,
+      `Les écarts sont ${differences.slice(0, 4).join(', ')}... Ils augmentent de ${increase}.`,
     );
   }
 
@@ -122,7 +122,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `The subtractions are ${differences.slice(0, 4).join(', ')}... They decrease by ${decrease}.`,
+      `Les soustractions sont ${differences.slice(0, 4).join(', ')}... Elles diminuent de ${decrease}.`,
     );
   }
 
@@ -142,7 +142,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `Alternate operations: add ${addAmount}, then subtract ${subtractAmount}.`,
+      `Alterne les opérations : ajoute ${addAmount}, puis soustrais ${subtractAmount}.`,
     );
   }
 
@@ -162,7 +162,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `Alternate operations: multiply by ${multiplier}, then add ${addAmount}.`,
+      `Alterne les opérations : multiplie par ${multiplier}, puis ajoute ${addAmount}.`,
     );
   }
 
@@ -180,7 +180,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `Each step: multiply by ${multiplier}, then add ${addAmount}.`,
+      `À chaque étape : multiplie par ${multiplier}, puis ajoute ${addAmount}.`,
     );
   }
 
@@ -198,7 +198,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `Each step: multiply by ${multiplier}, then subtract ${subtractAmount}.`,
+      `À chaque étape : multiplie par ${multiplier}, puis soustrais ${subtractAmount}.`,
     );
   }
 
@@ -221,7 +221,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `Look at alternating positions. Positions 1, 3, 5... change by ${firstStep}. Positions 2, 4, 6... change by ${secondStep}.`,
+      `Observe les positions alternées. Les positions 1, 3, 5... changent de ${firstStep}. Les positions 2, 4, 6... changent de ${secondStep}.`,
     );
   }
 
@@ -244,7 +244,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `Look at alternating positions. Positions 1, 3, 5... add ${firstStep}. Positions 2, 4, 6... multiply by ${secondMultiplier}.`,
+      `Observe les positions alternées. Aux positions 1, 3, 5..., ajoute ${firstStep}. Aux positions 2, 4, 6..., multiplie par ${secondMultiplier}.`,
     );
   }
 
@@ -269,7 +269,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `Alternating positions combine two rules: one arithmetic sequence adds ${arithmeticStep}, the other uses square numbers with ${squareOffset} added.`,
+      `Les positions alternées suivent deux règles : une suite arithmétique ajoute ${arithmeticStep}, l’autre utilise des carrés auxquels on ajoute ${squareOffset}.`,
     );
   }
 
@@ -292,7 +292,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `Mostly add ${baseStep}, but every ${cycleLength}rd step gets an extra ${boost}. Differences: ${differences.slice(0, 6).join(', ')}...`,
+      `Ajoute surtout ${baseStep}, mais toutes les ${cycleLength} étapes, ajoute aussi ${boost}. Écarts : ${differences.slice(0, 6).join(', ')}...`,
     );
   }
 
@@ -309,7 +309,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      'Each number is the sum of the two previous numbers.',
+      'Chaque nombre est la somme des deux nombres précédents.',
     );
   }
 
@@ -331,7 +331,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      'Each number is the sum of the three previous numbers.',
+      'Chaque nombre est la somme des trois nombres précédents.',
     );
   }
 
@@ -348,8 +348,8 @@ export class SequencesService {
     return this.createPuzzleFromSequence(
       sequence,
       offset === 0
-        ? `These are square numbers starting at ${start}².`
-        : `These are square numbers starting at ${start}², with ${offset} added.`,
+        ? `Ce sont des nombres carrés à partir de ${start}².`
+        : `Ce sont des nombres carrés à partir de ${start}², auxquels on ajoute ${offset}.`,
     );
   }
 
@@ -366,8 +366,8 @@ export class SequencesService {
     return this.createPuzzleFromSequence(
       sequence,
       offset === 0
-        ? `These are cube numbers starting at ${start}³.`
-        : `These are cube numbers starting at ${start}³, with ${offset} added.`,
+        ? `Ce sont des nombres cubiques à partir de ${start}³.`
+        : `Ce sont des nombres cubiques à partir de ${start}³, auxquels on ajoute ${offset}.`,
     );
   }
 
@@ -384,8 +384,8 @@ export class SequencesService {
     return this.createPuzzleFromSequence(
       sequence,
       offset === 0
-        ? `These are triangular numbers starting at T${start}.`
-        : `These are triangular numbers starting at T${start}, with ${offset} added.`,
+        ? `Ce sont des nombres triangulaires à partir de T${start}.`
+        : `Ce sont des nombres triangulaires à partir de T${start}, auxquels on ajoute ${offset}.`,
     );
   }
 
@@ -405,7 +405,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `The differences are prime numbers: ${usedSteps.slice(0, 5).join(', ')}...`,
+      `Les écarts sont des nombres premiers : ${usedSteps.slice(0, 5).join(', ')}...`,
     );
   }
 
@@ -425,7 +425,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `The differences are square numbers: ${usedSteps.slice(0, 5).join(', ')}...`,
+      `Les écarts sont des nombres carrés : ${usedSteps.slice(0, 5).join(', ')}...`,
     );
   }
 
@@ -442,7 +442,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `The differences repeat in this cycle: ${steps.join(', ')}.`,
+      `Les écarts se répètent selon ce cycle : ${steps.join(', ')}.`,
     );
   }
 
@@ -459,7 +459,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `Each step: double the previous number, then subtract ${subtractAmount}.`,
+      `À chaque étape : double le nombre précédent, puis soustrais ${subtractAmount}.`,
     );
   }
 
@@ -479,7 +479,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `The differences are increasing odd numbers: ${differences.slice(0, 5).join(', ')}...`,
+      `Les écarts sont des nombres impairs croissants : ${differences.slice(0, 5).join(', ')}...`,
     );
   }
 
@@ -499,7 +499,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `The differences are increasing even numbers: ${differences.slice(0, 5).join(', ')}...`,
+      `Les écarts sont des nombres pairs croissants : ${differences.slice(0, 5).join(', ')}...`,
     );
   }
 
@@ -519,7 +519,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `The multipliers alternate: ×${firstMultiplier}, then ×${secondMultiplier}.`,
+      `Les multiplicateurs alternent : ×${firstMultiplier}, puis ×${secondMultiplier}.`,
     );
   }
 
@@ -538,8 +538,8 @@ export class SequencesService {
     return this.createPuzzleFromSequence(
       sequence,
       addAmount === 0
-        ? 'Multiply by 2, then 3, then 4, then 5...'
-        : `Multiply by 2, then 3, then 4, then 5... and add ${addAmount} each time.`,
+        ? 'Multiplie par 2, puis 3, puis 4, puis 5...'
+        : `Multiplie par 2, puis 3, puis 4, puis 5... et ajoute ${addAmount} chaque fois.`,
     );
   }
 
@@ -556,7 +556,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `For each position n, combine n² with ${multiplier} × n, then add ${offset}.`,
+      `Pour chaque position n, combine n² avec ${multiplier} × n, puis ajoute ${offset}.`,
     );
   }
 
@@ -568,7 +568,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      offset === 0 ? 'These are powers of 2.' : `These are powers of 2, with ${offset} added.`,
+      offset === 0 ? 'Ce sont des puissances de 2.' : `Ce sont des puissances de 2, auxquelles on ajoute ${offset}.`,
     );
   }
 
@@ -580,7 +580,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `These are powers of 3, with ${subtractAmount} subtracted.`,
+      `Ce sont des puissances de 3, auxquelles on soustrait ${subtractAmount}.`,
     );
   }
 
@@ -596,7 +596,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `For each position n, calculate ${factor} × n, then add ${offset}.`,
+      `Pour chaque position n, calcule ${factor} × n, puis ajoute ${offset}.`,
     );
   }
 
@@ -615,7 +615,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `Add square-number steps: ${differences.slice(0, 5).join(', ')}...`,
+      `Ajoute des écarts carrés : ${differences.slice(0, 5).join(', ')}...`,
     );
   }
 
@@ -634,7 +634,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `Add cube-number steps: ${differences.join(', ')}...`,
+      `Ajoute des écarts cubiques : ${differences.join(', ')}...`,
     );
   }
 
@@ -656,7 +656,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `The differences alternate between primes and squares: ${differences.slice(0, 6).join(', ')}...`,
+      `Les écarts alternent entre nombres premiers et carrés : ${differences.slice(0, 6).join(', ')}...`,
     );
   }
 
@@ -679,7 +679,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `Alternating positions multiply separately: one by ${firstMultiplier}, the other by ${secondMultiplier}.`,
+      `Les positions alternées se multiplient séparément : l’une par ${firstMultiplier}, l’autre par ${secondMultiplier}.`,
     );
   }
 
@@ -697,7 +697,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `Each number is the sum of the two previous numbers, plus ${addAmount}.`,
+      `Chaque nombre est la somme des deux nombres précédents, plus ${addAmount}.`,
     );
   }
 
@@ -714,7 +714,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      'Each number is twice the difference between the two previous numbers.',
+      'Chaque nombre vaut deux fois l’écart entre les deux nombres précédents.',
     );
   }
 
@@ -729,7 +729,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `Each step divides by 2, rounds down, then adds ${addAmount}.`,
+      `À chaque étape, divise par 2, arrondis vers le bas, puis ajoute ${addAmount}.`,
     );
   }
 
@@ -748,7 +748,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `Multiply by increasing numbers: ${multipliers.join(', ')}...`,
+      `Multiplie par des nombres croissants : ${multipliers.join(', ')}...`,
     );
   }
 
@@ -768,7 +768,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `The differences double each time: ${differences.slice(0, 5).join(', ')}...`,
+      `Les écarts doublent chaque fois : ${differences.slice(0, 5).join(', ')}...`,
     );
   }
 
@@ -781,7 +781,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `Add ${step} each time. The sequence starts below zero.`,
+      `Ajoute ${step} chaque fois. La suite commence sous zéro.`,
     );
   }
 
@@ -802,7 +802,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `Alternate operations: subtract ${subtractAmount} and take the absolute value, then add ${addAmount}.`,
+      `Alterne les opérations : soustrais ${subtractAmount} et prends la valeur absolue, puis ajoute ${addAmount}.`,
     );
   }
 
@@ -818,8 +818,8 @@ export class SequencesService {
     return this.createPuzzleFromSequence(
       sequence,
       offset === 0
-        ? 'For each position n, calculate n × (n + 1).'
-        : `For each position n, calculate n × (n + 1), then add ${offset}.`,
+        ? 'Pour chaque position n, calcule n × (n + 1).'
+        : `Pour chaque position n, calcule n × (n + 1), puis ajoute ${offset}.`,
     );
   }
 
@@ -834,7 +834,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `For each n starting at ${start}, calculate n² - n.`,
+      `Pour chaque n à partir de ${start}, calcule n² - n.`,
     );
   }
 
@@ -849,7 +849,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `For each n starting at ${start}, calculate n³ - n².`,
+      `Pour chaque n à partir de ${start}, calcule n³ - n².`,
     );
   }
 
@@ -865,7 +865,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `The absolute value increases by ${step}, and the sign alternates positive, negative, positive...`,
+      `La valeur absolue augmente de ${step} et le signe alterne : positif, négatif, positif...`,
     );
   }
 
@@ -895,7 +895,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `The operations alternate and grow: ${operations.slice(0, 6).join(', ')}...`,
+      `Les opérations alternent et augmentent : ${operations.slice(0, 6).join(', ')}...`,
     );
   }
 
@@ -916,7 +916,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `Each step multiplies by ${multiplier}, then adds a growing offset: ${offsets.slice(0, 5).join(', ')}...`,
+      `Chaque étape multiplie par ${multiplier}, puis ajoute une valeur croissante : ${offsets.slice(0, 5).join(', ')}...`,
     );
   }
 
@@ -945,7 +945,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `Alternating positions follow two rules: Fibonacci-like values, then square numbers with ${squareOffset} added.`,
+      `Les positions alternées suivent deux règles : des valeurs de type Fibonacci, puis des carrés auxquels on ajoute ${squareOffset}.`,
     );
   }
 
@@ -964,7 +964,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      'Each number is the difference between the two previous numbers, plus its position.',
+      'Chaque nombre est l’écart entre les deux nombres précédents, plus sa position.',
     );
   }
 
@@ -989,7 +989,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `Look at the differences, then their differences. The second differences cycle: ${secondDifferenceCycle.join(', ')}.`,
+      `Observe les écarts, puis les écarts entre ceux-ci. Les écarts de second niveau suivent ce cycle : ${secondDifferenceCycle.join(', ')}.`,
     );
   }
 

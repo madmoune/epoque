@@ -1,12 +1,12 @@
 <main class="page">
-    <a routerLink="/" class="back-link">← Le menu par ici</a>
+    <a routerLink="/" class="back-link">← Retour au menu</a>
 
     <section class="card">
         <p class="eyebrow">Séquences</p>
         <h1>Trouve le bon nombre</h1>
 
         <section class="puzzle-area">
-            <div class="number-sequence" aria-label="Math sequence">
+            <div class="number-sequence" aria-label="Suite mathématique">
                 @for (value of puzzle().sequence; track $index) {
                 <div class="number-card" [class.missing]="$index === puzzle().missingIndex">
                     @if ($index === puzzle().missingIndex) {
@@ -18,12 +18,12 @@
                 }
             </div>
 
-            <label class="answer-label" for="math-answer">
-                Ta réponse
-            </label>
-
-            <input id="math-answer" type="number" inputmode="numeric" [value]="mathAnswer()"
-                (input)="updateMathAnswer($event)" [disabled]="isCorrect()" autocomplete="off" />
+            <div class="answer-field-group">
+                <label class="answer-label" for="math-answer">Ta réponse</label>
+                <input id="math-answer" class="answer-input" type="number" inputmode="numeric"
+                    [value]="mathAnswer()" (input)="updateMathAnswer($event)" [disabled]="isCorrect()"
+                    autocomplete="off" />
+            </div>
 
             <div class="actions">
                 <button type="button" class="secondary-button" (click)="showHint()">
@@ -41,26 +41,29 @@
 
             @if (isHintVisible()) {
             <p class="hint" role="status">
-                Hint: {{ puzzle().hint }}
+                Indice : {{ puzzle().hint }}
             </p>
             }
 
             @if (isAnswerHintVisible()) {
             <div class="answer-hint" role="status">
-                <strong>Answer:</strong>
+                <strong>Réponse :</strong>
                 <span>{{ puzzle().answer }}</span>
             </div>
             }
 
             @if (isCorrect()) {
-            <p class="success" role="status">
-                Correcte!
-            </p>
+            <app-puzzle-success-popup
+                title="Séquence résolue!"
+                message="Le nombre manquant est correct."
+                actionLabel="Prochaine séquence"
+                (action)="nextPuzzle()"
+            />
             }
 
             @if (isIncorrect()) {
             <p class="error" role="status">
-                Ben non c'pas ça.
+                Réponse incorrecte.
             </p>
             }
         </section>

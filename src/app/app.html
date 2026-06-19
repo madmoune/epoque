@@ -1,1 +1,11 @@
+<button
+  type="button"
+  class="theme-toggle"
+  (click)="toggleTheme()"
+  [attr.aria-label]="theme() === 'dark' ? 'Activer le thème clair' : 'Activer le thème sombre'"
+  [attr.title]="theme() === 'dark' ? 'Thème clair' : 'Thème sombre'"
+>
+  <span aria-hidden="true">{{ theme() === 'dark' ? '☀' : '☾' }}</span>
+</button>
+
 <router-outlet />

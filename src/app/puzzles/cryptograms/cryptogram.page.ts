@@ -14,10 +14,11 @@ import {
     CryptogramPuzzle,
 } from '../../puzzles/cryptograms/cryptogram.model';
 import { CryptogramService } from '../../puzzles/cryptograms/cryptogram.service';
+import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
 
 @Component({
     selector: 'app-cryptograms-page',
-    imports: [FormsModule, RouterLink],
+    imports: [FormsModule, RouterLink, PuzzleSuccessPopupComponent],
     templateUrl: './cryptogram.page.html',
     styleUrl: './cryptogram.page.scss',
 })
@@ -129,8 +130,8 @@ export class CryptogramsPage {
             await this.cryptogramService.loadSentences();
             this.nextPuzzle();
         } catch (error) {
-            console.error('Could not load cryptogram sentences:', error);
-            this.loadError.set('Could not load the cryptogram sentence list.');
+            console.error('Impossible de charger les phrases du cryptogramme :', error);
+            this.loadError.set('Impossible de charger les phrases du cryptogramme.');
         } finally {
             this.isLoading.set(false);
         }

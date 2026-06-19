@@ -1,11 +1,12 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
 import { MathSequencePuzzle } from '../../puzzles/sequences/sequences.model';
 import { SequencesService } from '../../puzzles/sequences/sequences.service';
 
 @Component({
     selector: 'app-sequences-page',
-    imports: [RouterLink],
+    imports: [RouterLink, PuzzleSuccessPopupComponent],
     templateUrl: './sequences.page.html',
     styleUrl: './sequences.page.scss',
 })

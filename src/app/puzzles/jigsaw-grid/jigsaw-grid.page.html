@@ -1,12 +1,12 @@
 <main class="page">
-    <a routerLink="/" class="back-link">← Retour vers le futur de l'époque</a>
+    <a routerLink="/" class="back-link">← Retour au menu</a>
 
     <section class="card">
         <p class="eyebrow">Casse-Grille</p>
         <h1>Place les pièces</h1>
 
         <p class="instructions">
-            Placer les pièces pour compléter la grille.
+            Place toutes les pièces pour compléter la grille.
         </p>
 
         <div class="game-layout">
@@ -27,7 +27,7 @@
                             }
                         </div>
 
-                        <div class="jigsaw-board" aria-label="Jigsaw grid" (pointerleave)="clearHoveredAnchor()">
+                        <div class="jigsaw-board" aria-label="Grille du casse-tête" (pointerleave)="clearHoveredAnchor()">
                             @for (cell of boardCells(); track cell.row + '-' + cell.column) {
                             <button type="button" data-board-cell="true" [attr.data-row]="cell.row"
                                 [attr.data-column]="cell.column" [class]="boardCellClasses(cell)" (pointerenter)="
@@ -35,7 +35,7 @@
                   " (pointermove)="
                     setHoveredAnchor({ row: cell.row, column: cell.column })
                   " (click)="handleBoardCellClick(cell, $event)" [attr.aria-label]="
-                    'Row ' + (cell.row + 1) + ', column ' + (cell.column + 1)
+                    'Ligne ' + (cell.row + 1) + ', colonne ' + (cell.column + 1)
                   ">
                                 @if (cell.isBlocked) {
                                 ×
@@ -56,7 +56,7 @@
 
                 @if (selectedPiece(); as piece) {
                 <div class="selected-info">
-                    Selected: <strong>{{ piece.name }}</strong>
+                    Sélection : <strong>{{ piece.name }}</strong>
                 </div>
                 } @else {
                 <div class="selected-info">
@@ -65,13 +65,13 @@
                 }
             </div>
 
-            <aside class="piece-tray" aria-label="Pieces to place">
+            <aside class="piece-tray" aria-label="Pièces à placer">
                 <h2>Pièces à placer</h2>
 
                 <div class="piece-list">
                     @for (piece of unplacedPieces(); track piece.id) {
                     <button type="button" class="piece-button" [class.selected]="selectedPieceId() === piece.id"
-                        (pointerdown)="startPieceDrag(piece.id, $event)" [attr.aria-label]="'Drag ' + piece.name">
+                        (pointerdown)="startPieceDrag(piece.id, $event)" [attr.aria-label]="'Déplacer ' + piece.name">
                         <span class="piece-preview" [style.gridTemplateColumns]="
                   'repeat(' + previewGridSize(piece) + ', 1fr)'
                 " [style.gridTemplateRows]="
@@ -104,7 +104,7 @@
             </button>
 
             <button type="button" class="secondary-button" (click)="resetPuzzle()">
-                Reset
+                Recommencer
             </button>
 
             <button type="button" (click)="newPuzzle()">
@@ -113,9 +113,12 @@
         </div>
 
         @if (isSolved()) {
-        <p class="success" role="status">
-            Incroyable!
-        </p>
+        <app-puzzle-success-popup
+            title="Puzzle complété!"
+            message="Toutes les pièces sont correctement placées."
+            actionLabel="Nouveau puzzle"
+            (action)="newPuzzle()"
+        />
         }
     </section>
 

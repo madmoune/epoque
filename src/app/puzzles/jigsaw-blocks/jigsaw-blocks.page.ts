@@ -8,6 +8,7 @@ import {
     PlacedPathwayTile,
 } from '../../puzzles/jigsaw-blocks/jigsaw-blocks.model';
 import { PathwaysService } from '../../puzzles/jigsaw-blocks/jigsaw-blocks.service';
+import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
 
 type DragPosition = {
     x: number;
@@ -23,7 +24,7 @@ type Point = {
 
 @Component({
     selector: 'app-pathways-page',
-    imports: [RouterLink],
+    imports: [RouterLink, PuzzleSuccessPopupComponent],
     templateUrl: './jigsaw-blocks.page.html',
     styleUrl: './jigsaw-blocks.page.scss',
 })
@@ -269,7 +270,7 @@ export class PathwaysPage {
 
         if (!hintPlacement) {
             this.errorMessage.set(
-                'No hint is available. Try moving one of your placed tiles.',
+                'Aucun indice n’est disponible. Essaie de déplacer une pièce déjà placée.',
             );
             return;
         }

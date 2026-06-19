@@ -1,5 +1,6 @@
 import { Component, computed, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { PuzzleSuccessPopupComponent } from '../../shared/puzzle-success-popup/puzzle-success-popup.component';
 
 type Player = 'human' | 'cpu';
 
@@ -14,7 +15,7 @@ type PendingRemoval = NimMove & {
 
 @Component({
   selector: 'app-nim-page',
-  imports: [RouterLink],
+  imports: [RouterLink, PuzzleSuccessPopupComponent],
   templateUrl: './nim.page.html',
   styleUrl: './nim.page.scss',
 })
@@ -28,7 +29,16 @@ export class NimPage {
   protected readonly pendingRemoval = signal<PendingRemoval | null>(null);
 
   protected readonly nimSum = computed(() => this.calculateNimSum(this.piles()));
-  protected readonly nimSumBinary = computed(() => this.nimSum().toString(2));
+  protected readonly binaryWidth = computed(() =>
+    Math.max(1, ...this.piles(), this.nimSum()).toString(2).length,
+  );
+  protected readonly binaryRows = computed(() =>
+    this.piles().map((size) => ({
+      size,
+      binary: this.toBinary(size),
+    })),
+  );
+  protected readonly nimSumBinary = computed(() => this.toBinary(this.nimSum()));
   protected readonly isHumanTurn = computed(
     () => this.turn() === 'human' && !this.winner() && !this.pendingRemoval(),
   );
@@ -73,7 +83,7 @@ export class NimPage {
     const winner = this.winner();
 
     if (winner === 'human') {
-      return 'Tu as pris la dernière pierre. Bien joué.';
+      return 'Tu as pris la dernière pierre et remporté la partie.';
     }
 
     if (winner === 'cpu') {
@@ -83,11 +93,28 @@ export class NimPage {
     return '';
   });
   protected readonly hintText = computed(() => {
-    if (!this.bestMove()) {
+    const move = this.bestMove();
+
+    if (!move) {
       return 'Aucun coup gagnant forcé ici. Retire peu et attends une erreur du CPU.';
     }
 
-    return 'Clique la pierre mise en évidence pour ramener le XOR à 0.';
+    const currentSize = this.piles()[move.pileIndex];
+    const targetSize = currentSize - move.removeCount;
+
+    return `Dans le tas de ${currentSize} pierres, retire ${move.removeCount} pierre${move.removeCount > 1 ? 's' : ''} pour en laisser ${targetSize}.`;
+  });
+  protected readonly hintFormula = computed(() => {
+    const move = this.bestMove();
+
+    if (!move) {
+      return null;
+    }
+
+    const currentSize = this.piles()[move.pileIndex];
+    const targetSize = currentSize - move.removeCount;
+
+    return `${currentSize} XOR ${this.nimSum()} = ${targetSize}`;
   });
 
   constructor() {
@@ -286,6 +313,10 @@ export class NimPage {
 
   private calculateNimSum(piles: number[]): number {
     return piles.reduce((nimSum, pile) => nimSum ^ pile, 0);
+  }
+
+  private toBinary(value: number): string {
+    return value.toString(2).padStart(this.binaryWidth(), '0');
   }
 
   private createPiles(): number[] {

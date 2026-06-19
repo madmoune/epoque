@@ -1,5 +1,5 @@
 <main class="page">
-    <a routerLink="/" class="back-link">← Retour à la sélection des jeux</a>
+    <a routerLink="/" class="back-link">← Retour au menu</a>
 
     <section class="card">
         <p class="eyebrow">Grille mémoire</p>
@@ -68,18 +68,17 @@
 
         @if (isGridComplete() && !isSolved()) {
         <p class="error" role="status">
-            Pas tout à fait. {{ correctCellCount() }} cases sur 9 sont correctes.
+            Grille incorrecte : {{ correctCellCount() }} cases sur 9 sont correctes.
         </p>
         }
 
         @if (isSolved()) {
-        <p class="success" role="status">
-            Bravo! Tu as reconstruit toute la grille.
-        </p>
-
-        <button type="button" (click)="nextPuzzle()">
-            Grille suivante
-        </button>
+        <app-puzzle-success-popup
+            title="Grille reconstruite!"
+            message="Toutes les cases correspondent à la grille mémorisée."
+            actionLabel="Grille suivante"
+            (action)="nextPuzzle()"
+        />
         }
 
         @if (isPickerOpen() && selectedCell(); as cell) {
@@ -134,12 +133,12 @@
         }
         }
 
-        <section class="mnemonic-legend" aria-labelledby="mnemonic-title">
-            <h2 id="mnemonic-title">Légende mnémotechnique</h2>
+        <details class="mnemonic-legend">
+            <summary id="mnemonic-title">Légende mnémotechnique</summary>
 
             <div class="legend-grid">
-                <section class="legend-card">
-                    <h3>Couleurs</h3>
+                <details class="legend-card">
+                    <summary>Couleurs</summary>
 
                     <div class="legend-table-wrapper">
                         <table>
@@ -164,10 +163,10 @@
                             </tbody>
                         </table>
                     </div>
-                </section>
+                </details>
 
-                <section class="legend-card">
-                    <h3>Formes</h3>
+                <details class="legend-card">
+                    <summary>Formes</summary>
 
                     <div class="legend-table-wrapper">
                         <table>
@@ -192,10 +191,10 @@
                             </tbody>
                         </table>
                     </div>
-                </section>
+                </details>
 
-                <section class="legend-card memory-palace-card">
-                    <h3>Palais mental</h3>
+                <details class="legend-card memory-palace-card">
+                    <summary>Palais mental</summary>
 
                     <div class="legend-table-wrapper">
                         <table>
@@ -216,8 +215,8 @@
                             </tbody>
                         </table>
                     </div>
-                </section>
+                </details>
             </div>
-        </section>
+        </details>
     </section>
 </main>

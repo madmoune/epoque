@@ -1,5 +1,6 @@
 import { Component, computed, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
 
 type LatinSquareSize = 4 | 5;
 
@@ -17,7 +18,7 @@ type LatinSquarePuzzle = {
 
 @Component({
   selector: 'app-latin-square-page',
-  imports: [RouterLink],
+  imports: [RouterLink, PuzzleSuccessPopupComponent],
   templateUrl: './latin-square.page.html',
   styleUrl: './latin-square.page.scss',
 })

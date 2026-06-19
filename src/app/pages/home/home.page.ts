@@ -76,13 +76,13 @@ export class HomePage {
           tag: 'Nombres',
         },
         {
-          title: 'Crossmath',
+          title: 'Calcul croisé',
           description: 'Complète une grille où les lignes et les colonnes forment des équations.',
           route: '/crossmath',
           tag: 'Calcul',
         },
         {
-          title: 'Latin square',
+          title: 'Carré latin',
           description: 'Place chaque chiffre une seule fois par ligne et par colonne.',
           route: '/latin-square',
           tag: 'Logique',

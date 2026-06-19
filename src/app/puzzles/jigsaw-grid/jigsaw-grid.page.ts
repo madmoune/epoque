@@ -7,6 +7,7 @@ import {
     PlacedJigsawPiece,
 } from '../../puzzles/jigsaw-grid/jigsaw-grid.model';
 import { JigsawGridService } from '../../puzzles/jigsaw-grid/jigsaw-grid.service';
+import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
 
 type BoardCell = {
     row: number;
@@ -26,7 +27,7 @@ type PieceRotationMap = Record<string, number>;
 
 @Component({
     selector: 'app-jigsaw-grid-page',
-    imports: [RouterLink],
+    imports: [RouterLink, PuzzleSuccessPopupComponent],
     templateUrl: './jigsaw-grid.page.html',
     styleUrl: './jigsaw-grid.page.scss',
 })
@@ -402,7 +403,7 @@ export class JigsawGridPage {
 
         if (!hintPlacement) {
             this.errorMessage.set(
-                'No hint is available. Try moving one of your placed pieces.',
+                'Aucun indice n’est disponible. Essaie de déplacer une pièce déjà placée.',
             );
             return;
         }

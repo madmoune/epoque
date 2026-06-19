@@ -1,0 +1,32 @@
+.theme-toggle {
+  position: fixed;
+  z-index: 200;
+  top: max(0.75rem, env(safe-area-inset-top));
+  right: max(0.75rem, env(safe-area-inset-right));
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  background: var(--surface-raised);
+  color: var(--accent);
+  box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 28%);
+  cursor: pointer;
+  touch-action: manipulation;
+
+  span {
+    font-size: 1.15rem;
+    line-height: 1;
+  }
+
+  &:hover {
+    border-color: var(--accent);
+  }
+
+  &:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--accent) 35%, transparent);
+    outline-offset: 2px;
+  }
+}

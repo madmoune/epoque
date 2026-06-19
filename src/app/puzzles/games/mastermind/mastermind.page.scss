@@ -68,17 +68,6 @@ h3 {
   background: #f2f2f2;
 }
 
-.success {
-  display: grid;
-  gap: 0.25rem;
-  margin-bottom: 1rem;
-  padding: 0.9rem;
-  border: 1px solid #7bc99a;
-  border-radius: 0.75rem;
-  background: #eefaf2;
-  color: #126334;
-}
-
 .play-area {
   display: grid;
   grid-template-columns: minmax(0, 24rem) minmax(0, 1fr);
@@ -466,4 +455,5 @@ button {
     overflow-y: auto;
     overscroll-behavior: contain;
   }
+
 }

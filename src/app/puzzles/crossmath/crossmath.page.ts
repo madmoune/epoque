@@ -1,6 +1,7 @@
 import { Component, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
 
 type CrossmathSize = 3 | 4;
 type CrossmathOperator = '+' | '-' | '×';
@@ -25,7 +26,7 @@ const CROSSMATH_DIGITS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 @Component({
   selector: 'app-crossmath-page',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, PuzzleSuccessPopupComponent],
   templateUrl: './crossmath.page.html',
   styleUrl: './crossmath.page.scss',
 })

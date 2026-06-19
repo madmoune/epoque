@@ -1,5 +1,5 @@
 <main class="page">
-    <a routerLink="/" class="back-link">← Retour à la sélection des jeux</a>
+    <a routerLink="/" class="back-link">← Retour au menu</a>
 
     <section class="card">
         <p class="eyebrow">Dé logique</p>
@@ -53,14 +53,17 @@
         </section>
 
         @if (isCorrect()) {
-        <p class="success" role="status">
-            Bravo! C’est la bonne réponse.
-        </p>
+        <app-puzzle-success-popup
+            title="Symbole trouvé!"
+            message="Le dernier symbole est correct."
+            actionLabel="Nouveau puzzle"
+            (action)="nextPuzzle()"
+        />
         }
 
         @if (isIncorrect()) {
         <p class="error" role="status">
-            Pas tout à fait. La bonne réponse était
+            Réponse incorrecte. La bonne réponse était
             {{ getSymbolLabel(puzzle().answerSymbolId) }}.
         </p>
         }

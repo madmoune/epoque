@@ -7,10 +7,11 @@ import {
     MnemonicPuzzle,
 } from '../../puzzles/mnemonic/mnemonic.model';
 import { MnemonicService } from '../../puzzles/mnemonic/mnemonic.service';
+import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
 
 @Component({
     selector: 'app-mnemonic-page',
-    imports: [RouterLink],
+    imports: [RouterLink, PuzzleSuccessPopupComponent],
     templateUrl: './mnemonic.page.html',
     styleUrl: './mnemonic.page.scss',
 })

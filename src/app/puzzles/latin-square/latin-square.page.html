@@ -1,8 +1,8 @@
 <main class="page">
-  <a routerLink="/" class="back-link">← Le menu par ici</a>
+  <a routerLink="/" class="back-link">← Retour au menu</a>
 
   <section class="card">
-    <p class="eyebrow">Latin square</p>
+    <p class="eyebrow">Carré latin</p>
     <h1>Complète le carré</h1>
     <p class="intro">
       Chaque ligne et chaque colonne doit contenir une seule fois chaque chiffre de
@@ -27,6 +27,15 @@
         5x5
       </button>
     </div>
+
+    @if (isSolved()) {
+      <app-puzzle-success-popup
+        title="Carré résolu!"
+        message="Chaque ligne et colonne est complète."
+        actionLabel="Nouvelle grille"
+        (action)="newPuzzle()"
+      />
+    }
 
     <section class="puzzle-area">
       <div
@@ -72,15 +81,11 @@
         >
           Indice
         </button>
-        <button type="button" class="secondary-button" (click)="resetGrid()">Reset</button>
+        <button type="button" class="secondary-button" (click)="resetGrid()">Recommencer</button>
         <button type="button" class="secondary-button" (click)="newPuzzle()">
           Nouvelle grille
         </button>
       </div>
-
-      @if (isSolved()) {
-        <p class="success" role="status">Carré résolu! Chaque ligne et colonne est complète.</p>
-      }
 
       @if (hasChecked() && !isSolved()) {
         <p class="error" role="status">Il reste au moins une ligne ou une colonne à corriger.</p>

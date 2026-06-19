@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, Output, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { PuzzleSuccessPopupComponent } from '../puzzle-success-popup/puzzle-success-popup.component';
 
 export type PuzzleAnswerStatus = 'correct' | 'incorrect' | 'partial';
 
@@ -24,7 +25,7 @@ export interface PuzzlePartialAnswer {
 
 @Component({
   selector: 'app-puzzle-answer',
-  imports: [FormsModule],
+  imports: [FormsModule, PuzzleSuccessPopupComponent],
   templateUrl: './puzzle-answer.component.html',
   styleUrl: './puzzle-answer.component.scss',
 })
@@ -36,8 +37,8 @@ export class PuzzleAnswerComponent {
   @Input() placeholder = '';
   @Input() submitLabel = 'Valider';
   @Input() emptyAnswerMessage = 'Entre une réponse avant de valider.';
-  @Input() correctText = 'Correct';
-  @Input() incorrectText = 'Incorrect';
+  @Input() correctText = 'Bonne réponse';
+  @Input() incorrectText = 'Mauvaise réponse';
   @Input() partialText = 'Partiel';
   @Input() lockOnCorrect = true;
   @Input() clearAfterSubmit = true;
@@ -52,6 +53,19 @@ export class PuzzleAnswerComponent {
     () =>
       this.lockOnCorrect && this.attempts().some((attempt) => attempt.result.status === 'correct'),
   );
+  protected readonly popupAttempt = computed(() => {
+    const latestAttempt = this.attempts()[0];
+
+    return latestAttempt && latestAttempt.result.status !== 'incorrect' ? latestAttempt : null;
+  });
+
+  protected popupTitle(attempt: PuzzleAnswerAttempt): string {
+    return attempt.result.status === 'correct' ? 'Énigme résolue!' : 'Réponse partielle';
+  }
+
+  protected popupMessage(attempt: PuzzleAnswerAttempt): string {
+    return attempt.result.message ?? this.statusText(attempt.result);
+  }
 
   private nextAttemptId = 1;
 

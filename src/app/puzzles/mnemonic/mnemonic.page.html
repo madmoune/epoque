@@ -1,5 +1,5 @@
 <main class="page">
-    <a routerLink="/" class="back-link">← Retour à la sélection des jeux</a>
+    <a routerLink="/" class="back-link">← Retour au menu</a>
 
     <section class="card">
         <p class="eyebrow">Mnémotechnique</p>
@@ -122,14 +122,17 @@
         }
 
         @if (isCorrect()) {
-        <p class="success" role="status">
-            Barvo! C’est la bonne réponse.
-        </p>
+        <app-puzzle-success-popup
+            title="Association correcte!"
+            message="L'association mnémotechnique est correcte."
+            actionLabel="Question suivante"
+            (action)="nextPuzzle()"
+        />
         }
 
         @if (isIncorrect()) {
         <p class="error" role="status">
-            Pas tout à fait.
+            Réponse incorrecte.
             La bonne réponse était :
             {{ mnemonicService.getColorLabel(puzzle().colorId) }},
             {{ mnemonicService.getShapeLabel(puzzle().shapeId) }},

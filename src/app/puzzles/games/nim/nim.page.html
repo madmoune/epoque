@@ -1,5 +1,5 @@
 <main class="page">
-  <a routerLink="/" class="back-link">← Le menu par ici</a>
+  <a routerLink="/" class="back-link">← Retour au menu</a>
 
   <section class="shell">
     <header class="hero">
@@ -9,6 +9,15 @@
         Clique une pierre pour retirer cette pierre et toutes celles qui suivent dans le même tas.
       </p>
     </header>
+
+    @if (winner() === 'human') {
+      <app-puzzle-success-popup
+        title="Victoire!"
+        message="Tu as pris la dernière pierre et remporté la partie."
+        actionLabel="Nouvelle partie"
+        (action)="newGame()"
+      />
+    }
 
     <section class="game-layout">
       <div class="board" aria-label="Jeu de Nim">
@@ -62,9 +71,35 @@
 
       <aside class="side-panel" aria-label="Analyse Nim">
         <div class="metric">
-          <span>XOR</span>
-          <strong>{{ nimSum() }}</strong>
-          <small>binaire {{ nimSumBinary() }}</small>
+          <div class="metric-heading">
+            <span>Somme XOR</span>
+            <strong>{{ nimSum() }}</strong>
+          </div>
+
+          <div class="xor-breakdown" aria-label="Calcul binaire du XOR">
+            <div class="xor-row xor-labels" aria-hidden="true">
+              <span>Pierres</span>
+              <span>Binaire</span>
+            </div>
+            @for (row of binaryRows(); track $index) {
+              <div class="xor-row">
+                <span>{{ row.size }}</span>
+                <code>{{ row.binary }}</code>
+              </div>
+            }
+            <div class="xor-row xor-total">
+              <span>XOR</span>
+              <code>{{ nimSumBinary() }}</code>
+            </div>
+          </div>
+
+          <p class="xor-explanation">
+            @if (nimSum() === 0) {
+              Le XOR est déjà à 0: aucun coup ne garantit l’avantage.
+            } @else {
+              Le XOR n’est pas 0: un coup peut le ramener à 0.
+            }
+          </p>
         </div>
 
         <button type="button" class="secondary-button" (click)="showHint()" [disabled]="!isHumanTurn()">
@@ -72,7 +107,14 @@
         </button>
 
         @if (hintVisible()) {
-          <p class="hint">{{ hintText() }}</p>
+          <div class="hint">
+            <strong>Coup conseillé</strong>
+            <p>{{ hintText() }}</p>
+            @if (hintFormula()) {
+              <code>{{ hintFormula() }}</code>
+              <small>Le tas surligné est celui à modifier.</small>
+            }
+          </div>
         }
 
         <button type="button" class="secondary-button" (click)="newGame()">Nouvelle partie</button>

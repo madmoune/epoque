@@ -7,6 +7,7 @@ import {
     PlayerMemoryGridCell,
 } from '../../puzzles/memory-grid/memory-grid.model';
 import { MemoryGridService } from '../../puzzles/memory-grid/memory-grid.service';
+import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
 
 type GamePhase = 'memorize' | 'play';
 
@@ -24,7 +25,7 @@ type MemoryPalaceLocation = {
 
 @Component({
     selector: 'app-memory-grid-page',
-    imports: [RouterLink],
+    imports: [RouterLink, PuzzleSuccessPopupComponent],
     templateUrl: './memory-grid.page.html',
     styleUrl: './memory-grid.page.scss',
 })

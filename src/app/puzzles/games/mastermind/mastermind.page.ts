@@ -1,5 +1,6 @@
 import { Component, computed, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { PuzzleSuccessPopupComponent } from '../../shared/puzzle-success-popup/puzzle-success-popup.component';
 import {
   MemoryGridColor,
   MemoryGridShape,
@@ -35,7 +36,7 @@ const CODE_LENGTH = 4;
 
 @Component({
   selector: 'app-mastermind-page',
-  imports: [RouterLink],
+  imports: [RouterLink, PuzzleSuccessPopupComponent],
   templateUrl: './mastermind.page.html',
   styleUrl: './mastermind.page.scss',
 })

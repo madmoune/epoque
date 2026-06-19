@@ -215,9 +215,12 @@ h1 {
     }
 
     .puzzle-tag {
-        min-width: 0;
+        width: 5.5rem;
+        min-width: 5.5rem;
+        box-sizing: border-box;
         padding: 0.2rem 0.45rem;
         font-size: 0.68rem;
+        text-align: center;
     }
 
     .play-link {

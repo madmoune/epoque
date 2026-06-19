@@ -6,10 +6,11 @@ import {
     PhrasePuzzle,
 } from '../../puzzles/phrases/phrase.model';
 import { PhraseService } from '../../puzzles/phrases/phrase.service';
+import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
 
 @Component({
     selector: 'app-phrases-page',
-    imports: [RouterLink, FormsModule],
+    imports: [RouterLink, FormsModule, PuzzleSuccessPopupComponent],
     templateUrl: './phrase.page.html',
     styleUrl: './phrase.page.scss',
 })
@@ -158,8 +159,8 @@ export class PhrasesPage {
             await this.phraseService.loadPhrases();
             this.nextPuzzle();
         } catch (error) {
-            console.error('Could not load phrases:', error);
-            this.loadError.set('Could not load the phrase list.');
+            console.error('Impossible de charger les phrases :', error);
+            this.loadError.set('Impossible de charger la liste de phrases.');
         } finally {
             this.isLoading.set(false);
         }

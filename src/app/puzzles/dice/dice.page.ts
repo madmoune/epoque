@@ -5,6 +5,7 @@ import {
     DiceSymbol,
 } from '../../puzzles/dice/dice.model';
 import { DiceService } from '../../puzzles/dice/dice.service';
+import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
 
 type ConnectionDirection = 'up' | 'down' | 'left' | 'right';
 
@@ -17,7 +18,7 @@ type CompactGridBounds = {
 
 @Component({
     selector: 'app-dice-page',
-    imports: [RouterLink],
+    imports: [RouterLink, PuzzleSuccessPopupComponent],
     templateUrl: './dice.page.html',
     styleUrl: './dice.page.scss',
 })

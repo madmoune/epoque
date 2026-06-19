@@ -3,13 +3,14 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AnagramService } from '../../puzzles/anagrams/anagram.service';
 import { AnagramWord } from '../../puzzles/anagrams/anagram-word.model';
+import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
 
 type LetterDisplayMode = 'default' | 'alphabetical' | 'vowelsFirst';
 type LetterLayoutMode = 'line' | 'circle';
 
 @Component({
     selector: 'app-anagrams-page',
-    imports: [FormsModule, RouterLink],
+    imports: [FormsModule, RouterLink, PuzzleSuccessPopupComponent],
     templateUrl: './anagram.page.html',
     styleUrl: './anagram.page.scss',
 })
@@ -149,20 +150,10 @@ export class AnagramsPage {
             await this.anagramService.loadWords();
             this.nextPuzzle();
         } catch {
-            this.loadError.set('Could not load the anagram word list.');
+            this.loadError.set('Impossible de charger la liste d’anagrammes.');
         } finally {
             this.isLoading.set(false);
         }
-    }
-
-    protected goToNextPuzzleIfCorrect(event: Event): void {
-        event.preventDefault();
-
-        if (!this.isCorrect()) {
-            return;
-        }
-
-        this.nextPuzzle();
     }
 
     protected showNextHintLetter(): void {

@@ -1,9 +1,9 @@
 <main class="page">
-    <a routerLink="/" class="back-link">← Retour à la bonne vielle époque</a>
+    <a routerLink="/" class="back-link">← Retour au menu</a>
 
-    <section class="card" (keydown.enter)="goToNextPuzzleIfCorrect($event)">
+    <section class="card">
         <p class="eyebrow">Anagramme</p>
-        <h1>Pour pas avoir l'air fou si on doit trouver BUCHERON</h1>
+        <h1>Trouve le mot</h1>
 
         @if (isLoading()) {
         <p>Chargement des mots…</p>
@@ -50,38 +50,40 @@
             }
         </div>
 
-        <label for="answer">Réponse</label>
+        <div class="answer-field-group">
+            <label class="answer-label" for="answer">Réponse</label>
+            <input id="answer" class="answer-input" type="text" autocomplete="off" [ngModel]="answerInput()"
+                (ngModelChange)="updateAnswer($event)" [class.correct]="isCorrect()" [disabled]="isCorrect()" />
+        </div>
 
-        <input id="answer" type="text" autocomplete="off" [ngModel]="answerInput()"
-            (ngModelChange)="updateAnswer($event)" [class.correct]="isCorrect()" [disabled]="isCorrect()" />
-
-        <div class="hint">
+        <div class="actions">
             <button type="button" class="secondary-button" (click)="showNextHintLetter()"
                 [disabled]="isCorrect() || hintLetterCount() >= word.answer.length">
                 Indice
             </button>
 
-            @if (revealedHint()) {
-            <p>
-                Commence par:
-                <strong>{{ revealedHint() }}</strong>
-            </p>
+            @if(!isCorrect()) {
+            <button type="button" class="secondary-button" (click)="nextPuzzle()">
+                Passer
+            </button>
             }
         </div>
 
-        @if(!isCorrect()) {
-        <button type="button" class="secondary-button" (click)="nextPuzzle()">
-            Skip
-        </button>
+        @if (revealedHint()) {
+        <p class="hint-text">
+            Commence par:
+            <strong>{{ revealedHint() }}</strong>
+        </p>
         }
 
         @if (isCorrect()) {
-        <p class="success" role="status">
-            C'est beau biggie!
-        </p>
-        <button type="button" (click)="nextPuzzle()">
-            Prochain mot
-        </button>
+        <app-puzzle-success-popup
+            title="Mot trouvé!"
+            message="Toutes les lettres sont bien placées."
+            [answer]="word.answer"
+            actionLabel="Prochain mot"
+            (action)="nextPuzzle()"
+        />
         }
         }
     </section>

@@ -1,5 +1,5 @@
 <main class="page">
-  <a routerLink="/" class="back-link">← Le menu par ici</a>
+  <a routerLink="/" class="back-link">← Retour au menu</a>
 
   <section class="shell">
     <header class="hero">
@@ -35,10 +35,12 @@
     </header>
 
     @if (isSolved()) {
-      <section class="success" role="status">
-        <strong>Victoire!</strong>
-        <span>Tu as trouvé la combinaison en {{ results().length }} essais.</span>
-      </section>
+      <app-puzzle-success-popup
+        title="Combinaison trouvée!"
+        [message]="'Victoire en ' + results().length + ' essais.'"
+        actionLabel="Nouvelle partie"
+        (action)="newGame()"
+      />
     }
 
     <section class="play-area">
