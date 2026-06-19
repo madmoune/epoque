@@ -64,6 +64,13 @@ export const routes: Routes = [
       import('./puzzles/games/mastermind/mastermind.page').then((m) => m.MastermindPage),
   },
   {
+    path: 'tic-tac-toe',
+    loadComponent: () =>
+      import('./puzzles/games/tic-tac-toe/tic-tac-toe.page').then(
+        (m) => m.TicTacToePage,
+      ),
+  },
+  {
     path: 'puzzlehunt/navigation',
     loadComponent: () =>
       import('./puzzles/puzzlehunt/Navigation/navigation.page').then((m) => m.NavigationPuzzlePage),

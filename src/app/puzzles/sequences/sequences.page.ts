@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, ElementRef, inject, signal, ViewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
 import { MathSequencePuzzle } from '../../puzzles/sequences/sequences.model';
@@ -11,6 +11,9 @@ import { SequencesService } from '../../puzzles/sequences/sequences.service';
     styleUrl: './sequences.page.scss',
 })
 export class SequencesPage {
+    @ViewChild('answerField')
+    private readonly answerField?: ElementRef<HTMLInputElement>;
+
     private readonly sequencesService = inject(SequencesService);
 
     protected readonly puzzle = signal<MathSequencePuzzle>(
@@ -55,5 +58,6 @@ export class SequencesPage {
         this.puzzle.set(this.sequencesService.createPuzzle());
         this.mathAnswer.set('');
         this.hintCount.set(0);
+        window.setTimeout(() => this.answerField?.nativeElement.focus());
     }
 }

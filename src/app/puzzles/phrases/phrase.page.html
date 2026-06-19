@@ -49,7 +49,7 @@
 
         <div class="answer-field-group">
             <label class="answer-label" for="answer">Ta réponse</label>
-            <input id="answer" class="answer-input" type="text" autocomplete="off" autocapitalize="characters"
+            <input #answerField id="answer" class="answer-input" type="text" autocomplete="off" autocapitalize="characters"
                 [ngModel]="answerInput()" (ngModelChange)="updateAnswer($event)" [class.correct]="isAnswerCorrect()"
                 [disabled]="isSolved()" />
         </div>

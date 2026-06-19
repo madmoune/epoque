@@ -1,0 +1,63 @@
+<main class="page">
+  <a routerLink="/" class="back-link">← Retour au menu</a>
+
+  <section class="shell">
+    <header class="hero">
+      <p class="eyebrow">Jeu de stratégie</p>
+      <h1>Tic-Tac-Toe</h1>
+      <p class="intro">
+        Tu contrôles les X. À chaque tour, déplace l’un de tes trois pions vers n’importe quelle
+        case vide. Aligne-les avant le CPU.
+      </p>
+    </header>
+
+    @if (winner()) {
+      <app-puzzle-success-popup
+        [title]="winner() === 'human' ? 'Victoire!' : 'Défaite'"
+        [message]="winner() === 'human' ? 'Tu as aligné tes trois X.' : 'Le CPU a aligné ses trois O.'"
+        [tone]="winner() === 'human' ? 'success' : 'partial'"
+        actionLabel="Nouvelle partie"
+        (action)="newGame()"
+      />
+    }
+
+    <section class="game-area">
+      <div class="status-row">
+        <p class="status" role="status" aria-live="polite">{{ statusText() }}</p>
+        <span class="turn-pill" [class.cpu]="turn() === 'cpu'">
+          {{ turn() === 'human' ? 'Ton tour' : 'Tour du CPU' }}
+        </span>
+      </div>
+
+      <div class="board" role="grid" aria-label="Grille de Tic-Tac-Toe">
+        @for (index of cells; track index) {
+          <button
+            type="button"
+            class="cell"
+            [class.selected]="selectedCell() === index"
+            [class.destination]="isDestination(index)"
+            [class.x]="board()[index] === 'X'"
+            [class.o]="board()[index] === 'O'"
+            [disabled]="!isHumanTurn() || board()[index] === 'O' || (board()[index] === null && selectedCell() === null)"
+            (click)="playCell(index)"
+            [attr.aria-label]="cellLabel(index)"
+            role="gridcell"
+          >
+            @if (board()[index]) {
+              <span class="piece" aria-hidden="true">{{ board()[index] }}</span>
+            } @else if (isDestination(index)) {
+              <span class="destination-dot" aria-hidden="true"></span>
+            }
+          </button>
+        }
+      </div>
+
+      <div class="legend" aria-label="Légende">
+        <span><b class="legend-mark x-mark">X</b> Toi</span>
+        <span><b class="legend-mark o-mark">O</b> CPU</span>
+      </div>
+
+      <button type="button" class="new-game-button" (click)="newGame()">Nouvelle partie</button>
+    </section>
+  </section>
+</main>

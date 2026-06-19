@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, ElementRef, QueryList, signal, ViewChildren } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
@@ -31,6 +31,9 @@ const CROSSMATH_DIGITS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
   styleUrl: './crossmath.page.scss',
 })
 export class CrossmathPage {
+  @ViewChildren('answerField')
+  private readonly answerFields!: QueryList<ElementRef<HTMLInputElement>>;
+
   protected readonly selectedSize = signal<CrossmathSize>(3);
   protected readonly puzzle = signal<CrossmathPuzzle>(this.createPuzzle(3));
   protected readonly answers = signal<string[][]>(this.createEmptyAnswers(3));
@@ -82,6 +85,7 @@ export class CrossmathPage {
     this.answers.set(this.createEmptyAnswers(size));
     this.hintedPositions.set(new Set());
     this.hasChecked.set(false);
+    window.setTimeout(() => this.answerFields.first?.nativeElement.focus());
   }
 
   protected resetGrid(): void {

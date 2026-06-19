@@ -386,6 +386,17 @@ html[data-theme] body :is(.compact-button.active, .mode-button.active) {
   color: var(--accent-contrast) !important;
 }
 
+html[data-theme] body .memory-grid-page .picker-button.selected,
+html[data-theme] body app-memory-grid-page .picker-button.selected {
+  border-color: var(--focus) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 45%, transparent) !important;
+}
+
+html[data-theme] body .memory-grid-page .player-cell.selected,
+html[data-theme] body app-memory-grid-page .player-cell.selected {
+  outline-color: var(--focus) !important;
+}
+
 html[data-theme] body :is(.selected-info, .feedback-card, .empty-category) {
   border-color: var(--border) !important;
   background: var(--surface-soft) !important;

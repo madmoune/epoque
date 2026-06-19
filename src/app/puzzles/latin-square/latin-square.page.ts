@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, ElementRef, QueryList, signal, ViewChildren } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
 
@@ -23,6 +23,9 @@ type LatinSquarePuzzle = {
   styleUrl: './latin-square.page.scss',
 })
 export class LatinSquarePage {
+  @ViewChildren('answerField')
+  private readonly answerFields!: QueryList<ElementRef<HTMLInputElement>>;
+
   protected readonly selectedSize = signal<LatinSquareSize>(4);
   protected readonly puzzle = signal<LatinSquarePuzzle>(this.createPuzzle(4));
   protected readonly answers = signal<string[][]>(this.createEmptyAnswers(4));
@@ -60,6 +63,7 @@ export class LatinSquarePage {
     this.answers.set(this.createEmptyAnswers(size));
     this.hintedPositions.set(new Set());
     this.hasChecked.set(false);
+    window.setTimeout(() => this.answerFields.first?.nativeElement.focus());
   }
 
   protected resetGrid(): void {

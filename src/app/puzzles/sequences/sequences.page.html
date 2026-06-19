@@ -20,7 +20,7 @@
 
             <div class="answer-field-group">
                 <label class="answer-label" for="math-answer">Ta réponse</label>
-                <input id="math-answer" class="answer-input" type="number" inputmode="numeric"
+                <input #answerField id="math-answer" class="answer-input" type="number" inputmode="numeric"
                     [value]="mathAnswer()" (input)="updateMathAnswer($event)" [disabled]="isCorrect()"
                     autocomplete="off" />
             </div>

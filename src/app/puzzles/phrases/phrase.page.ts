@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, ElementRef, inject, signal, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import {
@@ -15,6 +15,9 @@ import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzz
     styleUrl: './phrase.page.scss',
 })
 export class PhrasesPage {
+    @ViewChild('answerField')
+    private readonly answerField?: ElementRef<HTMLInputElement>;
+
     private readonly phraseService = inject(PhraseService);
 
     protected readonly isLoading = signal(true);
@@ -152,6 +155,7 @@ export class PhrasesPage {
     protected nextPuzzle(): void {
         this.puzzle.set(this.phraseService.getRandomPuzzle());
         this.answerInput.set('');
+        window.setTimeout(() => this.answerField?.nativeElement.focus());
     }
 
     private async loadPuzzle(): Promise<void> {

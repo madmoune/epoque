@@ -46,7 +46,7 @@
               } @else if (isHinted(cell.row, cell.col)) {
                 {{ cellAnswer(cell.row, cell.col) }}
               } @else {
-                <input
+                <input #answerField
                   type="number"
                   inputmode="numeric"
                   min="1"

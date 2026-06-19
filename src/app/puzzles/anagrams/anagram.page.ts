@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, ElementRef, inject, signal, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AnagramService } from '../../puzzles/anagrams/anagram.service';
@@ -15,6 +15,9 @@ type LetterLayoutMode = 'line' | 'circle';
     styleUrl: './anagram.page.scss',
 })
 export class AnagramsPage {
+    @ViewChild('answerField')
+    private readonly answerField?: ElementRef<HTMLInputElement>;
+
     private readonly anagramService = inject(AnagramService);
 
     protected readonly isLoading = signal(true);
@@ -99,6 +102,7 @@ export class AnagramsPage {
         this.answerInput.set('');
         this.hintLetterCount.set(0);
         this.resetLetters();
+        this.focusAnswerField();
     }
 
     protected setAlphabeticalOrder(): void {
@@ -179,5 +183,9 @@ export class AnagramsPage {
             .normalize('NFD')
             .replace(/\p{Diacritic}/gu, '')
             .toUpperCase();
+    }
+
+    private focusAnswerField(): void {
+        window.setTimeout(() => this.answerField?.nativeElement.focus());
     }
 }

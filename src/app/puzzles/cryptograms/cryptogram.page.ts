@@ -123,6 +123,8 @@ export class CryptogramsPage {
                 this.isLetter(character) ? '' : character,
             ),
         );
+
+        window.setTimeout(() => this.guessInputs.first?.nativeElement.focus());
     }
 
     private async loadPuzzle(): Promise<void> {

@@ -129,6 +129,12 @@ export class HomePage {
           route: '/mastermind',
           tag: 'Déduction',
         },
+        {
+          title: 'Tic-Tac-Toe',
+          description: 'Déplace tes trois X et aligne-les avant le CPU.',
+          route: '/tic-tac-toe',
+          tag: 'Stratégie',
+        },
       ],
     },
     {
