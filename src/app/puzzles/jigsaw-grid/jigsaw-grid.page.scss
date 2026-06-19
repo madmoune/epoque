@@ -47,8 +47,9 @@ h1 {
 }
 
 .board-wrapper {
-    max-width: 32rem;
-    margin: 0 auto;
+    width: min(100%, 29rem, calc(100dvh - 9rem));
+    max-width: 100%;
+    margin: 0 auto 0.75rem;
 }
 
 .column-labels {
@@ -64,6 +65,7 @@ h1 {
     display: grid;
     grid-template-columns: 2rem 1fr;
     gap: 0.25rem;
+    min-width: 0;
 }
 
 .row-labels {
@@ -83,6 +85,8 @@ h1 {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
     gap: 0.25rem;
+    width: 100%;
+    min-width: 0;
     touch-action: none;
 }
 
@@ -90,7 +94,12 @@ h1 {
     position: relative;
     display: grid;
     place-items: center;
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
     aspect-ratio: 1;
+    padding: 0;
     border: 1px solid #d4d4d4;
     border-radius: 0.35rem;
     background: #f8f8f8;
@@ -175,7 +184,7 @@ h1 {
 .piece-tray {
     position: sticky;
     top: 1rem;
-    max-height: calc(100vh - 2rem);
+    max-height: calc(100dvh - 8rem);
     overflow: auto;
     padding: 0.875rem;
     border: 1px solid #ddd;
@@ -336,7 +345,7 @@ button {
     }
 
     .board-wrapper {
-        width: min(100%, 42vh);
+        width: min(100%, 36dvh);
         max-width: 100%;
         margin: 0 auto;
     }
@@ -443,7 +452,7 @@ button {
 
 @media (max-width: 380px) {
     .board-wrapper {
-        width: min(100%, 39vh);
+        width: min(100%, 32dvh);
     }
 
     .piece-button {

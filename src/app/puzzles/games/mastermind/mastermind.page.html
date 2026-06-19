@@ -116,16 +116,18 @@
       </div>
 
       <section class="history-panel" aria-label="Historique des essais">
-        <h2>Essais</h2>
-        <div class="feedback-legend" aria-label="Légende du résultat">
-          <span class="legend-item">
-            <span class="feedback-mark placed" aria-hidden="true"></span>
-            Bien placé
-          </span>
-          <span class="legend-item">
-            <span class="feedback-mark present" aria-hidden="true"></span>
-            Présent ailleurs
-          </span>
+        <div class="history-header">
+          <h2>Essais</h2>
+          <div class="feedback-legend" aria-label="Légende du résultat">
+            <span class="legend-item">
+              <span class="feedback-mark placed" aria-hidden="true"></span>
+              Bien placé
+            </span>
+            <span class="legend-item">
+              <span class="feedback-mark present" aria-hidden="true"></span>
+              Présent ailleurs
+            </span>
+          </div>
         </div>
 
         @if (results().length === 0) {
