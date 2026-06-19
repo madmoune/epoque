@@ -87,6 +87,27 @@ button {
   touch-action: manipulation;
 }
 
+.popup-actions {
+  display: grid;
+  gap: 0.3rem;
+  justify-items: stretch;
+}
+
+.popup-actions a {
+  color: currentColor !important;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-align: center;
+  text-decoration: none;
+  opacity: 0.78;
+
+  &:hover,
+  &:focus-visible {
+    opacity: 1;
+    text-decoration: underline;
+  }
+}
+
 @keyframes success-arrival {
   from {
     opacity: 0;
@@ -105,6 +126,10 @@ button {
   }
 
   button {
+    width: 100%;
+  }
+
+  .popup-actions {
     grid-column: 1 / -1;
     width: 100%;
   }
