@@ -83,6 +83,11 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'rush-hour',
+    loadComponent: () =>
+      import('./puzzles/games/rush-hour/rush-hour.page').then((m) => m.RushHourPage),
+  },
+  {
     path: 'puzzlehunt/navigation',
     loadComponent: () =>
       import('./puzzles/puzzlehunt/Navigation/navigation.page').then((m) => m.NavigationPuzzlePage),

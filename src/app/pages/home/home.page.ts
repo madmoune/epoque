@@ -147,6 +147,12 @@ export class HomePage {
           route: '/tic-tac-toe',
           tag: 'Stratégie',
         },
+        {
+          title: 'Rush Hour',
+          description: 'Déplace les véhicules dans une grille 6×6 pour libérer la voiture rouge.',
+          route: '/rush-hour',
+          tag: 'Glisse',
+        },
       ],
     },
     {
