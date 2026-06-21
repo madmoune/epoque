@@ -112,6 +112,12 @@ export class HomePage {
           tag: 'Glisse',
         },
         {
+          title: 'Superposition',
+          description: 'Déplace, tourne et superpose les formes colorées pour reproduire l’image.',
+          route: '/shape-layers',
+          tag: 'Formes',
+        },
+        {
           title: 'Chevaliers et menteurs',
           description: 'Déduis qui dit toujours vrai et qui ment toujours.',
           route: '/knights-and-knaves',

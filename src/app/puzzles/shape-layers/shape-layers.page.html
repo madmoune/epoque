@@ -1,0 +1,61 @@
+<main class="page">
+  <a routerLink="/" fragment="shape-layers" class="back-link">← Retour au menu</a>
+  <section class="shell">
+    <header class="hero">
+      <p class="eyebrow">Puzzle de transparence</p>
+      <h1>Superposition</h1>
+      <p class="instructions">Ajoute les pièces dans le bon ordre et reclique-les pour les retirer. Clic droit pour tourner.</p>
+    </header>
+
+    <div class="game-layout">
+      <section class="target-panel">
+        <h2>Image cible</h2>
+        <div class="shape-board target-board" aria-label="Image à reproduire">
+          @for (piece of solution(); track piece.id) {
+            <span class="shape-piece" [class]="'shape-piece ' + piece.kind + (piece.backgroundColor ? ' backed' : '') + (piece.accentColor ? ' has-accent' : '')"
+              [ngStyle]="pieceStyle(piece)"></span>
+          }
+        </div>
+      </section>
+
+      <section class="workspace-panel">
+        <h2>Ta composition</h2>
+        <div class="shape-board shape-workspace" aria-label="Zone de composition"
+          (contextmenu)="rotateSelectedFromContextMenu($event)">
+          @for (piece of pieces(); track piece.id) {
+            <button type="button" class="shape-piece interactive" [class.selected]="selectedPieceId() === piece.id"
+              [class]="'shape-piece interactive ' + piece.kind + (piece.backgroundColor ? ' backed' : '') + (piece.accentColor ? ' has-accent' : '')"
+              [ngStyle]="pieceStyle(piece)" (click)="removePiece(piece.id)"
+              [attr.aria-label]="'Retirer le ' + shapeLabel(piece)"></button>
+          }
+        </div>
+      </section>
+
+      <aside class="controls">
+        <p><strong>{{ moves() }}</strong> coups</p>
+        <span class="piece-count">{{ pieces().length }} / {{ solution().length }} pièces placées</span>
+        <span class="tray-label">Pièces disponibles</span>
+        <div class="piece-picker" aria-label="Pièces disponibles">
+          @for (piece of piecePool(); track piece.id) {
+            <button type="button" class="piece-choice" [class.selected]="selectedPieceId() === piece.id"
+              [class.placed]="isPlaced(piece.id)"
+              (click)="choosePiece(piece)"
+              [attr.aria-label]="(isPlaced(piece.id) ? 'Retirer le ' : 'Ajouter le ') + shapeLabel(piece)">
+              <span [class]="'choice-shape ' + piece.kind + (piece.backgroundColor ? ' backed' : '') + (piece.accentColor ? ' has-accent' : '')"
+                [style.--choice-color]="piece.color"
+                [style.--piece-background]="piece.backgroundColor ?? 'transparent'"
+                [style.--piece-accent]="piece.accentColor ?? 'transparent'"></span>
+            </button>
+          }
+        </div>
+        <button type="button" (click)="rotateSelected()" [disabled]="!selectedPieceId()">↻ Tourner</button>
+        <div class="new-area"><button type="button" (click)="newPuzzle()">Nouvelle image</button></div>
+      </aside>
+    </div>
+  </section>
+
+  @if (isSolved()) {
+    <app-puzzle-success-popup title="Composition réussie !" [message]="'Reproduite en ' + moves() + ' coups.'"
+      actionLabel="Nouvelle image" (action)="newPuzzle()" />
+  }
+</main>

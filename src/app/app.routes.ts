@@ -39,6 +39,11 @@ export const routes: Routes = [
       import('./puzzles/sliding-puzzle/sliding-puzzle.page').then((m) => m.SlidingPuzzlePage),
   },
   {
+    path: 'shape-layers',
+    loadComponent: () =>
+      import('./puzzles/shape-layers/shape-layers.page').then((m) => m.ShapeLayersPage),
+  },
+  {
     path: 'knights-and-knaves',
     loadComponent: () =>
       import('./puzzles/knights-and-knaves/knights-and-knaves.page').then(
