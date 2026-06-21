@@ -106,6 +106,12 @@ export class HomePage {
           tag: 'Chemin',
         },
         {
+          title: 'Taquin 15',
+          description: 'Glisse les 15 pièces pour remettre les nombres en ordre ou reconstruire une image.',
+          route: '/sliding-puzzle',
+          tag: 'Glisse',
+        },
+        {
           title: 'Chevaliers et menteurs',
           description: 'Déduis qui dit toujours vrai et qui ment toujours.',
           route: '/knights-and-knaves',

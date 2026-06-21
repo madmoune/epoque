@@ -1,0 +1,52 @@
+<main class="page">
+  <a routerLink="/" fragment="sliding-puzzle" class="back-link">← Retour au menu</a>
+
+  <section class="card">
+    <header class="header">
+      <p class="eyebrow">Casse-tête à glissière</p>
+      <h1>Le taquin 15</h1>
+      <p class="instructions">Clique une pièce alignée avec l’espace libre pour faire glisser toute la rangée ou la colonne.</p>
+    </header>
+
+    <div class="mode-switch" role="group" aria-label="Mode du casse-tête">
+      <button type="button" [class.active]="mode() === 'numbers'" (click)="setMode('numbers')"># Nombres</button>
+      <button type="button" [class.active]="mode() === 'image'" (click)="setMode('image')">▧ Image</button>
+    </div>
+
+    <div class="game-layout">
+      <div class="board" [class.image-mode]="mode() === 'image'" aria-label="Grille du taquin 4 par 4">
+        @for (tile of board(); track $index) {
+          @if (tile === 0) {
+            <div class="empty" aria-label="Espace libre"></div>
+          } @else {
+            <button type="button" class="tile" [class.movable]="true"
+              [attr.aria-label]="tileLabel(tile)" (click)="moveTile($index)">
+              @if (mode() === 'numbers') { <span>{{ tile }}</span> }
+              @else {
+                <img class="tile-image" [src]="tileImageUrl(tile)" alt="" />
+              }
+            </button>
+          }
+        }
+      </div>
+
+      <aside class="side-panel">
+        @if (mode() === 'image') {
+          <div class="reference">
+            <span>Image à reconstruire</span>
+            <img [src]="imageUrl()" alt="Aperçu de l’image complète" />
+          </div>
+        }
+        <p class="moves"><strong>{{ moves() }}</strong> coups</p>
+        <div class="new-puzzle-area">
+          <button type="button" class="new-button" (click)="newPuzzle()">Nouveau mélange</button>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  @if (isSolved()) {
+    <app-puzzle-success-popup title="Bravo !" [message]="'Casse-tête réussi en ' + moves() + ' coups.'"
+      actionLabel="Nouveau casse-tête" (action)="newPuzzle()" />
+  }
+</main>
