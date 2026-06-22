@@ -4,17 +4,35 @@
   <section class="shell">
     <header class="hero">
       <p class="eyebrow">Nim</p>
-      <h1>Prends le dernier</h1>
+      <h1>{{ mode() === 'game' ? 'Prends le dernier' : 'Trouve le coup XOR' }}</h1>
       <p class="intro">
-        Clique une pierre pour retirer cette pierre et toutes celles qui suivent dans le même tas.
+        @if (mode() === 'game') {
+          Clique une pierre pour retirer cette pierre et toutes celles qui suivent dans le même tas.
+        } @else {
+          Tu as un seul coup pour ramener la somme XOR à zéro. Il n’y a aucun adversaire.
+        }
       </p>
+      <div class="mode-switch" role="group" aria-label="Mode Nim">
+        <button type="button" class="mode-button" [class.active]="mode() === 'game'"
+          (click)="setMode('game')">Partie</button>
+        <button type="button" class="mode-button" [class.active]="mode() === 'xor-challenge'"
+          (click)="setMode('xor-challenge')">Coup XOR</button>
+      </div>
     </header>
 
-    @if (winner() === 'human') {
+    @if (mode() === 'game' && winner() === 'human') {
       <app-puzzle-success-popup
         title="Victoire!"
         message="Tu as pris la dernière pierre et remporté la partie."
         actionLabel="Nouvelle partie"
+        (action)="newGame()"
+      />
+    }
+    @if (mode() === 'xor-challenge' && challengeResult() === 'success') {
+      <app-puzzle-success-popup
+        title="XOR égal à zéro!"
+        message="Tu as trouvé le bon retrait en une tentative."
+        actionLabel="Nouveau défi"
         (action)="newGame()"
       />
     }
@@ -26,11 +44,11 @@
           <p class="last-move">{{ lastMove() }}</p>
         </div>
 
-        @if (winner()) {
+        @if (winner() || challengeResult()) {
           <section
             class="result-banner"
-            [class.win]="winner() === 'human'"
-            [class.loss]="winner() === 'cpu'"
+            [class.win]="winner() === 'human' || challengeResult() === 'success'"
+            [class.loss]="winner() === 'cpu' || challengeResult() === 'failure'"
             role="status"
             aria-live="polite"
           >
@@ -70,43 +88,51 @@
       </div>
 
       <aside class="side-panel" aria-label="Analyse Nim">
-        <div class="metric">
-          <div class="metric-heading">
-            <span>Somme XOR</span>
-            <strong>{{ nimSum() }}</strong>
-          </div>
-
-          <div class="xor-breakdown" aria-label="Calcul binaire du XOR">
-            <div class="xor-row xor-labels" aria-hidden="true">
-              <span>Pierres</span>
-              <span>Binaire</span>
+        @if (mode() === 'game' || hintVisible()) {
+          <div class="metric">
+            <div class="metric-heading">
+              <span>Somme XOR</span>
+              <strong>{{ nimSum() }}</strong>
             </div>
-            @for (row of binaryRows(); track $index) {
-              <div class="xor-row">
-                <span>{{ row.size }}</span>
-                <code>{{ row.binary }}</code>
+
+            <div class="xor-breakdown" aria-label="Calcul binaire du XOR">
+              <div class="xor-row xor-labels" aria-hidden="true">
+                <span>Pierres</span>
+                <span>Binaire</span>
               </div>
-            }
-            <div class="xor-row xor-total">
-              <span>XOR</span>
-              <code>{{ nimSumBinary() }}</code>
+              @for (row of binaryRows(); track $index) {
+                <div class="xor-row">
+                  <span>{{ row.size }}</span>
+                  <code>{{ row.binary }}</code>
+                </div>
+              }
+              <div class="xor-row xor-total">
+                <span>XOR</span>
+                <code>{{ nimSumBinary() }}</code>
+              </div>
             </div>
+
+            <p class="xor-explanation">
+              @if (nimSum() === 0) {
+                Le XOR est déjà à 0: aucun coup ne garantit l’avantage.
+              } @else {
+                Le XOR n’est pas 0: un coup peut le ramener à 0.
+              }
+            </p>
           </div>
+        }
 
-          <p class="xor-explanation">
-            @if (nimSum() === 0) {
-              Le XOR est déjà à 0: aucun coup ne garantit l’avantage.
-            } @else {
-              Le XOR n’est pas 0: un coup peut le ramener à 0.
-            }
-          </p>
-        </div>
+        @if (mode() === 'xor-challenge' && !hintVisible()) {
+          <button type="button" class="secondary-button" (click)="showHint()">Afficher l’indice XOR</button>
+        }
 
-        <button type="button" class="secondary-button" (click)="showHint()" [disabled]="!isHumanTurn()">
-          Indice
-        </button>
+        @if (mode() === 'game') {
+          <button type="button" class="secondary-button" (click)="showHint()" [disabled]="!isHumanTurn()">
+            Indice
+          </button>
+        }
 
-        @if (hintVisible()) {
+        @if (mode() === 'game' && hintVisible()) {
           <div class="hint">
             <strong>Coup conseillé</strong>
             <p>{{ hintText() }}</p>
@@ -117,7 +143,9 @@
           </div>
         }
 
-        <button type="button" class="secondary-button" (click)="newGame()">Nouvelle partie</button>
+        <button type="button" class="secondary-button" (click)="newGame()">
+          {{ mode() === 'game' ? 'Nouvelle partie' : 'Nouveau défi' }}
+        </button>
       </aside>
     </section>
   </section>

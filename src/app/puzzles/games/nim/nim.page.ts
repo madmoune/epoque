@@ -3,6 +3,8 @@ import { RouterLink } from '@angular/router';
 import { PuzzleSuccessPopupComponent } from '../../shared/puzzle-success-popup/puzzle-success-popup.component';
 
 type Player = 'human' | 'cpu';
+type NimMode = 'game' | 'xor-challenge';
+type ChallengeResult = 'success' | 'failure' | null;
 
 type NimMove = {
   pileIndex: number;
@@ -20,6 +22,7 @@ type PendingRemoval = NimMove & {
   styleUrl: './nim.page.scss',
 })
 export class NimPage {
+  protected readonly mode = signal<NimMode>('game');
   protected readonly piles = signal<number[]>(this.createPiles());
   protected readonly turn = signal<Player>(this.randomPlayer());
   protected readonly winner = signal<Player | null>(null);
@@ -27,6 +30,7 @@ export class NimPage {
   protected readonly lastMove = signal<string>('La partie commence.');
   protected readonly cpuThinking = signal(false);
   protected readonly pendingRemoval = signal<PendingRemoval | null>(null);
+  protected readonly challengeResult = signal<ChallengeResult>(null);
 
   protected readonly nimSum = computed(() => this.calculateNimSum(this.piles()));
   protected readonly binaryWidth = computed(() =>
@@ -40,10 +44,20 @@ export class NimPage {
   );
   protected readonly nimSumBinary = computed(() => this.toBinary(this.nimSum()));
   protected readonly isHumanTurn = computed(
-    () => this.turn() === 'human' && !this.winner() && !this.pendingRemoval(),
+    () =>
+      this.turn() === 'human' &&
+      !this.winner() &&
+      !this.challengeResult() &&
+      !this.pendingRemoval(),
   );
   protected readonly bestMove = computed(() => this.findBestMove(this.piles()));
   protected readonly statusText = computed(() => {
+    if (this.mode() === 'xor-challenge') {
+      if (this.challengeResult() === 'success') return 'XOR ramené à zéro.';
+      if (this.challengeResult() === 'failure') return 'La tentative est terminée.';
+      if (this.pendingRemoval()) return 'Vérification du coup...';
+      return 'Trouve le coup qui ramène le XOR à zéro.';
+    }
     const winner = this.winner();
 
     if (winner === 'human') {
@@ -67,6 +81,8 @@ export class NimPage {
     return this.turn() === 'human' ? 'À toi de jouer.' : 'Tour du CPU.';
   });
   protected readonly resultTitle = computed(() => {
+    if (this.challengeResult() === 'success') return 'Bon coup!';
+    if (this.challengeResult() === 'failure') return 'XOR non nul';
     const winner = this.winner();
 
     if (winner === 'human') {
@@ -80,6 +96,12 @@ export class NimPage {
     return '';
   });
   protected readonly resultText = computed(() => {
+    if (this.challengeResult() === 'success') {
+      return 'Ce retrait ramène exactement la somme XOR à zéro.';
+    }
+    if (this.challengeResult() === 'failure') {
+      return `Ce retrait laisse un XOR de ${this.nimSum()}. Essaie une nouvelle grille.`;
+    }
     const winner = this.winner();
 
     if (winner === 'human') {
@@ -122,8 +144,9 @@ export class NimPage {
   }
 
   protected newGame(): void {
-    const piles = this.createPiles();
-    const starter = this.randomPlayer();
+    const piles =
+      this.mode() === 'xor-challenge' ? this.createChallengePiles() : this.createPiles();
+    const starter: Player = this.mode() === 'xor-challenge' ? 'human' : this.randomPlayer();
 
     this.piles.set(piles);
     this.turn.set(starter);
@@ -131,8 +154,21 @@ export class NimPage {
     this.hintVisible.set(false);
     this.cpuThinking.set(false);
     this.pendingRemoval.set(null);
-    this.lastMove.set(starter === 'human' ? 'Tu commences.' : 'Le CPU commence.');
+    this.challengeResult.set(null);
+    this.lastMove.set(
+      this.mode() === 'xor-challenge'
+        ? 'Tu as une seule tentative.'
+        : starter === 'human'
+          ? 'Tu commences.'
+          : 'Le CPU commence.',
+    );
     this.prepareTurn();
+  }
+
+  protected setMode(mode: NimMode): void {
+    if (this.mode() === mode) return;
+    this.mode.set(mode);
+    this.newGame();
   }
 
   protected playStone(pileIndex: number, stoneIndex: number, event?: Event): void {
@@ -185,7 +221,7 @@ export class NimPage {
   }
 
   private prepareTurn(): void {
-    if (this.turn() !== 'cpu' || this.winner()) {
+    if (this.mode() === 'xor-challenge' || this.turn() !== 'cpu' || this.winner()) {
       return;
     }
 
@@ -238,6 +274,17 @@ export class NimPage {
     this.piles.set(nextPiles);
     this.hintVisible.set(false);
     this.lastMove.set(this.describeMove(move, player, wasCpuMistake));
+
+    if (this.mode() === 'xor-challenge') {
+      const result: ChallengeResult = this.calculateNimSum(nextPiles) === 0 ? 'success' : 'failure';
+      this.challengeResult.set(result);
+      this.lastMove.set(
+        result === 'success'
+          ? 'Excellent: ton coup produit un XOR de 0.'
+          : `Ce coup produit un XOR de ${this.calculateNimSum(nextPiles)}.`,
+      );
+      return;
+    }
 
     if (nextPiles.every((pile) => pile === 0)) {
       this.winner.set(player);
@@ -323,6 +370,12 @@ export class NimPage {
     const pileCount = this.randomInt(3, 5);
 
     return Array.from({ length: pileCount }, () => this.randomInt(4, 12));
+  }
+
+  private createChallengePiles(): number[] {
+    let piles = this.createPiles();
+    while (this.calculateNimSum(piles) === 0) piles = this.createPiles();
+    return piles;
   }
 
   private randomPlayer(): Player {

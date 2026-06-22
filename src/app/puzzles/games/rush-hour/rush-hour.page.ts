@@ -13,6 +13,7 @@ export class RushHourPage implements OnDestroy {
   private readonly size = 6;
   private generatorWorker: Worker | null = null;
   private readonly preparedPuzzles: Vehicle[][] = [];
+  private initialVehicles: Vehicle[] = [];
   private waitingForPuzzle = false;
   private dragState: {
     vehicleId: string;
@@ -41,8 +42,7 @@ export class RushHourPage implements OnDestroy {
   protected newGame(): void {
     const preparedPuzzle = this.preparedPuzzles.shift();
     if (preparedPuzzle) {
-      this.vehicles.set(preparedPuzzle);
-      this.moves.set(0);
+      this.showPuzzle(preparedPuzzle);
       this.startBackgroundGeneration();
       return;
     }
@@ -55,6 +55,13 @@ export class RushHourPage implements OnDestroy {
 
   ngOnDestroy(): void {
     this.generatorWorker?.terminate();
+  }
+
+  protected resetGame(): void {
+    if (!this.initialVehicles.length || this.isGenerating()) return;
+    this.vehicles.set(this.initialVehicles.map((vehicle) => ({ ...vehicle })));
+    this.moves.set(0);
+    this.dragState = null;
   }
 
   protected move(vehicleId: string, direction: -1 | 1): void {
@@ -143,8 +150,7 @@ export class RushHourPage implements OnDestroy {
       if (data.type !== 'ready' || !data.puzzle) return;
 
       if (this.waitingForPuzzle) {
-        this.vehicles.set(data.puzzle);
-        this.moves.set(0);
+        this.showPuzzle(data.puzzle);
         this.waitingForPuzzle = false;
         this.isGenerating.set(false);
       } else if (this.preparedPuzzles.length < 3) {
@@ -166,6 +172,12 @@ export class RushHourPage implements OnDestroy {
       this.isGenerating.set(false);
     };
     worker.postMessage({ count: requestedCount });
+  }
+
+  private showPuzzle(puzzle: Vehicle[]): void {
+    this.initialVehicles = puzzle.map((vehicle) => ({ ...vehicle }));
+    this.vehicles.set(puzzle.map((vehicle) => ({ ...vehicle })));
+    this.moves.set(0);
   }
 
   private async createPuzzle(): Promise<Vehicle[]> {

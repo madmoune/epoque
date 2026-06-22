@@ -44,6 +44,27 @@ h1 {
   line-height: 1.5;
 }
 
+.mode-switch {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 1rem;
+}
+
+.mode-button {
+  min-height: 2.5rem;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--text);
+}
+
+.mode-button.active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
 .game-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 18rem;

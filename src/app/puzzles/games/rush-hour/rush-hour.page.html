@@ -37,6 +37,8 @@
       <aside class="side-panel">
         <p class="moves"><strong>{{ moves() }}</strong> coups</p>
         <p class="tip">Utilise les flèches placées aux extrémités de chaque véhicule.</p>
+        <button type="button" class="reset-button" [disabled]="moves() === 0 || isGenerating()"
+          (click)="resetGame()">Recommencer</button>
         <div class="new-game-area">
           <button type="button" class="new-button" [disabled]="isGenerating()" (click)="newGame()">Nouvelle grille</button>
         </div>
