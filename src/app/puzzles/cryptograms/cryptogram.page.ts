@@ -30,6 +30,7 @@ import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzz
 export class CryptogramsPage {
     @ViewChildren('guessInput')
     private readonly guessInputs!: QueryList<ElementRef<HTMLInputElement>>;
+    private suppressNextSelection = false;
 
     private readonly cryptogramService = inject(CryptogramService);
 
@@ -43,6 +44,7 @@ export class CryptogramsPage {
         ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
         ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
         ['Z', 'X', 'C', 'V', 'B', 'N', 'M', 'backspace'],
+        ['clear'],
     ];
 
     protected readonly characters = computed<CryptogramCharacter[]>(() => {
@@ -127,6 +129,10 @@ export class CryptogramsPage {
 
     protected activateInput(index: number, input: HTMLInputElement): void {
         this.activeCharacterIndex.set(index);
+        if (this.suppressNextSelection) {
+            this.suppressNextSelection = false;
+            return;
+        }
         input.select();
     }
 
@@ -149,6 +155,12 @@ export class CryptogramsPage {
 
         if (key === 'backspace') {
             this.handleBackspace(activeIndex, new Event('keyboard'), input);
+            return;
+        }
+
+        if (key === 'clear') {
+            this.clearGuesses();
+            input.focus();
             return;
         }
 
@@ -176,8 +188,8 @@ export class CryptogramsPage {
         this.activeCharacterIndex.set(null);
 
         window.setTimeout(() => {
+            this.suppressNextSelection = true;
             this.guessInputs.first?.nativeElement.focus();
-            this.guessInputs.first?.nativeElement.select();
         });
     }
 
@@ -238,8 +250,10 @@ export class CryptogramsPage {
             .slice(currentIndex + 1)
             .find((input) => !input.value);
 
-        nextInput?.focus();
-        nextInput?.select();
+        if (nextInput) {
+            this.suppressNextSelection = true;
+            nextInput.focus();
+        }
 
         if (nextInput) {
             const index = Number(nextInput.dataset['characterIndex']);
@@ -278,8 +292,8 @@ export class CryptogramsPage {
         this.guesses.set(nextGuesses);
 
         queueMicrotask(() => {
+            this.suppressNextSelection = true;
             previousInput.focus();
-            previousInput.select();
             this.activeCharacterIndex.set(previousIndex);
         });
     }

@@ -1,6 +1,6 @@
 import { Component, HostBinding, input, output } from '@angular/core';
 
-export type CustomKeyboardKey = string | 'backspace' | 'space';
+export type CustomKeyboardKey = string | 'backspace' | 'clear' | 'space';
 
 @Component({
   selector: 'app-custom-keyboard',
@@ -20,12 +20,14 @@ export class CustomKeyboardComponent {
 
   protected keyLabel(key: CustomKeyboardKey): string {
     if (key === 'backspace') return '⌫';
+    if (key === 'clear') return 'Vider';
     if (key === 'space') return 'Espace';
     return key;
   }
 
   protected keyClass(key: CustomKeyboardKey): string {
     if (key === 'backspace') return 'wide-key';
+    if (key === 'clear') return 'wide-key';
     if (key === 'space') return 'space-key';
     return '';
   }

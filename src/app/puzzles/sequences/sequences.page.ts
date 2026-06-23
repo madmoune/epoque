@@ -17,6 +17,7 @@ import { SequencesService } from '../../puzzles/sequences/sequences.service';
 export class SequencesPage {
     @ViewChild('answerField')
     private readonly answerField?: ElementRef<HTMLInputElement>;
+    private suppressNextSelection = false;
 
     private readonly sequencesService = inject(SequencesService);
 
@@ -66,7 +67,7 @@ export class SequencesPage {
 
         if (key === 'backspace') {
             this.mathAnswer.update((answer) => answer.slice(0, -1));
-            this.focusAnswerField();
+            this.focusAnswerField(false);
             return;
         }
 
@@ -74,17 +75,21 @@ export class SequencesPage {
 
         if (key === '-') {
             this.mathAnswer.update((answer) => (answer.startsWith('-') ? answer.slice(1) : `-${answer}`));
-            this.focusAnswerField();
+            this.focusAnswerField(false);
             return;
         }
 
         this.mathAnswer.update((answer) => `${answer}${key}`);
-        this.focusAnswerField();
+        this.focusAnswerField(false);
     }
 
     protected selectInputContent(event: Event): void {
         if (event.target instanceof HTMLInputElement) {
             this.keyboardVisible.set(true);
+            if (this.suppressNextSelection) {
+                this.suppressNextSelection = false;
+                return;
+            }
             event.target.select();
         }
     }
@@ -105,10 +110,11 @@ export class SequencesPage {
         this.puzzle.set(this.sequencesService.createPuzzle());
         this.mathAnswer.set('');
         this.hintCount.set(0);
-        this.focusAnswerField();
+        this.focusAnswerField(false);
     }
 
-    private focusAnswerField(): void {
+    private focusAnswerField(selectOnFocus = true): void {
+        this.suppressNextSelection = !selectOnFocus;
         window.setTimeout(() => this.answerField?.nativeElement.focus());
     }
 }

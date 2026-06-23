@@ -9,10 +9,11 @@
   }
 
   .custom-keyboard {
+    --keyboard-key-size: clamp(1.55rem, 8vw, 2.25rem);
+
     position: fixed;
-    right: max(0.45rem, env(safe-area-inset-right));
+    left: 50%;
     bottom: max(0.45rem, env(safe-area-inset-bottom));
-    left: max(0.45rem, env(safe-area-inset-left));
     z-index: 60;
     display: grid;
     gap: 0.32rem;
@@ -24,6 +25,7 @@
     background: color-mix(in srgb, var(--surface-raised, #fff) 92%, transparent);
     box-shadow: 0 -0.35rem 1.2rem rgb(0 0 0 / 10%);
     backdrop-filter: blur(8px);
+    transform: translateX(-50%);
   }
 
   .keyboard-row {
@@ -33,7 +35,7 @@
   }
 
   .keyboard-key {
-    flex: 1 1 0;
+    flex: 0 0 var(--keyboard-key-size);
     min-width: 0;
     min-height: 2.35rem;
     padding: 0.25rem;
@@ -58,10 +60,10 @@
   }
 
   .wide-key {
-    flex-grow: 1.45;
+    flex-basis: calc(var(--keyboard-key-size) * 2);
   }
 
   .space-key {
-    flex-grow: 4;
+    flex-basis: calc(var(--keyboard-key-size) * 4);
   }
 }

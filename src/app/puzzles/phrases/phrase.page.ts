@@ -21,6 +21,7 @@ import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzz
 export class PhrasesPage {
     @ViewChild('answerField')
     private readonly answerField?: ElementRef<HTMLInputElement>;
+    private suppressNextSelection = false;
 
     private readonly phraseService = inject(PhraseService);
 
@@ -34,7 +35,7 @@ export class PhrasesPage {
         ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
         ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
         ['Z', 'X', 'C', 'V', 'B', 'N', 'M', 'backspace'],
-        ['space'],
+        ['space', 'clear'],
     ];
 
     protected readonly characters = computed<PhraseCharacter[]>(() => {
@@ -168,17 +169,27 @@ export class PhrasesPage {
 
         if (key === 'backspace') {
             this.answerInput.update((answer) => answer.slice(0, -1));
-            this.focusAnswerField();
+            this.focusAnswerField(false);
+            return;
+        }
+
+        if (key === 'clear') {
+            this.answerInput.set('');
+            this.focusAnswerField(false);
             return;
         }
 
         this.answerInput.update((answer) => `${answer}${key === 'space' ? ' ' : key}`);
-        this.focusAnswerField();
+        this.focusAnswerField(false);
     }
 
     protected selectInputContent(event: Event): void {
         if (event.target instanceof HTMLInputElement) {
             this.keyboardVisible.set(true);
+            if (this.suppressNextSelection) {
+                this.suppressNextSelection = false;
+                return;
+            }
             event.target.select();
         }
     }
@@ -194,7 +205,7 @@ export class PhrasesPage {
     protected nextPuzzle(): void {
         this.puzzle.set(this.phraseService.getRandomPuzzle());
         this.answerInput.set('');
-        this.focusAnswerField();
+        this.focusAnswerField(false);
     }
 
     private async loadPuzzle(): Promise<void> {
@@ -223,7 +234,8 @@ export class PhrasesPage {
         return /^[A-Z]$/.test(character);
     }
 
-    private focusAnswerField(): void {
+    private focusAnswerField(selectOnFocus = true): void {
+        this.suppressNextSelection = !selectOnFocus;
         window.setTimeout(() => this.answerField?.nativeElement.focus());
     }
 }

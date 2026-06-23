@@ -29,6 +29,7 @@ type LatinSquarePuzzle = {
 export class LatinSquarePage {
   @ViewChildren('answerField')
   private readonly answerFields!: QueryList<ElementRef<HTMLInputElement>>;
+  private suppressNextSelection = false;
 
   protected readonly selectedSize = signal<LatinSquareSize>(4);
   protected readonly puzzle = signal<LatinSquarePuzzle>(this.createPuzzle(4));
@@ -72,7 +73,10 @@ export class LatinSquarePage {
     this.answers.set(this.createEmptyAnswers(size));
     this.hintedPositions.set(new Set());
     this.hasChecked.set(false);
-    window.setTimeout(() => this.answerFields.first?.nativeElement.focus());
+    window.setTimeout(() => {
+      this.suppressNextSelection = true;
+      this.answerFields.first?.nativeElement.focus();
+    });
   }
 
   protected resetGrid(): void {
@@ -108,6 +112,10 @@ export class LatinSquarePage {
     this.activeCell.set({ row, col });
 
     if (event.target instanceof HTMLInputElement) {
+      if (this.suppressNextSelection) {
+        this.suppressNextSelection = false;
+        return;
+      }
       event.target.select();
     }
   }
@@ -182,8 +190,8 @@ export class LatinSquarePage {
     if (!nextInput) return;
 
     window.setTimeout(() => {
+      this.suppressNextSelection = true;
       nextInput.focus();
-      nextInput.select();
       this.activeCell.set({
         row: Number(nextInput.dataset['row']),
         col: Number(nextInput.dataset['col']),

@@ -37,6 +37,7 @@ const CROSSMATH_DIGITS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 export class CrossmathPage {
   @ViewChildren('answerField')
   private readonly answerFields!: QueryList<ElementRef<HTMLInputElement>>;
+  private suppressNextSelection = false;
 
   protected readonly selectedSize = signal<CrossmathSize>(3);
   protected readonly puzzle = signal<CrossmathPuzzle>(this.createPuzzle(3));
@@ -107,7 +108,10 @@ export class CrossmathPage {
     this.answers.set(this.createEmptyAnswers(size));
     this.hintedPositions.set(new Set());
     this.hasChecked.set(false);
-    window.setTimeout(() => this.answerFields.first?.nativeElement.focus());
+    window.setTimeout(() => {
+      this.suppressNextSelection = true;
+      this.answerFields.first?.nativeElement.focus();
+    });
   }
 
   protected resetGrid(): void {
@@ -143,6 +147,10 @@ export class CrossmathPage {
     this.activeCell.set({ row, col });
 
     if (event.target instanceof HTMLInputElement) {
+      if (this.suppressNextSelection) {
+        this.suppressNextSelection = false;
+        return;
+      }
       event.target.select();
     }
   }
@@ -217,8 +225,8 @@ export class CrossmathPage {
     if (!nextInput) return;
 
     window.setTimeout(() => {
+      this.suppressNextSelection = true;
       nextInput.focus();
-      nextInput.select();
       this.activeCell.set({
         row: Number(nextInput.dataset['row']),
         col: Number(nextInput.dataset['col']),

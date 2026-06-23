@@ -21,6 +21,7 @@
                     </span>
 
                     <input #guessInput type="text" autocomplete="off" autocapitalize="characters" inputmode="none"
+                        maxlength="1"
                         enterkeyhint="next"
                         [attr.aria-label]="'Réponse pour la lettre chiffrée ' + character.encryptedCharacter"
                         [attr.data-character-index]="character.index" [ngModel]="guesses()[character.index]"

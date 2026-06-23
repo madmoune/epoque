@@ -56,10 +56,11 @@
                 {{ cellAnswer(cell.row, cell.col) }}
               } @else {
                 <input #answerField
-                  type="number"
+                  type="text"
                   inputmode="none"
                   min="1"
                   [max]="selectedSize()"
+                  maxlength="1"
                   autocomplete="off"
                   [attr.data-row]="cell.row"
                   [attr.data-col]="cell.col"
