@@ -40,9 +40,20 @@ export class CrossmathPage {
   protected readonly hintedPositions = signal<Set<string>>(new Set());
   protected readonly hasChecked = signal(false);
 
-  protected readonly gridTemplateColumns = computed(
-    () => `repeat(${this.puzzle().size * 2 + 1}, minmax(0, var(--crossmath-cell-size)))`,
-  );
+  protected readonly gridTemplateColumns = computed(() => {
+    const columns: string[] = [];
+
+    for (let index = 0; index < this.puzzle().size; index += 1) {
+      columns.push('var(--crossmath-number-cell-size)');
+
+      if (index < this.puzzle().size - 1) {
+        columns.push('var(--crossmath-operator-cell-size)');
+      }
+    }
+
+    columns.push('var(--crossmath-operator-cell-size)', 'var(--crossmath-target-cell-size)');
+    return columns.join(' ');
+  });
 
   protected readonly isCorrect = computed(() => {
     const values = this.enteredValues();

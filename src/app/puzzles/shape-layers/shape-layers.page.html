@@ -12,7 +12,7 @@
         <h2>Image cible</h2>
         <div class="shape-board target-board" aria-label="Image à reproduire">
           @for (piece of solution(); track piece.id) {
-            <span class="shape-piece" [class]="'shape-piece ' + piece.kind + (piece.backgroundColor ? ' backed' : '') + (piece.accentColor ? ' has-accent' : '')"
+            <span [class]="pieceClass(piece)"
               [ngStyle]="pieceStyle(piece)"></span>
           }
         </div>
@@ -23,8 +23,7 @@
         <div class="shape-board shape-workspace" aria-label="Zone de composition"
           (contextmenu)="rotateSelectedFromContextMenu($event)">
           @for (piece of pieces(); track piece.id) {
-            <button type="button" class="shape-piece interactive" [class.selected]="selectedPieceId() === piece.id"
-              [class]="'shape-piece interactive ' + piece.kind + (piece.backgroundColor ? ' backed' : '') + (piece.accentColor ? ' has-accent' : '')"
+            <button type="button" [class]="pieceClass(piece, 'interactive')" [class.selected]="selectedPieceId() === piece.id"
               [ngStyle]="pieceStyle(piece)" (click)="removePiece(piece.id)"
               [attr.aria-label]="'Retirer le ' + shapeLabel(piece)"></button>
           }
@@ -41,7 +40,7 @@
               [class.placed]="isPlaced(piece.id)"
               (click)="choosePiece(piece)"
               [attr.aria-label]="(isPlaced(piece.id) ? 'Retirer le ' : 'Ajouter le ') + shapeLabel(piece)">
-              <span [class]="'choice-shape ' + piece.kind + (piece.backgroundColor ? ' backed' : '') + (piece.accentColor ? ' has-accent' : '')"
+              <span [class]="choiceClass(piece)"
                 [style.--choice-color]="piece.color"
                 [style.--piece-background]="piece.backgroundColor ?? 'transparent'"
                 [style.--piece-accent]="piece.accentColor ?? 'transparent'"></span>

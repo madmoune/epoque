@@ -88,6 +88,15 @@ export class KnightsAndKnavesPage {
     this.message.set('Attribue un rôle à chaque personne.');
   }
 
+  protected resetAnswers(): void {
+    const count = this.personCount();
+    this.answers.set(Array.from({ length: count }, () => null));
+    this.hintedPeople.set(new Set());
+    this.checked.set(false);
+    this.solved.set(false);
+    this.message.set('Attribue un rôle à chaque personne.');
+  }
+
   protected chooseRole(personIndex: number, role: Role): void {
     if (this.solved() || this.hintedPeople().has(personIndex)) return;
 

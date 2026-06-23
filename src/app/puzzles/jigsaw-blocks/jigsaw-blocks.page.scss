@@ -338,18 +338,16 @@ button {
     }
 
     .tile-list {
-        display: flex;
-        gap: 0.5rem;
-        overflow-x: auto;
-        padding-bottom: 0.25rem;
-        scroll-snap-type: x proximity;
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 0.35rem;
+        overflow: visible;
+        padding-bottom: 0;
     }
 
     .tile-button {
-        flex: 0 0 3.4rem;
         padding: 0;
-        border-radius: 0.6rem;
-        scroll-snap-align: start;
+        border-radius: 0.5rem;
     }
 
     .actions {
@@ -382,7 +380,6 @@ button {
     }
 
     .tile-button {
-        flex-basis: 3rem;
         padding: 0;
     }
 

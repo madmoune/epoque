@@ -45,20 +45,52 @@ blockquote { margin: 0; padding: 0.65rem 0.75rem; border-left: 3px solid var(--f
 .secondary-button { border: 1px solid var(--line) !important; background: var(--raised) !important; color: var(--copy) !important; }
 
 @media (max-width: 700px) {
-  .page { padding: 0.6rem; }
-  .shell { padding: 0.7rem; border-radius: 1rem; }
-  .hero { display: grid; align-items: start; }
-  .count-picker { width: 100%; }
-  .count-picker button { flex: 1; width: auto; }
+  .page { padding: 0.45rem; }
+  .back-link { margin-bottom: 0.35rem; font-size: 0.85rem; }
+  .shell { padding: 0.55rem; border-radius: 0.85rem; }
+  .hero { display: grid; gap: 0.45rem; align-items: start; }
+  .eyebrow { display: none; }
+  h1 { font-size: 1.45rem; }
+  .intro { display: none; }
+  .count-picker { width: 100%; padding: 0.15rem; border-radius: 0.55rem; }
+  .count-picker button { flex: 1; width: auto; min-height: 1.9rem; border-radius: 0.4rem; font-size: 0.78rem; }
+  .progress-row { gap: 0.35rem; margin: 0.55rem 0 0.45rem; font-size: 0.75rem; }
+  .progress-row p { max-width: 55%; }
   .people-grid { grid-template-columns: 1fr; }
-  .progress-row { align-items: start; }
-  .person-card { padding: 0.7rem; }
+  .person-card {
+    grid-template-columns: minmax(0, 0.9fr) minmax(11.4rem, 52%);
+    grid-template-rows: auto auto;
+    gap: 0.4rem 0.5rem;
+    padding: 0.48rem;
+    border-radius: 0.72rem;
+  }
+  .person-heading { gap: 0.45rem; align-self: center; }
+  .avatar { width: 1.9rem; font-size: 0.82rem; }
+  h2 { font-size: 0.95rem; }
+  .hint-badge { margin-top: 0; font-size: 0.6rem; }
+  .statements { grid-column: 1 / -1; grid-row: 2; gap: 0.25rem; }
+  blockquote {
+    padding: 0.42rem 0.5rem;
+    border-left-width: 2px;
+    border-radius: 0 0.45rem 0.45rem 0;
+    font-size: 0.83rem;
+    line-height: 1.25;
+  }
+  .role-picker { align-self: center; gap: 0.25rem; }
+  .role-picker button {
+    gap: 0.25rem;
+    min-height: 2.15rem;
+    padding: 0.36rem 0.56rem;
+    border-radius: 0.48rem;
+    font-size: 0.76rem;
+  }
   .actions { display: grid; grid-template-columns: 1fr 1fr; }
-  .actions button:first-child { grid-column: 1 / -1; }
-  .role-picker button { min-height: 2.6rem; }
-  .actions > button { min-height: 2.6rem !important; }
+  .actions button:last-child { grid-column: 1 / -1; }
+  .actions > button { min-height: 2.25rem !important; }
 }
 
 @media (max-width: 380px) {
-  .role-picker { grid-template-columns: 1fr; }
+  .person-card { grid-template-columns: 1fr; }
+  .role-picker { grid-template-columns: repeat(2, 1fr); }
+  .statements { grid-row: auto; }
 }

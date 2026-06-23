@@ -51,17 +51,20 @@ h1 {
 }
 
 .crossmath-grid {
-  --crossmath-cell-size: 3.6rem;
+  --crossmath-number-cell-size: 3.6rem;
+  --crossmath-operator-cell-size: 1.6rem;
+  --crossmath-target-cell-size: 3.6rem;
 
   display: grid;
   justify-content: center;
   gap: 0.4rem;
   margin: 1rem auto 1.25rem;
-  overflow-x: auto;
 }
 
 .crossmath-grid.size-four {
-  --crossmath-cell-size: 3.15rem;
+  --crossmath-number-cell-size: 3.15rem;
+  --crossmath-operator-cell-size: 1.35rem;
+  --crossmath-target-cell-size: 3.15rem;
 }
 
 .number-cell,
@@ -71,8 +74,17 @@ h1 {
   display: grid;
   place-items: center;
   min-width: 0;
-  aspect-ratio: 1;
   line-height: 1;
+}
+
+.number-cell,
+.target-cell {
+  aspect-ratio: 1;
+}
+
+.operator-cell,
+.empty-cell {
+  min-height: var(--crossmath-operator-cell-size);
 }
 
 .number-cell,
@@ -187,14 +199,28 @@ button {
   }
 
   .crossmath-grid {
-    --crossmath-cell-size: 2.7rem;
+    --crossmath-number-cell-size: clamp(2.35rem, 11.5vw, 2.8rem);
+    --crossmath-operator-cell-size: clamp(0.75rem, 4vw, 1.05rem);
+    --crossmath-target-cell-size: clamp(2.15rem, 10vw, 2.65rem);
 
-    justify-content: start;
-    gap: 0.3rem;
+    justify-content: center;
+    gap: 0.18rem;
   }
 
   .crossmath-grid.size-four {
-    --crossmath-cell-size: 2.35rem;
+    --crossmath-number-cell-size: clamp(2.15rem, 10vw, 2.55rem);
+    --crossmath-operator-cell-size: clamp(0.62rem, 3.2vw, 0.9rem);
+    --crossmath-target-cell-size: clamp(1.9rem, 8.5vw, 2.35rem);
+  }
+
+  .number-cell,
+  .target-cell {
+    border-radius: 0.6rem;
+    font-size: 1rem;
+  }
+
+  .operator-cell {
+    font-size: 0.95rem;
   }
 
   .actions {

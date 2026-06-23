@@ -14,26 +14,17 @@
 
       <div class="count-picker" aria-label="Nombre de personnes">
         @for (count of availableCounts; track count) {
-          <button
-            type="button"
-            [class.active]="personCount() === count"
-            [attr.aria-pressed]="personCount() === count"
-            (click)="setPersonCount(count)"
-          >
-            {{ count }}
-          </button>
+        <button type="button" [class.active]="personCount() === count" [attr.aria-pressed]="personCount() === count"
+          (click)="setPersonCount(count)">
+          {{ count }}
+        </button>
         }
       </div>
     </header>
 
     @if (solved()) {
-      <app-puzzle-success-popup
-        title="Mystère résolu!"
-        message="Tous les rôles sont corrects."
-        [answer]="solutionText()"
-        actionLabel="Nouveau puzzle"
-        (action)="newPuzzle()"
-      />
+    <app-puzzle-success-popup title="Mystère résolu!" message="Tous les rôles sont corrects." [answer]="solutionText()"
+      actionLabel="Nouveau puzzle" (action)="newPuzzle()" />
     }
 
     <div class="progress-row">
@@ -45,54 +36,44 @@
 
     <section class="people-grid" aria-label="Déclarations et rôles">
       @for (name of puzzle().names; track name; let personIndex = $index) {
-        <article
-          class="person-card"
-          [class.hinted]="hintedPeople().has(personIndex)"
-          [class.complete]="answers()[personIndex]"
-        >
-          <header class="person-heading">
-            <span class="avatar" aria-hidden="true">{{ personInitial(name) }}</span>
-            <div>
-              <h2>{{ name }}</h2>
-              @if (hintedPeople().has(personIndex)) {
-                <span class="hint-badge">Révélé</span>
-              }
-            </div>
-          </header>
-
-          <div class="statements">
-            @for (statement of statementsBySpeaker()[personIndex]; track statement.key) {
-              <blockquote>« {{ statement.text }} »</blockquote>
+      <article class="person-card" [class.hinted]="hintedPeople().has(personIndex)"
+        [class.complete]="answers()[personIndex]">
+        <header class="person-heading">
+          <span class="avatar" aria-hidden="true">{{ personInitial(name) }}</span>
+          <div>
+            <h2>{{ name }}</h2>
+            @if (hintedPeople().has(personIndex)) {
+            <span class="hint-badge">Révélé</span>
             }
           </div>
+        </header>
 
-          <div class="role-picker" [attr.aria-label]="'Rôle de ' + name">
-            <button
-              type="button"
-              [class.selected]="answers()[personIndex] === 'knight'"
-              [disabled]="solved() || hintedPeople().has(personIndex)"
-              (click)="chooseRole(personIndex, 'knight')"
-            >
-              <span aria-hidden="true">♘</span>
-              Chevalier
-            </button>
-            <button
-              type="button"
-              [class.selected]="answers()[personIndex] === 'knave'"
-              [disabled]="solved() || hintedPeople().has(personIndex)"
-              (click)="chooseRole(personIndex, 'knave')"
-            >
-              <span aria-hidden="true">◆</span>
-              Menteur
-            </button>
-          </div>
-        </article>
+        <div class="statements">
+          @for (statement of statementsBySpeaker()[personIndex]; track statement.key) {
+          <blockquote>« {{ statement.text }} »</blockquote>
+          }
+        </div>
+
+        <div class="role-picker" [attr.aria-label]="'Rôle de ' + name">
+          <button type="button" [class.selected]="answers()[personIndex] === 'knight'"
+            [disabled]="solved() || hintedPeople().has(personIndex)" (click)="chooseRole(personIndex, 'knight')">
+            <span aria-hidden="true">♘</span>
+            Chevalier
+          </button>
+          <button type="button" [class.selected]="answers()[personIndex] === 'knave'"
+            [disabled]="solved() || hintedPeople().has(personIndex)" (click)="chooseRole(personIndex, 'knave')">
+            <span aria-hidden="true">◆</span>
+            Menteur
+          </button>
+        </div>
+      </article>
       }
     </section>
 
     <div class="actions">
-      <button type="button" (click)="checkAnswers()" [disabled]="solved()">Vérifier</button>
       <button type="button" class="secondary-button" (click)="showHint()" [disabled]="solved()">Indice</button>
+      <button type="button" class="secondary-button" (click)="resetAnswers()"
+        [disabled]="answeredCount() === 0 && hintedPeople().size === 0">Réinitialiser</button>
       <button type="button" class="secondary-button" (click)="newPuzzle()">Nouveau puzzle</button>
     </div>
   </section>

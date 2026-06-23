@@ -1,9 +1,10 @@
 import { NgStyle } from '@angular/common';
-import { Component, computed, signal } from '@angular/core';
+import { Component, HostListener, computed, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
 
-type ShapeKind = 'circle' | 'square' | 'rectangle' | 'triangle' | 'diamond';
+type ShapeKind = 'circle' | 'square' | 'rectangle' | 'triangle' | 'diamond' | 'hexagon' | 'cross';
+type AccentKind = 'corner' | 'top' | 'left' | 'diagonal';
 
 type ShapePiece = {
   id: string;
@@ -16,6 +17,7 @@ type ShapePiece = {
   height: number;
   backgroundColor?: string;
   accentColor?: string;
+  accentKind?: AccentKind;
 };
 
 @Component({
@@ -67,6 +69,31 @@ export class ShapeLayersPage {
     };
   }
 
+  protected pieceClass(piece: ShapePiece, extra = ''): string {
+    return [
+      'shape-piece',
+      extra,
+      piece.kind,
+      piece.backgroundColor ? 'backed' : '',
+      piece.accentColor ? 'has-accent' : '',
+      piece.accentColor ? `accent-${piece.accentKind ?? 'corner'}` : '',
+    ]
+      .filter(Boolean)
+      .join(' ');
+  }
+
+  protected choiceClass(piece: ShapePiece): string {
+    return [
+      'choice-shape',
+      piece.kind,
+      piece.backgroundColor ? 'backed' : '',
+      piece.accentColor ? 'has-accent' : '',
+      piece.accentColor ? `accent-${piece.accentKind ?? 'corner'}` : '',
+    ]
+      .filter(Boolean)
+      .join(' ');
+  }
+
   protected selectPiece(pieceId: string): void {
     this.selectedPieceId.set(pieceId);
   }
@@ -105,7 +132,16 @@ export class ShapeLayersPage {
     if (id) this.rotatePiece(id);
   }
 
-  protected rotateSelectedFromContextMenu(event: Event): void {
+  protected rotateSelectedFromContextMenu(event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.rotateSelected();
+  }
+
+  @HostListener('document:contextmenu', ['$event'])
+  protected rotateSelectedFromPageContextMenu(event: MouseEvent): void {
+    if (!this.selectedPieceId() || this.isSolved()) return;
+
     event.preventDefault();
     this.rotateSelected();
   }
@@ -113,7 +149,7 @@ export class ShapeLayersPage {
   protected rotatePiece(pieceId: string, event?: Event): void {
     event?.preventDefault();
     const piece = this.pieces().find((candidate) => candidate.id === pieceId);
-    if (!piece || piece.kind === 'circle' || this.isSolved()) return;
+    if (!piece || (piece.kind === 'circle' && !piece.accentColor) || this.isSolved()) return;
     this.selectedPieceId.set(pieceId);
     this.pieces.update((pieces) =>
       pieces.map((candidate) =>
@@ -143,6 +179,8 @@ export class ShapeLayersPage {
       rectangle: 'rectangle',
       triangle: 'triangle',
       diamond: 'losange',
+      hexagon: 'hexagone',
+      cross: 'croix',
     };
     return labels[piece.kind];
   }
@@ -153,31 +191,36 @@ export class ShapeLayersPage {
       color: string;
       backgroundColor?: string;
       accentColor?: string;
+      accentKind?: AccentKind;
     }> = [
-      { kind: 'circle', color: '#ef4444' },
-      { kind: 'square', color: '#3b82f6', accentColor: '#facc15' },
+      { kind: 'circle', color: '#ef4444', accentColor: '#f8e7c3', accentKind: 'left' },
+      { kind: 'square', color: '#3b82f6', accentColor: '#facc15', accentKind: 'corner' },
       { kind: 'rectangle', color: '#f59e0b', backgroundColor: '#f8e7c3' },
-      { kind: 'triangle', color: '#8b5cf6', accentColor: '#38bdf8' },
-      { kind: 'diamond', color: '#10b981' },
-      { kind: 'rectangle', color: '#06b6d4', backgroundColor: '#17313a' },
-      { kind: 'circle', color: '#ec4899', accentColor: '#fb923c' },
-      { kind: 'triangle', color: '#4ca82e', backgroundColor: '#f7c744', accentColor: '#5eb0df' },
-      { kind: 'diamond', color: '#f97316', accentColor: '#a855f7' },
-      { kind: 'square', color: '#a855f7', backgroundColor: '#e9d5ff' },
+      { kind: 'triangle', color: '#8b5cf6', accentColor: '#38bdf8', accentKind: 'diagonal' },
+      { kind: 'diamond', color: '#10b981', accentColor: '#f97316', accentKind: 'top' },
+      { kind: 'rectangle', color: '#06b6d4', backgroundColor: '#17313a', accentColor: '#e0f2fe', accentKind: 'top' },
+      { kind: 'circle', color: '#ec4899', accentColor: '#fb923c', accentKind: 'corner' },
+      { kind: 'triangle', color: '#4ca82e', backgroundColor: '#f7c744', accentColor: '#5eb0df', accentKind: 'diagonal' },
+      { kind: 'diamond', color: '#f97316', accentColor: '#a855f7', accentKind: 'left' },
+      { kind: 'square', color: '#a855f7', backgroundColor: '#e9d5ff', accentColor: '#fef3c7', accentKind: 'top' },
+      { kind: 'hexagon', color: '#14b8a6', backgroundColor: '#fee2e2', accentColor: '#ef4444', accentKind: 'diagonal' },
+      { kind: 'cross', color: '#facc15', backgroundColor: '#334155', accentColor: '#94a3b8', accentKind: 'corner' },
+      { kind: 'hexagon', color: '#60a5fa', accentColor: '#a3e635', accentKind: 'left' },
+      { kind: 'cross', color: '#fb7185', accentColor: '#22c55e', accentKind: 'top' },
     ];
     return definitions.map((definition, index) => ({
       id: `piece-${index}`,
       ...definition,
       x: 2.5,
       y: 2.5,
-      rotation: definition.kind === 'circle' ? 0 : Math.floor(Math.random() * 4) * 90,
+      rotation: definition.kind === 'circle' && !definition.accentColor ? 0 : Math.floor(Math.random() * 4) * 90,
       width: 84,
       height: 84,
     }));
   }
 
   private normalizedRotation(piece: ShapePiece): number {
-    if (piece.accentColor) return piece.rotation % 360;
+    if (piece.accentColor || piece.kind === 'cross') return piece.rotation % 360;
     if (piece.kind === 'circle' || piece.kind === 'square' || piece.kind === 'diamond') {
       return piece.rotation % 90;
     }
@@ -216,12 +259,7 @@ export class ShapeLayersPage {
     if (Math.abs(localX) > 0.5 || Math.abs(localY) > 0.5) return null;
 
     let color = piece.backgroundColor ?? null;
-    if (
-      piece.accentColor &&
-      localX >= 0.06 &&
-      localY >= 0.06 &&
-      (localX - 0.06) / 0.44 + (localY - 0.06) / 0.44 >= 1
-    ) {
+    if (piece.accentColor && this.isInsideAccent(piece.accentKind ?? 'corner', localX, localY)) {
       color = piece.accentColor;
     }
     if (this.isInsidePrimaryShape(piece.kind, localX, localY)) color = piece.color;
@@ -246,6 +284,23 @@ export class ShapeLayersPage {
         return y >= -0.42 && y <= 0.42 && Math.abs(x) <= (y + 0.42) / 2;
       case 'diamond':
         return Math.abs(x) + Math.abs(y) <= 0.34;
+      case 'hexagon':
+        return Math.abs(y) <= 0.38 && Math.abs(x) <= 0.38 - Math.abs(y) * 0.48;
+      case 'cross':
+        return (Math.abs(x) <= 0.095 && Math.abs(y) <= 0.39) || (Math.abs(x) <= 0.39 && Math.abs(y) <= 0.095);
+    }
+  }
+
+  private isInsideAccent(kind: AccentKind, x: number, y: number): boolean {
+    switch (kind) {
+      case 'corner':
+        return x >= 0.06 && y >= 0.06 && (x - 0.06) / 0.44 + (y - 0.06) / 0.44 >= 1;
+      case 'top':
+        return y <= -0.28;
+      case 'left':
+        return x <= -0.28;
+      case 'diagonal':
+        return y - x <= -0.32;
     }
   }
 }
