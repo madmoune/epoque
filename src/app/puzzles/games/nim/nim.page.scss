@@ -466,7 +466,7 @@ button {
   }
 
   .pile-grid {
-    grid-template-columns: repeat(auto-fit, minmax(3.65rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
     gap: 0.45rem;
   }
 
@@ -481,13 +481,17 @@ button {
   }
 
   .stones {
-    gap: 0.05rem;
+    display: grid;
+    grid-template-columns: repeat(4, 1.55rem);
+    justify-content: center;
+    align-content: center;
+    gap: 0.08rem;
     min-height: 4.25rem;
   }
 
   .stone-button {
-    width: 1.65rem;
-    height: 1.65rem;
+    width: 1.55rem;
+    height: 1.55rem;
   }
 
   .stone-button span {
@@ -501,5 +505,15 @@ button {
 
   .metric strong {
     font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .pile-grid {
+    grid-template-columns: repeat(auto-fit, minmax(6rem, 1fr));
+  }
+
+  .stones {
+    grid-template-columns: repeat(3, 1.55rem);
   }
 }

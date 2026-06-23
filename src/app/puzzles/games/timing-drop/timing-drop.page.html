@@ -1,0 +1,59 @@
+<main class="page">
+  <a routerLink="/" fragment="timing-drop" class="back-link">← Retour au menu</a>
+
+  <section class="shell">
+    <header class="hero">
+      <p class="eyebrow">Synchronisation</p>
+      <h1>Chute cachée</h1>
+      <p class="intro">
+        Chaque bille traverse un parcours caché à une vitesse différente. Lance-les au bon moment pour qu’elles arrivent ensemble.
+      </p>
+    </header>
+
+    <section class="game-layout">
+      <div class="wall-panel">
+        <div class="top-rail" aria-label="Billes à lancer">
+          @for (ball of balls(); track ball.id) {
+            <button
+              type="button"
+              class="ball-launcher"
+              [class.falling]="ball.state === 'falling'"
+              [class.arrived]="ball.state === 'arrived'"
+              [disabled]="ball.state === 'falling' || isSolved()"
+              (click)="launchBall(ball.id)"
+              [style.--ball-color]="ball.color"
+              [attr.aria-label]="'Lancer la bille ' + ball.label"
+            >
+              <span class="ball">{{ ball.label }}</span>
+            </button>
+          }
+        </div>
+
+        <div class="hidden-wall" aria-hidden="true">
+          <div class="labyrinth">
+            @for (ball of balls(); track ball.id) {
+              <span
+                class="arrival-light"
+                [class.on]="ball.state === 'arrived'"
+                [style.--ball-color]="ball.color"
+              ></span>
+            }
+          </div>
+        </div>
+      </div>
+
+      <aside class="side-panel">
+        <button type="button" (click)="newPuzzle()">Nouveau parcours</button>
+      </aside>
+    </section>
+
+    @if (isSolved()) {
+      <app-puzzle-success-popup
+        title="Arrivée synchronisée!"
+        message="Les billes sont arrivées presque en même temps."
+        actionLabel="Nouveau parcours"
+        (action)="newPuzzle()"
+      />
+    }
+  </section>
+</main>

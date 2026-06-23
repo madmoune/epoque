@@ -24,7 +24,7 @@ type PuzzleCategory = {
 export class HomePage {
   protected readonly categories: PuzzleCategory[] = [
     {
-      title: 'Puzzles de mots',
+      title: 'Mots et langage',
       description: 'Jeux de lettres, de phrases et de déchiffrement.',
       puzzles: [
         {
@@ -48,7 +48,7 @@ export class HomePage {
       ],
     },
     {
-      title: 'Puzzles de mémoire',
+      title: 'Mémoire',
       description: 'Jeux basés sur la mémorisation, les symboles et les associations.',
       puzzles: [
         {
@@ -66,8 +66,8 @@ export class HomePage {
       ],
     },
     {
-      title: 'Puzzles mathématiques',
-      description: 'Suites, logique numérique et raisonnement mathématique.',
+      title: 'Nombres et calcul',
+      description: 'Suites, grilles numériques et raisonnement mathématique.',
       puzzles: [
         {
           title: 'Suites mathématiques',
@@ -85,13 +85,37 @@ export class HomePage {
           title: 'Carré latin',
           description: 'Place chaque chiffre une seule fois par ligne et par colonne.',
           route: '/latin-square',
-          tag: 'Logique',
+          tag: 'Grille',
+        },
+        {
+          title: 'Nim',
+          description: 'Analyse les tas et trouve les bons retraits avec la logique XOR.',
+          route: '/nim',
+          tag: 'XOR',
         },
       ],
     },
     {
-      title: 'Puzzles de casse-tête',
-      description: 'Puzzles de placement, de blocs et de reconstruction visuelle.',
+      title: 'Déduction et logique',
+      description: 'Puzzles où il faut éliminer les possibilités et lire entre les indices.',
+      puzzles: [
+        {
+          title: 'Chevaliers et menteurs',
+          description: 'Déduis qui dit toujours vrai et qui ment toujours.',
+          route: '/knights-and-knaves',
+          tag: 'Logique',
+        },
+        {
+          title: 'Mastermind',
+          description: 'Devine une suite de formes et de couleurs.',
+          route: '/mastermind',
+          tag: 'Déduction',
+        },
+      ],
+    },
+    {
+      title: 'Spatial et placement',
+      description: 'Casse-têtes de formes, de déplacements et de reconstruction visuelle.',
       puzzles: [
         {
           title: 'Grille de pièces',
@@ -113,15 +137,15 @@ export class HomePage {
         },
         {
           title: 'Superposition',
-          description: 'Déplace, tourne et superpose les formes colorées pour reproduire l’image.',
+          description: 'Superpose les formes colorées dans le bon ordre pour reproduire l’image.',
           route: '/shape-layers',
           tag: 'Formes',
         },
         {
-          title: 'Chevaliers et menteurs',
-          description: 'Déduis qui dit toujours vrai et qui ment toujours.',
-          route: '/knights-and-knaves',
-          tag: 'Logique',
+          title: 'Rush Hour',
+          description: 'Déplace les véhicules dans une grille 6×6 pour libérer la voiture rouge.',
+          route: '/rush-hour',
+          tag: 'Blocage',
         },
         {
           title: 'Dé logique',
@@ -132,21 +156,9 @@ export class HomePage {
       ],
     },
     {
-      title: 'Jeux',
-      description: 'Jeux de stratégie contre un adversaire automatisé.',
+      title: 'Stratégie et timing',
+      description: 'Jeux plus directs où le bon coup ou le bon moment fait toute la différence.',
       puzzles: [
-        {
-          title: 'Nim',
-          description: 'Retire des objets face à un CPU presque parfait.',
-          route: '/nim',
-          tag: 'Stratégie',
-        },
-        {
-          title: 'Mastermind',
-          description: 'Devine une suite de formes et de couleurs.',
-          route: '/mastermind',
-          tag: 'Déduction',
-        },
         {
           title: 'Tic-Tac-Toe',
           description: 'Déplace tes trois X et aligne-les avant le CPU.',
@@ -154,15 +166,15 @@ export class HomePage {
           tag: 'Stratégie',
         },
         {
-          title: 'Rush Hour',
-          description: 'Déplace les véhicules dans une grille 6×6 pour libérer la voiture rouge.',
-          route: '/rush-hour',
-          tag: 'Glisse',
+          title: 'Chute cachée',
+          description: 'Lance quatre billes au bon moment pour les faire arriver ensemble.',
+          route: '/timing-drop',
+          tag: 'Timing',
         },
       ],
     },
     {
-      title: 'Puzzles',
+      title: 'Énigmes',
       description: 'Vraies énigmes de type jeu d’évasion.',
       puzzles: [
         {

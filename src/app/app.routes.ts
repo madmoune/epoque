@@ -93,6 +93,11 @@ export const routes: Routes = [
       import('./puzzles/games/rush-hour/rush-hour.page').then((m) => m.RushHourPage),
   },
   {
+    path: 'timing-drop',
+    loadComponent: () =>
+      import('./puzzles/games/timing-drop/timing-drop.page').then((m) => m.TimingDropPage),
+  },
+  {
     path: 'puzzlehunt/navigation',
     loadComponent: () =>
       import('./puzzles/puzzlehunt/Navigation/navigation.page').then((m) => m.NavigationPuzzlePage),
