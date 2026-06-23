@@ -20,11 +20,12 @@
                         {{ character.encryptedCharacter }}
                     </span>
 
-                    <input #guessInput type="text" autocomplete="off" autocapitalize="characters" inputmode="text"
+                    <input #guessInput type="text" autocomplete="off" autocapitalize="characters" inputmode="none"
                         enterkeyhint="next"
                         [attr.aria-label]="'Réponse pour la lettre chiffrée ' + character.encryptedCharacter"
                         [attr.data-character-index]="character.index" [ngModel]="guesses()[character.index]"
-                        (focus)="guessInput.select()"
+                        (focus)="activateInput(character.index, guessInput)"
+                        (click)="activateInput(character.index, guessInput)"
                         (keydown)="handleGuessKeydown(character.index, $event, guessInput)" [disabled]="isCorrect()"
                         [class.correct]="
     guesses()[character.index] === character.answerCharacter
@@ -39,6 +40,13 @@
             </span>
             }
         </div>
+        <app-custom-keyboard
+            [rows]="letterKeyboardRows"
+            [visible]="activeCharacterIndex() !== null"
+            [disabled]="isCorrect()"
+            (keyPress)="handleKeyboardKey($event)"
+        />
+
         <div class="actions">
             <button type="button" class="secondary-button" (click)="showHint()" [disabled]="isCorrect()">
                 Indice

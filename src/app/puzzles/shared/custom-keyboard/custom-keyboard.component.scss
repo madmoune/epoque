@@ -1,0 +1,67 @@
+.custom-keyboard {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  :host.keyboard-visible {
+    display: block;
+    min-height: 11rem;
+  }
+
+  .custom-keyboard {
+    position: fixed;
+    right: max(0.45rem, env(safe-area-inset-right));
+    bottom: max(0.45rem, env(safe-area-inset-bottom));
+    left: max(0.45rem, env(safe-area-inset-left));
+    z-index: 60;
+    display: grid;
+    gap: 0.32rem;
+    width: min(44rem, calc(100vw - 0.9rem));
+    margin: 0 auto;
+    padding: 0.45rem;
+    border: 1px solid var(--border, #d5dcda);
+    border-radius: 0.85rem;
+    background: color-mix(in srgb, var(--surface-raised, #fff) 92%, transparent);
+    box-shadow: 0 -0.35rem 1.2rem rgb(0 0 0 / 10%);
+    backdrop-filter: blur(8px);
+  }
+
+  .keyboard-row {
+    display: flex;
+    justify-content: center;
+    gap: 0.28rem;
+  }
+
+  .keyboard-key {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 2.35rem;
+    padding: 0.25rem;
+    border: 1px solid var(--border, #d5dcda);
+    border-radius: 0.55rem;
+    background: var(--surface-soft, #f2f2f2);
+    color: var(--text, #222);
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 850;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  .keyboard-key:active {
+    transform: translateY(1px);
+  }
+
+  .keyboard-key:disabled {
+    cursor: default;
+    opacity: 0.45;
+  }
+
+  .wide-key {
+    flex-grow: 1.45;
+  }
+
+  .space-key {
+    flex-grow: 4;
+  }
+}

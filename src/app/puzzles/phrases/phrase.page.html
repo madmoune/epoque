@@ -50,9 +50,17 @@
         <div class="answer-field-group">
             <label class="answer-label" for="answer">Ta réponse</label>
             <input #answerField id="answer" class="answer-input" type="text" autocomplete="off" autocapitalize="characters"
-                [ngModel]="answerInput()" (ngModelChange)="updateAnswer($event)" [class.correct]="isAnswerCorrect()"
-                [disabled]="isSolved()" />
+                inputmode="none" [ngModel]="answerInput()" (ngModelChange)="updateAnswer($event)"
+                (focus)="selectInputContent($event)" (click)="selectInputContent($event)"
+                [class.correct]="isAnswerCorrect()" [disabled]="isSolved()" />
         </div>
+
+        <app-custom-keyboard
+            [rows]="letterKeyboardRows"
+            [visible]="keyboardVisible()"
+            [disabled]="isSolved()"
+            (keyPress)="handleKeyboardKey($event)"
+        />
 
         <div class="actions">
             <button type="button" class="secondary-button" (click)="nextPuzzle()">

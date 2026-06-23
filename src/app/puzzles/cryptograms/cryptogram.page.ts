@@ -1,5 +1,6 @@
 import {
     Component,
+    HostListener,
     computed,
     ElementRef,
     inject,
@@ -14,11 +15,15 @@ import {
     CryptogramPuzzle,
 } from '../../puzzles/cryptograms/cryptogram.model';
 import { CryptogramService } from '../../puzzles/cryptograms/cryptogram.service';
+import {
+    CustomKeyboardComponent,
+    CustomKeyboardKey,
+} from '../shared/custom-keyboard/custom-keyboard.component';
 import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
 
 @Component({
     selector: 'app-cryptograms-page',
-    imports: [FormsModule, RouterLink, PuzzleSuccessPopupComponent],
+    imports: [FormsModule, RouterLink, PuzzleSuccessPopupComponent, CustomKeyboardComponent],
     templateUrl: './cryptogram.page.html',
     styleUrl: './cryptogram.page.scss',
 })
@@ -33,6 +38,12 @@ export class CryptogramsPage {
 
     protected readonly puzzle = signal<CryptogramPuzzle | null>(null);
     protected readonly guesses = signal<string[]>([]);
+    protected readonly activeCharacterIndex = signal<number | null>(null);
+    protected readonly letterKeyboardRows: CustomKeyboardKey[][] = [
+        ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+        ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
+        ['Z', 'X', 'C', 'V', 'B', 'N', 'M', 'backspace'],
+    ];
 
     protected readonly characters = computed<CryptogramCharacter[]>(() => {
         const puzzle = this.puzzle();
@@ -98,6 +109,7 @@ export class CryptogramsPage {
         value: string,
         currentInput: HTMLInputElement,
     ): void {
+        this.activeCharacterIndex.set(index);
         const nextGuesses = [...this.guesses()];
         const character = value.slice(-1).toUpperCase();
 
@@ -113,6 +125,44 @@ export class CryptogramsPage {
         });
     }
 
+    protected activateInput(index: number, input: HTMLInputElement): void {
+        this.activeCharacterIndex.set(index);
+        input.select();
+    }
+
+    @HostListener('document:pointerdown', ['$event'])
+    protected hideKeyboardWhenClickingAway(event: PointerEvent): void {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+        if (target.closest('.character-tile input') || target.closest('app-custom-keyboard')) return;
+        this.activeCharacterIndex.set(null);
+    }
+
+    protected handleKeyboardKey(key: CustomKeyboardKey): void {
+        if (this.isCorrect()) return;
+
+        const activeIndex = this.activeCharacterIndex() ?? this.findFirstEmptyGuessIndex();
+        if (activeIndex === null) return;
+
+        const input = this.findInputByCharacterIndex(activeIndex);
+        if (!input) return;
+
+        if (key === 'backspace') {
+            this.handleBackspace(activeIndex, new Event('keyboard'), input);
+            return;
+        }
+
+        if (key === 'space') return;
+
+        const nextGuesses = [...this.guesses()];
+        nextGuesses[activeIndex] = key;
+        this.guesses.set(nextGuesses);
+
+        if (this.isCorrect()) return;
+
+        queueMicrotask(() => this.focusNextEmptyInput(input));
+    }
+
     protected nextPuzzle(): void {
         const nextPuzzle = this.cryptogramService.getRandomPuzzle();
 
@@ -123,8 +173,12 @@ export class CryptogramsPage {
                 this.isLetter(character) ? '' : character,
             ),
         );
+        this.activeCharacterIndex.set(null);
 
-        window.setTimeout(() => this.guessInputs.first?.nativeElement.focus());
+        window.setTimeout(() => {
+            this.guessInputs.first?.nativeElement.focus();
+            this.guessInputs.first?.nativeElement.select();
+        });
     }
 
     private async loadPuzzle(): Promise<void> {
@@ -185,6 +239,12 @@ export class CryptogramsPage {
             .find((input) => !input.value);
 
         nextInput?.focus();
+        nextInput?.select();
+
+        if (nextInput) {
+            const index = Number(nextInput.dataset['characterIndex']);
+            this.activeCharacterIndex.set(Number.isNaN(index) ? null : index);
+        }
     }
 
     protected handleBackspace(
@@ -219,7 +279,25 @@ export class CryptogramsPage {
 
         queueMicrotask(() => {
             previousInput.focus();
+            previousInput.select();
+            this.activeCharacterIndex.set(previousIndex);
         });
+    }
+
+    private findInputByCharacterIndex(index: number): HTMLInputElement | undefined {
+        return this.guessInputs
+            .toArray()
+            .map((input) => input.nativeElement)
+            .find((input) => Number(input.dataset['characterIndex']) === index);
+    }
+
+    private findFirstEmptyGuessIndex(): number | null {
+        const index = this.guesses().findIndex((guess, characterIndex) => {
+            const character = this.characters()[characterIndex];
+            return character?.isLetter && !guess;
+        });
+
+        return index === -1 ? null : index;
     }
 
     private findPreviousInput(
@@ -278,5 +356,6 @@ export class CryptogramsPage {
                 this.isLetter(character) ? '' : character,
             ),
         );
+        this.activeCharacterIndex.set(null);
     }
 }

@@ -20,10 +20,17 @@
 
             <div class="answer-field-group">
                 <label class="answer-label" for="math-answer">Ta réponse</label>
-                <input #answerField id="math-answer" class="answer-input" type="number" inputmode="numeric"
-                    [value]="mathAnswer()" (input)="updateMathAnswer($event)" [disabled]="isCorrect()"
-                    autocomplete="off" />
+                <input #answerField id="math-answer" class="answer-input" type="number" inputmode="none"
+                    [value]="mathAnswer()" (input)="updateMathAnswer($event)" (focus)="selectInputContent($event)"
+                    (click)="selectInputContent($event)" [disabled]="isCorrect()" autocomplete="off" />
             </div>
+
+            <app-custom-keyboard
+                [rows]="numberKeyboardRows"
+                [visible]="keyboardVisible()"
+                [disabled]="isCorrect()"
+                (keyPress)="handleKeyboardKey($event)"
+            />
 
             <div class="actions">
                 <button type="button" class="secondary-button" (click)="showHint()">

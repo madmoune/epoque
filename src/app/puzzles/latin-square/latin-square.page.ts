@@ -1,5 +1,9 @@
-import { Component, computed, ElementRef, QueryList, signal, ViewChildren } from '@angular/core';
+import { Component, HostListener, computed, ElementRef, QueryList, signal, ViewChildren } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import {
+  CustomKeyboardComponent,
+  CustomKeyboardKey,
+} from '../shared/custom-keyboard/custom-keyboard.component';
 import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
 
 type LatinSquareSize = 4 | 5;
@@ -18,7 +22,7 @@ type LatinSquarePuzzle = {
 
 @Component({
   selector: 'app-latin-square-page',
-  imports: [RouterLink, PuzzleSuccessPopupComponent],
+  imports: [RouterLink, PuzzleSuccessPopupComponent, CustomKeyboardComponent],
   templateUrl: './latin-square.page.html',
   styleUrl: './latin-square.page.scss',
 })
@@ -31,8 +35,13 @@ export class LatinSquarePage {
   protected readonly answers = signal<string[][]>(this.createEmptyAnswers(4));
   protected readonly hintedPositions = signal<Set<string>>(new Set());
   protected readonly hasChecked = signal(false);
+  protected readonly activeCell = signal<{ row: number; col: number } | null>(null);
 
   protected readonly symbols = computed(() => this.createSymbols(this.selectedSize()));
+  protected readonly numberKeyboardRows = computed<CustomKeyboardKey[][]>(() => [
+    this.symbols().map((symbol) => String(symbol)),
+    ['backspace'],
+  ]);
   protected readonly gridTemplateColumns = computed(
     () => `repeat(${this.puzzle().size}, minmax(0, var(--latin-cell-size)))`,
   );
@@ -95,6 +104,37 @@ export class LatinSquarePage {
     this.hasChecked.set(false);
   }
 
+  protected activateInput(row: number, col: number, event: Event): void {
+    this.activeCell.set({ row, col });
+
+    if (event.target instanceof HTMLInputElement) {
+      event.target.select();
+    }
+  }
+
+  @HostListener('document:pointerdown', ['$event'])
+  protected hideKeyboardWhenClickingAway(event: PointerEvent): void {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    if (target.closest('.number-cell input') || target.closest('app-custom-keyboard')) return;
+    this.activeCell.set(null);
+  }
+
+  protected handleKeyboardKey(key: CustomKeyboardKey): void {
+    const activeCell = this.activeCell();
+    if (!activeCell || this.isHinted(activeCell.row, activeCell.col)) return;
+
+    if (key === 'backspace') {
+      this.updateAnswer(activeCell.row, activeCell.col, '');
+      return;
+    }
+
+    if (key === 'space') return;
+
+    this.updateAnswer(activeCell.row, activeCell.col, key);
+    this.focusNextInput(activeCell.row, activeCell.col);
+  }
+
   protected checkPuzzle(): void {
     this.hasChecked.set(true);
   }
@@ -127,6 +167,28 @@ export class LatinSquarePage {
 
   protected isHinted(row: number, col: number): boolean {
     return this.hintedPositions().has(this.positionKey(row, col));
+  }
+
+  private focusNextInput(row: number, col: number): void {
+    const inputs = this.answerFields.toArray().map((input) => input.nativeElement);
+    const currentInput = inputs.find(
+      (input) => input.dataset['row'] === String(row) && input.dataset['col'] === String(col),
+    );
+
+    if (!currentInput) return;
+
+    const currentIndex = inputs.indexOf(currentInput);
+    const nextInput = inputs[currentIndex + 1];
+    if (!nextInput) return;
+
+    window.setTimeout(() => {
+      nextInput.focus();
+      nextInput.select();
+      this.activeCell.set({
+        row: Number(nextInput.dataset['row']),
+        col: Number(nextInput.dataset['col']),
+      });
+    });
   }
 
   private createPuzzle(size: LatinSquareSize): LatinSquarePuzzle {

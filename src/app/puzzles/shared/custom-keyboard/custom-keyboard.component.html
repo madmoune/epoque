@@ -1,0 +1,19 @@
+@if (visible()) {
+  <div class="custom-keyboard" aria-label="Clavier du jeu">
+    @for (row of rows(); track $index) {
+      <div class="keyboard-row">
+        @for (key of row; track key) {
+          <button
+            type="button"
+            class="keyboard-key"
+            [class]="keyClass(key)"
+            [disabled]="disabled()"
+            (click)="keyPress.emit(key)"
+          >
+            {{ keyLabel(key) }}
+          </button>
+        }
+      </div>
+    }
+  </div>
+}

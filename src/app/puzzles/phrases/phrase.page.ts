@@ -1,4 +1,4 @@
-import { Component, computed, ElementRef, inject, signal, ViewChild } from '@angular/core';
+import { Component, HostListener, computed, ElementRef, inject, signal, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import {
@@ -6,11 +6,15 @@ import {
     PhrasePuzzle,
 } from '../../puzzles/phrases/phrase.model';
 import { PhraseService } from '../../puzzles/phrases/phrase.service';
+import {
+    CustomKeyboardComponent,
+    CustomKeyboardKey,
+} from '../shared/custom-keyboard/custom-keyboard.component';
 import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
 
 @Component({
     selector: 'app-phrases-page',
-    imports: [RouterLink, FormsModule, PuzzleSuccessPopupComponent],
+    imports: [RouterLink, FormsModule, PuzzleSuccessPopupComponent, CustomKeyboardComponent],
     templateUrl: './phrase.page.html',
     styleUrl: './phrase.page.scss',
 })
@@ -25,6 +29,13 @@ export class PhrasesPage {
 
     protected readonly puzzle = signal<PhrasePuzzle | null>(null);
     protected readonly answerInput = signal('');
+    protected readonly keyboardVisible = signal(false);
+    protected readonly letterKeyboardRows: CustomKeyboardKey[][] = [
+        ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+        ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
+        ['Z', 'X', 'C', 'V', 'B', 'N', 'M', 'backspace'],
+        ['space'],
+    ];
 
     protected readonly characters = computed<PhraseCharacter[]>(() => {
         const puzzle = this.puzzle();
@@ -152,10 +163,38 @@ export class PhrasesPage {
         this.answerInput.set(value);
     }
 
+    protected handleKeyboardKey(key: CustomKeyboardKey): void {
+        if (this.isSolved()) return;
+
+        if (key === 'backspace') {
+            this.answerInput.update((answer) => answer.slice(0, -1));
+            this.focusAnswerField();
+            return;
+        }
+
+        this.answerInput.update((answer) => `${answer}${key === 'space' ? ' ' : key}`);
+        this.focusAnswerField();
+    }
+
+    protected selectInputContent(event: Event): void {
+        if (event.target instanceof HTMLInputElement) {
+            this.keyboardVisible.set(true);
+            event.target.select();
+        }
+    }
+
+    @HostListener('document:pointerdown', ['$event'])
+    protected hideKeyboardWhenClickingAway(event: PointerEvent): void {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+        if (target.closest('.answer-input') || target.closest('app-custom-keyboard')) return;
+        this.keyboardVisible.set(false);
+    }
+
     protected nextPuzzle(): void {
         this.puzzle.set(this.phraseService.getRandomPuzzle());
         this.answerInput.set('');
-        window.setTimeout(() => this.answerField?.nativeElement.focus());
+        this.focusAnswerField();
     }
 
     private async loadPuzzle(): Promise<void> {
@@ -182,5 +221,9 @@ export class PhrasesPage {
 
     private isLetter(character: string): boolean {
         return /^[A-Z]$/.test(character);
+    }
+
+    private focusAnswerField(): void {
+        window.setTimeout(() => this.answerField?.nativeElement.focus());
     }
 }

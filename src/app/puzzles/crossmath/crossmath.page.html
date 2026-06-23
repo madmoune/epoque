@@ -48,11 +48,15 @@
               } @else {
                 <input #answerField
                   type="number"
-                  inputmode="numeric"
+                  inputmode="none"
                   min="1"
                   max="9"
                   autocomplete="off"
+                  [attr.data-row]="cell.row"
+                  [attr.data-col]="cell.col"
                   [value]="cellAnswer(cell.row, cell.col)"
+                  (focus)="activateInput(cell.row, cell.col, $event)"
+                  (click)="activateInput(cell.row, cell.col, $event)"
                   (input)="updateAnswer(cell.row, cell.col, $any($event.target).value)"
                   aria-label="Case de réponse"
                 />
@@ -107,6 +111,13 @@
         <div class="empty-cell"></div>
         <div class="empty-cell"></div>
       </div>
+
+      <app-custom-keyboard
+        [rows]="numberKeyboardRows"
+        [visible]="activeCell() !== null"
+        [disabled]="isCorrect()"
+        (keyPress)="handleKeyboardKey($event)"
+      />
 
       <div class="actions">
         <button type="button" (click)="checkPuzzle()">Vérifier</button>

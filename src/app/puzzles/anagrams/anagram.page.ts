@@ -1,8 +1,12 @@
-import { Component, computed, ElementRef, inject, signal, ViewChild } from '@angular/core';
+import { Component, HostListener, computed, ElementRef, inject, signal, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AnagramService } from '../../puzzles/anagrams/anagram.service';
 import { AnagramWord } from '../../puzzles/anagrams/anagram-word.model';
+import {
+    CustomKeyboardComponent,
+    CustomKeyboardKey,
+} from '../shared/custom-keyboard/custom-keyboard.component';
 import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
 
 type LetterDisplayMode = 'default' | 'alphabetical' | 'vowelsFirst';
@@ -10,7 +14,7 @@ type LetterLayoutMode = 'line' | 'circle';
 
 @Component({
     selector: 'app-anagrams-page',
-    imports: [FormsModule, RouterLink, PuzzleSuccessPopupComponent],
+    imports: [FormsModule, RouterLink, PuzzleSuccessPopupComponent, CustomKeyboardComponent],
     templateUrl: './anagram.page.html',
     styleUrl: './anagram.page.scss',
 })
@@ -28,9 +32,15 @@ export class AnagramsPage {
     protected readonly answerInput = signal('');
 
     protected readonly hintLetterCount = signal(0);
+    protected readonly keyboardVisible = signal(false);
 
     protected readonly letterDisplayMode = signal<LetterDisplayMode>('default');
     protected readonly letterLayoutMode = signal<LetterLayoutMode>('line');
+    protected readonly letterKeyboardRows: CustomKeyboardKey[][] = [
+        ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+        ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
+        ['Z', 'X', 'C', 'V', 'B', 'N', 'M', 'backspace'],
+    ];
 
     protected readonly displayedLetters = computed(() => {
         const letters = this.scrambledLetters().split('');
@@ -90,6 +100,36 @@ export class AnagramsPage {
 
     protected updateAnswer(value: string): void {
         this.answerInput.set(value);
+    }
+
+    protected handleKeyboardKey(key: CustomKeyboardKey): void {
+        if (this.isCorrect()) return;
+
+        if (key === 'backspace') {
+            this.answerInput.update((answer) => answer.slice(0, -1));
+            this.focusAnswerField();
+            return;
+        }
+
+        if (key === 'space') return;
+
+        this.answerInput.update((answer) => `${answer}${key}`);
+        this.focusAnswerField();
+    }
+
+    protected selectInputContent(event: Event): void {
+        if (event.target instanceof HTMLInputElement) {
+            this.keyboardVisible.set(true);
+            event.target.select();
+        }
+    }
+
+    @HostListener('document:pointerdown', ['$event'])
+    protected hideKeyboardWhenClickingAway(event: PointerEvent): void {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+        if (target.closest('.answer-input') || target.closest('app-custom-keyboard')) return;
+        this.keyboardVisible.set(false);
     }
 
     protected nextPuzzle(): void {

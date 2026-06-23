@@ -1,12 +1,16 @@
-import { Component, computed, ElementRef, inject, signal, ViewChild } from '@angular/core';
+import { Component, HostListener, computed, ElementRef, inject, signal, ViewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import {
+    CustomKeyboardComponent,
+    CustomKeyboardKey,
+} from '../shared/custom-keyboard/custom-keyboard.component';
 import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
 import { MathSequencePuzzle } from '../../puzzles/sequences/sequences.model';
 import { SequencesService } from '../../puzzles/sequences/sequences.service';
 
 @Component({
     selector: 'app-sequences-page',
-    imports: [RouterLink, PuzzleSuccessPopupComponent],
+    imports: [RouterLink, PuzzleSuccessPopupComponent, CustomKeyboardComponent],
     templateUrl: './sequences.page.html',
     styleUrl: './sequences.page.scss',
 })
@@ -22,6 +26,13 @@ export class SequencesPage {
 
     protected readonly mathAnswer = signal('');
     protected readonly hintCount = signal(0);
+    protected readonly keyboardVisible = signal(false);
+    protected readonly numberKeyboardRows: CustomKeyboardKey[][] = [
+        ['1', '2', '3'],
+        ['4', '5', '6'],
+        ['7', '8', '9'],
+        ['-', '0', 'backspace'],
+    ];
 
     protected readonly isHintVisible = computed(() => this.hintCount() >= 1);
     protected readonly isAnswerHintVisible = computed(() => this.hintCount() >= 2);
@@ -50,6 +61,42 @@ export class SequencesPage {
         this.mathAnswer.set(input.value);
     }
 
+    protected handleKeyboardKey(key: CustomKeyboardKey): void {
+        if (this.isCorrect()) return;
+
+        if (key === 'backspace') {
+            this.mathAnswer.update((answer) => answer.slice(0, -1));
+            this.focusAnswerField();
+            return;
+        }
+
+        if (key === 'space') return;
+
+        if (key === '-') {
+            this.mathAnswer.update((answer) => (answer.startsWith('-') ? answer.slice(1) : `-${answer}`));
+            this.focusAnswerField();
+            return;
+        }
+
+        this.mathAnswer.update((answer) => `${answer}${key}`);
+        this.focusAnswerField();
+    }
+
+    protected selectInputContent(event: Event): void {
+        if (event.target instanceof HTMLInputElement) {
+            this.keyboardVisible.set(true);
+            event.target.select();
+        }
+    }
+
+    @HostListener('document:pointerdown', ['$event'])
+    protected hideKeyboardWhenClickingAway(event: PointerEvent): void {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+        if (target.closest('.answer-input') || target.closest('app-custom-keyboard')) return;
+        this.keyboardVisible.set(false);
+    }
+
     protected showHint(): void {
         this.hintCount.update((count) => Math.min(count + 1, 2));
     }
@@ -58,6 +105,10 @@ export class SequencesPage {
         this.puzzle.set(this.sequencesService.createPuzzle());
         this.mathAnswer.set('');
         this.hintCount.set(0);
+        this.focusAnswerField();
+    }
+
+    private focusAnswerField(): void {
         window.setTimeout(() => this.answerField?.nativeElement.focus());
     }
 }
