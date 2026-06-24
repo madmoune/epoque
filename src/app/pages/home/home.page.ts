@@ -142,6 +142,12 @@ export class HomePage {
           tag: 'Formes',
         },
         {
+          title: 'Tangram',
+          description: 'Place et assemble les sept pièces classiques du tangram.',
+          route: '/tangram',
+          tag: 'Formes',
+        },
+        {
           title: 'Rush Hour',
           description: 'Déplace les véhicules dans une grille 6×6 pour libérer la voiture rouge.',
           route: '/rush-hour',

@@ -1,0 +1,140 @@
+<main class="page">
+  <a routerLink="/" fragment="tangram" class="back-link">← Retour au menu</a>
+
+  <section class="card">
+    <p class="eyebrow">Tangram</p>
+    <h1>Place les pièces</h1>
+    <p class="instructions">
+      Reproduis la silhouette en utilisant les sept pièces. Chaque pièce de la cible touche une
+      autre pièce sur un côté complet.
+    </p>
+
+    <div class="game-layout">
+      <section class="board-section">
+        <div
+          class="tangram-board"
+          aria-label="Plateau de tangram"
+          (pointerdown)="clearSelection()"
+        >
+          <svg
+            class="silhouette"
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <defs>
+              <filter id="silhouette-merge" x="-5%" y="-5%" width="110%" height="110%">
+                <feMorphology operator="dilate" radius="0.12"></feMorphology>
+              </filter>
+            </defs>
+            <g filter="url(#silhouette-merge)">
+              @for (targetPiece of targetPieces(); track targetPiece.pieceId) {
+                <polygon [attr.points]="silhouettePoints(targetPiece)"></polygon>
+              }
+            </g>
+          </svg>
+
+          @for (placedPiece of placedPieces(); track placedPiece.pieceId) {
+            @let piece = getDefinition(placedPiece.pieceId);
+            <button
+              type="button"
+              class="board-piece"
+              [class.selected]="selectedPieceId() === piece.id"
+              [style]="pieceStyle(placedPiece)"
+              (pointerdown)="startBoardDrag(placedPiece, $event)"
+              (click)="selectPlacedPiece(piece.id, $event)"
+              [attr.aria-label]="'Déplacer ' + piece.name"
+            >
+              <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                <polygon [attr.points]="piece.points" [attr.fill]="piece.color"></polygon>
+              </svg>
+            </button>
+          }
+
+          @if (placedPieces().length === 0) {
+            <p class="empty-board">Dépose les pièces ici</p>
+          }
+        </div>
+
+        @if (selectedPiece(); as piece) {
+          <p class="selected-info">Sélection : <strong>{{ piece.name }}</strong></p>
+        }
+      </section>
+
+      <aside class="piece-tray" aria-label="Pièces à placer">
+        <h2>Pièces à placer</h2>
+
+        <div class="piece-list">
+          @for (piece of unplacedPieces(); track piece.id) {
+            <button
+              type="button"
+              class="piece-button"
+              [class.selected]="selectedPieceId() === piece.id"
+              (pointerdown)="startTrayDrag(piece.id, $event)"
+              [attr.aria-label]="'Déplacer ' + piece.name"
+            >
+              <svg
+                class="piece-preview"
+                viewBox="0 0 100 100"
+                preserveAspectRatio="none"
+                [style]="trayPreviewStyle(piece)"
+                aria-hidden="true"
+              >
+                <polygon [attr.points]="piece.points" [attr.fill]="piece.color"></polygon>
+              </svg>
+            </button>
+          }
+        </div>
+
+        @if (unplacedPieces().length === 0) {
+          <p class="tray-empty">Toutes les pièces sont sur le plateau.</p>
+        }
+      </aside>
+    </div>
+
+    <div class="actions">
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="rotateSelectedPiece()"
+        [disabled]="!lastSelectedPieceId()"
+      >
+        Pivoter
+      </button>
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="placeHintPiece()"
+        [disabled]="!needsHint()"
+      >
+        Indice
+      </button>
+      <button type="button" class="secondary-button" (click)="resetBoard()">
+        Recommencer
+      </button>
+      <button type="button" (click)="newPuzzle()">Nouvelle silhouette</button>
+    </div>
+
+    @if (isSolved()) {
+      <app-puzzle-success-popup
+        title="Tangram réussi !"
+        message="La silhouette est complète."
+        actionLabel="Nouvelle silhouette"
+        (action)="newPuzzle()"
+      />
+    }
+  </section>
+
+  @if (dragState(); as drag) {
+    @let piece = getDefinition(drag.pieceId);
+    <div class="drag-preview" [style]="dragPreviewStyle(drag)">
+      <svg
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+      >
+        <polygon [attr.points]="piece.points" [attr.fill]="piece.color"></polygon>
+      </svg>
+    </div>
+  }
+</main>

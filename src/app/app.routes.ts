@@ -44,6 +44,10 @@ export const routes: Routes = [
       import('./puzzles/shape-layers/shape-layers.page').then((m) => m.ShapeLayersPage),
   },
   {
+    path: 'tangram',
+    loadComponent: () => import('./puzzles/tangram/tangram.page').then((m) => m.TangramPage),
+  },
+  {
     path: 'knights-and-knaves',
     loadComponent: () =>
       import('./puzzles/knights-and-knaves/knights-and-knaves.page').then(
