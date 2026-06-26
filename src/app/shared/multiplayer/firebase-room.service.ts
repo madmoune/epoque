@@ -1,6 +1,13 @@
 import { Injectable } from '@angular/core';
 import { FirebaseApp, FirebaseOptions, getApp, getApps, initializeApp } from 'firebase/app';
-import { Auth, getAuth, signInAnonymously } from 'firebase/auth';
+import {
+  Auth,
+  browserSessionPersistence,
+  getAuth,
+  setPersistence,
+  signInAnonymously,
+  signOut,
+} from 'firebase/auth';
 import {
   DataSnapshot,
   Database,
@@ -43,6 +50,7 @@ export interface MultiplayerRoom<TState = unknown> {
 
 @Injectable({ providedIn: 'root' })
 export class FirebaseRoomService {
+  private readonly authSessionKey = 'epique.firebase.authSessionStarted';
   private app?: FirebaseApp;
   private auth?: Auth;
   private database?: Database;
@@ -243,6 +251,13 @@ export class FirebaseRoomService {
       throw new Error('Firebase Auth is not available.');
     }
 
+    await setPersistence(auth, browserSessionPersistence);
+
+    const hasTabSession = sessionStorage.getItem(this.authSessionKey);
+    if (!hasTabSession && auth.currentUser) {
+      await signOut(auth);
+    }
+
     if (!auth.currentUser) {
       await signInAnonymously(auth);
     }
@@ -251,6 +266,8 @@ export class FirebaseRoomService {
     if (!uid) {
       throw new Error('Could not start an anonymous Firebase session.');
     }
+
+    sessionStorage.setItem(this.authSessionKey, uid);
 
     return uid;
   }
