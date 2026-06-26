@@ -87,9 +87,7 @@ export const routes: Routes = [
   {
     path: 'tic-tac-toe',
     loadComponent: () =>
-      import('./puzzles/games/tic-tac-toe/tic-tac-toe.page').then(
-        (m) => m.TicTacToePage,
-      ),
+      import('./puzzles/games/tic-tac-toe/tic-tac-toe.page').then((m) => m.TicTacToePage),
   },
   {
     path: 'rush-hour',
@@ -100,6 +98,13 @@ export const routes: Routes = [
     path: 'timing-drop',
     loadComponent: () =>
       import('./puzzles/games/timing-drop/timing-drop.page').then((m) => m.TimingDropPage),
+  },
+  {
+    path: 'describe-symbols',
+    loadComponent: () =>
+      import('./puzzles/games/describe-symbols/describe-symbols.page').then(
+        (m) => m.DescribeSymbolsPage,
+      ),
   },
   {
     path: 'puzzlehunt/navigation',

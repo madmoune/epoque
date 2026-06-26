@@ -131,7 +131,8 @@ export class HomePage {
         },
         {
           title: 'Taquin 15',
-          description: 'Glisse les 15 pièces pour remettre les nombres en ordre ou reconstruire une image.',
+          description:
+            'Glisse les 15 pièces pour remettre les nombres en ordre ou reconstruire une image.',
           route: '/sliding-puzzle',
           tag: 'Glisse',
         },
@@ -176,6 +177,18 @@ export class HomePage {
           description: 'Lance quatre billes au bon moment pour les faire arriver ensemble.',
           route: '/timing-drop',
           tag: 'Timing',
+        },
+      ],
+    },
+    {
+      title: 'Multi-joueurs',
+      description: 'Jeux a partager en salle avec plusieurs joueurs.',
+      puzzles: [
+        {
+          title: 'Description de symboles',
+          description: 'Decris un symbole pour que les autres retrouvent la bonne image.',
+          route: '/describe-symbols',
+          tag: 'En ligne',
         },
       ],
     },

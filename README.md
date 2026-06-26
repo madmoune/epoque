@@ -36,6 +36,18 @@ ng build
 
 This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
 
+## Firebase multiplayer setup
+
+This project has a lightweight Firebase Realtime Database room service for multiplayer games.
+
+1. Create a Firebase project at <https://console.firebase.google.com/>.
+2. Add a web app to the Firebase project.
+3. Create a Realtime Database for the project.
+4. Copy the web app config values into `src/environments/environment.ts`.
+5. In the Firebase console, add the rules from `database.rules.json` to Realtime Database rules.
+
+The current rules are intended for early prototypes with shareable room codes. Tighten them before using public player data or launching a public game.
+
 ## Running unit tests
 
 To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:

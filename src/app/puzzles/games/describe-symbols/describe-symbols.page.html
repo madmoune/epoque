@@ -1,0 +1,388 @@
+<main class="page">
+  <a routerLink="/" fragment="describe-symbols" class="back-link">Retour au menu</a>
+
+  <section class="shell">
+    <header class="hero">
+      <p class="eyebrow">Multijoueur en ligne</p>
+      <h1>Description de symboles</h1>
+      <p class="intro">
+        Un joueur voit un pavillon. Il le decrit a voix haute, puis les autres choisissent parmi dix
+        symboles proches.
+      </p>
+    </header>
+
+    @if (submissionFeedback(); as feedback) {
+      <app-puzzle-success-popup
+        [title]="feedback.title"
+        [message]="feedback.message"
+        [tone]="feedback.tone"
+        [showAction]="isHost()"
+        actionLabel="Symbole suivant"
+        (action)="nextRound()"
+      />
+    }
+
+    @if (!firebaseReady()) {
+      <section class="setup-panel warning-panel">
+        <h2>Firebase n'est pas configure</h2>
+        <p>Ajoute la configuration Firebase avant de creer une salle.</p>
+      </section>
+    }
+
+    @if (!room()) {
+      <section class="setup-panel room-entry-panel">
+        <div class="room-entry-heading">
+          <h2>Jouer avec des amis</h2>
+          <p>Crée une salle et partage le code, ou rejoins une salle existante.</p>
+        </div>
+
+        <label class="text-field name-entry">
+          <span>Ton nom</span>
+          <input [value]="playerName()" (input)="setPlayerName($event)" autocomplete="nickname" />
+        </label>
+
+        <div class="room-choice-grid">
+          <section class="room-choice">
+            <div>
+              <h3>Nouvelle salle</h3>
+              <p>Crée un code à partager.</p>
+            </div>
+            <button
+              type="button"
+              class="primary-button"
+              (click)="createRoom()"
+              [disabled]="busy() || !firebaseReady()"
+            >
+              Créer
+            </button>
+          </section>
+
+          <section class="room-choice join-choice">
+            <div>
+              <h3>Rejoindre</h3>
+              <p>Entre le code du host.</p>
+            </div>
+            <label class="text-field compact">
+              <span>Code</span>
+              <input
+                [value]="joinCode()"
+                (input)="setJoinCode($event)"
+                maxlength="6"
+                autocomplete="off"
+                placeholder="ABC234"
+              />
+            </label>
+            <button
+              type="button"
+              class="ghost-button"
+              (click)="joinRoom()"
+              [disabled]="busy() || !firebaseReady()"
+            >
+              Rejoindre
+            </button>
+          </section>
+        </div>
+
+        @if (errorMessage()) {
+          <p class="error-text">{{ errorMessage() }}</p>
+        }
+      </section>
+    } @else {
+      <section class="room-banner">
+        <div>
+          <span>Code de salle</span>
+          <div class="room-code-row">
+            <strong>{{ roomCode() }}</strong>
+            <button
+              type="button"
+              class="copy-button"
+              (click)="copyRoomCode()"
+              aria-label="Copier le code de salle"
+            >
+              Copier
+            </button>
+          </div>
+          @if (copyStatus()) {
+            <small>{{ copyStatus() }}</small>
+          }
+        </div>
+        <div class="host-status">
+          {{ isHost() ? 'Tu es le host' : 'Host: ' + (hostPlayer()?.name ?? 'en attente') }}
+        </div>
+        <button type="button" class="ghost-button" (click)="leaveRoom()" [disabled]="busy()">
+          Quitter
+        </button>
+      </section>
+
+      <section class="player-row" aria-label="Joueurs">
+        @for (player of players(); track player.id) {
+          <div
+            class="player-chip"
+            [class.active]="localPlayer()?.id === player.id"
+            [class.describer]="describer()?.id === player.id && phase() !== 'lobby'"
+          >
+            <span>{{ player.name }}</span>
+            @if (room()?.hostId === player.id) {
+              <span class="role-badge">Host</span>
+            }
+          </div>
+        }
+      </section>
+
+      <section class="round-bar">
+        <p role="status" aria-live="polite">{{ statusText() }}</p>
+        <span>{{
+          phase() === 'lobby' ? 'Salon' : phase() === 'reveal' ? 'Reponse' : 'En jeu'
+        }}</span>
+      </section>
+
+      @if (submissionFeedback(); as feedback) {
+        <section class="result-banner" [class.partial]="feedback.tone === 'partial'">
+          <strong>{{ feedback.title }}</strong>
+          <span>{{ feedback.message }}</span>
+        </section>
+      }
+
+      @if (phase() === 'lobby') {
+        <section class="setup-panel">
+          <div class="panel-heading">
+            <h2>Salon</h2>
+            <span>{{ players().length }} joueur(s)</span>
+          </div>
+
+          <p class="muted">Partage le code de salle. Le createur de la salle lance la partie.</p>
+
+          @if (isHost()) {
+            <button
+              type="button"
+              class="primary-button"
+              (click)="startRound()"
+              [disabled]="busy() || players().length < 2"
+            >
+              Lancer
+            </button>
+          } @else {
+            <p class="muted">En attente du createur de la salle.</p>
+          }
+        </section>
+      } @else {
+        @if (isDescriber()) {
+          <section class="describer-view">
+            <div class="secret-card">
+              @if (target(); as symbol) {
+                <div class="describe-symbol-wrap large">
+                  <ng-container
+                    [ngTemplateOutlet]="symbolTemplate"
+                    [ngTemplateOutletContext]="{ symbol: symbol }"
+                  />
+                </div>
+              }
+            </div>
+
+            <div class="describer-actions">
+              <p>Tu es le descripteur. Fais deviner ce pavillon aux autres joueurs.</p>
+            </div>
+          </section>
+        } @else {
+          <section class="guesser-view">
+            <div class="choice-grid">
+              @for (symbol of choices(); track symbol.id) {
+                <button
+                  type="button"
+                  class="choice-card"
+                  [class.correct]="symbolState(symbol.id) === 'correct'"
+                  [class.picked]="symbolState(symbol.id) === 'picked'"
+                  [class.wrong]="symbolState(symbol.id) === 'wrong'"
+                  [disabled]="busy() || phase() === 'reveal' || hasGuessed()"
+                  (click)="chooseSymbol(symbol.id)"
+                  aria-label="Choisir ce pavillon"
+                >
+                  <ng-container
+                    [ngTemplateOutlet]="symbolTemplate"
+                    [ngTemplateOutletContext]="{ symbol: symbol }"
+                  />
+                  @if (playersForSymbol(symbol.id).length > 0) {
+                    <span class="choice-badges" aria-label="Joueurs ayant choisi ce pavillon">
+                      @for (player of playersForSymbol(symbol.id); track player.id) {
+                        <span>{{ player.name }}</span>
+                      }
+                    </span>
+                  }
+                </button>
+              }
+            </div>
+
+            @if (phase() === 'describing' && !hasGuessed()) {
+              <div class="submit-row">
+                <button
+                  type="button"
+                  class="primary-button"
+                  (click)="submitGuess()"
+                  [disabled]="busy() || !selectedSymbolId()"
+                >
+                  Soumettre
+                </button>
+              </div>
+            }
+          </section>
+        }
+
+        @if (isHost() && phase() === 'reveal') {
+          <section class="round-footer">
+            <div class="reveal-actions">
+              <button type="button" class="ghost-button" (click)="resetRoom()" [disabled]="busy()">
+                Reinitialiser
+              </button>
+              <button
+                type="button"
+                class="primary-button"
+                (click)="nextRound()"
+                [disabled]="busy()"
+              >
+                Symbole suivant
+              </button>
+            </div>
+          </section>
+        }
+      }
+
+      @if (errorMessage()) {
+        <p class="error-text">{{ errorMessage() }}</p>
+      }
+    }
+  </section>
+</main>
+
+<ng-template #symbolTemplate let-symbol="symbol">
+  <svg class="describe-symbol" viewBox="0 0 180 120" role="img" aria-label="Symbole">
+    <defs>
+      <clipPath [attr.id]="'clip-' + symbol.id">
+        <rect x="8" y="8" width="164" height="104" rx="8" />
+      </clipPath>
+    </defs>
+
+    <g [attr.clip-path]="'url(#clip-' + symbol.id + ')'">
+      @switch (symbol.layout) {
+        @case ('horizontal') {
+          <rect x="8" y="8" width="164" height="35" [attr.fill]="stripeColor(symbol, 0)" />
+          <rect x="8" y="43" width="164" height="34" [attr.fill]="stripeColor(symbol, 1)" />
+          <rect x="8" y="77" width="164" height="35" [attr.fill]="stripeColor(symbol, 2)" />
+        }
+        @case ('vertical') {
+          <rect x="8" y="8" width="55" height="104" [attr.fill]="stripeColor(symbol, 0)" />
+          <rect x="63" y="8" width="54" height="104" [attr.fill]="stripeColor(symbol, 1)" />
+          <rect x="117" y="8" width="55" height="104" [attr.fill]="stripeColor(symbol, 2)" />
+        }
+        @case ('diagonal') {
+          <rect x="8" y="8" width="164" height="104" [attr.fill]="stripeColor(symbol, 0)" />
+          <polygon points="8,112 172,8 172,112" [attr.fill]="stripeColor(symbol, 1)" />
+          <polygon points="8,8 172,8 8,112" [attr.fill]="stripeColor(symbol, 2)" opacity="0.82" />
+        }
+        @case ('cross') {
+          <rect x="8" y="8" width="164" height="104" [attr.fill]="stripeColor(symbol, 0)" />
+          <rect x="76" y="8" width="28" height="104" [attr.fill]="stripeColor(symbol, 1)" />
+          <rect x="8" y="46" width="164" height="28" [attr.fill]="stripeColor(symbol, 2)" />
+        }
+        @case ('chevron') {
+          <rect x="8" y="8" width="164" height="104" [attr.fill]="stripeColor(symbol, 0)" />
+          <polygon points="8,8 92,60 8,112" [attr.fill]="stripeColor(symbol, 1)" />
+          <polygon points="8,22 70,60 8,98" [attr.fill]="stripeColor(symbol, 2)" />
+        }
+        @case ('canton') {
+          <rect x="8" y="8" width="164" height="104" [attr.fill]="stripeColor(symbol, 0)" />
+          <rect x="8" y="8" width="72" height="48" [attr.fill]="stripeColor(symbol, 1)" />
+          <rect x="8" y="78" width="164" height="34" [attr.fill]="stripeColor(symbol, 2)" />
+        }
+        @case ('quartered') {
+          <rect x="8" y="8" width="82" height="52" [attr.fill]="stripeColor(symbol, 0)" />
+          <rect x="90" y="8" width="82" height="52" [attr.fill]="stripeColor(symbol, 1)" />
+          <rect x="8" y="60" width="82" height="52" [attr.fill]="stripeColor(symbol, 2)" />
+          <rect x="90" y="60" width="82" height="52" [attr.fill]="stripeColor(symbol, 0)" />
+        }
+        @case ('saltire') {
+          <rect x="8" y="8" width="164" height="104" [attr.fill]="stripeColor(symbol, 0)" />
+          <polygon
+            points="8,8 28,8 172,92 172,112 152,112 8,28"
+            [attr.fill]="stripeColor(symbol, 1)"
+          />
+          <polygon
+            points="172,8 152,8 8,92 8,112 28,112 172,28"
+            [attr.fill]="stripeColor(symbol, 2)"
+          />
+        }
+        @case ('bordered') {
+          <rect x="8" y="8" width="164" height="104" [attr.fill]="stripeColor(symbol, 0)" />
+          <rect x="24" y="24" width="132" height="72" rx="5" [attr.fill]="stripeColor(symbol, 1)" />
+          <rect x="40" y="38" width="100" height="44" rx="4" [attr.fill]="stripeColor(symbol, 2)" />
+        }
+      }
+
+      @if (symbol.band !== 'none') {
+        <rect
+          x="8"
+          [attr.y]="symbol.band === 'top' ? 18 : symbol.band === 'middle' ? 54 : 88"
+          width="164"
+          height="14"
+          [attr.fill]="symbol.emblemColor"
+          opacity="0.82"
+        />
+      }
+    </g>
+
+    <g
+      [attr.fill]="symbol.emblemColor"
+      [attr.stroke]="symbol.emblemColor"
+      stroke-width="5"
+      stroke-linejoin="round"
+      [attr.transform]="emblemTransform(symbol)"
+    >
+      @switch (symbol.emblem) {
+        @case ('anchor') {
+          <circle cx="90" cy="44" r="10" fill="none" />
+          <line x1="90" y1="54" x2="90" y2="88" />
+          <path d="M62 74 C66 98 114 98 118 74" fill="none" />
+          <line x1="72" y1="66" x2="108" y2="66" />
+        }
+        @case ('star') {
+          <polygon points="90,31 99,51 121,52 104,67 110,89 90,77 70,89 76,67 59,52 81,51" />
+        }
+        @case ('diamond') {
+          <polygon points="90,30 124,60 90,90 56,60" />
+        }
+        @case ('ring') {
+          <circle cx="90" cy="60" r="27" fill="none" stroke-width="10" />
+        }
+        @case ('triangle') {
+          <polygon points="90,30 126,90 54,90" />
+        }
+        @case ('moon') {
+          <path d="M105 32 C82 40 73 61 84 82 C69 74 63 54 73 39 C81 27 94 25 105 32 Z" />
+        }
+        @case ('bolt') {
+          <polygon points="99,29 69,66 88,66 78,91 112,51 93,51" />
+        }
+        @case ('square') {
+          <rect x="65" y="35" width="50" height="50" rx="5" />
+        }
+        @case ('sun') {
+          <circle cx="90" cy="60" r="16" />
+          <path
+            d="M90 28 V42 M90 78 V92 M58 60 H72 M108 60 H122 M68 38 L78 48 M102 72 L112 82 M112 38 L102 48 M78 72 L68 82"
+            fill="none"
+          />
+        }
+      }
+    </g>
+
+    <rect
+      x="8"
+      y="8"
+      width="164"
+      height="104"
+      rx="8"
+      fill="none"
+      class="describe-symbol-border"
+      [class]="borderClass(symbol)"
+    />
+  </svg>
+</ng-template>
