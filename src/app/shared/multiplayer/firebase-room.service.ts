@@ -101,13 +101,12 @@ export class FirebaseRoomService {
   async joinRoom(roomCode: string, playerName = 'Player'): Promise<{ playerId: string }> {
     const database = this.getDatabase();
     const normalizedRoomCode = this.normalizeRoomCode(roomCode);
+    const playerId = await this.getPlayerId();
     const roomSnapshot = await get(ref(database, `rooms/${normalizedRoomCode}`));
 
     if (!roomSnapshot.exists()) {
       throw new Error('Room not found.');
     }
-
-    const playerId = await this.getPlayerId();
 
     await update(ref(database, `rooms/${normalizedRoomCode}`), {
       [`players/${playerId}`]: this.createPlayer(playerId, playerName),
