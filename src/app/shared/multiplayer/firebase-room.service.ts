@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { FirebaseApp, FirebaseOptions, getApp, getApps, initializeApp } from 'firebase/app';
+import { Auth, getAuth, signInAnonymously } from 'firebase/auth';
 import {
   DataSnapshot,
   Database,
@@ -42,8 +43,8 @@ export interface MultiplayerRoom<TState = unknown> {
 
 @Injectable({ providedIn: 'root' })
 export class FirebaseRoomService {
-  private readonly playerIdKey = 'epique.firebase.playerId';
   private app?: FirebaseApp;
+  private auth?: Auth;
   private database?: Database;
 
   get isConfigured(): boolean {
@@ -67,7 +68,7 @@ export class FirebaseRoomService {
     playerName = 'Player',
   ): Promise<{ roomCode: string; playerId: string }> {
     const database = this.getDatabase();
-    const playerId = this.getPlayerId();
+    const playerId = await this.getPlayerId();
     const roomCode = await this.createUniqueRoomCode();
     const player = this.createPlayer(playerId, playerName);
 
@@ -98,7 +99,7 @@ export class FirebaseRoomService {
       throw new Error('Room not found.');
     }
 
-    const playerId = this.getPlayerId();
+    const playerId = await this.getPlayerId();
 
     await update(ref(database, `rooms/${normalizedRoomCode}`), {
       [`players/${playerId}`]: this.createPlayer(playerId, playerName),
@@ -157,7 +158,7 @@ export class FirebaseRoomService {
 
   async leaveRoom(roomCode: string): Promise<void> {
     const database = this.getDatabase();
-    const playerId = this.getPlayerId();
+    const playerId = await this.getPlayerId();
     const normalizedRoomCode = this.normalizeRoomCode(roomCode);
     const roomRef = ref(database, `rooms/${normalizedRoomCode}`);
     const roomSnapshot = await get(roomRef);
@@ -197,6 +198,7 @@ export class FirebaseRoomService {
     if (!this.database) {
       this.app = this.getFirebaseApp(environment.firebase);
       this.database = getDatabase(this.app);
+      this.auth = getAuth(this.app);
     }
 
     return this.database;
@@ -233,17 +235,24 @@ export class FirebaseRoomService {
     return roomCode.trim().toUpperCase();
   }
 
-  private getPlayerId(): string {
-    const existingPlayerId = sessionStorage.getItem(this.playerIdKey);
+  private async getPlayerId(): Promise<string> {
+    this.getDatabase();
+    const auth = this.auth;
 
-    if (existingPlayerId) {
-      return existingPlayerId;
+    if (!auth) {
+      throw new Error('Firebase Auth is not available.');
     }
 
-    const playerId = crypto.randomUUID();
-    sessionStorage.setItem(this.playerIdKey, playerId);
+    if (!auth.currentUser) {
+      await signInAnonymously(auth);
+    }
 
-    return playerId;
+    const uid = auth.currentUser?.uid;
+    if (!uid) {
+      throw new Error('Could not start an anonymous Firebase session.');
+    }
+
+    return uid;
   }
 
   private createPlayer(playerId: string, playerName: string): MultiplayerPlayer {

@@ -1,10 +1,17 @@
 {
   "rules": {
+    ".read": false,
+    ".write": false,
     "rooms": {
       "$roomCode": {
-        ".read": true,
-        ".write": true,
-        ".validate": "$roomCode.matches(/^[A-Z2-9]{6}$/)"
+        ".read": "auth != null && $roomCode.matches(/^[A-Z2-9]{6}$/)",
+        ".write": "auth != null && $roomCode.matches(/^[A-Z2-9]{6}$/) && ((!data.exists() && newData.exists() && newData.child('id').val() === $roomCode && newData.child('hostId').val() === auth.uid && newData.child('players').child(auth.uid).child('id').val() === auth.uid) || (data.exists() && !newData.exists() && data.child('hostId').val() === auth.uid) || (data.exists() && newData.exists() && data.child('players').child(auth.uid).exists()) || (data.exists() && newData.exists() && !data.child('players').child(auth.uid).exists() && newData.child('players').child(auth.uid).child('id').val() === auth.uid))",
+        ".validate": "newData.hasChildren(['id', 'gameId', 'hostId', 'status', 'players', 'state']) && newData.child('id').val() === $roomCode && newData.child('gameId').isString() && newData.child('hostId').isString() && newData.child('status').isString()",
+        "players": {
+          "$playerId": {
+            ".validate": "$playerId === newData.child('id').val() && newData.child('name').isString() && newData.child('name').val().length <= 32 && newData.child('online').isBoolean()"
+          }
+        }
       }
     }
   }
