@@ -1,0 +1,93 @@
+<main class="page">
+  <a routerLink="/" fragment="magic-square" class="back-link">← Retour au menu</a>
+
+  <section class="card">
+    <header class="header">
+      <p class="eyebrow">Grille numérique</p>
+      <h1>Carré magique</h1>
+      <p class="instructions">
+        Place les nombres restants pour que chaque ligne, colonne et diagonale donne la même somme.
+      </p>
+    </header>
+
+    <section class="target-panel" aria-label="Somme cible">
+      <span>Somme cible</span>
+      <strong>{{ puzzle().targetSum }}</strong>
+    </section>
+
+    <div class="game-layout">
+      <div class="board-area">
+        <div class="magic-grid" aria-label="Carré magique 3 par 3">
+          @for (row of puzzle().cells; track $index) {
+            @for (cell of row; track cell.row + ':' + cell.col) {
+              <button
+                type="button"
+                class="number-cell"
+                [class.given]="cell.given"
+                [class.selected]="cellState(cell.row, cell.col) === 'selected'"
+                [class.correct]="cellState(cell.row, cell.col) === 'correct'"
+                [class.wrong]="cellState(cell.row, cell.col) === 'wrong'"
+                [attr.data-row]="cell.row"
+                [attr.data-col]="cell.col"
+                [attr.draggable]="
+                  !cell.given && cellValue(cell.row, cell.col) !== null ? 'true' : null
+                "
+                (click)="selectCell(cell.row, cell.col)"
+                (pointerdown)="beginCellPointerDrag(cell.row, cell.col, $event)"
+                (dragstart)="beginCellDrag(cell.row, cell.col, $event)"
+                (dragend)="endDrag()"
+                (dragover)="allowDrop(cell.row, cell.col, $event)"
+                (drop)="dropNumber(cell.row, cell.col, $event)"
+                [disabled]="cell.given"
+              >
+                {{ cellValue(cell.row, cell.col) ?? '' }}
+              </button>
+            }
+          }
+        </div>
+      </div>
+
+      <aside class="side-panel">
+        <section class="number-bank" aria-label="Nombres disponibles">
+          <h2>Nombres</h2>
+          <div class="bank-grid">
+            @for (number of puzzle().numberBank; track number) {
+              <button
+                type="button"
+                draggable="true"
+                [disabled]="!availableNumbers().includes(number)"
+                [class.dragging]="draggedNumber() === number"
+                (pointerdown)="beginPointerDrag(number, $event)"
+                (dragstart)="beginDrag(number, $event)"
+                (dragend)="endDrag()"
+                (click)="placeNumber(number)"
+              >
+                {{ number }}
+              </button>
+            }
+          </div>
+        </section>
+
+        <div class="actions">
+          <button type="button" class="secondary-button" (click)="clearSelectedCell()">
+            Effacer
+          </button>
+          <button type="button" class="secondary-button" (click)="resetPuzzle()">
+            Recommencer
+          </button>
+          <button type="button" class="primary-button" (click)="checkPuzzle()">Vérifier</button>
+          <button type="button" class="secondary-button" (click)="newPuzzle()">Nouveau</button>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  @if (isSolved()) {
+    <app-puzzle-success-popup
+      title="Carré magique réussi !"
+      [message]="'Toutes les lignes, colonnes et diagonales font ' + puzzle().targetSum + '.'"
+      actionLabel="Nouveau carré"
+      (action)="newPuzzle()"
+    />
+  }
+</main>

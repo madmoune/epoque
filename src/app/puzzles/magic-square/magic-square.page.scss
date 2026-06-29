@@ -1,0 +1,236 @@
+.page {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: var(--focus);
+  font-weight: 800;
+}
+
+.card {
+  display: grid;
+  gap: 1.25rem;
+  padding: 2rem;
+  border: 1px solid var(--border);
+  border-radius: 1.25rem;
+  background: var(--surface);
+  box-shadow: 0 0.75rem 2rem var(--shadow);
+}
+
+.header {
+  text-align: center;
+}
+
+.eyebrow {
+  margin: 0 0 0.35rem;
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+h1 {
+  color: var(--text);
+  font-size: clamp(2rem, 6vw, 3rem);
+  line-height: 1;
+}
+
+.instructions {
+  max-width: 38rem;
+  margin: 0.75rem auto 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.target-panel {
+  display: inline-grid;
+  justify-self: center;
+  gap: 0.15rem;
+  min-width: 11rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.85rem;
+  background: var(--surface-raised);
+  text-align: center;
+}
+
+.target-panel span,
+.number-bank h2 {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.target-panel strong {
+  color: var(--text);
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.game-layout {
+  display: grid;
+  grid-template-columns: minmax(18rem, 28rem) minmax(13rem, 18rem);
+  justify-content: center;
+  align-items: start;
+  gap: 1.5rem;
+}
+
+.board-area {
+  display: grid;
+}
+
+.magic-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.45rem;
+  aspect-ratio: 1;
+  padding: 0.45rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surface-soft);
+}
+
+.number-cell {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  min-height: 0;
+  aspect-ratio: 1;
+  border: 2px solid var(--border-strong);
+  border-radius: 0.8rem;
+  background: var(--surface-raised);
+  color: var(--text);
+  font: inherit;
+  font-size: clamp(1.5rem, 8vw, 2.35rem);
+  font-weight: 950;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+}
+
+.number-cell:not(.given):empty,
+.number-cell:not(.given) {
+  border-style: dashed;
+}
+
+.number-cell.given {
+  background: color-mix(in srgb, var(--accent) 20%, var(--surface-raised));
+  color: var(--text);
+  cursor: default;
+}
+
+.number-cell.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+.number-cell.correct {
+  border-color: #16a34a;
+}
+
+.number-cell.wrong {
+  border-color: #dc2626;
+  background: #fee2e2;
+  color: #7f1d1d;
+}
+
+.side-panel {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surface-raised);
+}
+
+.number-bank {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.bank-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.55rem;
+}
+
+.bank-grid button,
+.actions button {
+  min-height: 2.8rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.75rem;
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.bank-grid button {
+  background: var(--surface-soft);
+  color: var(--text);
+  font-size: 1.15rem;
+  touch-action: none;
+  user-select: none;
+}
+
+.bank-grid button:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
+.bank-grid button.dragging {
+  border-color: var(--accent);
+  opacity: 0.65;
+  transform: scale(0.96);
+}
+
+.actions {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.primary-button {
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.secondary-button {
+  background: var(--surface-soft);
+  color: var(--text);
+}
+
+@media (max-width: 720px) {
+  .page {
+    padding: 0.75rem;
+  }
+
+  .card {
+    padding: 1rem;
+    border-radius: 1rem;
+  }
+
+  .game-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .side-panel {
+    padding: 0.8rem;
+  }
+
+  .actions {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

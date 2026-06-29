@@ -88,6 +88,12 @@ export class HomePage {
           tag: 'Grille',
         },
         {
+          title: 'Carré magique',
+          description: 'Complète la grille pour atteindre la même somme partout.',
+          route: '/magic-square',
+          tag: 'Sommes',
+        },
+        {
           title: 'Nim',
           description: 'Analyse les tas et trouve les bons retraits avec la logique XOR.',
           route: '/nim',

@@ -68,6 +68,11 @@ export const routes: Routes = [
       import('./puzzles/latin-square/latin-square.page').then((m) => m.LatinSquarePage),
   },
   {
+    path: 'magic-square',
+    loadComponent: () =>
+      import('./puzzles/magic-square/magic-square.page').then((m) => m.MagicSquarePage),
+  },
+  {
     path: 'mnemonic',
     loadComponent: () => import('./puzzles/mnemonic/mnemonic.page').then((m) => m.MnemonicPage),
   },
