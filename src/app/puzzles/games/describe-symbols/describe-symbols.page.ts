@@ -19,7 +19,11 @@ type SymbolLayout =
   | 'canton'
   | 'quartered'
   | 'saltire'
-  | 'bordered';
+  | 'bordered'
+  | 'radial'
+  | 'orbit'
+  | 'scatter'
+  | 'grid';
 type SymbolEmblem =
   | 'anchor'
   | 'star'
@@ -32,6 +36,9 @@ type SymbolEmblem =
   | 'sun';
 type EmblemPosition = 'center' | 'left' | 'right' | 'top' | 'bottom';
 type EmblemScale = 'small' | 'medium' | 'large';
+type SymmetryMode = 'balanced' | 'offset' | 'chaotic';
+type DetailRegion = 'left' | 'right' | 'top' | 'bottom' | 'center';
+type DetailShape = 'dot' | 'ring' | 'dash' | 'spark';
 
 type Player = {
   id: string;
@@ -55,6 +62,11 @@ type DescribedSymbol = {
   emblemScale: EmblemScale;
   border: 'plain' | 'dark' | 'double';
   band: 'none' | 'top' | 'middle' | 'bottom';
+  symmetry: SymmetryMode;
+  detailRegion: DetailRegion;
+  detailShape: DetailShape;
+  detailCount: number;
+  detailSeed: number;
 };
 
 type DescribeSymbolsState = {
@@ -90,6 +102,10 @@ const LAYOUTS: SymbolLayout[] = [
   'quartered',
   'saltire',
   'bordered',
+  'radial',
+  'orbit',
+  'scatter',
+  'grid',
 ];
 const EMBLEMS: SymbolEmblem[] = [
   'anchor',
@@ -106,6 +122,9 @@ const BORDERS: DescribedSymbol['border'][] = ['plain', 'dark', 'double'];
 const EMBLEM_POSITIONS: EmblemPosition[] = ['center', 'left', 'right', 'top', 'bottom'];
 const EMBLEM_SCALES: EmblemScale[] = ['small', 'medium', 'large'];
 const BANDS: DescribedSymbol['band'][] = ['none', 'top', 'middle', 'bottom'];
+const SYMMETRIES: SymmetryMode[] = ['balanced', 'offset', 'chaotic'];
+const DETAIL_REGIONS: DetailRegion[] = ['left', 'right', 'top', 'bottom', 'center'];
+const DETAIL_SHAPES: DetailShape[] = ['dot', 'ring', 'dash', 'spark'];
 
 @Component({
   selector: 'app-describe-symbols-page',
@@ -383,6 +402,58 @@ export class DescribeSymbolsPage implements OnDestroy {
     return `translate(${x} ${y}) scale(${scale}) translate(-90 -60)`;
   }
 
+  protected detailElements(symbol: DescribedSymbol): Array<{
+    key: string;
+    x: number;
+    y: number;
+    rotation: number;
+  }> {
+    const bounds = {
+      left: { minX: 24, maxX: 70, minY: 22, maxY: 98 },
+      right: { minX: 110, maxX: 156, minY: 22, maxY: 98 },
+      top: { minX: 35, maxX: 145, minY: 20, maxY: 48 },
+      bottom: { minX: 35, maxX: 145, minY: 72, maxY: 100 },
+      center: { minX: 58, maxX: 122, minY: 32, maxY: 88 },
+    }[symbol.detailRegion];
+    const centerX = (bounds.minX + bounds.maxX) / 2;
+    const centerY = (bounds.minY + bounds.maxY) / 2;
+
+    return Array.from({ length: symbol.detailCount }, (_, index) => {
+      const mirrorIndex = Math.floor(index / 2);
+      const mirrored = symbol.symmetry === 'balanced' && index % 2 === 1;
+      const randomX = this.seededUnit(symbol.detailSeed + mirrorIndex * 17);
+      const randomY = this.seededUnit(symbol.detailSeed + mirrorIndex * 29 + 7);
+      const spreadX = (bounds.maxX - bounds.minX) * 0.42;
+      const spreadY = (bounds.maxY - bounds.minY) * 0.42;
+      let x = bounds.minX + randomX * (bounds.maxX - bounds.minX);
+      let y = bounds.minY + randomY * (bounds.maxY - bounds.minY);
+
+      if (symbol.symmetry === 'balanced') {
+        const baseX = centerX - spreadX + randomX * spreadX;
+        const baseY = centerY - spreadY + randomY * spreadY * 2;
+        x = mirrored ? centerX + (centerX - baseX) : baseX;
+        y = baseY;
+
+        if (symbol.detailCount % 2 === 1 && index === symbol.detailCount - 1) {
+          x = centerX;
+          y = centerY;
+        }
+      }
+
+      if (symbol.symmetry === 'offset') {
+        x = bounds.minX + randomX * (bounds.maxX - bounds.minX) * 0.7;
+        y = bounds.minY + randomY * (bounds.maxY - bounds.minY);
+      }
+
+      return {
+        key: `${symbol.id}-${index}`,
+        x: Math.round(x),
+        y: Math.round(y),
+        rotation: Math.round(this.seededUnit(symbol.detailSeed + index * 41) * 180 - 90),
+      };
+    });
+  }
+
   private watchRoom(roomCode: string): void {
     this.roomSubscription?.unsubscribe();
     this.roomSubscription = this.firebaseRoom
@@ -437,8 +508,8 @@ export class DescribeSymbolsPage implements OnDestroy {
     return {
       phase: state?.phase ?? fallback.phase,
       describerId: state?.describerId ?? fallback.describerId,
-      target: state?.target ?? fallback.target,
-      choices: state?.choices ?? fallback.choices,
+      target: state?.target ? this.withSymbolDefaults(state.target) : fallback.target,
+      choices: state?.choices?.map((symbol) => this.withSymbolDefaults(symbol)) ?? fallback.choices,
       selectedSymbolId: state?.selectedSymbolId ?? fallback.selectedSymbolId,
       lastSubmission: state?.lastSubmission ?? fallback.lastSubmission,
       guesses: state?.guesses ?? fallback.guesses,
@@ -456,11 +527,22 @@ export class DescribeSymbolsPage implements OnDestroy {
     return variants;
   }
 
+  private withSymbolDefaults(symbol: DescribedSymbol): DescribedSymbol {
+    return {
+      ...symbol,
+      symmetry: symbol.symmetry ?? 'balanced',
+      detailRegion: symbol.detailRegion ?? 'center',
+      detailShape: symbol.detailShape ?? 'dot',
+      detailCount: symbol.detailCount ?? 4,
+      detailSeed: symbol.detailSeed ?? 1,
+    };
+  }
+
   private createSimilarSymbol(target: DescribedSymbol, seed: number): DescribedSymbol {
     const variant = structuredClone(target);
     variant.id = crypto.randomUUID();
 
-    const subtleChange = seed % 7;
+    const subtleChange = seed % 11;
     if (subtleChange === 0) variant.emblem = this.nearbyValue(EMBLEMS, target.emblem);
     if (subtleChange === 1)
       variant.emblemPosition = this.nearbyValue(EMBLEM_POSITIONS, target.emblemPosition);
@@ -476,6 +558,15 @@ export class DescribeSymbolsPage implements OnDestroy {
     }
     if (subtleChange === 6)
       variant.emblemColor = this.pick(PALETTE.filter((color) => !variant.colors.includes(color)));
+    if (subtleChange === 7) variant.symmetry = this.nearbyValue(SYMMETRIES, target.symmetry);
+    if (subtleChange === 8)
+      variant.detailRegion = this.nearbyValue(DETAIL_REGIONS, target.detailRegion);
+    if (subtleChange === 9) {
+      const direction = seed % 2 === 0 ? 1 : -1;
+      variant.detailCount = Math.min(8, Math.max(2, target.detailCount + direction));
+    }
+    if (subtleChange === 10)
+      variant.detailShape = this.nearbyValue(DETAIL_SHAPES, target.detailShape);
 
     return variant;
   }
@@ -492,6 +583,11 @@ export class DescribeSymbolsPage implements OnDestroy {
       emblemScale: this.pick(EMBLEM_SCALES),
       border: this.pick(BORDERS),
       band: this.pick(BANDS),
+      symmetry: this.pick(SYMMETRIES),
+      detailRegion: this.pick(DETAIL_REGIONS),
+      detailShape: this.pick(DETAIL_SHAPES),
+      detailCount: this.randomInt(2, 8),
+      detailSeed: this.randomInt(1, 9999),
     };
   }
 
@@ -506,5 +602,14 @@ export class DescribeSymbolsPage implements OnDestroy {
 
   private shuffle<T>(items: T[]): T[] {
     return [...items].sort(() => Math.random() - 0.5);
+  }
+
+  private randomInt(min: number, max: number): number {
+    return min + Math.floor(Math.random() * (max - min + 1));
+  }
+
+  private seededUnit(seed: number): number {
+    const value = Math.sin(seed * 12.9898) * 43758.5453;
+    return value - Math.floor(value);
   }
 }

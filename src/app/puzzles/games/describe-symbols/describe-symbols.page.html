@@ -315,6 +315,78 @@
           <rect x="24" y="24" width="132" height="72" rx="5" [attr.fill]="stripeColor(symbol, 1)" />
           <rect x="40" y="38" width="100" height="44" rx="4" [attr.fill]="stripeColor(symbol, 2)" />
         }
+        @case ('radial') {
+          <rect x="8" y="8" width="164" height="104" [attr.fill]="stripeColor(symbol, 0)" />
+          <polygon points="90,60 8,8 172,8" [attr.fill]="stripeColor(symbol, 1)" />
+          <polygon points="90,60 172,8 172,112" [attr.fill]="stripeColor(symbol, 2)" />
+          <polygon
+            points="90,60 172,112 8,112"
+            [attr.fill]="stripeColor(symbol, 1)"
+            opacity="0.78"
+          />
+          <polygon points="90,60 8,112 8,8" [attr.fill]="stripeColor(symbol, 2)" opacity="0.78" />
+        }
+        @case ('orbit') {
+          <rect x="8" y="8" width="164" height="104" [attr.fill]="stripeColor(symbol, 0)" />
+          <ellipse
+            cx="90"
+            cy="60"
+            rx="72"
+            ry="23"
+            [attr.stroke]="stripeColor(symbol, 1)"
+            stroke-width="12"
+            fill="none"
+            opacity="0.78"
+          />
+          <ellipse
+            cx="90"
+            cy="60"
+            rx="33"
+            ry="71"
+            [attr.stroke]="stripeColor(symbol, 2)"
+            stroke-width="10"
+            fill="none"
+            opacity="0.78"
+          />
+          <circle cx="90" cy="60" r="26" [attr.fill]="stripeColor(symbol, 1)" opacity="0.82" />
+        }
+        @case ('scatter') {
+          <rect x="8" y="8" width="164" height="104" [attr.fill]="stripeColor(symbol, 0)" />
+          <circle cx="45" cy="34" r="28" [attr.fill]="stripeColor(symbol, 1)" opacity="0.78" />
+          <rect
+            x="98"
+            y="21"
+            width="54"
+            height="54"
+            rx="12"
+            [attr.fill]="stripeColor(symbol, 2)"
+            opacity="0.84"
+          />
+          <polygon
+            points="38,94 82,46 126,96"
+            [attr.fill]="stripeColor(symbol, 1)"
+            opacity="0.68"
+          />
+          <path
+            d="M16 82 C55 35 120 106 164 48"
+            fill="none"
+            [attr.stroke]="stripeColor(symbol, 2)"
+            stroke-width="14"
+            opacity="0.72"
+          />
+        }
+        @case ('grid') {
+          <rect x="8" y="8" width="164" height="104" [attr.fill]="stripeColor(symbol, 0)" />
+          <rect x="8" y="8" width="41" height="26" [attr.fill]="stripeColor(symbol, 1)" />
+          <rect x="49" y="34" width="41" height="26" [attr.fill]="stripeColor(symbol, 2)" />
+          <rect x="90" y="60" width="41" height="26" [attr.fill]="stripeColor(symbol, 1)" />
+          <rect x="131" y="86" width="41" height="26" [attr.fill]="stripeColor(symbol, 2)" />
+          <path
+            d="M49 8 V112 M90 8 V112 M131 8 V112 M8 34 H172 M8 60 H172 M8 86 H172"
+            stroke="rgb(255 255 255 / 45%)"
+            stroke-width="4"
+          />
+        }
       }
 
       @if (symbol.band !== 'none') {
@@ -326,6 +398,33 @@
           [attr.fill]="symbol.emblemColor"
           opacity="0.82"
         />
+      }
+
+      @for (detail of detailElements(symbol); track detail.key) {
+        <g
+          [attr.transform]="
+            'translate(' + detail.x + ' ' + detail.y + ') rotate(' + detail.rotation + ')'
+          "
+          [attr.fill]="symbol.emblemColor"
+          [attr.stroke]="symbol.emblemColor"
+          stroke-width="4"
+          stroke-linecap="round"
+        >
+          @switch (symbol.detailShape) {
+            @case ('dot') {
+              <circle r="6" />
+            }
+            @case ('ring') {
+              <circle r="8" fill="none" />
+            }
+            @case ('dash') {
+              <line x1="-9" y1="0" x2="9" y2="0" />
+            }
+            @case ('spark') {
+              <path d="M0 -9 V9 M-9 0 H9" fill="none" />
+            }
+          }
+        </g>
       }
     </g>
 

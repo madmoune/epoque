@@ -22,13 +22,20 @@ export class RushHourPage implements OnDestroy {
     startY: number;
     cellSize: number;
     appliedSteps: number;
+    moved: boolean;
   } | null = null;
+  private suppressNextClickForVehicleId: string | null = null;
 
   protected readonly cells = Array.from({ length: 36 });
   protected readonly vehicles = signal<Vehicle[]>([]);
   protected readonly moves = signal(0);
   protected readonly isGenerating = signal(false);
   protected readonly generationBatch = signal(0);
+  protected readonly selectedVehicleId = signal<string | null>(null);
+  protected readonly selectedVehicle = computed(() => {
+    const selectedId = this.selectedVehicleId();
+    return this.vehicles().find((vehicle) => vehicle.id === selectedId) ?? null;
+  });
   protected readonly isSolved = computed(() => {
     if (this.isGenerating()) return false;
     const target = this.vehicles().find((vehicle) => vehicle.target);
@@ -62,6 +69,7 @@ export class RushHourPage implements OnDestroy {
     this.vehicles.set(this.initialVehicles.map((vehicle) => ({ ...vehicle })));
     this.moves.set(0);
     this.dragState = null;
+    this.selectedVehicleId.set(null);
   }
 
   protected move(vehicleId: string, direction: -1 | 1): void {
@@ -76,6 +84,20 @@ export class RushHourPage implements OnDestroy {
       }),
     );
     this.moves.update((value) => value + 1);
+  }
+
+  protected clickMove(vehicleId: string, direction: -1 | 1): void {
+    if (this.suppressNextClickForVehicleId === vehicleId) {
+      this.suppressNextClickForVehicleId = null;
+      return;
+    }
+
+    this.move(vehicleId, direction);
+  }
+
+  protected selectVehicle(vehicleId: string): void {
+    if (this.isGenerating() || this.isSolved()) return;
+    this.selectedVehicleId.set(vehicleId);
   }
 
   protected canMove(vehicleId: string, direction: -1 | 1): boolean {
@@ -97,11 +119,12 @@ export class RushHourPage implements OnDestroy {
     return vehicle.target ? 'Voiture rouge à libérer' : `Véhicule ${vehicle.id}`;
   }
 
-  protected beginDrag(vehicle: Vehicle, event: PointerEvent): void {
+  protected beginDrag(vehicle: Vehicle, event: PointerEvent, preserveClick = false): void {
     if (this.isGenerating() || this.isSolved()) return;
+    this.selectVehicle(vehicle.id);
     const board = (event.currentTarget as HTMLElement).closest('.board');
     if (!(board instanceof HTMLElement)) return;
-    event.preventDefault();
+    if (!preserveClick) event.preventDefault();
     this.dragState = {
       vehicleId: vehicle.id,
       orientation: vehicle.orientation,
@@ -109,6 +132,7 @@ export class RushHourPage implements OnDestroy {
       startY: event.clientY,
       cellSize: board.getBoundingClientRect().width / this.size,
       appliedSteps: 0,
+      moved: false,
     };
   }
 
@@ -126,12 +150,17 @@ export class RushHourPage implements OnDestroy {
       if (!this.canMove(drag.vehicleId, direction)) break;
       this.move(drag.vehicleId, direction);
       drag.appliedSteps += direction;
+      drag.moved = true;
     }
   }
 
   @HostListener('document:pointerup')
   @HostListener('document:pointercancel')
   protected endDrag(): void {
+    if (this.dragState?.moved) {
+      this.suppressNextClickForVehicleId = this.dragState.vehicleId;
+    }
+
     this.dragState = null;
   }
 
@@ -142,7 +171,9 @@ export class RushHourPage implements OnDestroy {
 
     const worker = new Worker(new URL('./rush-hour.worker', import.meta.url), { type: 'module' });
     this.generatorWorker = worker;
-    worker.onmessage = ({ data }: MessageEvent<{ type: string; batch?: number; puzzle?: Vehicle[] }>) => {
+    worker.onmessage = ({
+      data,
+    }: MessageEvent<{ type: string; batch?: number; puzzle?: Vehicle[] }>) => {
       if (data.type === 'progress' && data.batch) {
         this.generationBatch.set(data.batch);
         return;
@@ -178,6 +209,7 @@ export class RushHourPage implements OnDestroy {
     this.initialVehicles = puzzle.map((vehicle) => ({ ...vehicle }));
     this.vehicles.set(puzzle.map((vehicle) => ({ ...vehicle })));
     this.moves.set(0);
+    this.selectedVehicleId.set(null);
   }
 
   private async createPuzzle(): Promise<Vehicle[]> {
@@ -283,12 +315,13 @@ export class RushHourPage implements OnDestroy {
       const legalMoves = vehicles
         .filter((vehicle) => !keepTargetFixed || !vehicle.target)
         .flatMap((vehicle) =>
-        ([-1, 1] as const)
-          .filter((direction) => this.canVehicleMove(vehicle, direction, vehicles))
-          .map((direction) => ({ vehicle, direction })),
-      );
+          ([-1, 1] as const)
+            .filter((direction) => this.canVehicleMove(vehicle, direction, vehicles))
+            .map((direction) => ({ vehicle, direction })),
+        );
       const moves = legalMoves.filter(
-        ({ vehicle, direction }) => previous?.id !== vehicle.id || previous.direction !== -direction,
+        ({ vehicle, direction }) =>
+          previous?.id !== vehicle.id || previous.direction !== -direction,
       );
       if (!moves.length) moves.push(...legalMoves);
       if (!moves.length) break;
@@ -341,12 +374,14 @@ export class RushHourPage implements OnDestroy {
     horizontalDependencies: number;
   } {
     const target = vehicles[0];
-    const blockers = vehicles.slice(1).filter(
-      (vehicle) =>
-        vehicle.orientation === 'vertical' &&
-        this.occupiesCell(vehicle, target.row, vehicle.column) &&
-        vehicle.column >= target.column + target.length,
-    );
+    const blockers = vehicles
+      .slice(1)
+      .filter(
+        (vehicle) =>
+          vehicle.orientation === 'vertical' &&
+          this.occupiesCell(vehicle, target.row, vehicle.column) &&
+          vehicle.column >= target.column + target.length,
+      );
     let immobileBlockers = 0;
     const horizontalDependencyIds = new Set<string>();
 
@@ -396,7 +431,8 @@ export class RushHourPage implements OnDestroy {
       occupied.fill(-1);
       vehicles.forEach((vehicle, vehicleIndex) => {
         for (let offset = 0; offset < vehicle.length; offset++) {
-          const row = vehicle.orientation === 'vertical' ? state[vehicleIndex] + offset : vehicle.row;
+          const row =
+            vehicle.orientation === 'vertical' ? state[vehicleIndex] + offset : vehicle.row;
           const column =
             vehicle.orientation === 'horizontal' ? state[vehicleIndex] + offset : vehicle.column;
           occupied[row * this.size + column] = vehicleIndex;

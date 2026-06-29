@@ -1,165 +1,212 @@
 .page {
-    max-width: 960px;
-    margin: 0 auto;
-    padding: 2rem;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem;
 }
 
 .back-link {
-    display: inline-block;
-    margin-bottom: 1rem;
-    color: #444;
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: #444;
 }
 
 .card {
-    padding: 2rem;
-    border: 1px solid #ddd;
-    border-radius: 1.25rem;
-    box-shadow: 0 0.75rem 2rem rgb(0 0 0 / 6%);
+  padding: 2rem;
+  border: 1px solid #ddd;
+  border-radius: 1.25rem;
+  box-shadow: 0 0.75rem 2rem rgb(0 0 0 / 6%);
 }
 
 .eyebrow {
-    margin: 0 0 0.5rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-size: 0.8rem;
-    color: #666;
+  margin: 0 0 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.8rem;
+  color: #666;
 }
 
 h1 {
-    margin-top: 0;
+  margin-top: 0;
 }
 
 .cryptogram {
-    display: flex;
-    flex-wrap: wrap;
-    column-gap: clamp(1.5rem, 5vw, 2.75rem);
-    row-gap: 1.25rem;
-    margin: 2rem 0;
-    align-items: end;
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: clamp(1.5rem, 5vw, 2.75rem);
+  row-gap: 1.25rem;
+  margin: 2rem 0;
+  align-items: end;
 }
 
 .word-group {
-    display: inline-flex;
-    gap: clamp(0.35rem, 1.6vw, 0.5rem);
-    white-space: nowrap;
-    align-items: end;
+  display: inline-flex;
+  gap: clamp(0.35rem, 1.6vw, 0.5rem);
+  max-width: 100%;
+  white-space: nowrap;
+  align-items: end;
 }
 
 .character-tile {
-    display: grid;
-    gap: 0.35rem;
-    justify-items: center;
+  display: grid;
+  gap: 0.35rem;
+  justify-items: center;
 }
 
 .encrypted-character {
-    display: grid;
-    place-items: center;
-    width: clamp(2.25rem, 9vw, 2.75rem);
-    height: clamp(2.25rem, 9vw, 2.75rem);
-    border-radius: 0.5rem;
-    background: #f2f2f2;
-    font-weight: 700;
-    font-size: clamp(1rem, 4vw, 1.25rem);
+  display: grid;
+  place-items: center;
+  width: clamp(2.25rem, 9vw, 2.75rem);
+  height: clamp(2.25rem, 9vw, 2.75rem);
+  border-radius: 0.5rem;
+  background: #f2f2f2;
+  font-weight: 700;
+  font-size: clamp(1rem, 4vw, 1.25rem);
 }
 
 input {
-    width: clamp(2.25rem, 9vw, 2.75rem);
-    height: clamp(2.25rem, 9vw, 2.75rem);
-    box-sizing: border-box;
-    text-align: center;
-    border: 1px solid #ccc;
-    border-radius: 0.5rem;
-    font-size: 16px;
-    text-transform: uppercase;
-    touch-action: manipulation;
+  width: clamp(2.25rem, 9vw, 2.75rem);
+  height: clamp(2.25rem, 9vw, 2.75rem);
+  box-sizing: border-box;
+  text-align: center;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  font-size: 16px;
+  text-transform: uppercase;
+  touch-action: manipulation;
 
-    &:focus {
-        outline: 3px solid rgb(0 0 0 / 15%);
-        outline-offset: 2px;
-    }
+  &:focus {
+    outline: 3px solid rgb(0 0 0 / 15%);
+    outline-offset: 2px;
+  }
 
-    &:disabled {
-        cursor: not-allowed;
-        background: #f5f5f5;
-        color: #333;
-    }
+  &:disabled {
+    cursor: not-allowed;
+    background: #f5f5f5;
+    color: #333;
+  }
 }
 
 .punctuation {
-    display: grid;
-    place-items: center;
-    min-width: 1rem;
-    height: clamp(2.25rem, 9vw, 2.75rem);
-    font-weight: 700;
-    font-size: clamp(1rem, 4vw, 1.25rem);
+  display: grid;
+  place-items: center;
+  min-width: 1rem;
+  height: clamp(2.25rem, 9vw, 2.75rem);
+  font-weight: 700;
+  font-size: clamp(1rem, 4vw, 1.25rem);
 }
 
 .actions {
-    display: flex;
-    gap: 0.75rem;
-    margin-top: 1rem;
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
 }
 
 button {
-    padding: 0.75rem 1rem;
-    border: 0;
-    border-radius: 0.75rem;
-    cursor: pointer;
-    font-weight: 700;
-    touch-action: manipulation;
+  padding: 0.75rem 1rem;
+  border: 0;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  font-weight: 700;
+  touch-action: manipulation;
 
-    &:disabled {
-        cursor: not-allowed;
-        opacity: 0.6;
-    }
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
 }
 
 .secondary-button {
-    background: #f2f2f2;
-    color: #222;
+  background: #f2f2f2;
+  color: #222;
 }
 
 .success {
-    margin-top: 1rem;
-    color: #17803d;
-    font-weight: 700;
+  margin-top: 1rem;
+  color: #17803d;
+  font-weight: 700;
 }
 
 .answer-sentence {
-    display: block;
-    margin-top: 0.5rem;
-    color: #222;
-    font-size: 1.05rem;
-    line-height: 1.45;
+  display: block;
+  margin-top: 0.5rem;
+  color: #222;
+  font-size: 1.05rem;
+  line-height: 1.45;
 }
 
 .error {
-    color: #b00020;
-    font-weight: 700;
+  color: #b00020;
+  font-weight: 700;
 }
 
 @media (max-width: 600px) {
-    .page {
-        padding: 1rem;
-    }
+  .page {
+    padding: 1rem;
+  }
 
-    .card {
-        padding: 1rem;
-        border-radius: 1rem;
-    }
+  .card {
+    padding: 1rem;
+    border-radius: 1rem;
+  }
 
-    .cryptogram {
-        margin: 1.5rem 0;
-    }
+  .cryptogram {
+    column-gap: 1rem;
+    margin: 1.5rem 0;
+  }
 
-    .actions {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 0.75rem;
-    }
+  .word-group {
+    position: relative;
+    flex-wrap: wrap;
+    row-gap: 0.45rem;
+    min-width: 0;
+    white-space: normal;
+  }
 
-    button {
-        width: 100%;
-        min-height: 3rem;
-    }
+  .wrapped-word-hint {
+    isolation: isolate;
+  }
+
+  .wrapped-word-hint::before {
+    position: absolute;
+    top: 0.25rem;
+    bottom: 0.25rem;
+    left: -0.45rem;
+    width: 0.2rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--accent, #d0834f) 78%, transparent);
+    content: '';
+  }
+
+  .line-break-hyphen {
+    position: relative;
+  }
+
+  .line-break-hyphen::after {
+    position: absolute;
+    top: 50%;
+    right: -0.42rem;
+    color: color-mix(in srgb, var(--accent, #d0834f) 88%, #111);
+    content: '-';
+    font-size: 1.25rem;
+    font-weight: 900;
+    line-height: 1;
+    transform: translateY(-50%);
+  }
+
+  .encrypted-character,
+  input {
+    width: clamp(1.95rem, 8.5vw, 2.35rem);
+    height: clamp(1.95rem, 8.5vw, 2.35rem);
+  }
+
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  button {
+    width: 100%;
+    min-height: 3rem;
+  }
 }

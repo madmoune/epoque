@@ -8,6 +8,10 @@
     min-height: 11rem;
   }
 
+  :host.roomy-keyboard.keyboard-visible {
+    min-height: 12.75rem;
+  }
+
   .custom-keyboard {
     --keyboard-key-size: clamp(1.55rem, 8vw, 2.25rem);
 
@@ -48,6 +52,26 @@
     font-weight: 850;
     cursor: pointer;
     touch-action: manipulation;
+  }
+
+  :host.roomy-keyboard .custom-keyboard {
+    --keyboard-key-size: clamp(2.45rem, 17vw, 4.05rem);
+
+    gap: 0.45rem;
+    width: min(28rem, calc(100vw - 0.9rem));
+    padding: 0.6rem;
+    border-radius: 1rem;
+  }
+
+  :host.roomy-keyboard .keyboard-row {
+    gap: 0.45rem;
+  }
+
+  :host.roomy-keyboard .keyboard-key {
+    min-height: 3.25rem;
+    padding: 0.35rem;
+    border-radius: 0.7rem;
+    font-size: 1.12rem;
   }
 
   .keyboard-key:active {

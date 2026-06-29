@@ -1,76 +1,102 @@
 <main class="page">
-    <a routerLink="/" fragment="cryptograms" class="back-link">← Retour au menu</a>
+  <a routerLink="/" fragment="cryptograms" class="back-link">← Retour au menu</a>
 
-    <section class="card">
-        <p class="eyebrow">Cryptogramme</p>
-        <h1>Déchiffre le message</h1>
+  <section class="card">
+    <p class="eyebrow">Cryptogramme</p>
+    <h1>Déchiffre le message</h1>
 
-        @if (isLoading()) {
-        <p>Chargement…</p>
-        } @else if (loadError()) {
-        <p class="error">{{ loadError() }}</p>
-        } @else if (puzzle()) {
-        <div class="cryptogram" aria-label="Cryptogramme à résoudre">
-            @for (wordGroup of wordGroups(); track $index) {
-            <span class="word-group">
-                @for (character of wordGroup; track character.index) {
-                @if (character.isLetter) {
-                <label class="character-tile">
-                    <span class="encrypted-character">
-                        {{ character.encryptedCharacter }}
-                    </span>
-
-                    <input #guessInput type="text" autocomplete="off" autocapitalize="characters" inputmode="none"
-                        maxlength="1"
-                        enterkeyhint="next"
-                        [attr.aria-label]="'Réponse pour la lettre chiffrée ' + character.encryptedCharacter"
-                        [attr.data-character-index]="character.index" [ngModel]="guesses()[character.index]"
-                        (focus)="activateInput(character.index, guessInput)"
-                        (click)="activateInput(character.index, guessInput)"
-                        (keydown)="handleGuessKeydown(character.index, $event, guessInput)" [disabled]="isCorrect()"
-                        [class.correct]="
-    guesses()[character.index] === character.answerCharacter
-  " />
-                </label>
-                } @else {
-                <span class="punctuation">
+    @if (isLoading()) {
+      <p>Chargement…</p>
+    } @else if (loadError()) {
+      <p class="error">{{ loadError() }}</p>
+    } @else if (puzzle()) {
+      <div class="cryptogram" aria-label="Cryptogramme à résoudre">
+        @for (wordGroup of wordGroups(); track $index) {
+          <span
+            #wordGroupElement
+            class="word-group"
+            [class.wrapped-word-hint]="wrappedWordIndexes().has($index)"
+          >
+            @for (character of wordGroup; track character.index) {
+              @if (character.isLetter) {
+                <label
+                  class="character-tile"
+                  [class.line-break-hyphen]="lineBreakAfterIndexes().has(character.index)"
+                >
+                  <span class="encrypted-character">
                     {{ character.encryptedCharacter }}
+                  </span>
+
+                  <input
+                    #guessInput
+                    type="text"
+                    autocomplete="off"
+                    autocapitalize="characters"
+                    inputmode="none"
+                    maxlength="1"
+                    enterkeyhint="next"
+                    [attr.aria-label]="
+                      'Réponse pour la lettre chiffrée ' + character.encryptedCharacter
+                    "
+                    [attr.data-character-index]="character.index"
+                    [ngModel]="guesses()[character.index]"
+                    (focus)="activateInput(character.index, guessInput)"
+                    (click)="activateInput(character.index, guessInput)"
+                    (keydown)="handleGuessKeydown(character.index, $event, guessInput)"
+                    [disabled]="isCorrect()"
+                    [class.correct]="guesses()[character.index] === character.answerCharacter"
+                  />
+                </label>
+              } @else {
+                <span
+                  class="punctuation"
+                  [class.line-break-hyphen]="lineBreakAfterIndexes().has(character.index)"
+                >
+                  {{ character.encryptedCharacter }}
                 </span>
-                }
-                }
-            </span>
+              }
             }
-        </div>
-        <app-custom-keyboard
-            [rows]="letterKeyboardRows"
-            [visible]="activeCharacterIndex() !== null"
-            [disabled]="isCorrect()"
-            (keyPress)="handleKeyboardKey($event)"
-        />
+          </span>
+        }
+      </div>
+      <app-custom-keyboard
+        [rows]="letterKeyboardRows"
+        [visible]="activeCharacterIndex() !== null"
+        [disabled]="isCorrect()"
+        (keyPress)="handleKeyboardKey($event)"
+      />
 
-        <div class="actions">
-            <button type="button" class="secondary-button" (click)="showHint()" [disabled]="isCorrect()">
-                Indice
-            </button>
-            <button type="button" class="secondary-button" (click)="clearGuesses()" [disabled]="isCorrect()">
-                Vider les champs
-            </button>
-            @if (!isCorrect()) {
-            <button type="button" class="secondary-button" (click)="nextPuzzle()">
-                Passer
-            </button>
-            }
-        </div>
+      <div class="actions">
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="showHint()"
+          [disabled]="isCorrect()"
+        >
+          Indice
+        </button>
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="clearGuesses()"
+          [disabled]="isCorrect()"
+        >
+          Vider les champs
+        </button>
+        @if (!isCorrect()) {
+          <button type="button" class="secondary-button" (click)="nextPuzzle()">Passer</button>
+        }
+      </div>
 
-        @if (isCorrect()) {
+      @if (isCorrect()) {
         <app-puzzle-success-popup
-            title="Message déchiffré!"
-            message="Le message a été entièrement déchiffré."
-            [answer]="puzzle()!.answer"
-            actionLabel="Prochain"
-            (action)="nextPuzzle()"
+          title="Message déchiffré!"
+          message="Le message a été entièrement déchiffré."
+          [answer]="puzzle()!.answer"
+          actionLabel="Prochain"
+          (action)="nextPuzzle()"
         />
-        }
-        }
-    </section>
+      }
+    }
+  </section>
 </main>

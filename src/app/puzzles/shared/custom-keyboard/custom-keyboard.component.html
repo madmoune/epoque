@@ -8,7 +8,8 @@
             class="keyboard-key"
             [class]="keyClass(key)"
             [disabled]="disabled()"
-            (click)="keyPress.emit(key)"
+            (pointerdown)="$event.preventDefault()"
+            (click)="pressKey(key)"
           >
             {{ keyLabel(key) }}
           </button>

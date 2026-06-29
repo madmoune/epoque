@@ -21,7 +21,8 @@ export class SlidingPuzzlePage {
   protected readonly imageUrl = signal('');
   protected readonly tileImageUrls = signal<string[]>([]);
   protected readonly isSolved = computed(
-    () => this.hasStarted() && this.board().every((tile, index) => tile === this.solvedBoard[index]),
+    () =>
+      this.hasStarted() && this.board().every((tile, index) => tile === this.solvedBoard[index]),
   );
 
   constructor() {
@@ -73,7 +74,9 @@ export class SlidingPuzzlePage {
     const sameColumn = index % this.size === emptyIndex % this.size;
     if (!sameRow && !sameColumn) return;
 
-    const direction = sameRow ? Math.sign(index - emptyIndex) : Math.sign(index - emptyIndex) * this.size;
+    const direction = sameRow
+      ? Math.sign(index - emptyIndex)
+      : Math.sign(index - emptyIndex) * this.size;
     for (let position = emptyIndex; position !== index; position += direction) {
       board[position] = board[position + direction];
     }
@@ -102,11 +105,7 @@ export class SlidingPuzzlePage {
   }
 
   private createRandomArtwork(): { fullImage: string; tileImages: string[] } {
-    const hue = Math.floor(Math.random() * 360);
-    const hue2 = (hue + 80 + Math.floor(Math.random() * 90)) % 360;
-    const x = 20 + Math.floor(Math.random() * 60);
-    const y = 20 + Math.floor(Math.random() * 60);
-    const content = `<defs><linearGradient id="g" x2="1" y2="1"><stop stop-color="hsl(${hue} 78% 60%)"/><stop offset="1" stop-color="hsl(${hue2} 72% 35%)"/></linearGradient></defs><rect width="400" height="400" fill="url(#g)"/><circle cx="${x * 4}" cy="${y * 4}" r="115" fill="white" opacity=".28"/><path d="M-20 330 Q100 180 205 300 T430 210 V430 H-20Z" fill="hsl(${(hue + 180) % 360} 65% 35%)" opacity=".7"/><path d="M35 60 L190 30 L330 150 L270 310 L80 285Z" fill="none" stroke="white" stroke-width="18" opacity=".38"/><circle cx="330" cy="65" r="42" fill="hsl(${(hue2 + 130) % 360} 88% 68%)"/>`;
+    const content = this.createArtworkContent();
     const svgUrl = (viewBox: string) =>
       `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}">${content}</svg>`)}`;
 
@@ -118,5 +117,139 @@ export class SlidingPuzzlePage {
         return svgUrl(`${column * 100} ${row * 100} 100 100`);
       }),
     };
+  }
+
+  private createArtworkContent(): string {
+    const palettes = [
+      ['#17324d', '#42a5b3', '#f4d35e', '#ee964b', '#f95738'],
+      ['#201923', '#9046cf', '#17bebb', '#ffc857', '#ff5e5b'],
+      ['#102820', '#4c956c', '#fefee3', '#ffc9b9', '#d68c45'],
+      ['#071013', '#23b5d3', '#75abbc', '#f7f7ff', '#ea526f'],
+      ['#2d1e2f', '#6c9a8b', '#e8d7f1', '#f4a261', '#e76f51'],
+      ['#0b132b', '#1c2541', '#3a506b', '#5bc0be', '#fde74c'],
+    ];
+    const palette = palettes[this.randomInt(0, palettes.length - 1)];
+    const theme = this.randomInt(0, 5);
+
+    if (theme === 0) return this.createLandscapeArtwork(palette);
+    if (theme === 1) return this.createOrbitalArtwork(palette);
+    if (theme === 2) return this.createRocketArtwork(palette);
+    if (theme === 3) return this.createCircuitArtwork(palette);
+    if (theme === 4) return this.createSatelliteArtwork(palette);
+    return this.createRobotArtwork(palette);
+  }
+
+  private createLandscapeArtwork(palette: string[]): string {
+    const sunX = this.randomInt(55, 340);
+    const sunY = this.randomInt(42, 130);
+    const mountainApex = this.randomInt(95, 305);
+    const riverX = this.randomInt(120, 270);
+    const trees = Array.from({ length: this.randomInt(8, 15) }, () => {
+      const x = this.randomInt(15, 385);
+      const y = this.randomInt(245, 350);
+      const size = this.randomInt(16, 34);
+      return `<path d="M${x} ${y - size} L${x - size * 0.55} ${y} H${x + size * 0.55}Z" fill="${palette[1]}" opacity=".85"/><rect x="${x - 3}" y="${y - 2}" width="6" height="18" fill="${palette[0]}" opacity=".7"/>`;
+    }).join('');
+
+    return `<defs><linearGradient id="sky" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${palette[2]}"/><stop offset=".55" stop-color="${palette[3]}"/><stop offset="1" stop-color="${palette[0]}"/></linearGradient></defs><rect width="400" height="400" fill="url(#sky)"/><circle cx="${sunX}" cy="${sunY}" r="${this.randomInt(28, 52)}" fill="${palette[4]}" opacity=".9"/><path d="M-20 252 L${mountainApex} 80 L430 265 V430 H-20Z" fill="${palette[0]}" opacity=".82"/><path d="M-10 285 L${this.randomInt(70, 150)} 145 L${this.randomInt(210, 330)} 295 L430 185 V430 H-10Z" fill="${palette[1]}" opacity=".7"/><path d="M${riverX} 235 C${riverX - 70} 285 ${riverX + 80} 310 ${riverX + 5} 430 L${riverX + 75} 430 C${riverX + 145} 330 ${riverX - 25} 302 ${riverX + 58} 235Z" fill="${palette[3]}" opacity=".72"/><path d="M0 332 C80 285 154 362 238 318 S346 286 400 340 V400 H0Z" fill="${palette[2]}" opacity=".5"/>${trees}`;
+  }
+
+  private createOrbitalArtwork(palette: string[]): string {
+    const planetX = this.randomInt(125, 285);
+    const planetY = this.randomInt(130, 270);
+    const planetR = this.randomInt(54, 92);
+    const stars = Array.from({ length: 34 }, () => {
+      const x = this.randomInt(8, 392);
+      const y = this.randomInt(8, 392);
+      const r = this.randomInt(2, 5);
+      return `<circle cx="${x}" cy="${y}" r="${r}" fill="${palette[this.randomInt(2, 4)]}" opacity="${this.randomInt(45, 95) / 100}"/>`;
+    }).join('');
+    const satellites = Array.from({ length: 5 }, (_, index) => {
+      const angle = index * 72 + this.randomInt(0, 36);
+      const orbit = this.randomInt(95, 165);
+      const x = planetX + Math.cos((angle * Math.PI) / 180) * orbit;
+      const y = planetY + Math.sin((angle * Math.PI) / 180) * orbit * 0.6;
+      return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${this.randomInt(8, 18)}" fill="${palette[index % palette.length]}"/>`;
+    }).join('');
+
+    return `<rect width="400" height="400" fill="${palette[0]}"/><path d="M0 70 C110 25 225 120 400 40 V0 H0Z" fill="${palette[1]}" opacity=".22"/><path d="M0 360 C115 295 232 390 400 315 V400 H0Z" fill="${palette[3]}" opacity=".18"/>${stars}<ellipse cx="${planetX}" cy="${planetY}" rx="${planetR + 62}" ry="${Math.round((planetR + 30) * 0.42)}" fill="none" stroke="${palette[2]}" stroke-width="10" opacity=".62" transform="rotate(-18 ${planetX} ${planetY})"/><circle cx="${planetX}" cy="${planetY}" r="${planetR}" fill="${palette[4]}"/><path d="M${planetX - planetR} ${planetY + 12} C${planetX - 24} ${planetY - 18} ${planetX + 28} ${planetY + 45} ${planetX + planetR} ${planetY - 18}" fill="none" stroke="${palette[2]}" stroke-width="14" opacity=".48"/>${satellites}`;
+  }
+
+  private createMapArtwork(palette: string[]): string {
+    const blocks = Array.from({ length: 18 }, () => {
+      const x = this.randomInt(-10, 350);
+      const y = this.randomInt(-10, 350);
+      const w = this.randomInt(34, 96);
+      const h = this.randomInt(24, 82);
+      return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${this.randomInt(4, 14)}" fill="${palette[this.randomInt(1, 4)]}" opacity="${this.randomInt(45, 82) / 100}"/>`;
+    }).join('');
+    const route = `M-20 ${this.randomInt(95, 305)} C${this.randomInt(55, 120)} ${this.randomInt(20, 130)} ${this.randomInt(170, 260)} ${this.randomInt(270, 370)} 420 ${this.randomInt(80, 330)}`;
+    const roadY = this.randomInt(115, 285);
+
+    return `<rect width="400" height="400" fill="${palette[0]}"/><path d="M0 ${roadY} H400" stroke="${palette[2]}" stroke-width="34" opacity=".32"/><path d="M${this.randomInt(70, 145)} -20 V420" stroke="${palette[3]}" stroke-width="28" opacity=".22"/><path d="M-20 330 L420 10" stroke="${palette[1]}" stroke-width="24" opacity=".22"/>${blocks}<path d="${route}" fill="none" stroke="${palette[4]}" stroke-width="16" stroke-linecap="round"/><path d="${route}" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".75"/><circle cx="${this.randomInt(40, 100)}" cy="${this.randomInt(270, 350)}" r="26" fill="${palette[2]}"/><rect x="${this.randomInt(265, 330)}" y="${this.randomInt(35, 95)}" width="48" height="48" rx="10" fill="${palette[4]}"/>`;
+  }
+
+  private createCircuitArtwork(palette: string[]): string {
+    const traces = Array.from({ length: 16 }, () => {
+      const x1 = this.randomInt(10, 390);
+      const y1 = this.randomInt(10, 390);
+      const x2 = this.randomInt(10, 390);
+      const y2 = this.randomInt(10, 390);
+      return `<path d="M${x1} ${y1} H${x2} V${y2}" fill="none" stroke="${palette[this.randomInt(2, 4)]}" stroke-width="${this.randomInt(5, 10)}" stroke-linecap="round" opacity=".72"/>`;
+    }).join('');
+    const nodes = Array.from({ length: 28 }, () => {
+      const x = this.randomInt(16, 384);
+      const y = this.randomInt(16, 384);
+      return `<circle cx="${x}" cy="${y}" r="${this.randomInt(5, 13)}" fill="${palette[this.randomInt(1, 4)]}" stroke="${palette[0]}" stroke-width="4"/>`;
+    }).join('');
+    const chipX = this.randomInt(110, 210);
+    const chipY = this.randomInt(95, 215);
+
+    return `<rect width="400" height="400" fill="${palette[0]}"/><path d="M0 0 H400 V400 H0Z" fill="none" stroke="${palette[1]}" stroke-width="20" opacity=".36"/>${traces}<rect x="${chipX}" y="${chipY}" width="${this.randomInt(95, 145)}" height="${this.randomInt(82, 135)}" rx="16" fill="${palette[1]}" stroke="${palette[3]}" stroke-width="8"/><path d="M${chipX + 25} ${chipY + 35} H${chipX + 95} M${chipX + 25} ${chipY + 65} H${chipX + 115} M${chipX + 25} ${chipY + 95} H${chipX + 80}" stroke="${palette[4]}" stroke-width="8" stroke-linecap="round"/>${nodes}`;
+  }
+
+  private createRocketArtwork(palette: string[]): string {
+    const stars = Array.from({ length: 26 }, () => {
+      const x = this.randomInt(10, 390);
+      const y = this.randomInt(10, 390);
+      return `<circle cx="${x}" cy="${y}" r="${this.randomInt(2, 5)}" fill="${palette[this.randomInt(2, 4)]}" opacity=".8"/>`;
+    }).join('');
+    const rocketX = this.randomInt(150, 235);
+    const rocketY = this.randomInt(90, 165);
+    const planetX = this.randomInt(45, 125);
+    const planetY = this.randomInt(240, 330);
+
+    return `<rect width="400" height="400" fill="${palette[0]}"/><path d="M0 360 C105 310 215 390 400 310 V400 H0Z" fill="${palette[1]}" opacity=".22"/>${stars}<circle cx="${planetX}" cy="${planetY}" r="${this.randomInt(48, 76)}" fill="${palette[3]}"/><path d="M${planetX - 50} ${planetY + 8} C${planetX - 5} ${planetY - 20} ${planetX + 35} ${planetY + 30} ${planetX + 60} ${planetY - 16}" fill="none" stroke="${palette[2]}" stroke-width="12" opacity=".68"/><g transform="translate(${rocketX} ${rocketY}) rotate(${this.randomInt(-18, 18)} 42 95)"><path d="M42 0 C82 42 82 122 42 166 C2 122 2 42 42 0Z" fill="${palette[4]}" stroke="#fff" stroke-width="7"/><circle cx="42" cy="62" r="18" fill="${palette[1]}" stroke="#fff" stroke-width="6"/><path d="M12 108 L-24 148 L22 140Z" fill="${palette[2]}"/><path d="M72 108 L108 148 L62 140Z" fill="${palette[2]}"/><path d="M28 166 L42 224 L56 166Z" fill="${palette[3]}"/><path d="M34 180 L42 245 L50 180Z" fill="${palette[2]}" opacity=".8"/></g>`;
+  }
+
+  private createSatelliteArtwork(palette: string[]): string {
+    const earthX = this.randomInt(55, 125);
+    const earthY = this.randomInt(250, 335);
+    const satelliteX = this.randomInt(220, 300);
+    const satelliteY = this.randomInt(90, 155);
+    const stars = Array.from({ length: 30 }, () => {
+      const x = this.randomInt(8, 392);
+      const y = this.randomInt(8, 392);
+      return `<circle cx="${x}" cy="${y}" r="${this.randomInt(2, 4)}" fill="#fff" opacity="${this.randomInt(45, 88) / 100}"/>`;
+    }).join('');
+
+    return `<rect width="400" height="400" fill="${palette[0]}"/>${stars}<circle cx="${earthX}" cy="${earthY}" r="${this.randomInt(72, 100)}" fill="${palette[1]}"/><path d="M${earthX - 54} ${earthY - 16} C${earthX - 12} ${earthY - 42} ${earthX + 30} ${earthY - 8} ${earthX + 58} ${earthY - 35} C${earthX + 42} ${earthY + 14} ${earthX - 6} ${earthY + 30} ${earthX - 42} ${earthY + 58}" fill="${palette[2]}" opacity=".78"/><path d="M${earthX - 78} ${earthY - 8} C${earthX + 8} ${earthY - 65} ${earthX + 120} ${earthY - 54} ${satelliteX + 22} ${satelliteY + 20}" fill="none" stroke="${palette[3]}" stroke-width="5" stroke-dasharray="10 10" opacity=".7"/><g transform="translate(${satelliteX} ${satelliteY}) rotate(${this.randomInt(-22, 22)} 45 34)"><rect x="22" y="14" width="48" height="42" rx="8" fill="${palette[4]}" stroke="#fff" stroke-width="5"/><rect x="-46" y="5" width="60" height="58" fill="${palette[1]}" stroke="${palette[3]}" stroke-width="5"/><rect x="78" y="5" width="60" height="58" fill="${palette[1]}" stroke="${palette[3]}" stroke-width="5"/><path d="M70 36 H78 M14 36 H22 M46 56 V88" stroke="#fff" stroke-width="6" stroke-linecap="round"/><circle cx="46" cy="94" r="8" fill="${palette[2]}"/></g>`;
+  }
+
+  private createRobotArtwork(palette: string[]): string {
+    const x = this.randomInt(118, 185);
+    const y = this.randomInt(70, 125);
+    const gears = Array.from({ length: 7 }, () => {
+      const gx = this.randomInt(30, 370);
+      const gy = this.randomInt(30, 365);
+      const r = this.randomInt(14, 30);
+      return `<g transform="translate(${gx} ${gy})"><circle r="${r}" fill="none" stroke="${palette[this.randomInt(2, 4)]}" stroke-width="7" opacity=".7"/><circle r="${Math.max(5, r - 14)}" fill="${palette[0]}"/></g>`;
+    }).join('');
+
+    return `<rect width="400" height="400" fill="${palette[0]}"/><path d="M0 330 H400 V400 H0Z" fill="${palette[1]}" opacity=".25"/>${gears}<g transform="translate(${x} ${y})"><rect x="25" y="35" width="130" height="105" rx="22" fill="${palette[3]}" stroke="#fff" stroke-width="8"/><rect x="45" y="165" width="92" height="115" rx="18" fill="${palette[1]}" stroke="#fff" stroke-width="8"/><circle cx="68" cy="83" r="15" fill="${palette[0]}"/><circle cx="116" cy="83" r="15" fill="${palette[0]}"/><path d="M70 115 H112" stroke="${palette[4]}" stroke-width="8" stroke-linecap="round"/><path d="M90 35 V0" stroke="#fff" stroke-width="7" stroke-linecap="round"/><circle cx="90" cy="-9" r="10" fill="${palette[4]}"/><path d="M45 185 L0 245 M137 185 L182 245 M65 280 V330 M118 280 V330" stroke="#fff" stroke-width="12" stroke-linecap="round"/></g>`;
+  }
+
+  private randomInt(min: number, max: number): number {
+    return min + Math.floor(Math.random() * (max - min + 1));
   }
 }

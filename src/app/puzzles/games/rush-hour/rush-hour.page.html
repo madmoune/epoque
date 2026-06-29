@@ -5,7 +5,9 @@
     <header class="hero">
       <p class="eyebrow">Jeu de glisse</p>
       <h1>Rush Hour</h1>
-      <p class="instructions">Déplace les véhicules dans leur axe pour conduire la voiture rouge jusqu’à la sortie.</p>
+      <p class="instructions">
+        Déplace les véhicules dans leur axe pour conduire la voiture rouge jusqu’à la sortie.
+      </p>
     </header>
 
     <div class="game-layout">
@@ -16,16 +18,41 @@
           }
 
           @for (vehicle of vehicles(); track vehicle.id) {
-            <div class="vehicle" [class.target]="vehicle.target" [class.vertical]="vehicle.orientation === 'vertical'"
-              [style.grid-column]="gridColumn(vehicle)" [style.grid-row]="gridRow(vehicle)"
-              [attr.aria-label]="vehicleLabel(vehicle)">
-              <button type="button" class="move-button backward" [disabled]="!canMove(vehicle.id, -1) || isSolved()"
-                (click)="move(vehicle.id, -1)" [attr.aria-label]="'Déplacer ' + vehicleLabel(vehicle) + ' vers le début'">
+            <div
+              class="vehicle"
+              [class.target]="vehicle.target"
+              [class.vertical]="vehicle.orientation === 'vertical'"
+              [class.selected]="selectedVehicle()?.id === vehicle.id"
+              [style.grid-column]="gridColumn(vehicle)"
+              [style.grid-row]="gridRow(vehicle)"
+              [attr.aria-label]="vehicleLabel(vehicle)"
+              (click)="selectVehicle(vehicle.id)"
+            >
+              <button
+                type="button"
+                class="move-button backward"
+                [class.unavailable]="!canMove(vehicle.id, -1) || isSolved()"
+                [attr.aria-disabled]="!canMove(vehicle.id, -1) || isSolved()"
+                (pointerdown)="beginDrag(vehicle, $event, true)"
+                (click)="clickMove(vehicle.id, -1)"
+                [attr.aria-label]="'Déplacer ' + vehicleLabel(vehicle) + ' vers le début'"
+              >
                 {{ vehicle.orientation === 'horizontal' ? '‹' : '↑' }}
               </button>
-              <span class="vehicle-body" aria-hidden="true" (pointerdown)="beginDrag(vehicle, $event)"></span>
-              <button type="button" class="move-button forward" [disabled]="!canMove(vehicle.id, 1) || isSolved()"
-                (click)="move(vehicle.id, 1)" [attr.aria-label]="'Déplacer ' + vehicleLabel(vehicle) + ' vers la fin'">
+              <span
+                class="vehicle-body"
+                aria-hidden="true"
+                (pointerdown)="beginDrag(vehicle, $event)"
+              ></span>
+              <button
+                type="button"
+                class="move-button forward"
+                [class.unavailable]="!canMove(vehicle.id, 1) || isSolved()"
+                [attr.aria-disabled]="!canMove(vehicle.id, 1) || isSolved()"
+                (pointerdown)="beginDrag(vehicle, $event, true)"
+                (click)="clickMove(vehicle.id, 1)"
+                [attr.aria-label]="'Déplacer ' + vehicleLabel(vehicle) + ' vers la fin'"
+              >
                 {{ vehicle.orientation === 'horizontal' ? '›' : '↓' }}
               </button>
             </div>
@@ -35,20 +62,34 @@
       </div>
 
       <aside class="side-panel">
-        <p class="moves"><strong>{{ moves() }}</strong> coups</p>
+        <p class="moves">
+          <strong>{{ moves() }}</strong> coups
+        </p>
         <p class="tip">Utilise les flèches placées aux extrémités de chaque véhicule.</p>
-        <button type="button" class="reset-button" [disabled]="moves() === 0 || isGenerating()"
-          (click)="resetGame()">Recommencer</button>
+        <button
+          type="button"
+          class="reset-button"
+          [disabled]="moves() === 0 || isGenerating()"
+          (click)="resetGame()"
+        >
+          Recommencer
+        </button>
         <div class="new-game-area">
-          <button type="button" class="new-button" [disabled]="isGenerating()" (click)="newGame()">Nouvelle grille</button>
+          <button type="button" class="new-button" [disabled]="isGenerating()" (click)="newGame()">
+            Nouvelle grille
+          </button>
         </div>
       </aside>
     </div>
   </section>
 
   @if (isSolved()) {
-    <app-puzzle-success-popup title="Sortie libérée !" [message]="'Réussi en ' + moves() + ' coups.'"
-      actionLabel="Nouvelle grille" (action)="newGame()" />
+    <app-puzzle-success-popup
+      title="Sortie libérée !"
+      [message]="'Réussi en ' + moves() + ' coups.'"
+      actionLabel="Nouvelle grille"
+      (action)="newGame()"
+    />
   }
 
   @if (isGenerating()) {
