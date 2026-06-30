@@ -1,6 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { PuzzlePlayHistoryService } from './puzzle-play-history.service';
 
 type Theme = 'dark' | 'light';
 type ThemeTransitionDocument = Document & {
@@ -15,6 +16,10 @@ type ThemeTransitionDocument = Document & {
 })
 export class App {
   private readonly document = inject(DOCUMENT);
+
+  constructor() {
+    inject(PuzzlePlayHistoryService);
+  }
 
   protected readonly theme = signal<Theme>(
     this.document.documentElement.dataset['theme'] === 'light' ? 'light' : 'dark',

@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { PuzzleAnswerComponent, PuzzlePartialAnswer } from '../../shared/puzzle-answer';
+import { PuzzlePlayHistoryService } from '../../../puzzle-play-history.service';
 
 @Component({
   selector: 'app-navigation-puzzle-page',
@@ -9,6 +10,8 @@ import { PuzzleAnswerComponent, PuzzlePartialAnswer } from '../../shared/puzzle-
   styleUrl: './navigation.page.scss',
 })
 export class NavigationPuzzlePage {
+  private readonly playHistory = inject(PuzzlePlayHistoryService);
+
   protected readonly answer = 'POULIE';
   protected readonly partials: PuzzlePartialAnswer[] = [
     {
@@ -16,4 +19,8 @@ export class NavigationPuzzlePage {
       message: 'Oui, mais quels trajets?',
     },
   ];
+
+  protected markSolved(): void {
+    this.playHistory.markSolved('/puzzlehunt/navigation');
+  }
 }

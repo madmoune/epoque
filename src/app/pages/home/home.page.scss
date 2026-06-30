@@ -35,6 +35,41 @@ h1 {
     line-height: 1.4;
 }
 
+.sort-controls {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-top: 0.9rem;
+    padding: 0.25rem;
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    background: var(--surface-raised);
+}
+
+.sort-button {
+    min-height: 2.25rem;
+    padding: 0.45rem 0.7rem;
+    border: 1px solid transparent;
+    border-radius: 0.55rem;
+    background: transparent !important;
+    color: var(--muted-strong) !important;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 800;
+
+    &.active {
+        border-color: var(--accent);
+        background: var(--accent) !important;
+        color: var(--accent-contrast) !important;
+    }
+
+    &:focus-visible {
+        outline: 3px solid color-mix(in srgb, var(--focus) 35%, transparent);
+        outline-offset: 2px;
+    }
+}
+
 .category-list {
     display: grid;
     gap: 0.85rem;
@@ -111,6 +146,45 @@ h1 {
     }
 }
 
+.puzzle-main {
+    display: grid;
+    gap: 0.15rem;
+    min-width: 0;
+}
+
+.last-played {
+    color: #707070;
+    font-size: 0.72rem;
+    font-weight: 750;
+    line-height: 1.1;
+}
+
+.solve-status {
+    width: fit-content;
+    padding: 0.12rem 0.4rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--muted);
+    font-size: 0.68rem;
+    font-weight: 850;
+    line-height: 1.2;
+
+    &.solved {
+        border-color: #3dbb71;
+        background: color-mix(in srgb, #3dbb71 18%, transparent);
+        color: #9ef0bd;
+    }
+
+    &.unsolved {
+        border-color: var(--border-strong);
+        background: color-mix(in srgb, var(--surface-raised) 70%, transparent);
+    }
+}
+
+:root[data-theme='light'] .solve-status.solved {
+    color: #14532d;
+}
+
 .puzzle-tag {
     display: inline-flex;
     align-items: center;
@@ -180,6 +254,17 @@ h1 {
         line-height: 1.35;
     }
 
+    .sort-controls {
+        display: grid;
+        grid-template-columns: 1fr;
+        margin-top: 0.7rem;
+    }
+
+    .sort-button {
+        width: 100%;
+        min-height: 2.45rem;
+    }
+
     .category-list {
         gap: 0.65rem;
         margin-top: 0.75rem;
@@ -219,6 +304,11 @@ h1 {
         p {
             display: none;
         }
+    }
+
+    .last-played,
+    .solve-status {
+        font-size: 0.68rem;
     }
 
     .puzzle-tag {

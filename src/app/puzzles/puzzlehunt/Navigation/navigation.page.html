@@ -4,7 +4,11 @@
   <section class="card">
     <p class="eyebrow">Énigme</p>
     <h1>Navigation</h1>
-    <app-puzzle-answer [answer]="answer" [partials]="partials"></app-puzzle-answer>
+    <app-puzzle-answer
+      [answer]="answer"
+      [partials]="partials"
+      (correctAnswer)="markSolved()"
+    ></app-puzzle-answer>
     <section class="puzzle-panel" aria-label="Énoncé du puzzle">
       <p class="clue">Les itinéraires devraient m'indiquer ce dont j'ai besoin pour la suite.</p>
 

@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { PuzzlePlayHistoryService } from '../../puzzle-play-history.service';
 
 type PuzzleCard = {
   title: string;
@@ -13,7 +14,11 @@ type PuzzleCategory = {
   description: string;
   puzzles: PuzzleCard[];
   emptyText?: string;
+  sortable?: boolean;
+  showSolvedStatus?: boolean;
 };
+
+type HomeSortMode = 'default' | 'oldest';
 
 @Component({
   selector: 'app-home-page',
@@ -22,7 +27,21 @@ type PuzzleCategory = {
   styleUrl: './home.page.scss',
 })
 export class HomePage {
-  protected readonly categories: PuzzleCategory[] = [
+  private readonly sortModeStorageKey = 'epique-home-sort-mode';
+  private readonly playHistory = inject(PuzzlePlayHistoryService);
+
+  protected readonly sortMode = signal<HomeSortMode>(this.readSortMode());
+  protected readonly categories = computed(() =>
+    this.baseCategories.map((category) => ({
+      ...category,
+      puzzles:
+        this.sortMode() === 'oldest' && category.sortable !== false
+          ? [...category.puzzles].sort((first, second) => this.compareByOldestPlayed(first, second))
+          : category.puzzles,
+    })),
+  );
+
+  private readonly baseCategories: PuzzleCategory[] = [
     {
       title: 'Mots et langage',
       description: 'Jeux de lettres, de phrases et de déchiffrement.',
@@ -212,8 +231,8 @@ export class HomePage {
       ],
     },
     {
-      title: 'Énigmes',
-      description: 'Vraies énigmes de type jeu d’évasion.',
+      title: 'Enigmes',
+      description: "Vraies enigmes de type jeu d'evasion.",
       puzzles: [
         {
           title: 'Navigation',
@@ -222,7 +241,75 @@ export class HomePage {
           tag: 'Hunt',
         },
       ],
-      emptyText: 'Aucun puzzle ajouté pour le moment.',
+      emptyText: 'Aucun puzzle ajoute pour le moment.',
+      sortable: false,
+      showSolvedStatus: true,
     },
   ];
+
+  protected setSortMode(sortMode: HomeSortMode): void {
+    this.sortMode.set(sortMode);
+    this.writeSortMode(sortMode);
+  }
+
+  protected lastPlayedText(route: string): string {
+    const playedAt = this.playHistory.lastPlayedAt(route);
+
+    if (!playedAt) {
+      return 'Jamais joue';
+    }
+
+    const elapsedMilliseconds = Date.now() - playedAt;
+    const elapsedDays = Math.floor(elapsedMilliseconds / 86_400_000);
+
+    if (elapsedDays <= 0) {
+      return "Joue aujourd'hui";
+    }
+
+    if (elapsedDays === 1) {
+      return 'Joue hier';
+    }
+
+    if (elapsedDays < 7) {
+      return `Joue il y a ${elapsedDays} jours`;
+    }
+
+    return `Derniere fois: ${new Intl.DateTimeFormat('fr-CA', {
+      day: 'numeric',
+      month: 'short',
+    }).format(new Date(playedAt))}`;
+  }
+
+  protected solvedStatusText(route: string): string {
+    return this.playHistory.isSolved(route) ? 'Resolue' : 'Non resolue';
+  }
+
+  protected solvedStatusClass(route: string): string {
+    return this.playHistory.isSolved(route) ? 'solved' : 'unsolved';
+  }
+
+  private compareByOldestPlayed(first: PuzzleCard, second: PuzzleCard): number {
+    const firstPlayedAt = this.playHistory.lastPlayedAt(first.route) ?? 0;
+    const secondPlayedAt = this.playHistory.lastPlayedAt(second.route) ?? 0;
+
+    return firstPlayedAt - secondPlayedAt || first.title.localeCompare(second.title);
+  }
+
+  private readSortMode(): HomeSortMode {
+    try {
+      const storedSortMode = globalThis.localStorage?.getItem(this.sortModeStorageKey);
+
+      return storedSortMode === 'oldest' ? 'oldest' : 'default';
+    } catch {
+      return 'default';
+    }
+  }
+
+  private writeSortMode(sortMode: HomeSortMode): void {
+    try {
+      globalThis.localStorage?.setItem(this.sortModeStorageKey, sortMode);
+    } catch {
+      // The selected order still applies for the current page when storage is unavailable.
+    }
+  }
 }

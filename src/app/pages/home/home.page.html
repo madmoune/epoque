@@ -3,12 +3,23 @@
         <p class="eyebrow">Collection de jeux</p>
         <h1>Choisis un puzzle</h1>
         <p class="hero-text">
-            Entraîne ta logique, ta mémoire, ton sens spatial et ta résolution de problèmes.
+            Entraine ta logique, ta memoire, ton sens spatial et ta resolution de problemes.
         </p>
+
+        <div class="sort-controls" aria-label="Ordre d'affichage des jeux">
+            <button type="button" class="sort-button" [class.active]="sortMode() === 'default'"
+                (click)="setSortMode('default')">
+                Ordre normal
+            </button>
+            <button type="button" class="sort-button" [class.active]="sortMode() === 'oldest'"
+                (click)="setSortMode('oldest')">
+                Plus longtemps non joué
+            </button>
+        </div>
     </section>
 
-    <section class="category-list" aria-label="Catégories de puzzles">
-        @for (category of categories; track category.title) {
+    <section class="category-list" aria-label="Categories de puzzles">
+        @for (category of categories(); track category.title) {
         <section class="category-card">
             <div class="category-header">
                 <h2>{{ category.title }}</h2>
@@ -23,10 +34,19 @@
                     <span class="puzzle-tag">{{ puzzle.tag }}</span>
                     }
 
-                    <h3>{{ puzzle.title }}</h3>
+                    <span class="puzzle-main">
+                        <h3>{{ puzzle.title }}</h3>
+                        @if (category.showSolvedStatus) {
+                        <span [class]="'solve-status ' + solvedStatusClass(puzzle.route)">
+                            {{ solvedStatusText(puzzle.route) }}
+                        </span>
+                        } @else {
+                        <span class="last-played">{{ lastPlayedText(puzzle.route) }}</span>
+                        }
+                    </span>
                     <p>{{ puzzle.description }}</p>
 
-                    <span class="play-link">Jouer →</span>
+                    <span class="play-link">Jouer -></span>
                 </a>
                 }
             </div>
