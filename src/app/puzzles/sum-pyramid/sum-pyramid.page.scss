@@ -1,0 +1,174 @@
+.page {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: #444;
+  font-weight: 800;
+}
+
+.card {
+  padding: 2rem;
+  border: 1px solid #ddd;
+  border-radius: 1.25rem;
+  background: #fff;
+  box-shadow: 0 0.75rem 2rem rgb(0 0 0 / 6%);
+}
+
+.header {
+  text-align: center;
+}
+
+.eyebrow {
+  margin: 0 0 0.5rem;
+  color: #805400;
+  font-size: 0.8rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0;
+  color: #202020;
+  font-size: clamp(2rem, 6vw, 3rem);
+  line-height: 1;
+}
+
+.intro {
+  max-width: 38rem;
+  margin: 0.75rem auto 0;
+  color: #555;
+  line-height: 1.5;
+}
+
+.puzzle-area {
+  display: grid;
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  border: 1px solid #eee;
+  border-radius: 1rem;
+  background: #fbfaf7;
+}
+
+.sum-pyramid {
+  --cell-size: clamp(3.25rem, 12vw, 5rem);
+
+  display: grid;
+  gap: 0.35rem;
+  justify-content: center;
+  padding: 1rem 0;
+}
+
+.pyramid-row {
+  display: flex;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.pyramid-cell {
+  display: grid;
+  place-items: center;
+  width: var(--cell-size);
+  height: var(--cell-size);
+  box-sizing: border-box;
+  border: 2px solid #d5c8aa;
+  border-radius: 0.8rem;
+  background: #fff;
+  color: #202020;
+  font-size: clamp(1.2rem, 5vw, 1.85rem);
+  font-weight: 950;
+  line-height: 1;
+}
+
+.pyramid-cell.given {
+  border-color: #202020;
+  background: #202020;
+  color: #fff;
+}
+
+.pyramid-cell.hinted {
+  border-color: #c07a00;
+  background: #fff3c4;
+  color: #5f4200;
+}
+
+input {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 0.7rem;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: center;
+
+  &:focus {
+    outline: 4px solid rgb(128 84 0 / 18%);
+    outline-offset: 2px;
+  }
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+button {
+  min-height: 2.8rem;
+  padding: 0.75rem 1rem;
+  border: 0;
+  border-radius: 0.75rem;
+  background: #202020;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 800;
+  touch-action: manipulation;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+}
+
+.secondary-button {
+  background: #f0ece3;
+  color: #202020;
+}
+
+@media (max-width: 600px) {
+  .page {
+    padding: 1rem;
+  }
+
+  .card,
+  .puzzle-area {
+    padding: 1rem;
+  }
+
+  .sum-pyramid {
+    --cell-size: clamp(2.85rem, 17vw, 3.65rem);
+  }
+
+  .pyramid-row,
+  .sum-pyramid {
+    gap: 0.25rem;
+  }
+
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  button {
+    width: 100%;
+  }
+}

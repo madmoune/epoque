@@ -1,0 +1,77 @@
+<main class="page">
+  <a routerLink="/" fragment="sum-pyramid" class="back-link">Retour au menu</a>
+
+  <section class="card">
+    <header class="header">
+      <p class="eyebrow">Sommes</p>
+      <h1>Pyramide de sommes</h1>
+      <p class="intro">
+        Complete la pyramide: deux cases collees s'additionnent dans la case juste au-dessus.
+      </p>
+    </header>
+
+    @if (isSolved()) {
+      <app-puzzle-success-popup
+        title="Pyramide complete!"
+        message="Chaque case correspond a la somme des deux cases en dessous."
+        actionLabel="Nouvelle pyramide"
+        (action)="newPuzzle()"
+      />
+    }
+
+    <section class="puzzle-area">
+      <div class="sum-pyramid" aria-label="Pyramide de sommes">
+        @for (row of puzzle().rows; track $index) {
+          <div class="pyramid-row">
+            @for (cell of row; track cell.row + ':' + cell.col) {
+              <div
+                class="pyramid-cell"
+                [class.given]="cell.given"
+                [class.hinted]="isHinted(cell.row, cell.col)"
+              >
+                @if (cell.given || isHinted(cell.row, cell.col)) {
+                  {{ cell.value }}
+                } @else {
+                  <input
+                    #answerField
+                    type="text"
+                    inputmode="none"
+                    maxlength="3"
+                    autocomplete="off"
+                    [attr.data-row]="cell.row"
+                    [attr.data-col]="cell.col"
+                    [value]="cellAnswer(cell.row, cell.col)"
+                    (focus)="activateInput(cell.row, cell.col, $event)"
+                    (click)="activateInput(cell.row, cell.col, $event)"
+                    (input)="updateAnswer(cell.row, cell.col, $any($event.target).value)"
+                    aria-label="Case de reponse"
+                  />
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <app-custom-keyboard
+        [rows]="numberKeyboardRows()"
+        [visible]="activeCell() !== null"
+        [disabled]="isSolved()"
+        (keyPress)="handleKeyboardKey($event)"
+      />
+
+      <div class="actions">
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="showHint()"
+          [disabled]="!hasAvailableHint() || isSolved()"
+        >
+          Indice
+        </button>
+        <button type="button" class="secondary-button" (click)="resetPuzzle()">Recommencer</button>
+        <button type="button" class="secondary-button" (click)="newPuzzle()">Nouvelle pyramide</button>
+      </div>
+    </section>
+  </section>
+</main>

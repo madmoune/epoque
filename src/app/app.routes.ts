@@ -78,6 +78,11 @@ export const routes: Routes = [
       import('./puzzles/magic-square/magic-square.page').then((m) => m.MagicSquarePage),
   },
   {
+    path: 'sum-pyramid',
+    loadComponent: () =>
+      import('./puzzles/sum-pyramid/sum-pyramid.page').then((m) => m.SumPyramidPage),
+  },
+  {
     path: 'mnemonic',
     loadComponent: () => import('./puzzles/mnemonic/mnemonic.page').then((m) => m.MnemonicPage),
   },

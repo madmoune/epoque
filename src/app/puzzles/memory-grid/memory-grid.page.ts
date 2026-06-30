@@ -310,6 +310,28 @@ export class MemoryGridPage {
         this.isPickerOpen.set(false);
     }
 
+    protected placeHint(): void {
+        if (this.phase() !== 'play' || this.isSolved()) {
+            return;
+        }
+
+        const hintIndex = this.answerGrid().findIndex(
+            (answerCell, index) =>
+                !this.memoryGridService.areCellsEqual(answerCell, this.playerGrid()[index]),
+        );
+
+        if (hintIndex < 0) {
+            return;
+        }
+
+        const nextGrid = [...this.playerGrid()];
+        nextGrid[hintIndex] = { ...this.answerGrid()[hintIndex] };
+
+        this.playerGrid.set(nextGrid);
+        this.selectedCellIndex.set(null);
+        this.isPickerOpen.set(false);
+    }
+
     protected nextPuzzle(): void {
         this.answerGrid.set(this.memoryGridService.createAnswerGrid());
         this.playerGrid.set(this.memoryGridService.createEmptyPlayerGrid());

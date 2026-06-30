@@ -139,17 +139,7 @@ export class CornerCubePage {
       return false;
     }
 
-    return this.faceCells.every((cell) => {
-      const placedPiece = this.getPlacedPieceForPosition(cell.positionId);
-      const visibleFragment = this.cellFragment(cell);
-      const expectedPiece = this.getPieceById(cell.positionId);
-
-      if (!placedPiece || !visibleFragment || !expectedPiece) {
-        return false;
-      }
-
-      return visibleFragment === expectedPiece.fragments[cell.face];
-    });
+    return this.isDisplayedRouteContinuous();
   });
 
   protected selectPiece(pieceId: string): void {
@@ -528,6 +518,90 @@ export class CornerCubePage {
       positionId,
       face,
     };
+  }
+
+  private isDisplayedRouteContinuous(): boolean {
+    const routeNodes = this.faceCells.map((cell) => this.createRouteNode(cell.face, cell.row, cell.col));
+    const adjacency = this.createRouteAdjacency(routeNodes);
+    const cellsByNodeId = new Map(
+      this.faceCells.map((cell) => [this.createRouteNode(cell.face, cell.row, cell.col).id, cell]),
+    );
+    const visitedNodeIds = new Set<string>();
+    const connectedNodeIds = new Set<string>();
+    const routeEdgeIds = new Set<string>();
+    let endpointCount = 0;
+
+    for (const cell of this.faceCells) {
+      const fragment = this.cellFragment(cell);
+      const nodeId = this.createRouteNode(cell.face, cell.row, cell.col).id;
+
+      if (!fragment?.ports) {
+        return false;
+      }
+
+      visitedNodeIds.add(nodeId);
+
+      for (const port of fragment.ports) {
+        const edge = (adjacency.get(nodeId) ?? []).find((candidate) => candidate.fromPort === port);
+
+        if (!edge) {
+          endpointCount += 1;
+          continue;
+        }
+
+        const neighborCell = cellsByNodeId.get(edge.to);
+        const neighborFragment = neighborCell ? this.cellFragment(neighborCell) : null;
+
+        if (!neighborFragment?.ports?.includes(edge.toPort)) {
+          return false;
+        }
+
+        connectedNodeIds.add(nodeId);
+        connectedNodeIds.add(edge.to);
+        routeEdgeIds.add([nodeId, edge.to].sort().join('|'));
+      }
+    }
+
+    if (endpointCount !== 2 || visitedNodeIds.size !== this.faceCells.length) {
+      return false;
+    }
+
+    const firstNodeId = [...connectedNodeIds][0];
+
+    if (!firstNodeId) {
+      return false;
+    }
+
+    return this.countConnectedRouteNodes(firstNodeId, routeEdgeIds) === this.faceCells.length;
+  }
+
+  private countConnectedRouteNodes(startNodeId: string, routeEdgeIds: Set<string>): number {
+    const visitedNodeIds = new Set<string>();
+    const pendingNodeIds = [startNodeId];
+
+    while (pendingNodeIds.length > 0) {
+      const nodeId = pendingNodeIds.pop();
+
+      if (!nodeId || visitedNodeIds.has(nodeId)) {
+        continue;
+      }
+
+      visitedNodeIds.add(nodeId);
+
+      for (const edgeId of routeEdgeIds) {
+        const [firstNodeId, secondNodeId] = edgeId.split('|');
+
+        if (firstNodeId === nodeId && !visitedNodeIds.has(secondNodeId)) {
+          pendingNodeIds.push(secondNodeId);
+        }
+
+        if (secondNodeId === nodeId && !visitedNodeIds.has(firstNodeId)) {
+          pendingNodeIds.push(firstNodeId);
+        }
+      }
+    }
+
+    return visitedNodeIds.size;
   }
 
   private getSourceFaceForDisplayedCell(

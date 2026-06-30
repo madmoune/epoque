@@ -185,6 +185,30 @@ export class MagicSquarePage {
     this.hasChecked.set(true);
   }
 
+  protected placeHint(): void {
+    if (this.isSolved()) return;
+
+    const hintCell = this.puzzle()
+      .cells.flat()
+      .find((cell) => !cell.given && this.cellValue(cell.row, cell.col) !== cell.value);
+
+    if (!hintCell) return;
+
+    this.answers.update((answers) =>
+      answers.map((answerRow, row) =>
+        answerRow.map((answer, col) => {
+          if (row === hintCell.row && col === hintCell.col) {
+            return hintCell.value;
+          }
+
+          return answer === hintCell.value ? null : answer;
+        }),
+      ),
+    );
+    this.selectedCell.set({ row: hintCell.row, col: hintCell.col });
+    this.hasChecked.set(false);
+  }
+
   protected beginDrag(number: number, event: DragEvent): void {
     if (!this.availableNumbers().includes(number)) return;
 

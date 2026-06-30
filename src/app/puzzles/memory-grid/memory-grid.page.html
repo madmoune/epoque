@@ -57,6 +57,10 @@
         </div>
 
         <div class="actions">
+            <button type="button" class="secondary-button" (click)="placeHint()" [disabled]="isSolved()">
+                Indice
+            </button>
+
             <button type="button" class="secondary-button" (click)="resetPlayerGrid()" [disabled]="isSolved()">
                 Tout effacer
             </button>

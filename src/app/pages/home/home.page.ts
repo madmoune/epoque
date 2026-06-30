@@ -94,6 +94,12 @@ export class HomePage {
           tag: 'Sommes',
         },
         {
+          title: 'Pyramide de sommes',
+          description: 'Complete la pyramide en additionnant deux cases collees vers le haut.',
+          route: '/sum-pyramid',
+          tag: 'Sommes',
+        },
+        {
           title: 'Nim',
           description: 'Analyse les tas et trouve les bons retraits avec la logique XOR.',
           route: '/nim',

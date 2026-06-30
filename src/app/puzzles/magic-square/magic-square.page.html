@@ -69,6 +69,9 @@
         </section>
 
         <div class="actions">
+          <button type="button" class="secondary-button" (click)="placeHint()" [disabled]="isSolved()">
+            Indice
+          </button>
           <button type="button" class="secondary-button" (click)="clearSelectedCell()">
             Effacer
           </button>
