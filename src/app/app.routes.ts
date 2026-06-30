@@ -34,6 +34,11 @@ export const routes: Routes = [
       import('./puzzles/jigsaw-blocks/jigsaw-blocks.page').then((m) => m.PathwaysPage),
   },
   {
+    path: 'corner-cube',
+    loadComponent: () =>
+      import('./puzzles/corner-cube/corner-cube.page').then((m) => m.CornerCubePage),
+  },
+  {
     path: 'sliding-puzzle',
     loadComponent: () =>
       import('./puzzles/sliding-puzzle/sliding-puzzle.page').then((m) => m.SlidingPuzzlePage),

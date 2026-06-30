@@ -91,10 +91,8 @@ export class MagicSquarePage {
     return this.puzzle().numberBank.filter((number) => !usedAnswers.has(number));
   });
 
-  protected readonly isSolved = computed(() =>
-    this.puzzle().cells.every((row) =>
-      row.every((cell) => this.cellValue(cell.row, cell.col) === cell.value),
-    ),
+  protected readonly isSolved = computed(
+    () => this.isGridFilled() && this.lineStates().every((state) => state === 'correct'),
   );
 
   protected readonly lineStates = computed<LineState[]>(() =>
@@ -138,7 +136,6 @@ export class MagicSquarePage {
     if (!selectedCell) return;
 
     this.placeNumberAt(selectedCell.row, selectedCell.col, number, null);
-    this.selectNextEmptyCell(selectedCell.row, selectedCell.col);
   }
 
   protected placeNumberAt(
@@ -300,8 +297,9 @@ export class MagicSquarePage {
     const selected = this.selectedCell();
     if (selected?.row === row && selected.col === col) return 'selected';
     if (!this.hasChecked() || this.puzzle().cells[row][col].given) return null;
+    if (this.cellValue(row, col) === null) return null;
 
-    return this.cellValue(row, col) === this.puzzle().cells[row][col].value ? 'correct' : 'wrong';
+    return this.isCellInWrongCompletedLine(row, col) ? 'wrong' : 'correct';
   }
 
   protected rowState(row: number): LineState {
@@ -344,6 +342,20 @@ export class MagicSquarePage {
       targetSum: 15 + offset * 3,
       numberBank: this.shuffle([...missingNumbers, ...this.createDistractors(solutionNumbers)]),
     };
+  }
+
+  private isGridFilled(): boolean {
+    return this.puzzle().cells.every((row) =>
+      row.every((cell) => this.cellValue(cell.row, cell.col) !== null),
+    );
+  }
+
+  private isCellInWrongCompletedLine(row: number, col: number): boolean {
+    return LINES.some((line, index) => {
+      const includesCell = line.some(([lineRow, lineCol]) => lineRow === row && lineCol === col);
+
+      return includesCell && this.lineStates()[index] === 'wrong';
+    });
   }
 
   private createGivenPositions(count: number): string[] {
@@ -400,25 +412,6 @@ export class MagicSquarePage {
     }
 
     return transformed;
-  }
-
-  private selectNextEmptyCell(row: number, col: number): void {
-    const positions = this.createPositions();
-    const currentIndex = positions.indexOf(this.positionKey(row, col));
-    const nextPosition = positions
-      .slice(currentIndex + 1)
-      .concat(positions.slice(0, currentIndex))
-      .find((position) => {
-        const [nextRow, nextCol] = position.split(':').map(Number);
-        return (
-          !this.puzzle().cells[nextRow][nextCol].given && this.answers()[nextRow][nextCol] === null
-        );
-      });
-
-    if (!nextPosition) return;
-
-    const [nextRow, nextCol] = nextPosition.split(':').map(Number);
-    this.selectedCell.set({ row: nextRow, col: nextCol });
   }
 
   private createEmptyAnswers(): (number | null)[][] {

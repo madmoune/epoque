@@ -1,4 +1,12 @@
-import { Component, HostListener, computed, ElementRef, QueryList, signal, ViewChildren } from '@angular/core';
+import {
+  Component,
+  HostListener,
+  computed,
+  ElementRef,
+  QueryList,
+  signal,
+  ViewChildren,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import {
   CustomKeyboardComponent,
@@ -140,7 +148,6 @@ export class LatinSquarePage {
     if (key === 'space') return;
 
     this.updateAnswer(activeCell.row, activeCell.col, key);
-    this.focusNextInput(activeCell.row, activeCell.col);
   }
 
   protected checkPuzzle(): void {
@@ -175,28 +182,6 @@ export class LatinSquarePage {
 
   protected isHinted(row: number, col: number): boolean {
     return this.hintedPositions().has(this.positionKey(row, col));
-  }
-
-  private focusNextInput(row: number, col: number): void {
-    const inputs = this.answerFields.toArray().map((input) => input.nativeElement);
-    const currentInput = inputs.find(
-      (input) => input.dataset['row'] === String(row) && input.dataset['col'] === String(col),
-    );
-
-    if (!currentInput) return;
-
-    const currentIndex = inputs.indexOf(currentInput);
-    const nextInput = inputs[currentIndex + 1];
-    if (!nextInput) return;
-
-    window.setTimeout(() => {
-      this.suppressNextSelection = true;
-      nextInput.focus();
-      this.activeCell.set({
-        row: Number(nextInput.dataset['row']),
-        col: Number(nextInput.dataset['col']),
-      });
-    });
   }
 
   private createPuzzle(size: LatinSquareSize): LatinSquarePuzzle {

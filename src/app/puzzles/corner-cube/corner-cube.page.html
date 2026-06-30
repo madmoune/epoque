@@ -1,0 +1,147 @@
+<main class="page">
+  <a routerLink="/" fragment="corner-cube" class="back-link">Retour au menu</a>
+
+  <section class="shell">
+    <header class="header">
+      <p class="eyebrow">Cube 3 faces</p>
+      <h1>Reconstruis le coin du cube</h1>
+      <p class="instructions">
+        Place les morceaux pour former un trajet continu sur les trois faces visibles du cube.
+      </p>
+    </header>
+
+    <section class="game-layout">
+      <div class="cube-stage" aria-label="Coin de cube a trois faces">
+        <svg class="corner-board" viewBox="0 0 420 330" role="img" aria-label="Cube a trois faces">
+          <defs>
+            @for (face of faces; track face) {
+            @for (cell of getFaceCells(face); track cell.face + cell.positionId) {
+            <clipPath [attr.id]="cellClipId(cell)">
+              <polygon [attr.points]="cellPolygonPoints(cell)" />
+            </clipPath>
+            }
+            }
+          </defs>
+
+          @for (face of faces; track face) {
+          <g [attr.aria-label]="faceLabels[face]">
+            @for (cell of getFaceCells(face); track cell.face + cell.positionId) {
+            <g data-cube-cell="true" [attr.data-position-id]="cell.positionId" [attr.data-face]="cell.face"
+              (pointerdown)="startPlacedPieceDrag(cell, $event)">
+              <polygon [class]="cellClasses(cell)" [attr.points]="cellPolygonPoints(cell)" [attr.fill]="cellFill(cell)"
+                (click)="handleCellClick(cell)" (dblclick)="removePiece(cell.positionId)">
+                <title>{{ faceLabels[face] }}, case {{ cell.row + 1 }}-{{ cell.col + 1 }}</title>
+              </polygon>
+
+              @if (cellFragment(cell); as fragment) {
+              <g [attr.clip-path]="'url(#' + cellClipId(cell) + ')'">
+                <g class="image-fragment">
+                  <path [attr.d]="cellRoutePath(cell, fragment)" [attr.stroke]="fragment.stroke"
+                    [attr.stroke-width]="fragment.strokeWidth" />
+                </g>
+              </g>
+              }
+            </g>
+            }
+          </g>
+          }
+        </svg>
+
+        <p class="status" role="status">{{ message() }}</p>
+      </div>
+
+      <aside class="piece-tray" aria-label="Morceaux disponibles">
+        <div class="tray-header">
+          <h2>Morceaux</h2>
+          <span>{{ unplacedPieces().length }} restants</span>
+        </div>
+
+        <div class="piece-list">
+          @for (piece of unplacedPieces(); track piece.id) {
+          <button type="button" [class]="pieceClasses(piece)" (pointerdown)="startPieceDrag(piece.id, $event)"
+            (click)="selectPiece(piece.id)" [attr.aria-label]="'Déplacer ' + piece.name">
+            <span class="piece-cube-wrap">
+              <svg class="piece-cube" viewBox="0 0 120 98" aria-hidden="true">
+                <defs>
+                  @for (face of piece.faces; track face) {
+                  <clipPath [attr.id]="pieceFaceClipId(piece, face)">
+                    <polygon [attr.points]="pieceFacePolygonPoints(face)" />
+                  </clipPath>
+                  }
+                </defs>
+
+                @for (face of piece.faces; track face) {
+                <g>
+                  <polygon [attr.points]="pieceFacePolygonPoints(face)" [attr.fill]="pieceFaceFill(face)"
+                    [class]="'piece-cube-face ' + face" />
+                  <g [attr.clip-path]="'url(#' + pieceFaceClipId(piece, face) + ')'">
+                    <g [attr.transform]="pieceFragmentTransform(face)" class="image-fragment">
+                      @for (path of piece.fragments[face].paths; track path) {
+                      <path [attr.d]="path" [attr.stroke]="piece.fragments[face].stroke"
+                        [attr.stroke-width]="piece.fragments[face].strokeWidth" />
+                      }
+                      @for (dot of piece.fragments[face].dots; track dot.cx + '-' + dot.cy + '-' + dot.fill) {
+                      <circle [attr.cx]="dot.cx" [attr.cy]="dot.cy" [attr.r]="dot.r" [attr.fill]="dot.fill" />
+                      }
+                    </g>
+                  </g>
+                </g>
+                }
+              </svg>
+            </span>
+          </button>
+          }
+        </div>
+      </aside>
+    </section>
+
+    <div class="actions">
+      <button type="button" class="secondary-button" (click)="placeHint()" [disabled]="isSolved()">
+        Indice
+      </button>
+      <button type="button" (click)="resetPuzzle()">Recommencer</button>
+      <button type="button" (click)="newCube()">Nouveau cube</button>
+    </div>
+
+    @if (isSolved()) {
+    <app-puzzle-success-popup title="Cube complete!" message="Le trajet est continu sur les trois faces du cube."
+      actionLabel="Rejouer" (action)="resetPuzzle()" />
+    }
+  </section>
+
+  @if (selectedPiece(); as piece) {
+  @if (dragPosition(); as position) {
+  <div class="drag-preview" [style.transform]="dragPreviewTransform(position)">
+    <span class="piece-cube-wrap">
+      <svg class="piece-cube" viewBox="0 0 120 98" aria-hidden="true">
+        <defs>
+          @for (face of piece.faces; track face) {
+          <clipPath [attr.id]="pieceFaceClipId(piece, face) + '-drag'">
+            <polygon [attr.points]="pieceFacePolygonPoints(face)" />
+          </clipPath>
+          }
+        </defs>
+
+        @for (face of piece.faces; track face) {
+        <g>
+          <polygon [attr.points]="pieceFacePolygonPoints(face)" [attr.fill]="pieceFaceFill(face)"
+            [class]="'piece-cube-face ' + face" />
+          <g [attr.clip-path]="'url(#' + pieceFaceClipId(piece, face) + '-drag)'">
+            <g [attr.transform]="pieceFragmentTransform(face)" class="image-fragment">
+              @for (path of piece.fragments[face].paths; track path) {
+              <path [attr.d]="path" [attr.stroke]="piece.fragments[face].stroke"
+                [attr.stroke-width]="piece.fragments[face].strokeWidth" />
+              }
+              @for (dot of piece.fragments[face].dots; track dot.cx + '-' + dot.cy + '-' + dot.fill) {
+              <circle [attr.cx]="dot.cx" [attr.cy]="dot.cy" [attr.r]="dot.r" [attr.fill]="dot.fill" />
+              }
+            </g>
+          </g>
+        </g>
+        }
+      </svg>
+    </span>
+  </div>
+  }
+  }
+</main>

@@ -129,10 +129,6 @@ export class CryptogramsPage implements AfterViewInit {
     if (!character || this.isCorrect()) {
       return;
     }
-
-    queueMicrotask(() => {
-      this.focusNextEmptyInput(currentInput);
-    });
   }
 
   protected activateInput(index: number, input: HTMLInputElement): void {
@@ -184,8 +180,6 @@ export class CryptogramsPage implements AfterViewInit {
     this.guesses.set(nextGuesses);
 
     if (this.isCorrect()) return;
-
-    queueMicrotask(() => this.focusNextEmptyInput(input));
   }
 
   protected nextPuzzle(): void {
@@ -250,23 +244,6 @@ export class CryptogramsPage implements AfterViewInit {
     });
 
     this.guesses.set(nextGuesses);
-  }
-
-  private focusNextEmptyInput(currentInput: HTMLInputElement): void {
-    const inputs = this.guessInputs.toArray().map((input) => input.nativeElement);
-    const currentIndex = inputs.indexOf(currentInput);
-
-    const nextInput = inputs.slice(currentIndex + 1).find((input) => !input.value);
-
-    if (nextInput) {
-      this.suppressNextSelection = true;
-      nextInput.focus();
-    }
-
-    if (nextInput) {
-      const index = Number(nextInput.dataset['characterIndex']);
-      this.activeCharacterIndex.set(Number.isNaN(index) ? null : index);
-    }
   }
 
   protected handleBackspace(index: number, event: Event, currentInput: HTMLInputElement): void {
@@ -354,10 +331,6 @@ export class CryptogramsPage implements AfterViewInit {
     if (this.isCorrect()) {
       return;
     }
-
-    queueMicrotask(() => {
-      this.focusNextEmptyInput(currentInput);
-    });
   }
 
   protected clearGuesses(): void {

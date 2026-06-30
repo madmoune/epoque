@@ -136,6 +136,13 @@ export class HomePage {
           tag: 'Chemin',
         },
         {
+          title: 'Cube 3 faces',
+          description:
+            'Reconstruis trois images sur un coin de cube avec des morceaux de face, d’arête et de coin.',
+          route: '/corner-cube',
+          tag: '3D',
+        },
+        {
           title: 'Taquin 15',
           description:
             'Glisse les 15 pièces pour remettre les nombres en ordre ou reconstruire une image.',

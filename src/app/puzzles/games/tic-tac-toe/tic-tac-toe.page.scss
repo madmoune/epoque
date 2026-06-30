@@ -18,7 +18,9 @@
   box-shadow: 0 0.75rem 2rem rgb(0 0 0 / 6%);
 }
 
-.hero { margin-bottom: 1.25rem; }
+.hero {
+  margin-bottom: 1.25rem;
+}
 .eyebrow {
   margin: 0 0 0.4rem;
   text-transform: uppercase;
@@ -27,8 +29,17 @@
   color: #666;
   font-weight: 800;
 }
-h1 { margin: 0; font-size: clamp(1.85rem, 7vw, 3rem); line-height: 1; }
-.intro { max-width: 620px; margin: 0.75rem 0 0; color: #555; line-height: 1.5; }
+h1 {
+  margin: 0;
+  font-size: clamp(1.85rem, 7vw, 3rem);
+  line-height: 1;
+}
+.intro {
+  max-width: 620px;
+  margin: 0.75rem 0 0;
+  color: #555;
+  line-height: 1.5;
+}
 
 .game-area {
   display: grid;
@@ -47,7 +58,11 @@ h1 { margin: 0; font-size: clamp(1.85rem, 7vw, 3rem); line-height: 1; }
   align-items: center;
   justify-content: space-between;
 }
-.status { margin: 0; color: #444; font-weight: 700; }
+.status {
+  margin: 0;
+  color: #444;
+  font-weight: 700;
+}
 .turn-pill {
   flex: 0 0 auto;
   padding: 0.35rem 0.65rem;
@@ -57,11 +72,15 @@ h1 { margin: 0; font-size: clamp(1.85rem, 7vw, 3rem); line-height: 1; }
   font-size: 0.78rem;
   font-weight: 900;
 }
-.turn-pill.cpu { background: #fee2e2; color: #b91c1c; }
+.turn-pill.cpu {
+  background: #fee2e2;
+  color: #b91c1c;
+}
 
 .board {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, minmax(0, 1fr));
   width: min(100%, 30rem);
   aspect-ratio: 1;
   overflow: hidden;
@@ -74,28 +93,70 @@ h1 { margin: 0; font-size: clamp(1.85rem, 7vw, 3rem); line-height: 1; }
   display: grid;
   place-items: center;
   min-width: 0;
+  min-height: 0;
+  aspect-ratio: 1;
   padding: 0;
   border: 0;
   border-radius: 0;
   background: #fff;
   cursor: pointer;
   color: #222;
-  transition: background 150ms ease, box-shadow 150ms ease;
+  transition:
+    background 150ms ease,
+    box-shadow 150ms ease;
 }
-.cell:disabled { cursor: default; opacity: 1; }
-.cell.destination { background: #f0fdf4; }
-.cell.destination:hover { background: #dcfce7; }
-.cell.selected { position: relative; z-index: 1; box-shadow: inset 0 0 0 6px #16a34a; }
-.piece { font-size: clamp(3.4rem, 14vw, 6.5rem); font-weight: 900; line-height: 1; }
-.cell.x .piece { color: #2563eb; }
-.cell.o .piece { color: #dc2626; }
-.destination-dot { width: 18%; aspect-ratio: 1; border-radius: 50%; background: #86efac; }
+.cell:disabled {
+  cursor: default;
+  opacity: 1;
+}
+.cell.destination {
+  background: #f0fdf4;
+}
+.cell.destination:hover {
+  background: #dcfce7;
+}
+.cell.selected {
+  position: relative;
+  z-index: 1;
+  box-shadow: inset 0 0 0 6px #16a34a;
+}
+.piece {
+  font-size: clamp(3.4rem, 14vw, 6.5rem);
+  font-weight: 900;
+  line-height: 1;
+}
+.cell.x .piece {
+  color: #2563eb;
+}
+.cell.o .piece {
+  color: #dc2626;
+}
+.destination-dot {
+  width: 18%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #86efac;
+}
 
-.legend { display: flex; gap: 1.4rem; color: #555; }
-.legend span { display: inline-flex; gap: 0.4rem; align-items: center; }
-.legend-mark { font-size: 1.2rem; }
-.x-mark { color: #2563eb; }
-.o-mark { color: #dc2626; }
+.legend {
+  display: flex;
+  gap: 1.4rem;
+  color: #555;
+}
+.legend span {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+.legend-mark {
+  font-size: 1.2rem;
+}
+.x-mark {
+  color: #2563eb;
+}
+.o-mark {
+  color: #dc2626;
+}
 .new-game-button {
   min-height: 2.65rem;
   padding: 0.7rem 1rem;
@@ -108,14 +169,31 @@ h1 { margin: 0; font-size: clamp(1.85rem, 7vw, 3rem); line-height: 1; }
 }
 
 @media (max-width: 560px) {
-  .page { padding: 0.75rem; }
-  .shell, .game-area { padding: 0.75rem; border-radius: 0.9rem; }
-  .intro { font-size: 0.92rem; line-height: 1.35; }
-  .status-row { align-items: flex-start; }
-  .status { font-size: 0.9rem; }
-  .board { border-radius: 0.75rem; }
+  .page {
+    padding: 0.75rem;
+  }
+  .shell,
+  .game-area {
+    padding: 0.75rem;
+    border-radius: 0.9rem;
+  }
+  .intro {
+    font-size: 0.92rem;
+    line-height: 1.35;
+  }
+  .status-row {
+    align-items: flex-start;
+  }
+  .status {
+    font-size: 0.9rem;
+  }
+  .board {
+    border-radius: 0.75rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .cell { transition: none; }
+  .cell {
+    transition: none;
+  }
 }
