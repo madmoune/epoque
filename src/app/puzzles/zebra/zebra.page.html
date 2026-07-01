@@ -1,0 +1,122 @@
+﻿<main class="page">
+  <a routerLink="/" fragment="deduction-logique" class="back-link">Retour au menu</a>
+
+  <section class="shell">
+    <header class="hero">
+      <p class="eyebrow">Deduction</p>
+      <h1>Zebra logique</h1>
+      <p class="intro">{{ puzzle().intro }}</p>
+
+      <div class="level-switch" aria-label="Niveau du puzzle">
+        <button type="button" class="mode-button" [class.active]="level() === 3" (click)="setLevel(3)">
+          3
+        </button>
+        <button type="button" class="mode-button" [class.active]="level() === 4" (click)="setLevel(4)">
+          4
+        </button>
+        <button type="button" class="mode-button" [class.active]="level() === 5" (click)="setLevel(5)">
+          5
+        </button>
+      </div>
+    </header>
+
+    @if (isSolved()) {
+      <app-puzzle-success-popup
+        title="Puzzle resolu!"
+        message="La grille de deduction contient toutes les bonnes associations."
+        actionLabel="Nouveau jeu"
+        (action)="newPuzzle()"
+      />
+    }
+
+    <section class="play-area">
+      <aside class="clue-panel">
+        <h2>{{ puzzle().title }}</h2>
+        <ol>
+          @for (clue of puzzle().clues; track clue) {
+            <li>{{ clue }}</li>
+          }
+        </ol>
+
+        <div class="actions">
+          <button type="button" (click)="newPuzzle()">Nouveau jeu</button>
+          <button type="button" class="secondary-button" (click)="showHint()" [disabled]="isSolved()">
+            Indice
+          </button>
+          <button type="button" class="secondary-button" (click)="resetPuzzle()">Recommencer</button>
+        </div>
+      </aside>
+
+      <section class="deduction-panel" aria-label="Grille de deduction">
+        <div class="section-heading">
+          <h2>Grille de deduction</h2>
+          <p>Clique une case pour noter non, oui, puis vide. Un oui complete les non deduits dans la meme ligne et colonne.</p>
+        </div>
+
+        <div class="logic-grid-wrap">
+          <table class="logic-grid">
+            <thead>
+              <tr>
+                <th class="category-corner"></th>
+                <th class="grid-corner"></th>
+                @for (category of columnCategories(); track category.id) {
+                  <th class="category-heading" [attr.colspan]="category.values.length">
+                    {{ category.label }}
+                  </th>
+                }
+              </tr>
+              <tr>
+                <th class="category-corner"></th>
+                <th class="grid-corner"></th>
+                @for (category of columnCategories(); track category.id) {
+                  @for (value of category.values; track value) {
+                    <th class="value-heading"><span>{{ value }}</span></th>
+                  }
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (rowCategory of rowCategories(); track rowCategory.id) {
+                @for (rowValue of rowCategory.values; track rowValue; let isFirstRowInSection = $first; let isLastRowInSection = $last) {
+                  <tr>
+                    @if (isFirstRowInSection) {
+                      <th class="row-category-heading" [attr.rowspan]="rowCategory.values.length">
+                        <span>{{ rowCategory.label }}</span>
+                      </th>
+                    }
+                    <th class="row-heading">{{ rowValue }}</th>
+                    @for (columnCategory of columnCategories(); track columnCategory.id) {
+                      @for (columnValue of columnCategory.values; track columnValue; let isFirstColumnInSection = $first; let isLastColumnInSection = $last) {
+                        @if (hasGridCell(rowCategory, columnCategory)) {
+                          @let mark = gridMark(rowCategory.id, rowValue, columnCategory.id, columnValue);
+                          <td
+                            [class.section-top]="isFirstRowInSection"
+                            [class.section-bottom]="isLastRowInSection"
+                            [class.section-left]="isFirstColumnInSection"
+                            [class.section-right]="isLastColumnInSection"
+                          >
+                            <button
+                              type="button"
+                              [class]="'mark-cell ' + mark + ' ' + gridMarkOrigin(rowCategory.id, rowValue, columnCategory.id, columnValue) + ' ' + gridMarkState(rowCategory.id, rowValue, columnCategory.id, columnValue)"
+                              [disabled]="!canToggleGridMark(rowCategory.id, rowValue, columnCategory.id, columnValue)"
+                              (click)="toggleGridMark(rowCategory.id, rowValue, columnCategory.id, columnValue)"
+                              [attr.aria-label]="rowCategory.label + ' ' + rowValue + ', ' + columnCategory.label + ' ' + columnValue"
+                            >
+                              <span aria-hidden="true"></span>
+                            </button>
+                          </td>
+                        } @else {
+                          <td class="disabled-cell"></td>
+                        }
+                      }
+                    }
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+  </section>
+</main>

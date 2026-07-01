@@ -142,6 +142,12 @@ export class HomePage {
           route: '/mastermind',
           tag: 'Déduction',
         },
+        {
+          title: 'Zebra Puzzle',
+          description: 'Déduis les bonnes caractéristiques en fonction des indices.',
+          route: '/zebra',
+          tag: 'Déduction',
+        },
       ],
     },
     {
