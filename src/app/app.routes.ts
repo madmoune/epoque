@@ -15,6 +15,11 @@ export const routes: Routes = [
       import('./puzzles/cryptograms/cryptogram.page').then((m) => m.CryptogramsPage),
   },
   {
+    path: 'word-search',
+    loadComponent: () =>
+      import('./puzzles/word-search/word-search.page').then((m) => m.WordSearchPage),
+  },
+  {
     path: 'phrases',
     loadComponent: () => import('./puzzles/phrases/phrase.page').then((m) => m.PhrasesPage),
   },

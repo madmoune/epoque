@@ -61,6 +61,12 @@ export class HomePage {
           tag: 'Code',
         },
         {
+          title: 'Mots cachés',
+          description: 'Trouve les mots dans la grille, puis déchiffre les lettres restantes.',
+          route: '/word-search',
+          tag: 'Grille',
+        },
+        {
           title: 'Phrases',
           description: 'Reconstruis ou devine la phrase cachée.',
           route: '/phrases',

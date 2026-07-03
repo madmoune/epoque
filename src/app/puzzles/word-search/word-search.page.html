@@ -1,0 +1,102 @@
+<main class="page">
+  <a routerLink="/" fragment="mots-langage" class="back-link">Retour au menu</a>
+
+  <section class="shell">
+    <header class="header">
+      <p class="eyebrow">Mots cachés</p>
+      <h1>Mots cachés</h1>
+      <p class="intro">Trouve les mots de la liste. Les lettres restantes forment le mot final.</p>
+    </header>
+
+    @if (isLoading()) {
+      <p>Chargement des mots...</p>
+    } @else if (loadError()) {
+      <p class="error">{{ loadError() }}</p>
+    } @else if (puzzle(); as currentPuzzle) {
+      <section class="game-layout">
+        <section class="grid-panel" aria-label="Grille de mots cachés">
+          <div class="word-grid" [style.--word-search-size]="currentPuzzle.size">
+            @for (row of currentPuzzle.grid; track $index) {
+              @for (cell of row; track cell.row + ':' + cell.col) {
+                <button
+                  type="button"
+                  [class]="cellClass(cell)"
+                  (click)="selectCell(cell)"
+                  [attr.aria-label]="'Ligne ' + (cell.row + 1) + ', colonne ' + (cell.col + 1) + ', lettre ' + cell.letter"
+                >
+                  {{ cell.letter }}
+                </button>
+              }
+            }
+          </div>
+
+          <p class="status" role="status">{{ message() }}</p>
+        </section>
+
+        <aside class="word-panel">
+          <div class="panel-heading">
+            <h2>Mots à trouver</h2>
+            <span>{{ foundWords().length }} / {{ currentPuzzle.hiddenWords.length }}</span>
+          </div>
+
+          <ul class="word-list">
+            @for (word of currentPuzzle.hiddenWords; track word.id) {
+              <li [class]="wordClass(word)">
+                <span>{{ word.answer }}</span>
+                @if (!foundWordIds().has(word.id)) {
+                  <button type="button" class="hint-button" (click)="revealWord(word)">Indice</button>
+                }
+              </li>
+            }
+          </ul>
+
+          <div class="final-panel" [class.unlocked]="allWordsFound()">
+            <h2>Mot final</h2>
+            @if (allWordsFound()) {
+              <p class="remaining-letters">{{ remainingLetters() }}</p>
+              <label for="final-answer">Réponse</label>
+              <input
+                #finalAnswerField
+                id="final-answer"
+                class="final-answer-input"
+                type="text"
+                inputmode="none"
+                autocomplete="off"
+                [ngModel]="finalAnswer()"
+                (ngModelChange)="updateFinalAnswer($event)"
+                (focus)="selectFinalAnswerContent($event)"
+                (click)="selectFinalAnswerContent($event)"
+                [disabled]="isSolved()"
+              />
+            } @else {
+              <p>Trouve tous les mots pour révéler les lettres restantes.</p>
+            }
+          </div>
+
+          @if (allWordsFound()) {
+            <app-custom-keyboard
+              [rows]="letterKeyboardRows"
+              [visible]="keyboardVisible()"
+              [disabled]="isSolved()"
+              (keyPress)="handleKeyboardKey($event)"
+            />
+          }
+
+          <div class="actions">
+            <button type="button" (click)="newPuzzle()">Nouvelle grille</button>
+          </div>
+        </aside>
+      </section>
+
+      @if (isSolved()) {
+        <app-puzzle-success-popup
+          title="Grille complétée!"
+          message="Les mots cachés et le mot final sont trouvés."
+          [answer]="currentPuzzle.finalWord"
+          actionLabel="Nouvelle grille"
+          (action)="newPuzzle()"
+        />
+      }
+    }
+  </section>
+</main>

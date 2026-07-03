@@ -13,6 +13,7 @@ export class PuzzleSuccessPopupComponent {
   private readonly sectionFragmentsByRoute: Record<string, string> = {
     anagrams: 'mots-langage',
     cryptograms: 'mots-langage',
+    'word-search': 'mots-langage',
     phrases: 'mots-langage',
     'memory-grid': 'memoire',
     mnemonic: 'memoire',
