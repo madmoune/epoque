@@ -197,8 +197,8 @@ export class PhrasesPage {
     @HostListener('document:pointerdown', ['$event'])
     protected hideKeyboardWhenClickingAway(event: PointerEvent): void {
         const target = event.target;
-        if (!(target instanceof HTMLElement)) return;
-        if (target.closest('.answer-input') || target.closest('app-custom-keyboard')) return;
+        if (!(target instanceof Element)) return;
+        if (target.closest('.answer-input') || target.closest('app-custom-keyboard') || target.closest('app-puzzle-success-popup')) return;
         this.keyboardVisible.set(false);
     }
 

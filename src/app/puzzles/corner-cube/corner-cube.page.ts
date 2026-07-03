@@ -468,10 +468,22 @@ export class CornerCubePage {
       return;
     }
 
+    const previousSelectedPiecePlacement = this.placedPieces().find(
+      (piece) => piece.pieceId === selectedPiece.id,
+    );
+
+    if (previousSelectedPiecePlacement?.locked) {
+      this.message.set('Cette piece est verrouillee par un indice.');
+      this.clearDragState();
+      return;
+    }
+
     const replacedPiece = this.getPlacedPieceForPosition(position.id);
 
     this.placedPieces.update((pieces) => [
-      ...pieces.filter((piece) => piece.positionId !== position.id),
+      ...pieces.filter(
+        (piece) => piece.positionId !== position.id && piece.pieceId !== selectedPiece.id,
+      ),
       {
         pieceId: selectedPiece.id,
         positionId: position.id,
@@ -479,8 +491,16 @@ export class CornerCubePage {
       },
     ]);
 
-    this.selectedPieceId.set(replacedPiece ? replacedPiece.pieceId : null);
+    this.selectedPieceId.set(
+      replacedPiece && replacedPiece.pieceId !== selectedPiece.id ? replacedPiece.pieceId : null,
+    );
     this.clearDragState();
+
+    if (this.isSolved()) {
+      this.message.set('Cube complete: le trajet est continu sur les trois faces.');
+      return;
+    }
+
     this.message.set(
       selectedPiece.id === position.id
         ? 'Bon morceau: ses fragments alignent les faces du cube.'
@@ -527,9 +547,7 @@ export class CornerCubePage {
       this.faceCells.map((cell) => [this.createRouteNode(cell.face, cell.row, cell.col).id, cell]),
     );
     const visitedNodeIds = new Set<string>();
-    const connectedNodeIds = new Set<string>();
     const routeEdgeIds = new Set<string>();
-    let endpointCount = 0;
 
     for (const cell of this.faceCells) {
       const fragment = this.cellFragment(cell);
@@ -545,7 +563,6 @@ export class CornerCubePage {
         const edge = (adjacency.get(nodeId) ?? []).find((candidate) => candidate.fromPort === port);
 
         if (!edge) {
-          endpointCount += 1;
           continue;
         }
 
@@ -556,23 +573,41 @@ export class CornerCubePage {
           return false;
         }
 
-        connectedNodeIds.add(nodeId);
-        connectedNodeIds.add(edge.to);
         routeEdgeIds.add([nodeId, edge.to].sort().join('|'));
       }
     }
 
-    if (endpointCount !== 2 || visitedNodeIds.size !== this.faceCells.length) {
+    if (visitedNodeIds.size !== this.faceCells.length) {
       return false;
     }
 
-    const firstNodeId = [...connectedNodeIds][0];
+    const routeDegrees = this.countRouteDegrees(routeEdgeIds);
+    const endpointCount = [...visitedNodeIds].filter((nodeId) => routeDegrees.get(nodeId) === 1).length;
+
+    if (endpointCount !== 2 || [...visitedNodeIds].some((nodeId) => !routeDegrees.has(nodeId))) {
+      return false;
+    }
+
+    const firstNodeId = [...visitedNodeIds][0];
 
     if (!firstNodeId) {
       return false;
     }
 
     return this.countConnectedRouteNodes(firstNodeId, routeEdgeIds) === this.faceCells.length;
+  }
+
+  private countRouteDegrees(routeEdgeIds: Set<string>): Map<string, number> {
+    const routeDegrees = new Map<string, number>();
+
+    for (const edgeId of routeEdgeIds) {
+      const [firstNodeId, secondNodeId] = edgeId.split('|');
+
+      routeDegrees.set(firstNodeId, (routeDegrees.get(firstNodeId) ?? 0) + 1);
+      routeDegrees.set(secondNodeId, (routeDegrees.get(secondNodeId) ?? 0) + 1);
+    }
+
+    return routeDegrees;
   }
 
   private countConnectedRouteNodes(startNodeId: string, routeEdgeIds: Set<string>): number {

@@ -10,6 +10,7 @@ type PuzzleCard = {
 };
 
 type PuzzleCategory = {
+  id: string;
   title: string;
   description: string;
   puzzles: PuzzleCard[];
@@ -43,6 +44,7 @@ export class HomePage {
 
   private readonly baseCategories: PuzzleCategory[] = [
     {
+      id: 'mots-langage',
       title: 'Mots et langage',
       description: 'Jeux de lettres, de phrases et de déchiffrement.',
       puzzles: [
@@ -67,6 +69,7 @@ export class HomePage {
       ],
     },
     {
+      id: 'memoire',
       title: 'Mémoire',
       description: 'Jeux basés sur la mémorisation, les symboles et les associations.',
       puzzles: [
@@ -85,6 +88,7 @@ export class HomePage {
       ],
     },
     {
+      id: 'nombres-calcul',
       title: 'Nombres et calcul',
       description: 'Suites, grilles numériques et raisonnement mathématique.',
       puzzles: [
@@ -127,6 +131,7 @@ export class HomePage {
       ],
     },
     {
+      id: 'deduction-logique',
       title: 'Déduction et logique',
       description: 'Puzzles où il faut éliminer les possibilités et lire entre les indices.',
       puzzles: [
@@ -151,6 +156,7 @@ export class HomePage {
       ],
     },
     {
+      id: 'spatial-placement',
       title: 'Spatial et placement',
       description: 'Casse-têtes de formes, de déplacements et de reconstruction visuelle.',
       puzzles: [
@@ -207,6 +213,7 @@ export class HomePage {
       ],
     },
     {
+      id: 'strategie-timing',
       title: 'Stratégie et timing',
       description: 'Jeux plus directs où le bon coup ou le bon moment fait toute la différence.',
       puzzles: [
@@ -225,6 +232,7 @@ export class HomePage {
       ],
     },
     {
+      id: 'multijoueurs',
       title: 'Multi-joueurs',
       description: 'Jeux a partager en salle avec plusieurs joueurs.',
       puzzles: [
@@ -237,6 +245,7 @@ export class HomePage {
       ],
     },
     {
+      id: 'enigmes',
       title: 'Enigmes',
       description: "Vraies enigmes de type jeu d'evasion.",
       puzzles: [

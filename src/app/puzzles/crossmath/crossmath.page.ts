@@ -166,8 +166,8 @@ export class CrossmathPage {
   @HostListener('document:pointerdown', ['$event'])
   protected hideKeyboardWhenClickingAway(event: PointerEvent): void {
     const target = event.target;
-    if (!(target instanceof HTMLElement)) return;
-    if (target.closest('.number-cell input') || target.closest('app-custom-keyboard')) return;
+    if (!(target instanceof Element)) return;
+    if (target.closest('.number-cell input') || target.closest('app-custom-keyboard') || target.closest('app-puzzle-success-popup')) return;
     this.activeCell.set(null);
   }
 

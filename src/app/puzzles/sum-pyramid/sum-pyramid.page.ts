@@ -87,8 +87,8 @@ export class SumPyramidPage {
   @HostListener('document:pointerdown', ['$event'])
   protected hideKeyboardWhenClickingAway(event: PointerEvent): void {
     const target = event.target;
-    if (!(target instanceof HTMLElement)) return;
-    if (target.closest('.pyramid-cell input') || target.closest('app-custom-keyboard')) return;
+    if (!(target instanceof Element)) return;
+    if (target.closest('.pyramid-cell input') || target.closest('app-custom-keyboard') || target.closest('app-puzzle-success-popup')) return;
     this.activeCell.set(null);
   }
 
@@ -198,6 +198,18 @@ export class SumPyramidPage {
   }
 
   private createGivenPositions(size: number): Set<string> {
+    for (let attempt = 0; attempt < 100; attempt += 1) {
+      const givenPositions = this.createRankedGivenPositions(size);
+
+      if (!this.hasConsecutiveEmptyRows(givenPositions, size)) {
+        return givenPositions;
+      }
+    }
+
+    return this.addRowSpacingHints(this.createRankedGivenPositions(size), size);
+  }
+
+  private createRankedGivenPositions(size: number): Set<string> {
     const adjacentPairs: string[][] = [];
 
     for (let row = 0; row < size; row += 1) {
@@ -244,6 +256,43 @@ export class SumPyramidPage {
     }
 
     return positions;
+  }
+
+  private hasConsecutiveEmptyRows(givenPositions: Set<string>, size: number): boolean {
+    const emptyRows = this.emptyRows(givenPositions, size);
+
+    return emptyRows.some((isEmpty, row) => isEmpty && emptyRows[row + 1] === true);
+  }
+
+  private addRowSpacingHints(givenPositions: Set<string>, size: number): Set<string> {
+    const spacedPositions = new Set(givenPositions);
+    let emptyRows = this.emptyRows(spacedPositions, size);
+
+    for (let row = 0; row < size - 1; row += 1) {
+      if (!emptyRows[row] || !emptyRows[row + 1]) {
+        continue;
+      }
+
+      const rowToFill = row + 1;
+      const col = Math.floor(Math.random() * (rowToFill + 1));
+
+      spacedPositions.add(this.positionKey(rowToFill, col));
+      emptyRows = this.emptyRows(spacedPositions, size);
+    }
+
+    return spacedPositions;
+  }
+
+  private emptyRows(givenPositions: Set<string>, size: number): boolean[] {
+    return Array.from({ length: size }, (_, row) => {
+      for (let col = 0; col <= row; col += 1) {
+        if (givenPositions.has(this.positionKey(row, col))) {
+          return false;
+        }
+      }
+
+      return true;
+    });
   }
 
   private coefficientRank(positions: string[], size: number): number {

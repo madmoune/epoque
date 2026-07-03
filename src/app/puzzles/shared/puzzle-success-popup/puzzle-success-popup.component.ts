@@ -10,6 +10,35 @@ export type PuzzlePopupTone = 'success' | 'partial';
   styleUrl: './puzzle-success-popup.component.scss',
 })
 export class PuzzleSuccessPopupComponent {
+  private readonly sectionFragmentsByRoute: Record<string, string> = {
+    anagrams: 'mots-langage',
+    cryptograms: 'mots-langage',
+    phrases: 'mots-langage',
+    'memory-grid': 'memoire',
+    mnemonic: 'memoire',
+    sequences: 'nombres-calcul',
+    crossmath: 'nombres-calcul',
+    'latin-square': 'nombres-calcul',
+    'magic-square': 'nombres-calcul',
+    'sum-pyramid': 'nombres-calcul',
+    nim: 'nombres-calcul',
+    'knights-and-knaves': 'deduction-logique',
+    mastermind: 'deduction-logique',
+    zebra: 'deduction-logique',
+    'jigsaw-grid': 'spatial-placement',
+    'jigsaw-blocks': 'spatial-placement',
+    'corner-cube': 'spatial-placement',
+    'sliding-puzzle': 'spatial-placement',
+    'shape-layers': 'spatial-placement',
+    tangram: 'spatial-placement',
+    'rush-hour': 'spatial-placement',
+    dice: 'spatial-placement',
+    'tic-tac-toe': 'strategie-timing',
+    'timing-drop': 'strategie-timing',
+    'describe-symbols': 'multijoueurs',
+    'puzzlehunt/navigation': 'enigmes',
+  };
+
   private readonly router = inject(Router);
   protected readonly dismissed = signal(false);
 
@@ -23,7 +52,9 @@ export class PuzzleSuccessPopupComponent {
   @Output() readonly action = new EventEmitter<void>();
 
   protected get menuFragment(): string {
-    return this.router.url.split(/[?#]/)[0].replace(/^\/+/, '');
+    const route = this.router.url.split(/[?#]/)[0].replace(/^\/+/, '');
+
+    return this.sectionFragmentsByRoute[route] ?? route;
   }
 
   protected dismissFromBackground(event: Event): void {

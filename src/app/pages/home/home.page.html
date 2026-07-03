@@ -20,7 +20,7 @@
 
     <section class="category-list" aria-label="Categories de puzzles">
         @for (category of categories(); track category.title) {
-        <section class="category-card">
+        <section class="category-card" [attr.id]="category.id">
             <div class="category-header">
                 <h2>{{ category.title }}</h2>
                 <p>{{ category.description }}</p>
@@ -29,7 +29,7 @@
             @if (category.puzzles.length > 0) {
             <div class="puzzle-grid">
                 @for (puzzle of category.puzzles; track puzzle.route) {
-                <a class="puzzle-card" [routerLink]="puzzle.route" [attr.id]="puzzle.route.slice(1)">
+                <a class="puzzle-card" [routerLink]="puzzle.route">
                     @if (puzzle.tag) {
                     <span class="puzzle-tag">{{ puzzle.tag }}</span>
                     }
