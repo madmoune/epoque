@@ -1,0 +1,56 @@
+<main class="page">
+  <a routerLink="/" fragment="mots-langage" class="back-link">Retour au menu</a>
+
+  <section class="shell">
+    <header class="header">
+      <p class="eyebrow">Lettres parasites</p>
+      <h1>Retrouve la phrase</h1>
+      <p class="intro">Barre les lettres inutiles pour faire apparaître la phrase cachée.</p>
+    </header>
+
+    @if (isLoading()) {
+      <p>Chargement des phrases...</p>
+    } @else if (loadError()) {
+      <p class="error">{{ loadError() }}</p>
+    } @else if (puzzle(); as currentPuzzle) {
+      <section class="game-panel">
+        <div
+          class="letter-grid"
+          aria-label="Grille de lettres"
+          [style.--hidden-phrase-cols]="currentPuzzle.cols"
+        >
+          @for (tile of currentPuzzle.tiles; track tile.id) {
+            <button
+              type="button"
+              [class]="tileClass(tile)"
+              [attr.aria-pressed]="crossedTileIds().has(tile.id)"
+              (click)="toggleTile(tile)"
+            >
+              {{ tile.letter }}
+            </button>
+          }
+        </div>
+
+        <div class="actions">
+          <button type="button" class="secondary-button" (click)="useHint()" [disabled]="!canUseHint()">
+            Indice
+          </button>
+          <button type="button" class="secondary-button" (click)="restartPuzzle()">
+            Recommencer
+          </button>
+          <button type="button" (click)="newPuzzle()">Nouvelle phrase</button>
+        </div>
+      </section>
+
+      @if (isSolved()) {
+        <app-puzzle-success-popup
+          title="Phrase retrouvée!"
+          message="Toutes les lettres parasites sont barrées."
+          [answer]="currentPuzzle.phrase"
+          actionLabel="Nouvelle phrase"
+          (action)="newPuzzle()"
+        />
+      }
+    }
+  </section>
+</main>

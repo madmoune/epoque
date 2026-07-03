@@ -14,6 +14,7 @@ export class PuzzleSuccessPopupComponent {
     anagrams: 'mots-langage',
     cryptograms: 'mots-langage',
     'word-search': 'mots-langage',
+    'hidden-phrase': 'mots-langage',
     phrases: 'mots-langage',
     'memory-grid': 'memoire',
     mnemonic: 'memoire',

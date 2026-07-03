@@ -20,6 +20,11 @@ export const routes: Routes = [
       import('./puzzles/word-search/word-search.page').then((m) => m.WordSearchPage),
   },
   {
+    path: 'hidden-phrase',
+    loadComponent: () =>
+      import('./puzzles/hidden-phrase/hidden-phrase.page').then((m) => m.HiddenPhrasePage),
+  },
+  {
     path: 'phrases',
     loadComponent: () => import('./puzzles/phrases/phrase.page').then((m) => m.PhrasesPage),
   },

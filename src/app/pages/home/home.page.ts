@@ -67,6 +67,12 @@ export class HomePage {
           tag: 'Grille',
         },
         {
+          title: 'Lettres parasites',
+          description: 'Barre les lettres inutiles pour retrouver la phrase cachée.',
+          route: '/hidden-phrase',
+          tag: 'Phrase',
+        },
+        {
           title: 'Phrases',
           description: 'Reconstruis ou devine la phrase cachée.',
           route: '/phrases',

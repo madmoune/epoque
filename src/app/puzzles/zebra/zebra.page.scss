@@ -104,10 +104,6 @@ h3 {
   border-radius: 1rem;
   background: var(--surface-raised);
   color: var(--text);
-}
-
-.clue-panel,
-.deduction-panel {
   padding: 1rem;
 }
 
@@ -175,7 +171,6 @@ select {
   display: flex;
   flex-wrap: wrap;
   gap: 0.6rem;
-  margin: 0;
 }
 
 button {
@@ -400,18 +395,15 @@ button {
 
 .mark-cell.yes.deduced span::before {
   background: transparent;
-  border-color: #5ee08a;
 }
 
 .mark-cell.no {
-  border-color: #e06565;
   color: #ffb4b4 !important;
   font-size: 0.86rem;
   font-weight: 950;
 }
 
 .mark-cell.yes {
-  border-color: #3dbb71;
   background: color-mix(in srgb, #3dbb71 22%, var(--surface-soft)) !important;
   color: #aaf0c3 !important;
   font-size: 0.8rem;
@@ -425,7 +417,6 @@ button {
 
 .mark-cell.yes.deduced {
   background: color-mix(in srgb, #3dbb71 14%, var(--surface-soft)) !important;
-  color: #aaf0c3 !important;
 }
 
 .mark-cell:disabled {
@@ -546,10 +537,5 @@ button {
 
   .actions {
     display: grid;
-    grid-template-columns: 1fr;
-  }
-
-  .actions button {
-    width: 100%;
   }
 }
