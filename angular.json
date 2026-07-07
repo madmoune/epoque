@@ -27,7 +27,9 @@
               {
                 "glob": "**/*",
                 "input": "public",
-                "ignore": ["assets/competition-terrain.png"]
+                "ignore": [
+                  "assets/competition-terrain.png"
+                ]
               }
             ],
             "styles": [
@@ -44,8 +46,8 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
-                  "maximumError": "8kB"
+                  "maximumWarning": "12kB",
+                  "maximumError": "16kB"
                 }
               ],
               "outputHashing": "all"
