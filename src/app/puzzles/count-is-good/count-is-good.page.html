@@ -1,0 +1,136 @@
+<main class="page">
+  <a routerLink="/" fragment="nombres-calcul" class="back-link">Retour au menu</a>
+
+  <section class="card">
+    <header class="header">
+      <p class="eyebrow">Cible numérique</p>
+      <h1>Compte est bon</h1>
+      <p class="intro">Choisis les nombres et les opérations. Le calcul se lit de gauche à droite.</p>
+    </header>
+
+    @if (isSolved()) {
+      <app-puzzle-success-popup
+        title="Cible atteinte!"
+        message="Le calcul donne exactement la cible."
+        [answer]="'' + puzzle().target"
+        actionLabel="Nouveau tirage"
+        (action)="newPuzzle()"
+      />
+    }
+
+    <section class="puzzle-area">
+      <div class="mode-row" aria-label="Mode de jeu">
+        @for (option of modeOptions; track option) {
+          <button
+            type="button"
+            class="mode-button"
+            [class.active]="numberCount() === option"
+            (click)="chooseNumberCount(option)"
+          >
+            {{ option }} nombres
+          </button>
+        }
+      </div>
+
+      <div class="target">
+        <span>Cible</span>
+        <strong>{{ puzzle().target }}</strong>
+      </div>
+
+      <div class="equation-builder" aria-label="Équation en cours">
+        <div class="expression-line">
+          @for (slot of numberSlots(); track slot) {
+            @if (expressionNumbers()[slot] !== undefined) {
+              <span
+                class="equation-slot filled draggable-token"
+                draggable="true"
+                (click)="returnNumberToPool(slot)"
+                (dragstart)="startDrag($event, 'number-slot', slot)"
+                (dragend)="finishDrag('number-slot', slot)"
+                (dragover)="allowDrop($event)"
+                (drop)="dropOnNumberSlot($event, slot)"
+              >
+                {{ expressionNumbers()[slot] }}
+              </span>
+            } @else {
+              <span
+                class="equation-slot"
+                (dragover)="allowDrop($event)"
+                (drop)="dropOnNumberSlot($event, slot)"
+              >
+                Nb
+              </span>
+            }
+
+            @if (slot < numberCount() - 1) {
+              @if (expressionOperations()[slot]) {
+                <span
+                  class="equation-operator operation-slot filled draggable-token"
+                  draggable="true"
+                  (click)="returnOperationToPool(slot)"
+                  (dragstart)="startDrag($event, 'operation-slot', slot)"
+                  (dragend)="finishDrag('operation-slot', slot)"
+                  (dragover)="allowDrop($event)"
+                  (drop)="dropOnOperationSlot($event, slot)"
+                >
+                  {{ expressionOperations()[slot] }}
+                </span>
+              } @else {
+                <span
+                  class="equation-operator operation-slot muted"
+                  (dragover)="allowDrop($event)"
+                  (drop)="dropOnOperationSlot($event, slot)"
+                >
+                  ?
+                </span>
+              }
+            }
+          }
+        </div>
+
+      </div>
+
+      <div class="entry-layout">
+        <section class="entry-panel" aria-label="Nombres disponibles">
+          <h2>Nombres</h2>
+          <div class="number-row" (dragover)="allowDrop($event)" (drop)="dropOnNumberPool($event)">
+            @for (number of availableNumbers(); track $index) {
+              <button
+                type="button"
+                class="number-tile draggable-token"
+                draggable="true"
+                (click)="selectNumber($index)"
+                (dragstart)="startDrag($event, 'number-pool', $index)"
+              >
+                {{ number }}
+              </button>
+            }
+          </div>
+        </section>
+
+        <section class="entry-panel" aria-label="Opérations">
+          <h2>Opérations</h2>
+          <div class="operation-row" (dragover)="allowDrop($event)" (drop)="dropOnOperationPool($event)">
+            @for (operation of availableOperations(); track $index) {
+              <button
+                type="button"
+                class="operation-button draggable-token"
+                draggable="true"
+                (click)="chooseOperation($index)"
+                (dragstart)="startDrag($event, 'operation-pool', $index)"
+              >
+                {{ operation }}
+              </button>
+            }
+          </div>
+        </section>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="secondary-button" (click)="showHint()">Indice</button>
+        <button type="button" class="secondary-button" (click)="resetPuzzle()">Recommencer</button>
+        <button type="button" class="secondary-button" (click)="newPuzzle()">Nouveau tirage</button>
+      </div>
+    </section>
+  </section>
+</main>

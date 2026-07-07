@@ -22,12 +22,12 @@ type PendingRemoval = NimMove & {
   styleUrl: './nim.page.scss',
 })
 export class NimPage {
-  protected readonly mode = signal<NimMode>('game');
-  protected readonly piles = signal<number[]>(this.createPiles());
-  protected readonly turn = signal<Player>(this.randomPlayer());
+  protected readonly mode = signal<NimMode>('xor-challenge');
+  protected readonly piles = signal<number[]>(this.createChallengePiles());
+  protected readonly turn = signal<Player>('human');
   protected readonly winner = signal<Player | null>(null);
   protected readonly hintVisible = signal(false);
-  protected readonly lastMove = signal<string>('La partie commence.');
+  protected readonly lastMove = signal<string>('Tu as une seule tentative.');
   protected readonly cpuThinking = signal(false);
   protected readonly pendingRemoval = signal<PendingRemoval | null>(null);
   protected readonly challengeResult = signal<ChallengeResult>(null);

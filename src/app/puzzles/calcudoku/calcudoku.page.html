@@ -1,0 +1,61 @@
+<main class="page">
+  <a routerLink="/" fragment="nombres-calcul" class="back-link">Retour au menu</a>
+
+  <section class="card">
+    <header class="header">
+      <p class="eyebrow">Grille calculee</p>
+      <h1>KenKen / Calcudoku</h1>
+      <p class="intro">
+        Place 1 a 4 une seule fois par ligne et colonne. Dans chaque cage, additionne ou multiplie
+        toutes les cases; pour - et /, fais grand moins petit ou grand divise par petit.
+      </p>
+    </header>
+
+    @if (isSolved()) {
+      <app-puzzle-success-popup
+        title="Grille complete!"
+        message="Toutes les lignes, colonnes et cages sont correctes."
+        actionLabel="Nouvelle grille"
+        (action)="newPuzzle()"
+      />
+    }
+
+    <section class="puzzle-area">
+      <div class="calcudoku-grid" aria-label="Grille Calcudoku">
+        @for (row of [0, 1, 2, 3]; track row) {
+          @for (col of [0, 1, 2, 3]; track $index) {
+            @let cell = cellAt(row, col);
+            <div [class]="cellClass(cell)" [attr.data-cage]="cell.cage">
+              <span class="cage-label">{{ cageLabel(cell) }}</span>
+              @if (isHinted(row, col)) {
+                <span class="hinted-value">{{ answerAt(row, col) }}</span>
+              } @else {
+                <input
+                  type="text"
+                  inputmode="numeric"
+                  maxlength="1"
+                  [value]="answerAt(row, col)"
+                  (input)="updateAnswer(row, col, $any($event.target).value)"
+                  aria-label="Case Calcudoku"
+                />
+              }
+            </div>
+          }
+        }
+      </div>
+
+      <div class="actions">
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="showHint()"
+          [disabled]="!hasAvailableHint() || isSolved()"
+        >
+          Indice
+        </button>
+        <button type="button" class="secondary-button" (click)="resetPuzzle()">Recommencer</button>
+        <button type="button" class="secondary-button" (click)="newPuzzle()">Nouvelle grille</button>
+      </div>
+    </section>
+  </section>
+</main>

@@ -26,6 +26,14 @@
       >
         5x5
       </button>
+      <button
+        type="button"
+        class="secondary-button compact-button"
+        [class.active]="selectedSize() === 6"
+        (click)="setSize(6)"
+      >
+        6x6
+      </button>
     </div>
 
     @if (isSolved()) {
@@ -41,6 +49,7 @@
       <div
         class="latin-grid"
         [class.size-five]="puzzle().size === 5"
+        [class.size-six]="puzzle().size === 6"
         [style.grid-template-columns]="gridTemplateColumns()"
       >
         @for (row of puzzle().cells; track $index) {

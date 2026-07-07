@@ -1,5 +1,6 @@
 import { Component, EventEmitter, HostListener, inject, Input, Output, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { PuzzlePlayHistoryService } from '../../../puzzle-play-history.service';
 
 export type PuzzlePopupTone = 'success' | 'partial';
 
@@ -10,12 +11,46 @@ export type PuzzlePopupTone = 'success' | 'partial';
   styleUrl: './puzzle-success-popup.component.scss',
 })
 export class PuzzleSuccessPopupComponent {
+  private readonly randomPuzzleRoutes = [
+    '/anagrams',
+    '/cryptograms',
+    '/word-search',
+    '/hidden-phrase',
+    '/phrases',
+    '/ciphers',
+    '/memory-grid',
+    '/mnemonic',
+    '/sequences',
+    '/crossmath',
+    '/latin-square',
+    '/magic-square',
+    '/sum-pyramid',
+    '/count-is-good',
+    '/calcudoku',
+    '/mental-arithmetic',
+    '/nim',
+    '/knights-and-knaves',
+    '/mastermind',
+    '/zebra',
+    '/jigsaw-grid',
+    '/jigsaw-blocks',
+    '/corner-cube',
+    '/sliding-puzzle',
+    '/shape-layers',
+    '/tangram',
+    '/rush-hour',
+    '/dice',
+    '/tic-tac-toe',
+    '/timing-drop',
+  ];
+
   private readonly sectionFragmentsByRoute: Record<string, string> = {
     anagrams: 'mots-langage',
     cryptograms: 'mots-langage',
     'word-search': 'mots-langage',
     'hidden-phrase': 'mots-langage',
     phrases: 'mots-langage',
+    ciphers: 'ciphers',
     'memory-grid': 'memoire',
     mnemonic: 'memoire',
     sequences: 'nombres-calcul',
@@ -23,6 +58,9 @@ export class PuzzleSuccessPopupComponent {
     'latin-square': 'nombres-calcul',
     'magic-square': 'nombres-calcul',
     'sum-pyramid': 'nombres-calcul',
+    'count-is-good': 'nombres-calcul',
+    calcudoku: 'nombres-calcul',
+    'mental-arithmetic': 'nombres-calcul',
     nim: 'nombres-calcul',
     'knights-and-knaves': 'deduction-logique',
     mastermind: 'deduction-logique',
@@ -42,6 +80,7 @@ export class PuzzleSuccessPopupComponent {
   };
 
   private readonly router = inject(Router);
+  private readonly playHistory = inject(PuzzlePlayHistoryService);
   protected readonly dismissed = signal(false);
 
   @Input({ required: true }) title = '';
@@ -57,6 +96,29 @@ export class PuzzleSuccessPopupComponent {
     const route = this.router.url.split(/[?#]/)[0].replace(/^\/+/, '');
 
     return this.sectionFragmentsByRoute[route] ?? route;
+  }
+
+  protected get cameFromRandom(): boolean {
+    return new URLSearchParams(this.router.url.split('?')[1]?.split('#')[0] ?? '').get('from') === 'random';
+  }
+
+  protected playAnotherRandomOldestPuzzle(): void {
+    const currentRoute = this.router.url.split(/[?#]/)[0];
+    const candidateRoutes = this.randomPuzzleRoutes.filter((route) => route !== currentRoute);
+
+    if (candidateRoutes.length === 0) {
+      return;
+    }
+
+    const oldestPlayedAt = Math.min(
+      ...candidateRoutes.map((route) => this.playHistory.lastPlayedAt(route) ?? 0),
+    );
+    const oldestRoutes = candidateRoutes.filter(
+      (route) => (this.playHistory.lastPlayedAt(route) ?? 0) === oldestPlayedAt,
+    );
+    const randomRoute = oldestRoutes[Math.floor(Math.random() * oldestRoutes.length)];
+
+    void this.router.navigateByUrl(`${randomRoute}?from=random`);
   }
 
   protected dismissFromBackground(event: Event): void {

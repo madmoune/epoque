@@ -68,6 +68,19 @@
                 (click)="selectFinalAnswerContent($event)"
                 [disabled]="isSolved()"
               />
+              <div class="final-hint-row">
+                <button
+                  type="button"
+                  class="hint-button final-hint-button"
+                  (click)="revealFinalAnswerHint()"
+                  [disabled]="finalAnswerHintLetterCount() >= currentPuzzle.finalWord.length || isSolved()"
+                >
+                  Indice
+                </button>
+                @if (finalAnswerHint()) {
+                  <p class="final-hint-text">Indice: {{ finalAnswerHint() }}</p>
+                }
+              </div>
             } @else {
               <p>Trouve tous les mots pour révéler les lettres restantes.</p>
             }

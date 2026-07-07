@@ -48,11 +48,27 @@ export class SumPyramidPage {
     ['clear', '0', 'backspace'],
   ]);
 
-  protected readonly isSolved = computed(() =>
-    this.puzzle().rows.every((row) =>
-      row.every((cell) => this.cellValue(cell.row, cell.col) === cell.value),
-    ),
-  );
+  protected readonly isSolved = computed(() => {
+    const rows = this.puzzle().rows;
+
+    if (rows.some((row) => row.some((cell) => this.cellValue(cell.row, cell.col) === null))) {
+      return false;
+    }
+
+    for (let row = 0; row < rows.length - 1; row += 1) {
+      for (let col = 0; col <= row; col += 1) {
+        const topValue = this.cellValue(row, col);
+        const leftValue = this.cellValue(row + 1, col);
+        const rightValue = this.cellValue(row + 1, col + 1);
+
+        if (topValue !== leftValue! + rightValue!) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  });
 
   protected readonly hasAvailableHint = computed(() =>
     this.puzzle().rows.some((row) =>

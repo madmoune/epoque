@@ -30,6 +30,7 @@ type Point = {
 })
 export class PathwaysPage {
     private readonly pathwaysService = inject(PathwaysService);
+    private suppressedClickTileId: string | null = null;
 
     protected readonly puzzle = signal<PathwaysPuzzle>(
         this.pathwaysService.createPuzzle(),
@@ -100,6 +101,7 @@ export class PathwaysPage {
         }
 
         event.preventDefault();
+        const draggedTileId = this.selectedTile()?.id ?? null;
         this.isDraggingTile.set(false);
 
         const slotId = this.getSlotIdFromPoint(event.clientX, event.clientY);
@@ -110,6 +112,10 @@ export class PathwaysPage {
         }
 
         this.placeSelectedTile(slotId);
+
+        if (draggedTileId && !this.selectedTileId()) {
+            this.suppressedClickTileId = draggedTileId;
+        }
     }
 
     @HostListener('document:pointercancel', ['$event'])
@@ -179,6 +185,15 @@ export class PathwaysPage {
     }
 
     protected selectTile(tileId: string, event?: PointerEvent): void {
+        if (this.suppressedClickTileId === tileId) {
+            this.suppressedClickTileId = null;
+            return;
+        }
+
+        if (!this.unplacedTiles().some((tile) => tile.id === tileId)) {
+            return;
+        }
+
         const rotation = this.tileRotations()[tileId] ?? 0;
 
         this.selectedTileId.set(tileId);

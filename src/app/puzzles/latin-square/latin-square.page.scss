@@ -63,6 +63,10 @@ h1 {
   --latin-cell-size: 3.55rem;
 }
 
+.latin-grid.size-six {
+  --latin-cell-size: 3rem;
+}
+
 .number-cell {
   display: grid;
   place-items: center;
@@ -169,6 +173,10 @@ button {
 
   .latin-grid.size-five {
     --latin-cell-size: 2.65rem;
+  }
+
+  .latin-grid.size-six {
+    --latin-cell-size: min(2.2rem, calc((100vw - 4.7rem) / 6));
   }
 
   .actions {

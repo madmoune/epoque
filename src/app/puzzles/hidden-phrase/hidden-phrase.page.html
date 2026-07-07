@@ -14,6 +14,15 @@
       <p class="error">{{ loadError() }}</p>
     } @else if (puzzle(); as currentPuzzle) {
       <section class="game-panel">
+        <label class="matching-toggle">
+          <input
+            type="checkbox"
+            [checked]="toggleMatchingLetters()"
+            (change)="setToggleMatchingLetters($any($event.target).checked)"
+          />
+          <span>Cocher les lettres identiques ensemble</span>
+        </label>
+
         <div
           class="letter-grid"
           aria-label="Grille de lettres"

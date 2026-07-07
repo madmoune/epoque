@@ -171,7 +171,15 @@ button {
 
   .pyramid-cell {
     border-radius: 0.55rem;
-    font-size: clamp(1rem, 4vw, 1.35rem);
+    font-size: min(1.2rem, calc(var(--cell-size) * 0.42));
+    letter-spacing: 0;
+    overflow: hidden;
+    padding: 0.05rem;
+  }
+
+  input {
+    font-size: inherit;
+    letter-spacing: 0;
   }
 
   .actions {

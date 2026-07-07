@@ -15,6 +15,10 @@ export const routes: Routes = [
       import('./puzzles/cryptograms/cryptogram.page').then((m) => m.CryptogramsPage),
   },
   {
+    path: 'ciphers',
+    loadComponent: () => import('./puzzles/ciphers/ciphers.page').then((m) => m.CiphersPage),
+  },
+  {
     path: 'word-search',
     loadComponent: () =>
       import('./puzzles/word-search/word-search.page').then((m) => m.WordSearchPage),
@@ -91,6 +95,22 @@ export const routes: Routes = [
     path: 'sum-pyramid',
     loadComponent: () =>
       import('./puzzles/sum-pyramid/sum-pyramid.page').then((m) => m.SumPyramidPage),
+  },
+  {
+    path: 'count-is-good',
+    loadComponent: () =>
+      import('./puzzles/count-is-good/count-is-good.page').then((m) => m.CountIsGoodPage),
+  },
+  {
+    path: 'calcudoku',
+    loadComponent: () => import('./puzzles/calcudoku/calcudoku.page').then((m) => m.CalcudokuPage),
+  },
+  {
+    path: 'mental-arithmetic',
+    loadComponent: () =>
+      import('./puzzles/mental-arithmetic/mental-arithmetic.page').then(
+        (m) => m.MentalArithmeticPage,
+      ),
   },
   {
     path: 'mnemonic',

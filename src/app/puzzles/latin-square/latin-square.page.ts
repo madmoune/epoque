@@ -14,7 +14,7 @@ import {
 } from '../shared/custom-keyboard/custom-keyboard.component';
 import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
 
-type LatinSquareSize = 4 | 5;
+type LatinSquareSize = 4 | 5 | 6;
 
 type LatinSquareCell = {
   row: number;
@@ -39,9 +39,9 @@ export class LatinSquarePage {
   private readonly answerFields!: QueryList<ElementRef<HTMLInputElement>>;
   private suppressNextSelection = false;
 
-  protected readonly selectedSize = signal<LatinSquareSize>(4);
-  protected readonly puzzle = signal<LatinSquarePuzzle>(this.createPuzzle(4));
-  protected readonly answers = signal<string[][]>(this.createEmptyAnswers(4));
+  protected readonly selectedSize = signal<LatinSquareSize>(5);
+  protected readonly puzzle = signal<LatinSquarePuzzle>(this.createPuzzle(5));
+  protected readonly answers = signal<string[][]>(this.createEmptyAnswers(5));
   protected readonly hintedPositions = signal<Set<string>>(new Set());
   protected readonly hasChecked = signal(false);
   protected readonly activeCell = signal<{ row: number; col: number } | null>(null);
@@ -185,7 +185,12 @@ export class LatinSquarePage {
   }
 
   private createPuzzle(size: LatinSquareSize): LatinSquarePuzzle {
-    const targetGivens = size === 4 ? 4 : 7;
+    const targetGivensBySize: Record<LatinSquareSize, number> = {
+      4: 4,
+      5: 7,
+      6: 10,
+    };
+    const targetGivens = targetGivensBySize[size];
     let bestPuzzle = this.createPuzzleCandidate(size, targetGivens);
 
     for (let attempt = 0; attempt < 24; attempt += 1) {

@@ -20,6 +20,7 @@ export class HiddenPhrasePage {
   protected readonly loadError = signal<string | null>(null);
   protected readonly puzzle = signal<HiddenPhrasePuzzle | null>(null);
   protected readonly crossedTileIds = signal<Set<string>>(new Set());
+  protected readonly toggleMatchingLetters = signal(false);
 
   protected readonly isSolved = computed(() => {
     const puzzle = this.puzzle();
@@ -52,15 +53,25 @@ export class HiddenPhrasePage {
 
     this.crossedTileIds.update((crossedTileIds) => {
       const nextCrossedTileIds = new Set(crossedTileIds);
+      const shouldCross = !nextCrossedTileIds.has(tile.id);
+      const tilesToToggle = this.toggleMatchingLetters()
+        ? (this.puzzle()?.tiles.filter((candidate) => candidate.letter === tile.letter) ?? [tile])
+        : [tile];
 
-      if (nextCrossedTileIds.has(tile.id)) {
-        nextCrossedTileIds.delete(tile.id);
-      } else {
-        nextCrossedTileIds.add(tile.id);
+      for (const tileToToggle of tilesToToggle) {
+        if (shouldCross) {
+          nextCrossedTileIds.add(tileToToggle.id);
+        } else {
+          nextCrossedTileIds.delete(tileToToggle.id);
+        }
       }
 
       return nextCrossedTileIds;
     });
+  }
+
+  protected setToggleMatchingLetters(enabled: boolean): void {
+    this.toggleMatchingLetters.set(enabled);
   }
 
   protected tileClass(tile: HiddenPhraseTile): string {
@@ -80,7 +91,18 @@ export class HiddenPhrasePage {
       return;
     }
 
-    this.crossedTileIds.update((crossedTileIds) => new Set([...crossedTileIds, tile.id]));
+    this.crossedTileIds.update((crossedTileIds) => {
+      const nextCrossedTileIds = new Set(crossedTileIds);
+      const tilesToCross = this.toggleMatchingLetters()
+        ? puzzle.tiles.filter((candidate) => candidate.letter === tile.letter)
+        : [tile];
+
+      for (const tileToCross of tilesToCross) {
+        nextCrossedTileIds.add(tileToCross.id);
+      }
+
+      return nextCrossedTileIds;
+    });
   }
 
   protected restartPuzzle(): void {

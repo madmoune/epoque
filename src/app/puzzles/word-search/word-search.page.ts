@@ -37,6 +37,7 @@ export class WordSearchPage {
   protected readonly foundWordIds = signal<Set<string>>(new Set());
   protected readonly selectedStart = signal<GridPosition | null>(null);
   protected readonly finalAnswer = signal('');
+  protected readonly finalAnswerHintLetterCount = signal(0);
   protected readonly keyboardVisible = signal(false);
   protected readonly letterKeyboardRows: CustomKeyboardKey[][] = [
     ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
@@ -80,6 +81,17 @@ export class WordSearchPage {
     }
 
     return this.wordSearchService.normalize(this.finalAnswer()) === puzzle.normalizedFinalWord;
+  });
+
+  protected readonly finalAnswerHint = computed(() => {
+    const puzzle = this.puzzle();
+    const hintLetterCount = this.finalAnswerHintLetterCount();
+
+    if (!puzzle || hintLetterCount === 0) {
+      return '';
+    }
+
+    return puzzle.finalWord.slice(0, hintLetterCount);
   });
 
   constructor() {
@@ -168,6 +180,24 @@ export class WordSearchPage {
     this.finalAnswer.set(value);
   }
 
+  protected revealFinalAnswerHint(): void {
+    const puzzle = this.puzzle();
+
+    if (!puzzle || !this.allWordsFound() || this.isSolved()) {
+      return;
+    }
+
+    const nextHintLetterCount = Math.min(
+      this.finalAnswerHintLetterCount() + 1,
+      puzzle.finalWord.length,
+    );
+    const hint = puzzle.finalWord.slice(0, nextHintLetterCount);
+
+    this.finalAnswerHintLetterCount.set(nextHintLetterCount);
+    this.finalAnswer.update((answer) => (answer.startsWith(hint) ? answer : hint));
+    this.focusFinalAnswer(false);
+  }
+
   protected handleKeyboardKey(key: CustomKeyboardKey): void {
     if (!this.allWordsFound() || this.isSolved()) {
       return;
@@ -233,6 +263,7 @@ export class WordSearchPage {
       this.foundWordIds.set(new Set());
       this.selectedStart.set(null);
       this.finalAnswer.set('');
+      this.finalAnswerHintLetterCount.set(0);
       this.keyboardVisible.set(false);
       this.message.set('Tape la première et la dernière lettre d’un mot.');
     } catch {

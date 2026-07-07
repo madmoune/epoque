@@ -1,0 +1,203 @@
+<main class="page">
+  <a routerLink="/" fragment="ciphers" class="back-link">Retour au menu</a>
+
+  <section class="card">
+    <header class="header">
+      <p class="eyebrow">Ciphers</p>
+      <h1>Mots codes</h1>
+      <p class="intro">Retrouve le mot de la liste apres transformation par un cipher simple.</p>
+    </header>
+
+    @if (isLoading()) {
+      <p class="state-text">Chargement des mots...</p>
+    } @else if (loadError()) {
+      <p class="error">{{ loadError() }}</p>
+    } @else if (puzzle(); as currentPuzzle) {
+      <section class="puzzle-area">
+        <div class="cipher-tabs" aria-label="Choix du cipher">
+          <button type="button" class="cipher-tab random-cipher-tab" (click)="chooseRandomCipher()">
+            Random
+          </button>
+          @for (option of cipherOptions; track option.type) {
+            <button
+              type="button"
+              class="cipher-tab"
+              [class.active]="selectedCipher() === option.type"
+              (click)="chooseCipher(option.type)"
+            >
+              {{ option.label }}
+            </button>
+          }
+        </div>
+
+        <p class="cipher-note">{{ currentPuzzle.note }}</p>
+
+        <div
+          class="encoded-word"
+          [class.symbolic]="selectedCipher() === 'pigpen' || selectedCipher() === 'braille' || selectedCipher() === 'semaphore'"
+          [class.pigpen-word]="selectedCipher() === 'pigpen'"
+          [class.braille-word]="selectedCipher() === 'braille'"
+          [class.semaphore-word]="selectedCipher() === 'semaphore'"
+          [class.nato-word]="selectedCipher() === 'nato'"
+        >
+          @for (token of currentPuzzle.encoded; track $index; let tokenIndex = $index) {
+            @if (selectedCipher() === 'pigpen') {
+              <span class="pigpen-tile" [attr.aria-label]="token">
+                <span [class]="pigpenSymbolClass(token)">
+                  @if (pigpenHasDot(token)) {
+                    <span class="pigpen-dot"></span>
+                  }
+                  <span class="pigpen-stroke one"></span>
+                  <span class="pigpen-stroke two"></span>
+                </span>
+              </span>
+            } @else if (selectedCipher() === 'braille') {
+              <span class="braille-word-tile" [attr.aria-label]="token">
+                <span class="braille-cell word-cell">
+                  @for (dot of [1, 4, 2, 5, 3, 6]; track dot) {
+                    <span class="braille-dot" [class.active]="isBrailleDotActive(currentPuzzle.normalizedAnswer[tokenIndex], dot)"></span>
+                  }
+                </span>
+              </span>
+            } @else if (selectedCipher() === 'semaphore') {
+              <span class="semaphore-tile" [attr.aria-label]="token">
+                <span class="semaphore-symbol">
+                  @for (armClass of semaphoreArmClassesForLetter(token); track armClass) {
+                    <span class="semaphore-arm {{ armClass }}"></span>
+                  }
+                </span>
+              </span>
+            } @else {
+              <span>{{ token }}</span>
+            }
+          }
+        </div>
+
+        @if (cipherLegend().length > 0) {
+          <details class="legend">
+            <summary>Legende</summary>
+            @if (selectedCipher() === 'pigpen') {
+              <div class="pigpen-key">
+                @for (grid of pigpenSquareKeys; track $index; let gridIndex = $index) {
+                  <div class="pigpen-square-key" [class.dotted-key]="gridIndex === 1">
+                    @for (row of grid; track $index) {
+                      @for (letter of row; track letter) {
+                        <span>
+                          {{ letter }}
+                          @if (gridIndex === 1) {
+                            <i aria-hidden="true"></i>
+                          }
+                        </span>
+                      }
+                    }
+                  </div>
+                }
+
+                @for (key of pigpenXKeys; track key.top) {
+                  <div class="pigpen-x-key" [class.dotted-key]="key.dotted">
+                    <span class="x-letter top">{{ key.top }}</span>
+                    <span class="x-letter right">{{ key.right }}</span>
+                    <span class="x-letter bottom">{{ key.bottom }}</span>
+                    <span class="x-letter left">{{ key.left }}</span>
+                    @if (key.dotted) {
+                      <i class="x-dot top" aria-hidden="true"></i>
+                      <i class="x-dot right" aria-hidden="true"></i>
+                      <i class="x-dot bottom" aria-hidden="true"></i>
+                      <i class="x-dot left" aria-hidden="true"></i>
+                    }
+                  </div>
+                }
+              </div>
+            } @else if (selectedCipher() === 'tap-code') {
+              <div class="tap-code-key" aria-label="Legende Tap code">
+                <span class="tap-code-corner"></span>
+                @for (column of [1, 2, 3, 4, 5]; track column) {
+                  <span class="tap-code-header">{{ column }}</span>
+                }
+                @for (row of tapCodeGrid; track $index; let rowIndex = $index) {
+                  <span class="tap-code-header">{{ rowIndex + 1 }}</span>
+                  @for (letter of row; track letter) {
+                    <span class="tap-code-cell">{{ letter }}</span>
+                  }
+                }
+              </div>
+            } @else {
+              <div
+                class="legend-grid"
+                [class.braille-legend]="selectedCipher() === 'braille'"
+                [class.semaphore-legend]="selectedCipher() === 'semaphore'"
+                [class.nato-legend]="selectedCipher() === 'nato'"
+              >
+                @for (item of cipherLegend(); track item.letter) {
+                  <span class="legend-item">
+                    <strong>{{ item.letter }}</strong>
+                    @if (selectedCipher() === 'braille') {
+                      <span class="braille-cell" [attr.aria-label]="item.symbol">
+                        @for (dot of [1, 4, 2, 5, 3, 6]; track dot) {
+                          <span class="braille-dot" [class.active]="isBrailleDotActive(item.letter, dot)"></span>
+                        }
+                      </span>
+                    } @else if (selectedCipher() === 'semaphore') {
+                      <span class="semaphore-symbol compact" [attr.aria-label]="item.symbol">
+                        @for (armClass of semaphoreArmClasses(item.symbol); track armClass) {
+                          <span class="semaphore-arm {{ armClass }}"></span>
+                        }
+                      </span>
+                    } @else {
+                      <span>{{ item.symbol }}</span>
+                    }
+                  </span>
+                }
+              </div>
+            }
+          </details>
+        }
+
+        <label class="answer-group">
+          <span>Mot original</span>
+          <input
+            #answerField
+            class="answer-input"
+            type="text"
+            inputmode="none"
+            autocomplete="off"
+            [ngModel]="answerInput()"
+            (ngModelChange)="updateAnswer($event)"
+            (focus)="selectInputContent($event)"
+            (click)="selectInputContent($event)"
+            [class.correct]="isCorrect()"
+            [disabled]="isCorrect()"
+          />
+        </label>
+
+        <app-custom-keyboard
+          [rows]="letterKeyboardRows"
+          [visible]="keyboardVisible()"
+          [disabled]="isCorrect()"
+          (keyPress)="handleKeyboardKey($event)"
+        />
+
+        <div class="actions">
+          <button type="button" class="secondary-button" (click)="showHint()" [disabled]="hintLevel() >= 2 || isCorrect()">
+            Indice
+          </button>
+          <button type="button" class="secondary-button" (click)="nextPuzzle()">Nouveau mot</button>
+        </div>
+
+        @if (hintText()) {
+          <p class="hint">{{ hintText() }}</p>
+        }
+
+        @if (isCorrect()) {
+          <app-puzzle-success-popup
+            title="Mot trouve!"
+            message="Le mot code a ete decode."
+            [answer]="currentPuzzle.answer"
+            actionLabel="Nouveau mot"
+            (action)="nextPuzzle()"
+          />
+        }
+      </section>
+    }
+  </section>
+</main>

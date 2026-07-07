@@ -286,6 +286,24 @@ h2 {
   font-size: 0.72rem;
 }
 
+.final-hint-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.final-hint-button {
+  min-height: 2.15rem;
+}
+
+.final-hint-text {
+  color: var(--muted-strong) !important;
+  font-size: 0.88rem;
+  font-weight: 850;
+  overflow-wrap: anywhere;
+}
+
 .final-panel {
   display: grid;
   gap: 0.5rem;

@@ -1,0 +1,302 @@
+.page {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: #444;
+  font-weight: 800;
+}
+
+.card {
+  padding: 2rem;
+  border: 1px solid #ddd;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 0.75rem 2rem rgb(0 0 0 / 6%);
+}
+
+.header {
+  text-align: center;
+}
+
+.eyebrow {
+  margin: 0 0 0.5rem;
+  color: #7a1c2f;
+  font-size: 0.8rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(2rem, 6vw, 3rem);
+}
+
+.intro {
+  max-width: 38rem;
+  margin: 0.75rem auto 0;
+  color: #555;
+  line-height: 1.5;
+}
+
+.puzzle-area {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  border: 1px solid #eee;
+  border-radius: 0.75rem;
+  background: #fff;
+}
+
+.target {
+  display: grid;
+  justify-items: center;
+  gap: 0.25rem;
+}
+
+.mode-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.mode-button {
+  min-width: 6rem;
+  background: #f7f7f7;
+  color: #202020;
+}
+
+.mode-button.active {
+  background: #b92e4a;
+  color: #fff;
+}
+
+.target strong {
+  font-size: clamp(2.5rem, 10vw, 5rem);
+  line-height: 1;
+}
+
+.number-row,
+.operation-row,
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.65rem;
+}
+
+.number-tile,
+.operation-button,
+button {
+  min-width: 3.25rem;
+  min-height: 2.8rem;
+  border: 0;
+  border-radius: 0.65rem;
+  background: #202020;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 850;
+}
+
+.number-tile {
+  font-size: 1.25rem;
+}
+
+.number-tile.selected,
+.operation-button.active {
+  background: #b92e4a;
+}
+
+.equation-builder {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 4.5rem;
+  padding: 0.75rem;
+  border: 1px solid #e3ded2;
+  border-radius: 0.75rem;
+  background: #fff;
+}
+
+.expression-line {
+  display: flex;
+  flex: 1 1 36rem;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.equation-slot,
+.equation-result {
+  display: grid;
+  min-width: 3.9rem;
+  min-height: 3rem;
+  place-items: center;
+  border: 2px dashed #cbc3b3;
+  border-radius: 0.65rem;
+  color: #6b6254;
+  font-weight: 850;
+}
+
+.equation-slot.filled,
+.equation-result {
+  border-style: solid;
+  border-color: #202020;
+  background: #202020;
+  color: #fff;
+}
+
+.equation-operator {
+  color: #202020;
+  font-size: 1.6rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.operation-slot {
+  display: grid;
+  min-width: 2.6rem;
+  min-height: 3rem;
+  place-items: center;
+  border: 2px dashed #cbc3b3;
+  border-radius: 0.65rem;
+}
+
+.operation-slot.filled {
+  border-style: solid;
+  border-color: #202020;
+  background: #202020;
+  color: #fff;
+}
+
+.draggable-token {
+  cursor: grab;
+  touch-action: none;
+}
+
+.draggable-token:active {
+  cursor: grabbing;
+}
+
+.muted {
+  opacity: 0.45;
+}
+
+.feedback {
+  min-height: 1.5rem;
+  margin: 0;
+  color: #555;
+  font-weight: 750;
+  text-align: center;
+}
+
+.hint {
+  margin: -0.4rem 0 0;
+  color: #7a1c2f;
+  font-weight: 850;
+  text-align: center;
+}
+
+.entry-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(13rem, 0.55fr);
+  gap: 1rem;
+}
+
+.entry-panel {
+  display: grid;
+  align-content: start;
+  gap: 0.75rem;
+  min-height: 7.5rem;
+  padding: 1rem;
+  border: 1px solid #e3ded2;
+  border-radius: 0.75rem;
+  background: #fff;
+}
+
+.entry-panel h2 {
+  margin: 0;
+  color: #6b6254;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.secondary-button {
+  background: #f7f7f7;
+  color: #202020;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+@media (max-width: 600px) {
+  .page {
+    padding: 0.75rem;
+  }
+
+  .card {
+    padding: 1rem;
+  }
+
+  .equation-builder {
+    gap: 0.35rem;
+    padding: 0.6rem;
+  }
+
+  .expression-line {
+    flex-basis: 100%;
+    gap: 0.35rem;
+  }
+
+  .equation-slot,
+  .equation-result {
+    min-width: 3.35rem;
+    font-size: 0.9rem;
+  }
+
+  .entry-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+:host-context(html[data-theme='dark']) {
+  .equation-builder,
+  .entry-panel {
+    border-color: var(--border) !important;
+    background: var(--surface-raised) !important;
+    color: var(--text) !important;
+  }
+
+  .equation-slot,
+  .operation-slot {
+    border-color: var(--border-strong);
+    background: var(--surface-soft);
+    color: var(--muted-strong);
+  }
+
+  .equation-slot.filled,
+  .operation-slot.filled {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--accent-contrast);
+  }
+
+  .equation-operator,
+  .entry-panel h2 {
+    color: var(--text) !important;
+  }
+}

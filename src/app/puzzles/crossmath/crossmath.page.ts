@@ -51,7 +51,6 @@ export class CrossmathPage {
   protected readonly puzzle = signal<CrossmathPuzzle>(this.createPuzzle(3));
   protected readonly answers = signal<string[][]>(this.createEmptyAnswers(3));
   protected readonly hintedPositions = signal<Set<string>>(new Set());
-  protected readonly hasChecked = signal(false);
   protected readonly activeCell = signal<{ row: number; col: number } | null>(null);
   protected readonly numberKeyboardRows: CustomKeyboardKey[][] = [
     ['1', '2', '3'],
@@ -115,7 +114,6 @@ export class CrossmathPage {
     this.puzzle.set(this.createPuzzle(size));
     this.answers.set(this.createEmptyAnswers(size));
     this.hintedPositions.set(new Set());
-    this.hasChecked.set(false);
     window.setTimeout(() => {
       this.suppressNextSelection = true;
       this.answerFields.first?.nativeElement.focus();
@@ -131,7 +129,6 @@ export class CrossmathPage {
     }
 
     this.answers.set(answers);
-    this.hasChecked.set(false);
   }
 
   protected updateAnswer(row: number, col: number, value: string): void {
@@ -148,7 +145,6 @@ export class CrossmathPage {
           : answerRow,
       ),
     );
-    this.hasChecked.set(false);
   }
 
   protected activateInput(row: number, col: number, event: Event): void {
@@ -185,10 +181,6 @@ export class CrossmathPage {
     this.updateAnswer(activeCell.row, activeCell.col, key);
   }
 
-  protected checkPuzzle(): void {
-    this.hasChecked.set(true);
-  }
-
   protected cellAnswer(row: number, col: number): string {
     return this.answers()[row]?.[col] ?? '';
   }
@@ -212,7 +204,6 @@ export class CrossmathPage {
     this.hintedPositions.update(
       (positions) => new Set([...positions, this.positionKey(hintCell.row, hintCell.col)]),
     );
-    this.hasChecked.set(false);
   }
 
   protected isHinted(row: number, col: number): boolean {

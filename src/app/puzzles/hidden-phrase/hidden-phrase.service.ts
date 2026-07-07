@@ -27,6 +27,8 @@ export class HiddenPhraseService {
   private readonly recentPhrases = new RecentRandomPicker<string>(45);
   private readonly alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   private readonly standardNoiseLetters = 'EEEEEEEEAAAAAAASSSSSSIIIINNNNRRRRTTTTLLLLUUUOOODDCCMMPPVVBBG';
+  private readonly preferredRows = 11;
+  private readonly preferredCols = 11;
 
   private phrases: string[] = [];
 
@@ -36,7 +38,7 @@ export class HiddenPhraseService {
     }
 
     const text = await firstValueFrom(
-      this.http.get('phrases.txt', {
+      this.http.get('mid-mid-sentences.txt', {
         responseType: 'text',
       }),
     );
@@ -45,9 +47,14 @@ export class HiddenPhraseService {
       .split(/\r?\n/)
       .map((phrase) => phrase.trim())
       .filter((phrase) => {
-        const normalizedPhrase = this.normalize(phrase);
+        const normalizedWords = this.normalizeWords(phrase);
+        const normalizedPhrase = normalizedWords.join('');
 
-        return normalizedPhrase.length >= 18 && this.availableNoiseLetters(normalizedPhrase).length >= 4;
+        return (
+          normalizedPhrase.length >= 18 &&
+          this.availableNoiseLetters(normalizedPhrase).length >= 4 &&
+          this.fitsPreferredGrid(normalizedWords)
+        );
       });
 
     if (phrases.length === 0) {
@@ -110,22 +117,25 @@ export class HiddenPhraseService {
   }
 
   private pickDimensions(phraseLength: number, minimumNoiseCount: number): { rows: number; cols: number } {
-    const targetLength = Math.max(Math.ceil(phraseLength * 1.6), phraseLength + minimumNoiseCount);
-    const candidates = [
-      { cols: 7, rows: Math.ceil(targetLength / 7) },
-      { cols: 8, rows: Math.ceil(targetLength / 8) },
-      { cols: 9, rows: Math.ceil(targetLength / 9) },
-      { cols: 10, rows: Math.ceil(targetLength / 10) },
-    ];
+    const minimumTileCount = phraseLength + minimumNoiseCount;
 
-    return candidates
-      .filter(({ rows, cols }) => rows * cols >= phraseLength + minimumNoiseCount)
-      .sort((first, second) => {
-        const firstWaste = first.rows * first.cols - targetLength;
-        const secondWaste = second.rows * second.cols - targetLength;
+    if (minimumTileCount <= this.preferredRows * this.preferredCols) {
+      return { rows: this.preferredRows, cols: this.preferredCols };
+    }
 
-        return Math.abs(firstWaste) - Math.abs(secondWaste) || first.cols - second.cols;
-      })[0];
+    return {
+      rows: Math.ceil(minimumTileCount / this.preferredCols),
+      cols: this.preferredCols,
+    };
+  }
+
+  private fitsPreferredGrid(words: string[]): boolean {
+    const phraseLength = words.reduce((sum, word) => sum + word.length, 0);
+
+    return (
+      phraseLength + this.minimumNoiseCountForWords(words) <=
+      this.preferredRows * this.preferredCols
+    );
   }
 
   normalize(value: string): string {
@@ -190,19 +200,19 @@ export class HiddenPhraseService {
   }
 
   private pickNoiseLetters(normalizedPhrase: string): string[] {
-    const availableLetters = this.shuffle(this.availableStandardNoiseLetters(normalizedPhrase));
-    const count = Math.min(6, Math.max(4, Math.ceil(normalizedPhrase.length / 12)));
-
-    return availableLetters.slice(0, count);
+    return this.availableNoiseLetters(normalizedPhrase);
   }
 
   private availableStandardNoiseLetters(normalizedPhrase: string): string[] {
     const phraseLetters = new Set(normalizedPhrase.split(''));
-    const commonLetters = [...new Set(this.standardNoiseLetters.split(''))].filter(
+    const commonLetters = this.shuffle([...new Set(this.standardNoiseLetters.split(''))].filter(
       (letter) => !phraseLetters.has(letter),
+    ));
+    const extraLetters = this.shuffle(
+      this.alphabet.split('').filter((letter) => !phraseLetters.has(letter) && !commonLetters.includes(letter)),
     );
 
-    return commonLetters.length >= 4 ? commonLetters : this.availableNoiseLetters(normalizedPhrase);
+    return [...commonLetters, ...extraLetters];
   }
 
   private availableNoiseLetters(normalizedPhrase: string): string[] {
@@ -224,16 +234,23 @@ export class HiddenPhraseService {
     noiseLetters: string[],
   ): void {
     for (let index = 0; index < count; index += 1) {
+      const previousLetter = tiles.at(-1)?.letter ?? null;
+
       tiles.push({
         id: `noise-${startIndex + index}`,
-        letter: this.randomNoiseLetter(noiseLetters),
+        letter: this.randomNoiseLetter(noiseLetters, previousLetter),
         isNoise: true,
       });
     }
   }
 
-  private randomNoiseLetter(noiseLetters: string[]): string {
-    return noiseLetters[Math.floor(Math.random() * noiseLetters.length)];
+  private randomNoiseLetter(noiseLetters: string[], previousLetter: string | null): string {
+    const candidates =
+      previousLetter && noiseLetters.length > 1
+        ? noiseLetters.filter((letter) => letter !== previousLetter)
+        : noiseLetters;
+
+    return candidates[Math.floor(Math.random() * candidates.length)];
   }
 
   private randomItem<T>(values: T[]): T {

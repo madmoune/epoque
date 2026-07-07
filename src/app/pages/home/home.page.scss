@@ -70,6 +70,12 @@ h1 {
     }
 }
 
+.random-button {
+    border-color: #222;
+    background: #222 !important;
+    color: #fff !important;
+}
+
 .category-list {
     display: grid;
     gap: 0.85rem;
@@ -144,6 +150,30 @@ h1 {
         background: #fff;
         box-shadow: 0 0.75rem 1.5rem rgb(0 0 0 / 8%);
         outline: none;
+    }
+
+    &.needs-completion {
+        border-color: #d18a00;
+        background: #fff4cf;
+        box-shadow: inset 0.3rem 0 0 #d18a00;
+
+        .puzzle-tag {
+            background: #d18a00;
+            color: #201400;
+        }
+
+        .last-played {
+            color: #805400;
+        }
+
+        &:hover,
+        &:focus-visible {
+            border-color: #9b6400;
+            background: #fff8df;
+            box-shadow:
+                inset 0.3rem 0 0 #d18a00,
+                0 0.75rem 1.5rem rgb(116 74 0 / 16%);
+        }
     }
 }
 

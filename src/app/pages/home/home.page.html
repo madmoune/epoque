@@ -15,6 +15,9 @@
                 (click)="setSortMode('oldest')">
                 Plus longtemps non joué
             </button>
+            <button type="button" class="sort-button random-button" (click)="playRandomOldestPuzzle()">
+                Jeu au hasard
+            </button>
         </div>
     </section>
 
@@ -29,7 +32,7 @@
             @if (category.puzzles.length > 0) {
             <div class="puzzle-grid">
                 @for (puzzle of category.puzzles; track puzzle.route) {
-                <a class="puzzle-card" [routerLink]="puzzle.route">
+                <a class="puzzle-card" [class.needs-completion]="puzzle.needsCompletion" [routerLink]="puzzle.route">
                     @if (puzzle.tag) {
                     <span class="puzzle-tag">{{ puzzle.tag }}</span>
                     }

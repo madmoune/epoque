@@ -121,7 +121,6 @@
       />
 
       <div class="actions">
-        <button type="button" (click)="checkPuzzle()">Vérifier</button>
         <button
           type="button"
           class="secondary-button"
@@ -145,9 +144,6 @@
         />
       }
 
-      @if (hasChecked() && !isCorrect()) {
-        <p class="error" role="status">Il reste au moins une équation à corriger.</p>
-      }
     </section>
   </section>
 </main>

@@ -1,0 +1,194 @@
+.page {
+  --calcudoku-cage-border: #103f45;
+  --calcudoku-grid-line: #a8bdc0;
+  --calcudoku-cell-bg: #fff;
+  --calcudoku-panel-bg: #f7fbfb;
+  --calcudoku-label: #205b61;
+  --calcudoku-input: #202020;
+  --calcudoku-hint-bg: #e7f4f2;
+
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: #444;
+  font-weight: 800;
+}
+
+.card {
+  padding: 2rem;
+  border: 1px solid #ddd;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 0.75rem 2rem rgb(0 0 0 / 6%);
+}
+
+.header {
+  text-align: center;
+}
+
+.eyebrow {
+  margin: 0 0 0.5rem;
+  color: #205b61;
+  font-size: 0.8rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(2rem, 6vw, 3rem);
+}
+
+.intro {
+  max-width: 38rem;
+  margin: 0.75rem auto 0;
+  color: #555;
+}
+
+.puzzle-area {
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  border: 1px solid #eee;
+  border-radius: 0.75rem;
+  background: var(--calcudoku-panel-bg);
+}
+
+.calcudoku-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(3.8rem, 5.4rem));
+  gap: 0;
+  border: 4px solid var(--calcudoku-cage-border);
+  background: var(--calcudoku-cage-border);
+}
+
+.cell {
+  position: relative;
+  aspect-ratio: 1;
+  box-sizing: border-box;
+  border: 1px solid var(--calcudoku-grid-line);
+  background: var(--calcudoku-cell-bg);
+}
+
+.cell.cage-top {
+  border-top: 4px solid var(--calcudoku-cage-border);
+}
+
+.cell.cage-right {
+  border-right: 4px solid var(--calcudoku-cage-border);
+}
+
+.cell.cage-bottom {
+  border-bottom: 4px solid var(--calcudoku-cage-border);
+}
+
+.cell.cage-left {
+  border-left: 4px solid var(--calcudoku-cage-border);
+}
+
+.cell.hinted {
+  background: var(--calcudoku-hint-bg);
+}
+
+.cage-label {
+  position: absolute;
+  top: 0.3rem;
+  left: 0.35rem;
+  color: var(--calcudoku-label);
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
+input {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  border: 0;
+  background: transparent;
+  color: var(--calcudoku-input);
+  font-size: clamp(1.5rem, 8vw, 2.5rem);
+  font-weight: 900;
+  text-align: center;
+}
+
+.hinted-value {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  color: var(--calcudoku-label);
+  font-size: clamp(1.5rem, 8vw, 2.5rem);
+  font-weight: 950;
+}
+
+button {
+  min-height: 2.8rem;
+  padding: 0.75rem 1rem;
+  border: 0;
+  border-radius: 0.65rem;
+  background: #ece8df;
+  color: #202020;
+  cursor: pointer;
+  font-weight: 850;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.65rem;
+}
+
+.success {
+  margin: 0;
+  color: #1f7a3d;
+  font-weight: 900;
+}
+
+@media (prefers-color-scheme: dark) {
+  .page {
+    --calcudoku-cage-border: #8ebfc4;
+    --calcudoku-grid-line: #6c8f94;
+    --calcudoku-cell-bg: #12211e;
+    --calcudoku-panel-bg: #10221f;
+    --calcudoku-label: #b7edf3;
+    --calcudoku-input: #f4fffd;
+    --calcudoku-hint-bg: #173d3b;
+  }
+
+  .card {
+    border-color: #33514d;
+    background: #14221f;
+  }
+
+  .puzzle-area {
+    border-color: #33514d;
+  }
+}
+
+@media (max-width: 600px) {
+  .page {
+    padding: 0.75rem;
+  }
+
+  .card {
+    padding: 1rem;
+  }
+
+  .calcudoku-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    width: min(100%, 22rem);
+  }
+}

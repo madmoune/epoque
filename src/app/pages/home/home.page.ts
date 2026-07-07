@@ -1,5 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { PuzzlePlayHistoryService } from '../../puzzle-play-history.service';
 
 type PuzzleCard = {
@@ -7,6 +7,7 @@ type PuzzleCard = {
   description: string;
   route: string;
   tag?: string;
+  needsCompletion?: boolean;
 };
 
 type PuzzleCategory = {
@@ -29,10 +30,11 @@ type HomeSortMode = 'default' | 'oldest';
 })
 export class HomePage {
   private readonly sortModeStorageKey = 'epique-home-sort-mode';
+  private readonly router = inject(Router);
   private readonly playHistory = inject(PuzzlePlayHistoryService);
 
-  protected readonly sortMode = signal<HomeSortMode>(this.readSortMode());
-  protected readonly categories = computed(() =>
+  readonly sortMode = signal<HomeSortMode>(this.readSortMode());
+  readonly categories = computed<PuzzleCategory[]>(() =>
     this.baseCategories.map((category) => ({
       ...category,
       puzzles:
@@ -77,6 +79,19 @@ export class HomePage {
           description: 'Reconstruis ou devine la phrase cachée.',
           route: '/phrases',
           tag: 'Langage',
+        },
+      ],
+    },
+    {
+      id: 'ciphers',
+      title: 'Ciphers',
+      description: 'Mots transformes avec des codes simples a decoder mentalement.',
+      puzzles: [
+        {
+          title: 'Mots codes',
+          description: 'Retrouve le mot original transforme en Caesar, Pigpen, A1Z26, morse ou braille.',
+          route: '/ciphers',
+          tag: 'Codes',
         },
       ],
     },
@@ -133,6 +148,24 @@ export class HomePage {
           description: 'Complete la pyramide en additionnant deux cases collees vers le haut.',
           route: '/sum-pyramid',
           tag: 'Sommes',
+        },
+        {
+          title: 'Compte est bon',
+          description: 'Utilise les nombres disponibles et les operations pour approcher une cible.',
+          route: '/count-is-good',
+          tag: 'Cible',
+        },
+        {
+          title: 'KenKen / Calcudoku',
+          description: 'Complete une grille avec chiffres uniques et contraintes de calcul.',
+          route: '/calcudoku',
+          tag: 'Contraintes',
+        },
+        {
+          title: 'Arithmétique mentale',
+          description: 'Resous des calculs courts et rapides en gardant le rythme.',
+          route: '/mental-arithmetic',
+          tag: 'Vitesse',
         },
         {
           title: 'Nim',
@@ -274,12 +307,32 @@ export class HomePage {
     },
   ];
 
-  protected setSortMode(sortMode: HomeSortMode): void {
+  setSortMode(sortMode: HomeSortMode): void {
     this.sortMode.set(sortMode);
     this.writeSortMode(sortMode);
   }
 
-  protected lastPlayedText(route: string): string {
+  playRandomOldestPuzzle(): void {
+    const puzzles = this.baseCategories
+      .filter((category) => category.sortable !== false && category.id !== 'multijoueurs')
+      .flatMap((category) => category.puzzles);
+
+    if (puzzles.length === 0) {
+      return;
+    }
+
+    const oldestPlayedAt = Math.min(
+      ...puzzles.map((puzzle) => this.playHistory.lastPlayedAt(puzzle.route) ?? 0),
+    );
+    const oldestPuzzles = puzzles.filter(
+      (puzzle) => (this.playHistory.lastPlayedAt(puzzle.route) ?? 0) === oldestPlayedAt,
+    );
+    const randomPuzzle = oldestPuzzles[Math.floor(Math.random() * oldestPuzzles.length)];
+
+    void this.router.navigateByUrl(`${randomPuzzle.route}?from=random`);
+  }
+
+  lastPlayedText(route: string): string {
     const playedAt = this.playHistory.lastPlayedAt(route);
 
     if (!playedAt) {
@@ -307,11 +360,11 @@ export class HomePage {
     }).format(new Date(playedAt))}`;
   }
 
-  protected solvedStatusText(route: string): string {
+  solvedStatusText(route: string): string {
     return this.playHistory.isSolved(route) ? 'Resolue' : 'Non resolue';
   }
 
-  protected solvedStatusClass(route: string): string {
+  solvedStatusClass(route: string): string {
     return this.playHistory.isSolved(route) ? 'solved' : 'unsolved';
   }
 

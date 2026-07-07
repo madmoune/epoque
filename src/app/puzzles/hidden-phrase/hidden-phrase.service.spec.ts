@@ -11,6 +11,8 @@ describe('HiddenPhraseService', () => {
     service.recentPhrases = new RecentRandomPicker<string>(45);
     service.alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     service.standardNoiseLetters = 'EEEEEEEEAAAAAAASSSSSSIIIINNNNRRRRTTTTLLLLUUUOOODDCCMMPPVVBBG';
+    service.preferredRows = 11;
+    service.preferredCols = 11;
 
     const puzzle = service.createPuzzle();
     const usefulLetters = puzzle.tiles
@@ -20,10 +22,14 @@ describe('HiddenPhraseService', () => {
 
     expect(usefulLetters).toBe(puzzle.normalizedPhrase);
     expect(puzzle.normalizedPhrase).toBe(service.normalize(puzzle.phrase));
+    expect(puzzle.rows).toBe(11);
+    expect(puzzle.cols).toBe(11);
     expect(puzzle.tiles).toHaveLength(puzzle.rows * puzzle.cols);
     expect(puzzle.tiles.filter((tile: any) => tile.isNoise)).toHaveLength(puzzle.noiseCount);
     expect(puzzle.noiseCount).toBeGreaterThanOrEqual(Math.floor(puzzle.normalizedPhrase.length * 0.5));
     expect(puzzle.noiseLetters.every((letter: string) => !puzzle.normalizedPhrase.includes(letter))).toBe(true);
+    expect(puzzle.noiseLetters.length).toBeGreaterThanOrEqual(8);
+    expect(puzzle.noiseLetters.sort()).toEqual(service.availableNoiseLetters(puzzle.normalizedPhrase).sort());
     expect(
       puzzle.tiles
         .filter((tile: any) => tile.isNoise)
@@ -34,8 +40,7 @@ describe('HiddenPhraseService', () => {
         .filter((tile: any) => tile.isNoise)
         .every((tile: any) => !puzzle.normalizedPhrase.includes(tile.letter)),
     ).toBe(true);
-    expect(puzzle.noiseLetters).not.toContain('X');
-    expect(puzzle.noiseLetters).not.toContain('Z');
+    expect(hasRepeatedNoiseRun(puzzle.tiles, 3)).toBe(false);
 
     const normalizedWords = puzzle.phrase
       .normalize('NFD')
@@ -76,4 +81,24 @@ function longestConsecutiveRun(indexes: number[]): number {
     },
     { currentRun: 0, longestRun: 0 },
   ).longestRun;
+}
+
+function hasRepeatedNoiseRun(tiles: any[], targetLength: number): boolean {
+  let currentLetter = '';
+  let currentRun = 0;
+
+  for (const tile of tiles) {
+    if (!tile.isNoise || tile.letter !== currentLetter) {
+      currentLetter = tile.isNoise ? tile.letter : '';
+      currentRun = tile.isNoise ? 1 : 0;
+    } else {
+      currentRun += 1;
+    }
+
+    if (currentRun >= targetLength) {
+      return true;
+    }
+  }
+
+  return false;
 }

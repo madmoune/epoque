@@ -1,0 +1,52 @@
+<main class="page">
+  <a routerLink="/" fragment="nombres-calcul" class="back-link">Retour au menu</a>
+
+  <section class="card">
+    <header class="header">
+      <p class="eyebrow">Calcul rapide</p>
+      <h1>Arithmétique mentale</h1>
+      <p class="intro">Une base de drill rapide pour pratiquer additions, soustractions, produits et divisions.</p>
+    </header>
+
+    @if (isSolved()) {
+      <app-puzzle-success-popup
+        title="Bonne réponse!"
+        message="Calcul résolu mentalement."
+        [answer]="'' + problem().answer"
+        actionLabel="Prochain calcul"
+        (action)="nextProblem()"
+      />
+    }
+
+    <section class="puzzle-area">
+      <div class="problem" [style.--equation-size]="equationSize()" [innerHTML]="displayExpression()"></div>
+
+      <label class="answer-group">
+        <span>Réponse</span>
+        <input
+          #answerField
+          class="answer-input"
+          type="text"
+          inputmode="none"
+          [value]="answer()"
+          (input)="updateAnswer($any($event.target).value)"
+          (focus)="showKeyboard()"
+          (click)="showKeyboard()"
+          [disabled]="isSolved()"
+          autocomplete="off"
+        />
+      </label>
+
+      <app-custom-keyboard
+        [rows]="numberKeyboardRows"
+        [visible]="keyboardVisible()"
+        [disabled]="isSolved()"
+        (keyPress)="handleKeyboardKey($event)"
+      />
+
+      <div class="actions">
+        <button type="button" class="secondary-button" (click)="nextProblem()">Nouvelle équation</button>
+      </div>
+    </section>
+  </section>
+</main>
