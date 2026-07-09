@@ -25,6 +25,7 @@ export class MentalArithmeticPage {
   protected readonly answer = signal('');
   protected readonly isSolved = signal(false);
   protected readonly keyboardVisible = signal(false);
+  protected readonly hintLevel = signal(0);
   protected readonly viewportWidth = signal(typeof window === 'undefined' ? 820 : window.innerWidth);
   protected readonly numberKeyboardRows: CustomKeyboardKey[][] = [
     ['1', '2', '3'],
@@ -37,6 +38,20 @@ export class MentalArithmeticPage {
     () => this.answer().trim().length > 0 && Number(this.answer()) === this.problem().answer,
   );
   protected readonly displayExpression = computed(() => this.formatExpression(this.problem().expression));
+  protected readonly answerHint = computed(() => {
+    if (this.hintLevel() === 0) {
+      return '';
+    }
+
+    const answer = String(this.problem().answer);
+    const revealedLength = Math.min(this.hintLevel(), answer.length);
+
+    return answer
+      .split('')
+      .map((character, index) => (index < revealedLength ? character : '_'))
+      .join(' ');
+  });
+  protected readonly maxHintLevel = computed(() => String(this.problem().answer).length);
   protected readonly equationSize = computed(() => {
     const width = this.viewportWidth();
     const compact = width <= 600;
@@ -97,10 +112,19 @@ export class MentalArithmeticPage {
     window.setTimeout(() => this.answerField?.nativeElement.select());
   }
 
+  protected showHint(): void {
+    if (this.isSolved()) {
+      return;
+    }
+
+    this.hintLevel.update((level) => Math.min(level + 1, this.maxHintLevel()));
+  }
+
   protected nextProblem(): void {
     this.problem.set(this.createProblem());
     this.answer.set('');
     this.isSolved.set(false);
+    this.hintLevel.set(0);
     this.focusAnswerField();
   }
 

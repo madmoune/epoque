@@ -77,7 +77,6 @@ export class MagicSquarePage {
   protected readonly answers = signal<(number | null)[][]>(this.createEmptyAnswers());
   protected readonly selectedCell = signal<{ row: number; col: number } | null>(null);
   protected readonly draggedNumber = signal<number | null>(null);
-  protected readonly hasChecked = signal(false);
   private draggedSource: { row: number; col: number } | null = null;
   private completedDrop = false;
 
@@ -115,7 +114,6 @@ export class MagicSquarePage {
     this.selectedCell.set(null);
     this.draggedNumber.set(null);
     this.draggedSource = null;
-    this.hasChecked.set(false);
   }
 
   protected resetPuzzle(): void {
@@ -123,7 +121,6 @@ export class MagicSquarePage {
     this.selectedCell.set(null);
     this.draggedNumber.set(null);
     this.draggedSource = null;
-    this.hasChecked.set(false);
   }
 
   protected selectCell(row: number, col: number): void {
@@ -164,7 +161,6 @@ export class MagicSquarePage {
       }),
     );
     this.selectedCell.set({ row, col });
-    this.hasChecked.set(false);
   }
 
   protected clearSelectedCell(): void {
@@ -178,11 +174,6 @@ export class MagicSquarePage {
           : answerRow,
       ),
     );
-    this.hasChecked.set(false);
-  }
-
-  protected checkPuzzle(): void {
-    this.hasChecked.set(true);
   }
 
   protected placeHint(): void {
@@ -206,7 +197,6 @@ export class MagicSquarePage {
       ),
     );
     this.selectedCell.set({ row: hintCell.row, col: hintCell.col });
-    this.hasChecked.set(false);
   }
 
   protected beginDrag(number: number, event: DragEvent): void {
@@ -309,7 +299,6 @@ export class MagicSquarePage {
           : answerRow,
       ),
     );
-    this.hasChecked.set(false);
   }
 
   protected cellValue(row: number, col: number): number | null {
@@ -320,7 +309,7 @@ export class MagicSquarePage {
   protected cellState(row: number, col: number): 'selected' | 'wrong' | 'correct' | null {
     const selected = this.selectedCell();
     if (selected?.row === row && selected.col === col) return 'selected';
-    if (!this.hasChecked() || this.puzzle().cells[row][col].given) return null;
+    if (this.puzzle().cells[row][col].given) return null;
     if (this.cellValue(row, col) === null) return null;
 
     return this.isCellInWrongCompletedLine(row, col) ? 'wrong' : 'correct';

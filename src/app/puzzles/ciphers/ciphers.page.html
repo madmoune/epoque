@@ -4,8 +4,8 @@
   <section class="card">
     <header class="header">
       <p class="eyebrow">Ciphers</p>
-      <h1>Mots codes</h1>
-      <p class="intro">Retrouve le mot de la liste apres transformation par un cipher simple.</p>
+      <h1>{{ selectedCipherLabel() }}</h1>
+      <p class="intro">Retrouve le mot de la liste après transformation par un cipher simple.</p>
     </header>
 
     @if (isLoading()) {
@@ -14,22 +14,6 @@
       <p class="error">{{ loadError() }}</p>
     } @else if (puzzle(); as currentPuzzle) {
       <section class="puzzle-area">
-        <div class="cipher-tabs" aria-label="Choix du cipher">
-          <button type="button" class="cipher-tab random-cipher-tab" (click)="chooseRandomCipher()">
-            Random
-          </button>
-          @for (option of cipherOptions; track option.type) {
-            <button
-              type="button"
-              class="cipher-tab"
-              [class.active]="selectedCipher() === option.type"
-              (click)="chooseCipher(option.type)"
-            >
-              {{ option.label }}
-            </button>
-          }
-        </div>
-
         <p class="cipher-note">{{ currentPuzzle.note }}</p>
 
         <div
@@ -75,7 +59,7 @@
 
         @if (cipherLegend().length > 0) {
           <details class="legend">
-            <summary>Legende</summary>
+            <summary>Légende</summary>
             @if (selectedCipher() === 'pigpen') {
               <div class="pigpen-key">
                 @for (grid of pigpenSquareKeys; track $index; let gridIndex = $index) {
@@ -109,7 +93,7 @@
                 }
               </div>
             } @else if (selectedCipher() === 'tap-code') {
-              <div class="tap-code-key" aria-label="Legende Tap code">
+              <div class="tap-code-key" aria-label="Légende Tap code">
                 <span class="tap-code-corner"></span>
                 @for (column of [1, 2, 3, 4, 5]; track column) {
                   <span class="tap-code-header">{{ column }}</span>
@@ -178,7 +162,7 @@
         />
 
         <div class="actions">
-          <button type="button" class="secondary-button" (click)="showHint()" [disabled]="hintLevel() >= 2 || isCorrect()">
+          <button type="button" class="secondary-button" (click)="showHint()" [disabled]="hintLevel() >= maxHintLevel() || isCorrect()">
             Indice
           </button>
           <button type="button" class="secondary-button" (click)="nextPuzzle()">Nouveau mot</button>
@@ -190,8 +174,8 @@
 
         @if (isCorrect()) {
           <app-puzzle-success-popup
-            title="Mot trouve!"
-            message="Le mot code a ete decode."
+            title="Mot trouvé!"
+            message="Le mot codé a été décodé."
             [answer]="currentPuzzle.answer"
             actionLabel="Nouveau mot"
             (action)="nextPuzzle()"

@@ -97,6 +97,12 @@ h1 {
   background: var(--calcudoku-hint-bg);
 }
 
+.cell.active-cell {
+  outline: 3px solid color-mix(in srgb, var(--calcudoku-label) 82%, transparent);
+  outline-offset: -5px;
+  z-index: 1;
+}
+
 .cage-label {
   position: absolute;
   top: 0.3rem;

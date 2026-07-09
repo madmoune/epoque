@@ -16,6 +16,11 @@ export const routes: Routes = [
   },
   {
     path: 'ciphers',
+    redirectTo: 'ciphers/caesar',
+    pathMatch: 'full',
+  },
+  {
+    path: 'ciphers/:cipher',
     loadComponent: () => import('./puzzles/ciphers/ciphers.page').then((m) => m.CiphersPage),
   },
   {

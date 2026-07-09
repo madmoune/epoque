@@ -25,16 +25,23 @@
         @for (row of [0, 1, 2, 3]; track row) {
           @for (col of [0, 1, 2, 3]; track $index) {
             @let cell = cellAt(row, col);
-            <div [class]="cellClass(cell)" [attr.data-cage]="cell.cage">
+            <div
+              [class]="cellClass(cell)"
+              [class.active-cell]="isActiveCell(row, col)"
+              [attr.data-cage]="cell.cage"
+            >
               <span class="cage-label">{{ cageLabel(cell) }}</span>
               @if (isHinted(row, col)) {
                 <span class="hinted-value">{{ answerAt(row, col) }}</span>
               } @else {
                 <input
                   type="text"
-                  inputmode="numeric"
+                  inputmode="none"
                   maxlength="1"
+                  autocomplete="off"
                   [value]="answerAt(row, col)"
+                  (focus)="activateInput(row, col, $event)"
+                  (click)="activateInput(row, col, $event)"
                   (input)="updateAnswer(row, col, $any($event.target).value)"
                   aria-label="Case Calcudoku"
                 />
@@ -43,6 +50,13 @@
           }
         }
       </div>
+
+      <app-custom-keyboard
+        [rows]="numberKeyboardRows"
+        [visible]="activeCell() !== null"
+        [disabled]="isSolved()"
+        (keyPress)="handleKeyboardKey($event)"
+      />
 
       <div class="actions">
         <button

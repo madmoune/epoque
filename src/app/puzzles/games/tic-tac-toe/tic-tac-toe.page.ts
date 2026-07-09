@@ -106,7 +106,7 @@ export class TicTacToePage {
     const bestScore = ranked[0]?.score;
     const bestMoves = ranked.filter(({ score }) => score === bestScore);
     const mistakes = ranked.filter(({ score }) => score < bestScore);
-    const shouldMistake = mistakes.length > 0 && Math.random() < 1 / 20;
+    const shouldMistake = mistakes.length > 0 && Math.random() < 1 / 10;
     const choices = shouldMistake ? mistakes : bestMoves;
     const choice = choices[Math.floor(Math.random() * choices.length)];
 

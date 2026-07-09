@@ -1,5 +1,9 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, HostListener, computed, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import {
+  CustomKeyboardComponent,
+  CustomKeyboardKey,
+} from '../shared/custom-keyboard/custom-keyboard.component';
 import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
 
 type CalcudokuCell = {
@@ -20,12 +24,16 @@ type CalcudokuCageTemplate = {
 
 @Component({
   selector: 'app-calcudoku-page',
-  imports: [RouterLink, PuzzleSuccessPopupComponent],
+  imports: [RouterLink, PuzzleSuccessPopupComponent, CustomKeyboardComponent],
   templateUrl: './calcudoku.page.html',
   styleUrl: './calcudoku.page.scss',
 })
 export class CalcudokuPage {
   protected readonly size = 4;
+  protected readonly numberKeyboardRows: CustomKeyboardKey[][] = [
+    ['1', '2', '3', '4'],
+    ['backspace'],
+  ];
 
   private readonly cageTemplates: CalcudokuCageTemplate[] = [
     this.createTemplate(
@@ -107,6 +115,7 @@ export class CalcudokuPage {
   protected readonly solution = signal<number[][]>(this.createSolution());
   protected readonly answers = signal<string[][]>(this.createEmptyAnswers());
   protected readonly hintedPositions = signal<Set<string>>(new Set());
+  protected readonly activeCell = signal<{ row: number; col: number } | null>(null);
 
   protected readonly isSolved = computed(() => {
     const enteredValues = this.enteredValues();
@@ -137,9 +146,56 @@ export class CalcudokuPage {
     );
   }
 
+  protected activateInput(row: number, col: number, event: Event): void {
+    this.activeCell.set({ row, col });
+
+    if (event.target instanceof HTMLInputElement) {
+      event.target.select();
+    }
+  }
+
+  @HostListener('document:pointerdown', ['$event'])
+  protected hideKeyboardWhenClickingAway(event: PointerEvent): void {
+    const target = event.target;
+
+    if (!(target instanceof Element)) {
+      return;
+    }
+
+    if (
+      target.closest('.calcudoku-grid input') ||
+      target.closest('app-custom-keyboard') ||
+      target.closest('app-puzzle-success-popup')
+    ) {
+      return;
+    }
+
+    this.activeCell.set(null);
+  }
+
+  protected handleKeyboardKey(key: CustomKeyboardKey): void {
+    const activeCell = this.activeCell();
+
+    if (!activeCell || this.isHinted(activeCell.row, activeCell.col)) {
+      return;
+    }
+
+    if (key === 'backspace' || key === 'clear') {
+      this.updateAnswer(activeCell.row, activeCell.col, '');
+      return;
+    }
+
+    if (key === 'space') {
+      return;
+    }
+
+    this.updateAnswer(activeCell.row, activeCell.col, key);
+  }
+
   protected resetPuzzle(): void {
     this.answers.set(this.createEmptyAnswers());
     this.hintedPositions.set(new Set());
+    this.activeCell.set(null);
   }
 
   protected newPuzzle(): void {
@@ -192,6 +248,12 @@ export class CalcudokuPage {
 
   protected isHinted(row: number, col: number): boolean {
     return this.hintedPositions().has(this.positionKey(row, col));
+  }
+
+  protected isActiveCell(row: number, col: number): boolean {
+    const activeCell = this.activeCell();
+
+    return activeCell?.row === row && activeCell.col === col;
   }
 
   protected cellClass(cell: CalcudokuCell): string {

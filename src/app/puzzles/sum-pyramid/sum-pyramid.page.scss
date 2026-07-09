@@ -83,6 +83,7 @@ h1 {
   color: #202020;
   font-size: clamp(1.2rem, 5vw, 1.85rem);
   font-weight: 950;
+  font-variant-numeric: tabular-nums;
   line-height: 1;
 }
 
@@ -100,10 +101,12 @@ h1 {
 
 input {
   width: 100%;
+  min-width: 0;
   height: 100%;
   box-sizing: border-box;
   border: 0;
   border-radius: 0.7rem;
+  padding: 0;
   background: transparent;
   color: inherit;
   font: inherit;
@@ -171,7 +174,7 @@ button {
 
   .pyramid-cell {
     border-radius: 0.55rem;
-    font-size: min(1.2rem, calc(var(--cell-size) * 0.42));
+    font-size: min(1.05rem, calc(var(--cell-size) * 0.34));
     letter-spacing: 0;
     overflow: hidden;
     padding: 0.05rem;

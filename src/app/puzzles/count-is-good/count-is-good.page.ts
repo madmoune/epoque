@@ -306,7 +306,12 @@ export class CountIsGoodPage {
       const operations = this.createOperationsFor(numbers);
       const target = this.evaluateExpression(numbers, operations);
 
-      if (target !== null && target >= 120 && target <= 899) {
+      if (
+        target !== null &&
+        target >= 120 &&
+        target <= 899 &&
+        this.distinctOperationCount(operations) >= 3
+      ) {
         return {
           target,
           numbers: this.shuffle(numbers),
@@ -317,9 +322,9 @@ export class CountIsGoodPage {
 
     const fallback =
       numberCount === 4
-        ? { numbers: [2, 3, 4, 25], operations: ['+', 'x', 'x'] as Operation[] }
+        ? { numbers: [6, 25, 4, 2], operations: ['x', '+', '-'] as Operation[] }
         : numberCount === 5
-          ? { numbers: [2, 3, 4, 5, 25], operations: ['+', 'x', '+', 'x'] as Operation[] }
+          ? { numbers: [6, 25, 4, 2, 3], operations: ['x', '+', '-', '+'] as Operation[] }
           : { numbers: [2, 3, 4, 5, 6, 25], operations: ['+', 'x', '+', 'x', '-'] as Operation[] };
 
     return {
@@ -355,6 +360,10 @@ export class CountIsGoodPage {
 
       return operation;
     });
+  }
+
+  private distinctOperationCount(operations: Operation[]): number {
+    return new Set(operations).size;
   }
 
   private findSolution(): CountSolution | null {

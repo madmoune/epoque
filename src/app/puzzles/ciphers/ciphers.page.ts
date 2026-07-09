@@ -1,6 +1,6 @@
 import { Component, ElementRef, HostListener, ViewChild, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import {
   CustomKeyboardComponent,
   CustomKeyboardKey,
@@ -19,10 +19,9 @@ export class CiphersPage {
   private readonly answerField?: ElementRef<HTMLInputElement>;
   private suppressNextSelection = false;
 
-  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly ciphersService = inject(CiphersService);
 
-  protected readonly cipherOptions = this.ciphersService.cipherOptions;
   protected readonly selectedCipher = signal<CipherType>('caesar');
   protected readonly puzzle = signal<CipherPuzzle | null>(null);
   protected readonly answerInput = signal('');
@@ -65,6 +64,12 @@ export class CiphersPage {
     return puzzle ? this.ciphersService.isCorrectAnswer(this.answerInput(), puzzle.normalizedAnswer) : false;
   });
 
+  protected readonly selectedCipherLabel = computed(
+    () =>
+      this.ciphersService.cipherOptions.find((option) => option.type === this.selectedCipher())?.label ??
+      'Cipher',
+  );
+
   protected readonly cipherLegend = computed(() => this.ciphersService.legendFor(this.selectedCipher()));
 
   protected readonly hintText = computed(() => {
@@ -73,12 +78,12 @@ export class CiphersPage {
       return '';
     }
 
-    if (this.hintLevel() === 1) {
-      return `${puzzle.normalizedAnswer.length} lettres`;
-    }
-
-    return `Commence par: ${puzzle.answer.slice(0, Math.min(2, puzzle.answer.length))}`;
+    return `Indice: ${this.partialWordHint(puzzle)}`;
   });
+
+  protected readonly maxHintLevel = computed(
+    () => this.puzzle()?.normalizedAnswer.length ?? 0,
+  );
 
   protected pigpenSymbolClass(letter: string): string {
     const normalizedLetter = letter.toLowerCase();
@@ -109,17 +114,21 @@ export class CiphersPage {
   }
 
   constructor() {
+    this.route.paramMap.subscribe((params) => {
+      const nextCipher = this.cipherFromRoute(params.get('cipher'));
+
+      if (this.selectedCipher() === nextCipher) {
+        return;
+      }
+
+      this.selectedCipher.set(nextCipher);
+
+      if (!this.isLoading() && !this.loadError()) {
+        this.nextPuzzle();
+      }
+    });
+
     void this.loadPuzzle();
-  }
-
-  protected chooseCipher(cipher: CipherType): void {
-    this.selectedCipher.set(cipher);
-    this.nextPuzzle();
-  }
-
-  protected chooseRandomCipher(): void {
-    const randomCipher = this.randomCipher();
-    this.chooseCipher(randomCipher);
   }
 
   protected updateAnswer(value: string): void {
@@ -173,7 +182,7 @@ export class CiphersPage {
   }
 
   protected showHint(): void {
-    this.hintLevel.update((level) => Math.min(level + 1, 2));
+    this.hintLevel.update((level) => Math.min(level + 1, this.maxHintLevel()));
   }
 
   protected nextPuzzle(): void {
@@ -186,12 +195,10 @@ export class CiphersPage {
   private async loadPuzzle(): Promise<void> {
     try {
       await this.ciphersService.loadWords();
-      if (this.cameFromRandom()) {
-        this.selectedCipher.set(this.randomCipher());
-      }
+      this.selectedCipher.set(this.cipherFromRoute(this.route.snapshot.paramMap.get('cipher')));
       this.nextPuzzle();
     } catch {
-      this.loadError.set('Impossible de charger la liste de mots codes.');
+      this.loadError.set('Impossible de charger la liste de mots codés.');
     } finally {
       this.isLoading.set(false);
     }
@@ -202,12 +209,20 @@ export class CiphersPage {
     window.setTimeout(() => this.answerField?.nativeElement.focus());
   }
 
-  private cameFromRandom(): boolean {
-    return new URLSearchParams(this.router.url.split('?')[1]?.split('#')[0] ?? '').get('from') === 'random';
+  private cipherFromRoute(value: string | null): CipherType {
+    const matchingOption = this.ciphersService.cipherOptions.find((option) => option.type === value);
+
+    return matchingOption?.type ?? 'caesar';
   }
 
-  private randomCipher(): CipherType {
-    return this.cipherOptions[Math.floor(Math.random() * this.cipherOptions.length)]?.type ?? 'caesar';
+  private partialWordHint(puzzle: CipherPuzzle): string {
+    const answer = puzzle.answer;
+    const revealedLength = Math.min(this.hintLevel(), answer.length);
+
+    return answer
+      .split('')
+      .map((letter, index) => (index < revealedLength ? letter : '_'))
+      .join(' ');
   }
 
   private readonly pigpenBaseClasses: Record<string, string> = {

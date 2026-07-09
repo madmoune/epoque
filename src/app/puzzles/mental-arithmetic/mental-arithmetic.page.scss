@@ -162,6 +162,21 @@ button {
   color: #202020;
 }
 
+.hint {
+  width: min(100%, 30rem);
+  margin: 0;
+  padding: 0.75rem 1rem;
+  box-sizing: border-box;
+  border: 1px solid #d8c5a3;
+  border-radius: 0.65rem;
+  background: #fff;
+  color: #5b3a00;
+  font-size: 1.1rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
 @media (max-width: 600px) {
   .page {
     padding: 0.75rem;
@@ -191,6 +206,12 @@ button {
 
   input {
     border-color: var(--border-strong) !important;
+    background: var(--surface-raised) !important;
+    color: var(--text) !important;
+  }
+
+  .hint {
+    border-color: var(--border) !important;
     background: var(--surface-raised) !important;
     color: var(--text) !important;
   }

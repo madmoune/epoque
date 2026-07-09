@@ -45,8 +45,20 @@
       />
 
       <div class="actions">
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="showHint()"
+          [disabled]="hintLevel() >= maxHintLevel() || isSolved()"
+        >
+          Indice
+        </button>
         <button type="button" class="secondary-button" (click)="nextProblem()">Nouvelle équation</button>
       </div>
+
+      @if (answerHint()) {
+        <p class="hint">Indice: {{ answerHint() }}</p>
+      }
     </section>
   </section>
 </main>

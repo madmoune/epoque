@@ -10,7 +10,6 @@ export type CipherType =
   | 'morse'
   | 'braille'
   | 'atbash'
-  | 'rail-fence'
   | 'tap-code'
   | 'semaphore'
   | 'nato';
@@ -43,15 +42,14 @@ export class CiphersService {
   private words: string[] = [];
 
   readonly cipherOptions: CipherOption[] = [
-    { type: 'caesar', label: 'Caesar' },
+    { type: 'caesar', label: 'César' },
     { type: 'pigpen', label: 'Pigpen' },
     { type: 'a1z26', label: 'A1Z26' },
     { type: 'morse', label: 'Morse' },
     { type: 'braille', label: 'Braille' },
     { type: 'atbash', label: 'Atbash' },
-    { type: 'rail-fence', label: 'Rail fence' },
     { type: 'tap-code', label: 'Tap code' },
-    { type: 'semaphore', label: 'Semaphore' },
+    { type: 'semaphore', label: 'Sémaphore' },
     { type: 'nato', label: 'NATO' },
   ];
 
@@ -158,10 +156,6 @@ export class CiphersService {
       return word.split('').map((letter) => this.atbashLetter(letter));
     }
 
-    if (cipher === 'rail-fence') {
-      return this.railFence(word).split('');
-    }
-
     if (cipher === 'tap-code') {
       return word.split('').map((letter) => this.tapCodeLetters[letter] ?? letter);
     }
@@ -183,19 +177,6 @@ export class CiphersService {
     return String.fromCharCode(122 - alphabetIndex);
   }
 
-  private railFence(word: string): string {
-    const firstRail = word
-      .split('')
-      .filter((_, index) => index % 2 === 0)
-      .join('');
-    const secondRail = word
-      .split('')
-      .filter((_, index) => index % 2 === 1)
-      .join('');
-
-    return `${firstRail}${secondRail}`;
-  }
-
   private createLegend(symbolsByLetter: Record<string, string>): CipherLegendItem[] {
     return Object.entries(symbolsByLetter).map(([letter, symbol]) => ({
       letter: letter.toUpperCase(),
@@ -204,16 +185,15 @@ export class CiphersService {
   }
 
   private noteFor(cipher: CipherType): string {
-    if (cipher === 'caesar') return 'Chaque lettre est decalee dans l alphabet.';
-    if (cipher === 'pigpen') return 'Chaque lettre est remplacee par un symbole de la grille Pigpen.';
-    if (cipher === 'a1z26') return 'A=1, B=2, C=3, jusqu a Z=26.';
-    if (cipher === 'morse') return 'Points et traits: une case correspond a une lettre.';
-    if (cipher === 'braille') return 'Chaque symbole braille correspond a une lettre de A a Z.';
-    if (cipher === 'atbash') return 'Alphabet inverse: A devient Z, B devient Y, et ainsi de suite.';
-    if (cipher === 'rail-fence') return 'Le mot a ete lu avec une cloture a 2 rails: positions impaires puis paires.';
-    if (cipher === 'tap-code') return 'Chaque code indique la ligne et la colonne dans une grille 5 x 5. I et J partagent la meme case.';
-    if (cipher === 'semaphore') return 'Chaque lettre est montree par deux positions de drapeaux.';
-    return 'Chaque lettre est remplacee par son mot de l alphabet radio NATO.';
+    if (cipher === 'caesar') return 'Chaque lettre est décalée dans l’alphabet.';
+    if (cipher === 'pigpen') return 'Chaque lettre est remplacée par un symbole de la grille Pigpen.';
+    if (cipher === 'a1z26') return 'A=1, B=2, C=3, jusqu’à Z=26.';
+    if (cipher === 'morse') return 'Points et traits : une case correspond à une lettre.';
+    if (cipher === 'braille') return 'Chaque symbole braille correspond à une lettre de A à Z.';
+    if (cipher === 'atbash') return 'Alphabet inverse : A devient Z, B devient Y, et ainsi de suite.';
+    if (cipher === 'tap-code') return 'Chaque code indique la ligne et la colonne dans une grille 5 x 5. I et J partagent la même case.';
+    if (cipher === 'semaphore') return 'Chaque lettre est montrée par deux positions de drapeaux.';
+    return 'Chaque lettre est remplacée par son mot de l’alphabet radio NATO.';
   }
 
   private readonly morseCodes: Record<string, string> = {
