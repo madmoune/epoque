@@ -22,9 +22,10 @@
 
                 <div class="option-grid">
                     @for (color of mnemonicService.colors; track color.id) {
-                    <button type="button" class="choice-button" [class.selected]="selectedColorId() === color.id"
-                        [disabled]="isCorrect()" (click)="selectColor(color.id)">
-                        {{ color.label }}
+                    <button type="button" class="choice-button visual-choice-button"
+                        [class.selected]="selectedColorId() === color.id" [disabled]="isCorrect()"
+                        (click)="selectColor(color.id)" [attr.aria-label]="color.label">
+                        <span class="color-choice-dot" [class]="'color-choice-dot color-' + color.id"></span>
                     </button>
                     }
                 </div>
@@ -35,9 +36,10 @@
 
                 <div class="option-grid">
                     @for (shape of mnemonicService.shapes; track shape.id) {
-                    <button type="button" class="choice-button" [class.selected]="selectedShapeId() === shape.id"
-                        [disabled]="isCorrect()" (click)="selectShape(shape.id)">
-                        {{ shape.label }}
+                    <button type="button" class="choice-button visual-choice-button"
+                        [class.selected]="selectedShapeId() === shape.id" [disabled]="isCorrect()"
+                        (click)="selectShape(shape.id)" [attr.aria-label]="shape.label">
+                        <span class="shape choice-shape" [class]="'shape choice-shape shape-' + shape.id"></span>
                     </button>
                     }
                 </div>

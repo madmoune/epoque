@@ -14,7 +14,6 @@ type GamePhase = 'memorize' | 'play';
 type MnemonicLegendItem = {
     label: string;
     object: string;
-    quality: string;
     action: string;
 };
 
@@ -39,50 +38,42 @@ export class MemoryGridPage {
         {
             label: 'Rouge',
             object: 'Pompier',
-            quality: 'Roti',
-            action: 'Brûler',
+            action: 'Qui est en feu',
         },
         {
             label: 'Jaune',
             object: 'Citron',
-            quality: 'Surette',
-            action: 'Grimacer de surette',
+            action: 'Qui est surette',
         },
         {
             label: 'Gris',
             object: 'Nassim',
-            quality: 'Riche',
-            action: 'Ramer avec un arc',
+            action: 'Qui rame avec un arc',
         },
         {
             label: 'Vert',
             object: 'Grinch',
-            quality: 'Malade',
-            action: 'Vomir',
+            action: 'Qui est malade',
         },
         {
             label: 'Bleu',
             object: 'Schtroumpf',
-            quality: 'Triste',
-            action: 'Pleurer',
+            action: 'Qui pleure',
         },
         {
             label: 'Orange',
             object: 'Citrouille',
-            quality: 'Déguisé',
-            action: 'Demander des bonbons',
+            action: 'Qui a plein de bonbons',
         },
         {
             label: 'Mauve',
-            object: 'Grosse douceur',
-            quality: 'Sexy',
-            action: 'Faire un câlin',
+            object: 'Grosse Douceur',
+            action: 'Qui est sexy',
         },
         {
             label: 'Rose',
-            object: 'Princesse',
-            quality: 'Fleuri',
-            action: 'Faire de la slackline',
+            object: 'Joseph',
+            action: 'Qui fait de la slackline',
         },
     ];
 
@@ -90,44 +81,37 @@ export class MemoryGridPage {
         {
             label: 'Cercle',
             object: 'Soleil',
-            quality: 'Chaud',
-            action: 'Orbiter',
+            action: 'Qui orbite',
         },
         {
             label: 'Triangle',
             object: 'Pizza',
-            quality: 'Gratiné',
-            action: 'Manger',
+            action: 'Qui est pepperoni-fromage',
         },
         {
             label: 'Rectangle',
-            object: 'Lit',
-            quality: 'Fatigué',
-            action: 'Dormir',
+            object: '-',
+            action: 'Qui dort dans un lit',
         },
         {
             label: 'Carré',
-            object: 'Cric Crac et Croc',
-            quality: 'Trempé de lait',
-            action: 'Danser',
+            object: 'Cric, Crac et Croc',
+            action: 'Qui mange des céréales',
         },
         {
             label: 'Losange',
-            object: 'Diamant',
-            quality: 'Brille',
-            action: 'Porter une bague',
+            object: 'Bague',
+            action: 'Qui porte une bague',
         },
         {
             label: 'Pentagone',
             object: 'Diable',
-            quality: 'Maléfique',
-            action: 'Invoquer',
+            action: 'Qui fait des incantations',
         },
         {
             label: 'Hexagone',
             object: 'Ruche',
-            quality: 'Bourdonne',
-            action: 'Faire une réaction allergique',
+            action: 'Qui a plein de miel',
         },
     ];
 

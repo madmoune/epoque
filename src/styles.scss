@@ -408,6 +408,15 @@ html[data-theme] body app-memory-grid-page .picker-button.selected {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 45%, transparent) !important;
 }
 
+html[data-theme] body app-mnemonic-page :is(.choice-button, .encode-option).selected {
+  border-color: var(--focus) !important;
+  background: color-mix(in srgb, var(--focus) 26%, var(--surface-raised)) !important;
+  color: var(--text) !important;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--focus) 80%, transparent),
+    0 0 0 3px color-mix(in srgb, var(--focus) 38%, transparent) !important;
+}
+
 html[data-theme] body .memory-grid-page .player-cell.selected,
 html[data-theme] body app-memory-grid-page .player-cell.selected {
   outline-color: var(--focus) !important;

@@ -19,23 +19,23 @@ export class MnemonicService {
             id: 'red',
             label: 'Rouge',
             object: 'Pompier',
-            quality: 'Roti',
-            action: 'Brûler',
-            conjugatedAction: 'brûle',
+            quality: 'En feu',
+            action: 'Être en feu',
+            conjugatedAction: 'est en feu',
         },
         {
             id: 'yellow',
             label: 'Jaune',
             object: 'Citron',
             quality: 'Surette',
-            action: 'Grimacer de surette',
-            conjugatedAction: 'grimace de surette',
+            action: 'Être surette',
+            conjugatedAction: 'est surette',
         },
         {
             id: 'gray',
             label: 'Gris',
             object: 'Nassim',
-            quality: 'Riche',
+            quality: '-',
             action: 'Ramer avec un arc',
             conjugatedAction: 'rame avec un arc',
         },
@@ -44,14 +44,14 @@ export class MnemonicService {
             label: 'Vert',
             object: 'Grinch',
             quality: 'Malade',
-            action: 'Vomir',
-            conjugatedAction: 'vomit',
+            action: 'Être malade',
+            conjugatedAction: 'est malade',
         },
         {
             id: 'blue',
             label: 'Bleu',
             object: 'Schtroumpf',
-            quality: 'Triste',
+            quality: '-',
             action: 'Pleurer',
             conjugatedAction: 'pleure',
         },
@@ -59,23 +59,23 @@ export class MnemonicService {
             id: 'orange',
             label: 'Orange',
             object: 'Citrouille',
-            quality: 'Déguisé',
-            action: 'Demander des bonbons',
-            conjugatedAction: 'demande des bonbons',
+            quality: 'Plein de bonbons',
+            action: 'Avoir plein de bonbons',
+            conjugatedAction: 'a plein de bonbons',
         },
         {
             id: 'purple',
             label: 'Mauve',
-            object: 'Grosse douceur',
+            object: 'Grosse Douceur',
             quality: 'Sexy',
-            action: 'Faire un câlin',
-            conjugatedAction: 'fait un câlin',
+            action: 'Être sexy',
+            conjugatedAction: 'est sexy',
         },
         {
             id: 'pink',
             label: 'Rose',
-            object: 'Princesse',
-            quality: 'Fleuri',
+            object: 'Joseph',
+            quality: '-',
             action: 'Faire de la slackline',
             conjugatedAction: 'fait de la slackline',
         },
@@ -86,7 +86,7 @@ export class MnemonicService {
             id: 'circle',
             label: 'Cercle',
             object: 'Soleil',
-            quality: 'Chaud',
+            quality: '-',
             action: 'Orbiter',
             conjugatedAction: 'orbite',
         },
@@ -94,31 +94,31 @@ export class MnemonicService {
             id: 'triangle',
             label: 'Triangle',
             object: 'Pizza',
-            quality: 'Gratiné',
-            action: 'Manger',
-            conjugatedAction: 'mange',
+            quality: '-',
+            action: 'Être pepperoni-fromage',
+            conjugatedAction: 'est pepperoni-fromage',
         },
         {
             id: 'rectangle',
             label: 'Rectangle',
-            object: 'Lit',
-            quality: 'Fatigué',
-            action: 'Dormir',
-            conjugatedAction: 'dort',
+            object: '-',
+            quality: '-',
+            action: 'Dormir dans un lit',
+            conjugatedAction: 'dort dans un lit',
         },
         {
             id: 'square',
             label: 'Carré',
-            object: 'Cric Crac et Croc',
-            quality: 'Trempé de lait',
-            action: 'Danser',
-            conjugatedAction: 'danse',
+            object: 'Cric, Crac et Croc',
+            quality: '-',
+            action: 'Manger des céréales',
+            conjugatedAction: 'mange des céréales',
         },
         {
             id: 'losange',
             label: 'Losange',
-            object: 'Diamant',
-            quality: 'Brille',
+            object: 'Bague',
+            quality: '-',
             action: 'Porter une bague',
             conjugatedAction: 'porte une bague',
         },
@@ -126,17 +126,17 @@ export class MnemonicService {
             id: 'pentagon',
             label: 'Pentagone',
             object: 'Diable',
-            quality: 'Maléfique',
-            action: 'Invoquer',
-            conjugatedAction: 'invoque',
+            quality: '-',
+            action: 'Faire des incantations',
+            conjugatedAction: 'fait des incantations',
         },
         {
             id: 'hexagon',
             label: 'Hexagone',
             object: 'Ruche',
-            quality: 'Bourdonne',
-            action: 'Faire une réaction allergique',
-            conjugatedAction: 'fait une réaction allergique',
+            quality: 'Plein de miel',
+            action: 'Avoir plein de miel',
+            conjugatedAction: 'a plein de miel',
         },
     ];
 
@@ -205,9 +205,8 @@ export class MnemonicService {
         const color = this.getRandomItem(this.colors);
         const shape = this.getRandomItem(this.shapes);
         const location = this.getRandomItem(this.memoryPalaceLocations);
-        const objectSource = this.getRandomMnemonicType();
-        const descriptorSource = this.getOppositeMnemonicType(objectSource);
-        const descriptorType = this.getRandomDescriptorType();
+        const { objectSource, descriptorSource, descriptorType } =
+            this.createMnemonicSelection(color, shape);
 
         const objectEntry = objectSource === 'color' ? color : shape;
         const descriptorEntry = descriptorSource === 'color' ? color : shape;
@@ -233,9 +232,8 @@ export class MnemonicService {
         const color = this.getRandomItem(this.colors);
         const shape = this.getRandomItem(this.shapes);
         const location = this.getRandomItem(this.memoryPalaceLocations);
-        const objectSource = this.getRandomMnemonicType();
-        const descriptorSource = this.getOppositeMnemonicType(objectSource);
-        const descriptorType = this.getRandomDescriptorType();
+        const { objectSource, descriptorSource, descriptorType } =
+            this.createMnemonicSelection(color, shape);
 
         const answerOption = this.createEncodeOption(
             color,
@@ -254,13 +252,26 @@ export class MnemonicService {
             const optionShape = this.getRandomItem(this.shapes);
             const optionLocation = this.getRandomItem(this.memoryPalaceLocations);
 
+            const optionSelections = this.createMnemonicSelectionOptions(
+                optionColor,
+                optionShape,
+                objectSource,
+                descriptorType,
+            );
+
+            if (optionSelections.length === 0) {
+                continue;
+            }
+
+            const optionSelection = this.getRandomItem(optionSelections);
+
             const option = this.createEncodeOption(
                 optionColor,
                 optionShape,
                 optionLocation.position,
-                objectSource,
-                descriptorSource,
-                descriptorType,
+                optionSelection.objectSource,
+                optionSelection.descriptorSource,
+                optionSelection.descriptorType,
                 false,
             );
 
@@ -329,6 +340,85 @@ export class MnemonicService {
         };
     }
 
+    private createMnemonicSelection(
+        color: MnemonicEntry,
+        shape: MnemonicEntry,
+        preferredObjectSource?: MnemonicType,
+        preferredDescriptorType?: MnemonicDescriptorType,
+    ): Pick<
+        MnemonicPuzzle,
+        'objectSource' | 'descriptorSource' | 'descriptorType'
+    > {
+        const options = this.createMnemonicSelectionOptions(
+            color,
+            shape,
+            preferredObjectSource,
+            preferredDescriptorType,
+        );
+
+        if (options.length > 0) {
+            return this.getRandomItem(options);
+        }
+
+        return this.getRandomItem(this.createMnemonicSelectionOptions(color, shape));
+    }
+
+    private createMnemonicSelectionOptions(
+        color: MnemonicEntry,
+        shape: MnemonicEntry,
+        preferredObjectSource?: MnemonicType,
+        preferredDescriptorType?: MnemonicDescriptorType,
+    ): Pick<
+        MnemonicPuzzle,
+        'objectSource' | 'descriptorSource' | 'descriptorType'
+    >[] {
+        const sources: MnemonicType[] = ['color', 'shape'];
+        const descriptorTypes: MnemonicDescriptorType[] = ['quality', 'action'];
+        const options: Pick<
+            MnemonicPuzzle,
+            'objectSource' | 'descriptorSource' | 'descriptorType'
+        >[] = [];
+
+        for (const objectSource of sources) {
+            if (preferredObjectSource && objectSource !== preferredObjectSource) {
+                continue;
+            }
+
+            const objectEntry = objectSource === 'color' ? color : shape;
+
+            if (!this.hasMnemonicValue(objectEntry.object)) {
+                continue;
+            }
+
+            const descriptorSource = this.getOppositeMnemonicType(objectSource);
+            const descriptorEntry = descriptorSource === 'color' ? color : shape;
+
+            for (const descriptorType of descriptorTypes) {
+                if (
+                    preferredDescriptorType &&
+                    descriptorType !== preferredDescriptorType
+                ) {
+                    continue;
+                }
+
+                const descriptor =
+                    descriptorType === 'quality'
+                        ? descriptorEntry.quality
+                        : descriptorEntry.action;
+
+                if (this.hasMnemonicValue(descriptor)) {
+                    options.push({
+                        objectSource,
+                        descriptorSource,
+                        descriptorType,
+                    });
+                }
+            }
+        }
+
+        return options;
+    }
+
     private createSentence(
         objectEntry: MnemonicEntry,
         descriptorEntry: MnemonicEntry,
@@ -368,16 +458,12 @@ export class MnemonicService {
         return value.charAt(0).toLocaleLowerCase('fr-CA') + value.slice(1);
     }
 
-    private getRandomMnemonicType(): MnemonicType {
-        return Math.random() < 0.5 ? 'color' : 'shape';
-    }
-
     private getOppositeMnemonicType(type: MnemonicType): MnemonicType {
         return type === 'color' ? 'shape' : 'color';
     }
 
-    private getRandomDescriptorType(): MnemonicDescriptorType {
-        return Math.random() < 0.5 ? 'quality' : 'action';
+    private hasMnemonicValue(value: string): boolean {
+        return value.trim() !== '-';
     }
 
     private getEntryById(entries: MnemonicEntry[], id: string): MnemonicEntry {
