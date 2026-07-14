@@ -12,6 +12,8 @@ export class GeometricShapesPuzzleType extends PuzzleType {
         'Code numérique à quatre chiffres, chaque chiffre correspondant à une propriété comptée.',
       clueFormat:
         'Série de figures exemples accompagnées de leur code, suivie d’une figure à résoudre sans code.',
+      createdAt: '2026-07-14',
+      updatedAt: '2026-07-14',
       variants: [
         {
           id: '2-1-triangles-by-orientation',

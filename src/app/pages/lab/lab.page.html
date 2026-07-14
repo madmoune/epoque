@@ -1,52 +1,345 @@
 <main class="lab-page">
   <header class="lab-header">
-    <a class="back-link" routerLink="/">Retour</a>
+    @if (isTypeDetailPage()) {
+      <a class="back-link" routerLink="/lab">Toutes les énigmes</a>
+    } @else {
+      <a class="back-link" routerLink="/">Retour</a>
+    }
     <h1>Laboratoire d’énigmes</h1>
   </header>
 
-  <section class="lab-layout" aria-label="Atelier de test">
-    <aside class="type-panel" aria-label="Types d'énigmes">
-      <div class="panel-heading">
-        <span>Types</span>
-        <strong>{{ puzzleTypes.length }}</strong>
+  @if (!isTypeDetailPage()) {
+  <section class="type-browser" aria-label="Catalogue des énigmes">
+    <div class="browser-heading">
+      <div>
+        <span class="eyebrow">Catalogue</span>
+        <h2>Choisis une énigme</h2>
       </div>
-
-      <div class="type-list">
-        @for (type of puzzleTypes; track type.id) {
+      <div class="browser-tools">
+        <span class="type-count">{{ visiblePuzzleTypes().length }} / {{ puzzleTypes.length }} énigmes</span>
+        <div class="display-mode-switch" role="group" aria-label="Mode d’affichage">
           <button
             type="button"
-            class="type-button"
-            [class.active]="selectedType().id === type.id"
-            [class.deleted]="typeState(type) === 'deleted'"
-            (click)="selectType(type)"
+            class="display-mode-button"
+            [class.active]="typeViewMode() === 'cards'"
+            [attr.aria-pressed]="typeViewMode() === 'cards'"
+            (click)="setTypeViewMode('cards')"
           >
-            <span class="type-name">{{ typeName(type) }} ({{ type.variants.length }})</span>
+            Grille
+          </button>
+          <button
+            type="button"
+            class="display-mode-button"
+            [class.active]="typeViewMode() === 'lines'"
+            [attr.aria-pressed]="typeViewMode() === 'lines'"
+            (click)="setTypeViewMode('lines')"
+          >
+            Lignes
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="catalogue-filters">
+      <label class="type-filter">
+        <span>Filtrer par nom d’énigme</span>
+        <input
+          type="search"
+          [value]="typeNameFilter()"
+          (input)="setTypeNameFilter($event)"
+          placeholder="Ex. Segments"
+          autocomplete="off"
+        />
+      </label>
+      <label class="type-sort">
+        <span>Filtrer par statut</span>
+        <select [value]="typeStatusFilter()" (change)="setTypeStatusFilter($event)">
+          <option value="all">Tous les statuts</option>
+          @for (state of approvalStates; track state) {
+            <option [value]="state">{{ stateLabel(state) }}</option>
+          }
+        </select>
+      </label>
+      <label class="type-sort">
+        <span>Trier par</span>
+        <select [value]="puzzleSortMode()" (change)="setPuzzleSortMode($event)">
+          <option value="name-asc">Nom (A à Z)</option>
+          <option value="name-desc">Nom (Z à A)</option>
+          <option value="created-desc">Création (plus récente)</option>
+          <option value="created-asc">Création (plus ancienne)</option>
+          <option value="updated-desc">Modification (plus récente)</option>
+          <option value="updated-asc">Modification (plus ancienne)</option>
+          <option value="status-asc">Statut (approuvées en premier)</option>
+          <option value="status-desc">Statut (supprimées en premier)</option>
+        </select>
+      </label>
+    </div>
+
+    @if (visiblePuzzleTypes().length > 0) {
+    <div class="type-grid" [class.lines-view]="typeViewMode() === 'lines'">
+      @for (type of visiblePuzzleTypes(); track type.id) {
+        <button
+          type="button"
+          class="type-card"
+          [class.deleted]="typeState(type) === 'deleted'"
+          (click)="selectType(type)"
+        >
+          <span class="type-card-body">
+            <span class="type-card-name">{{ typeName(type) }}</span>
+            <span class="type-card-dates">
+              <span>Créée le {{ typeCreatedAt(type) }}</span>
+              <span>Modifiée le {{ typeUpdatedAt(type) }}</span>
+            </span>
+          </span>
+          <span class="type-card-footer">
+            <small [class]="'state-badge ' + typeState(type)">{{ stateLabel(typeState(type)) }}</small>
             @if (hasTypeComment(type)) {
               <span class="comment-indicator" title="Commentaire présent" aria-label="Commentaire présent"></span>
             }
-            <small [class]="'state-badge ' + typeState(type)">{{ stateLabel(typeState(type)) }}</small>
+          </span>
+        </button>
+      }
+    </div>
+    } @else {
+      <p class="empty-filter">Aucune énigme ne correspond à ce filtre.</p>
+    }
+  </section>
+  }
+
+  @if (isTypeDetailPage()) {
+  <section class="lab-workspace" aria-label="Détails de l’énigme sélectionnée">
+    <div class="puzzle-detail-heading">
+      <span class="eyebrow">Énigme</span>
+      <div class="puzzle-title-row">
+        @if (editingTypeName()) {
+          <input
+            class="name-editor puzzle-title-editor"
+            type="text"
+            maxlength="120"
+            [value]="typeName(selectedType())"
+            aria-label="Nom de l’énigme"
+            (blur)="saveTypeName($event)"
+          />
+        } @else {
+          <h2 class="puzzle-title">{{ typeName(selectedType()) }}</h2>
+        }
+        <button type="button" class="name-edit-button" (click)="toggleTypeNameEdit()">
+          @if (editingTypeName()) {
+            <span aria-hidden="true">✓</span>
+            <span class="sr-only">Confirmer le nom de l’énigme</span>
+          } @else {
+            <span aria-hidden="true">✎</span>
+            <span class="sr-only">Modifier le nom de l’énigme</span>
+          }
+        </button>
+      </div>
+    </div>
+    <div class="type-summary puzzle-overview">
+      <div class="inline-state-field">
+        <span>État de l’énigme</span>
+        <select
+          [class]="typeState(selectedType())"
+          [value]="typeState(selectedType())"
+          (change)="setTypeState($event)"
+        >
+          @for (state of approvalStates; track state) {
+            <option [value]="state" [selected]="state === typeState(selectedType())">
+              {{ stateLabel(state) }}
+            </option>
+          }
+        </select>
+      </div>
+      <div class="comment-field description-field">
+        <span>Description de l’énigme</span>
+          <textarea
+            maxlength="1000"
+            [value]="typeDescription(selectedType())"
+            (input)="updateTypeDescription($event)"
+            (blur)="saveTypeDescription($event)"
+            aria-label="Description de l’énigme"
+          ></textarea>
+      </div>
+      <dl class="puzzle-dates">
+        <div>
+          <dt>Date de création</dt>
+          <dd>{{ typeCreatedAt(selectedType()) }}</dd>
+        </div>
+        <div>
+          <dt>Dernière modification</dt>
+          <dd>{{ typeUpdatedAt(selectedType()) }}</dd>
+        </div>
+      </dl>
+      <label class="comment-field">
+        <span>Commentaire de l’énigme</span>
+        <textarea
+          maxlength="1000"
+          [value]="typeComment(selectedType())"
+          (input)="updateTypeComment($event)"
+          (blur)="saveTypeComment($event)"
+          placeholder="Ajouter un commentaire…"
+        ></textarea>
+      </label>
+    </div>
+    <aside class="steps-panel" aria-label="Liste des étapes">
+      <div class="panel-heading">
+        <span>Étapes</span>
+        <strong>{{ selectedType().variants.length }}</strong>
+      </div>
+      <div class="step-list">
+        @for (variant of selectedType().variants; track variant.id) {
+          <button
+            type="button"
+            class="step-button"
+            [class.active]="selectedVariant().id === variant.id"
+            [class.deleted]="variantState(variant) === 'deleted'"
+            (click)="selectVariant(variant)"
+          >
+            <span class="step-button-name">{{ variantName(variant) }}</span>
+            @if (hasVariantComment(variant)) {
+              <span class="step-button-meta">Commentaire</span>
+            }
           </button>
         }
       </div>
     </aside>
-
     <section class="preview-stage" aria-label="Aperçu joueur">
-      <div class="puzzle-example" aria-label="Exemple généré">
-        <div class="example-heading">
-          <strong>Trouvez la combinaison du cadenas à l’aide de cette légende.</strong>
-          <span>{{ variantName(selectedVariant()) }}</span>
+      <div class="variant-summary step-overview">
+        <div class="editable-name">
+          @if (editingVariantName()) {
+            <input
+              class="name-editor"
+              type="text"
+              maxlength="120"
+              [value]="variantName(selectedVariant())"
+              aria-label="Nom de l’étape"
+              (blur)="saveVariantName($event)"
+            />
+          } @else {
+            <span class="name-label">{{ variantName(selectedVariant()) }}</span>
+          }
+          <button type="button" class="name-edit-button" (click)="toggleVariantNameEdit()">
+            @if (editingVariantName()) {
+              <span aria-hidden="true">✓</span>
+              <span class="sr-only">Confirmer le nom de l’étape</span>
+            } @else {
+              <span aria-hidden="true">✎</span>
+              <span class="sr-only">Modifier le nom de l’étape</span>
+            }
+          </button>
         </div>
-
+        <label class="field example-count-field">
+          <span>Nombre d’exemples</span>
+          <input
+            type="number"
+            min="0"
+            [max]="selectedVariant().examples.length"
+            [value]="selectedExampleCount()"
+            (change)="setExampleCount($event)"
+          />
+        </label>
+        <div class="comment-field description-field">
+          <span>Flavor text</span>
+          <textarea
+            maxlength="1000"
+            [value]="variantDescription(selectedVariant())"
+            (input)="updateVariantDescription($event)"
+            (blur)="saveVariantDescription($event)"
+            aria-label="Flavor text"
+          ></textarea>
+        </div>
+        <label class="comment-field">
+          <span>Commentaire de l’étape</span>
+          <textarea
+            maxlength="1000"
+            [value]="variantComment(selectedVariant())"
+            (input)="updateVariantComment($event)"
+            (blur)="saveVariantComment($event)"
+            placeholder="Ajouter un commentaire…"
+        ></textarea>
+        </label>
+      </div>
+      <div class="puzzle-example" aria-label="Exemple généré">
+        @if (savedVariantDescription(selectedVariant())) {
+          <p class="puzzle-flavor-text">{{ savedVariantDescription(selectedVariant()) }}</p>
+        }
+        @if (instance().challengeFigure.displayMode === 'clock-letters') {
+          <section class="clock-legend" aria-label="Légende des lettres possibles">
+            <h3>Légende des lettres</h3>
+            <div class="clock-legend-grid">
+              @for (legendLetter of clockLegend; track legendLetter.letter) {
+                <div class="clock-legend-card">
+                  <strong>{{ legendLetter.letter }}</strong>
+                  <span>{{ legendLetter.time }}</span>
+                  <svg viewBox="0 0 100 100" role="img" [attr.aria-label]="'Lettre ' + legendLetter.letter">
+                    <circle class="clock-letter-circle" cx="50" cy="50" r="36" />
+                    @for (line of legendLetter.staticLines; track line.id) {
+                      <line
+                        class="clock-static-line"
+                        [attr.x1]="line.x1"
+                        [attr.y1]="line.y1"
+                        [attr.x2]="line.x2"
+                        [attr.y2]="line.y2"
+                      />
+                    }
+                    @for (hand of legendLetter.clockHands; track hand.id) {
+                      <line
+                        class="clock-hand"
+                        [attr.x1]="hand.x1"
+                        [attr.y1]="hand.y1"
+                        [attr.x2]="hand.x2"
+                        [attr.y2]="hand.y2"
+                      />
+                    }
+                  </svg>
+                </div>
+              }
+            </div>
+          </section>
+        }
         <div class="figure-list">
           @for (figure of instance().exampleFigures; track figure.id) {
-            <article class="figure-card">
+            <article
+              class="figure-card"
+              [class.navigation-card]="figure.displayMode === 'navigation' || figure.displayMode === 'clock-letters'"
+            >
               <div
                 class="figure-visual"
                 [class.seven-segment-visual]="figure.displayMode === 'seven-segment'"
+                [class.navigation-visual]="figure.displayMode === 'navigation'"
               >
+                @if (figure.displayMode === 'navigation') {
+                  <img
+                    class="navigation-example-image"
+                    [src]="figure.imageSrc"
+                    [alt]="figure.example?.description"
+                  />
+                }
+                @if (figure.displayMode === 'clock-letters') {
+                  <div class="clock-word-visual">
+                    @for (clockLetter of figure.clockLetters ?? []; track clockLetter.id) {
+                      <div class="clock-letter-card">
+                        <span>{{ clockLetter.time }}</span>
+                        <svg viewBox="0 0 100 100" role="img" [attr.aria-label]="'Lettre à décoder à ' + clockLetter.time">
+                          <circle class="clock-letter-circle" cx="50" cy="50" r="36" />
+                          @for (line of clockLetter.staticLines; track line.id) {
+                            <line
+                              class="clock-static-line"
+                              [attr.x1]="line.x1"
+                              [attr.y1]="line.y1"
+                              [attr.x2]="line.x2"
+                              [attr.y2]="line.y2"
+                            />
+                          }
+                        </svg>
+                      </div>
+                    }
+                  </div>
+                }
               <svg
                 [attr.viewBox]="figure.viewBox"
                 [class.seven-segment-svg]="figure.displayMode === 'seven-segment'"
+                [class.navigation-svg]="figure.displayMode === 'navigation'"
+                [class.clock-svg]="figure.displayMode === 'clock-letters'"
                 role="img"
                 [attr.aria-label]="'Figure exemple : ' + (figure.example?.name ?? 'défi')"
                 [attr.title]="figure.example?.description"
@@ -132,18 +425,88 @@
               }
               </svg>
               </div>
-              <strong>{{ figure.code }}</strong>
+              <strong [class.navigation-code]="figure.displayMode === 'navigation'">
+                {{ figure.code }}
+              </strong>
             </article>
           }
 
-          <article class="figure-card challenge">
+          <article
+            class="figure-card challenge"
+            [class.navigation-card]="instance().challengeFigure.displayMode === 'navigation' || instance().challengeFigure.displayMode === 'clock-letters'"
+            [class.clock-letters-card]="instance().challengeFigure.displayMode === 'clock-letters'"
+          >
             <div
-              class="figure-visual"
-              [class.seven-segment-visual]="instance().challengeFigure.displayMode === 'seven-segment'"
+                class="figure-visual"
+                [class.seven-segment-visual]="instance().challengeFigure.displayMode === 'seven-segment'"
+                [class.navigation-visual]="instance().challengeFigure.displayMode === 'navigation'"
             >
+            @if (instance().challengeFigure.displayMode === 'navigation') {
+              <img
+                class="navigation-example-image"
+                [src]="instance().challengeFigure.imageSrc"
+                alt="Illustration de navigation"
+              />
+            }
+            @if (instance().challengeFigure.displayMode === 'clock-letters') {
+              <div class="clock-word-visual">
+                @for (clockLetter of instance().challengeFigure.clockLetters ?? []; track clockLetter.id) {
+                  <div class="clock-letter-card">
+                    <span>{{ clockLetter.time }}</span>
+                    <svg viewBox="0 0 100 100" role="img" [attr.aria-label]="'Lettre à décoder à ' + clockLetter.time">
+                      <circle class="clock-letter-circle" cx="50" cy="50" r="36" />
+                      @for (line of clockLetter.staticLines; track line.id) {
+                        <line
+                          class="clock-static-line"
+                          [attr.x1]="line.x1"
+                          [attr.y1]="line.y1"
+                          [attr.x2]="line.x2"
+                          [attr.y2]="line.y2"
+                        />
+                      }
+                    </svg>
+                  </div>
+                }
+                <strong class="clock-answer-placeholder">{{ challengeSolution() }}</strong>
+              </div>
+              <section class="clock-legend" aria-label="Légende des lettres possibles">
+                <h3>Légende des lettres</h3>
+                <div class="clock-legend-grid">
+                  @for (legendLetter of clockLegend; track legendLetter.letter) {
+                    <div class="clock-legend-card">
+                      <strong>{{ legendLetter.letter }}</strong>
+                      <span>{{ legendLetter.time }}</span>
+                      <svg viewBox="0 0 100 100" role="img" [attr.aria-label]="'Lettre ' + legendLetter.letter">
+                        <circle class="clock-letter-circle" cx="50" cy="50" r="36" />
+                        @for (line of legendLetter.staticLines; track line.id) {
+                          <line
+                            class="clock-static-line"
+                            [attr.x1]="line.x1"
+                            [attr.y1]="line.y1"
+                            [attr.x2]="line.x2"
+                            [attr.y2]="line.y2"
+                          />
+                        }
+                        @for (hand of legendLetter.clockHands; track hand.id) {
+                          <line
+                            class="clock-hand"
+                            [attr.x1]="hand.x1"
+                            [attr.y1]="hand.y1"
+                            [attr.x2]="hand.x2"
+                            [attr.y2]="hand.y2"
+                          />
+                        }
+                      </svg>
+                    </div>
+                  }
+                </div>
+              </section>
+            }
             <svg
               [attr.viewBox]="instance().challengeFigure.viewBox"
               [class.seven-segment-svg]="instance().challengeFigure.displayMode === 'seven-segment'"
+              [class.navigation-svg]="instance().challengeFigure.displayMode === 'navigation'"
+              [class.clock-svg]="instance().challengeFigure.displayMode === 'clock-letters'"
               role="img"
               aria-label="Figure à résoudre"
             >
@@ -231,15 +594,17 @@
               }
             </svg>
             </div>
-            <strong>{{ challengeSolution() }}</strong>
+            <strong [class.navigation-code]="instance().challengeFigure.displayMode === 'navigation'">
+              {{ challengeSolution() }}
+            </strong>
             <div class="example-answer">
               <label for="challenge-answer">Votre réponse</label>
               <input
                 id="challenge-answer"
                 type="text"
-                inputmode="numeric"
+                [attr.inputmode]="isTextAnswer() ? 'text' : 'numeric'"
                 autocomplete="off"
-                maxlength="4"
+                [attr.maxlength]="isTextAnswer() ? 20 : 4"
                 [value]="challengeAnswer()"
                 (input)="setChallengeAnswer($event)"
                 (keydown.enter)="checkChallenge()"
@@ -251,7 +616,7 @@
             </div>
             @if (challengeFeedback(); as feedback) {
               <small [class]="'example-feedback ' + feedback">
-                {{ feedback === 'correct' ? 'Bonne réponse.' : 'À revoir.' }}
+                {{ challengeFeedbackMessage(feedback) }}
               </small>
             }
           </article>
@@ -263,216 +628,7 @@
 
     </section>
 
-    <aside class="control-panel" aria-label="Contrôles de génération">
-      <div class="panel-heading">
-        <span>Type</span>
-      </div>
-
-      <div class="type-summary">
-        <div class="summary-heading">
-          @if (editingTypeName()) {
-            <input
-              class="name-editor"
-              type="text"
-              maxlength="120"
-              [value]="typeName(selectedType())"
-              aria-label="Nom du type"
-              (blur)="saveTypeName($event)"
-            />
-          } @else {
-            <span class="name-label">{{ typeName(selectedType()) }}</span>
-          }
-          <button type="button" class="name-edit-button" (click)="toggleTypeNameEdit()">
-            @if (editingTypeName()) {
-              <span aria-hidden="true">✓</span>
-              <span class="sr-only">Confirmer le nom du type</span>
-            } @else {
-              <span aria-hidden="true">✎</span>
-              <span class="sr-only">Modifier le nom du type</span>
-            }
-          </button>
-        </div>
-        <div class="inline-state-field">
-          <span>État du type</span>
-          <select
-            [class]="typeState(selectedType())"
-            [value]="typeState(selectedType())"
-            (change)="setTypeState($event)"
-          >
-            @for (state of approvalStates; track state) {
-              <option [value]="state" [selected]="state === typeState(selectedType())">
-                {{ stateLabel(state) }}
-              </option>
-            }
-          </select>
-        </div>
-        <p>{{ selectedType().description }}</p>
-        <label class="comment-field">
-          <span>Commentaire du type</span>
-          <textarea
-            maxlength="1000"
-            [value]="typeComment(selectedType())"
-            (input)="updateTypeComment($event)"
-            (blur)="saveTypeComment($event)"
-            placeholder="Ajouter un commentaire…"
-          ></textarea>
-        </label>
-      </div>
-
-      <label class="field">
-        <span>Famille</span>
-        <select
-          [class]="familyState(selectedFamily())"
-          [value]="selectedFamily().id"
-          (change)="setFamily($event)"
-        >
-          @for (family of selectedType().families; track family.id) {
-            <option [value]="family.id" [selected]="family.id === selectedFamily().id">
-              {{ familyName(family) }}
-            </option>
-          }
-        </select>
-      </label>
-
-      <label class="field">
-        <span>Nom de la famille</span>
-        <div class="editable-name">
-          @if (editingFamilyName()) {
-            <input
-              class="name-editor"
-              type="text"
-              maxlength="120"
-              [value]="familyName(selectedFamily())"
-              aria-label="Nom de la famille"
-              (blur)="saveFamilyName($event)"
-            />
-          } @else {
-            <span class="name-label">{{ familyName(selectedFamily()) }}</span>
-          }
-          <button type="button" class="name-edit-button" (click)="toggleFamilyNameEdit()">
-            @if (editingFamilyName()) {
-              <span aria-hidden="true">✓</span>
-              <span class="sr-only">Confirmer le nom de la famille</span>
-            } @else {
-              <span aria-hidden="true">✎</span>
-              <span class="sr-only">Modifier le nom de la famille</span>
-            }
-          </button>
-        </div>
-      </label>
-
-      <div class="inline-state-field">
-        <span>État de la famille</span>
-        <select
-          [class]="familyState(selectedFamily())"
-          [value]="familyState(selectedFamily())"
-          (change)="setFamilyState($event)"
-        >
-          @for (state of approvalStates; track state) {
-            <option [value]="state" [selected]="state === familyState(selectedFamily())">
-              {{ stateLabel(state) }}
-            </option>
-          }
-        </select>
-      </div>
-
-      <label class="comment-field">
-        <span>Commentaire de la famille</span>
-        <textarea
-          maxlength="1000"
-          [value]="familyComment(selectedFamily())"
-          (input)="updateFamilyComment($event)"
-          (blur)="saveFamilyComment($event)"
-          placeholder="Ajouter un commentaire…"
-        ></textarea>
-      </label>
-
-      <label class="field">
-        <span>Variante</span>
-        <select
-          [class]="variantState(selectedVariant())"
-          [value]="selectedVariant().id"
-          (change)="setVariant($event)"
-        >
-          @for (variant of selectedFamily().variants; track variant.id) {
-            <option
-              [class]="variantState(variant)"
-              [value]="variant.id"
-              [selected]="variant.id === selectedVariant().id"
-            >
-              {{ variantName(variant) }}{{ hasVariantComment(variant) ? ' •' : '' }}
-            </option>
-          }
-        </select>
-      </label>
-
-      <label class="field example-count-field">
-        <span>Nombre d’exemples</span>
-        <input
-          type="number"
-          min="0"
-          [max]="selectedVariant().examples.length"
-          [value]="selectedExampleCount()"
-          (change)="setExampleCount($event)"
-        />
-      </label>
-
-      <div class="variant-summary">
-        <div class="editable-name">
-          @if (editingVariantName()) {
-            <input
-              class="name-editor"
-              type="text"
-              maxlength="120"
-              [value]="variantName(selectedVariant())"
-              aria-label="Nom de la variante"
-              (blur)="saveVariantName($event)"
-            />
-          } @else {
-            <span class="name-label">{{ variantName(selectedVariant()) }}</span>
-          }
-          <button type="button" class="name-edit-button" (click)="toggleVariantNameEdit()">
-            @if (editingVariantName()) {
-              <span aria-hidden="true">✓</span>
-              <span class="sr-only">Confirmer le nom de la variante</span>
-            } @else {
-              <span aria-hidden="true">✎</span>
-              <span class="sr-only">Modifier le nom de la variante</span>
-            }
-          </button>
-        </div>
-        <p>{{ selectedVariant().description }}</p>
-        <div class="inline-state-field">
-          <span>État de la variante</span>
-          <select
-            [class]="variantState(selectedVariant())"
-            [value]="variantState(selectedVariant())"
-            (change)="setVariantState($event)"
-          >
-            @for (state of approvalStates; track state) {
-              <option [value]="state" [selected]="state === variantState(selectedVariant())">
-                {{ stateLabel(state) }}
-              </option>
-            }
-          </select>
-        </div>
-      </div>
-
-      <label class="comment-field">
-        <span>Commentaire de la variante</span>
-        <textarea
-          maxlength="1000"
-          [value]="variantComment(selectedVariant())"
-          (input)="updateVariantComment($event)"
-          (blur)="saveVariantComment($event)"
-          placeholder="Ajouter un commentaire…"
-        ></textarea>
-      </label>
-
-      <p class="storage-status" [class.error]="firebaseStatus() === 'error'">
-        {{ firebaseMessage() }}
-      </p>
-    </aside>
   </section>
+  }
 
 </main>

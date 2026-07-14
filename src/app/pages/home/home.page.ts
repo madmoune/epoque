@@ -1,6 +1,11 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { PuzzlePlayHistoryService } from '../../puzzle-play-history.service';
+import { LAB_PUZZLE_TYPES } from '../lab/lab.puzzle-types';
+import {
+  FirebasePuzzleCatalogService,
+  PuzzleCatalogApprovalState,
+} from '../../shared/firebase/firebase-puzzle-catalog.service';
 
 type PuzzleCard = {
   title: string;
@@ -32,17 +37,41 @@ export class HomePage {
   private readonly sortModeStorageKey = 'epique-home-sort-mode';
   private readonly router = inject(Router);
   private readonly playHistory = inject(PuzzlePlayHistoryService);
+  private readonly firebaseCatalog = inject(FirebasePuzzleCatalogService);
+  private readonly labTypeNames = signal<Record<string, string>>({});
+  private readonly labTypeStates = signal<Record<string, PuzzleCatalogApprovalState>>({});
 
   readonly sortMode = signal<HomeSortMode>(this.readSortMode());
-  readonly categories = computed<PuzzleCategory[]>(() =>
-    this.baseCategories.map((category) => ({
+  readonly categories = computed<PuzzleCategory[]>(() => {
+    const labCategory: PuzzleCategory = {
+      id: 'enigmes',
+      title: 'Énigmes',
+      description: 'Énigmes approuvées du laboratoire.',
+      puzzles: LAB_PUZZLE_TYPES.filter(
+        (type) => (this.labTypeStates()[type.id] ?? type.state) === 'approved',
+      ).map((type) => ({
+        title: this.labTypeNames()[type.id] ?? type.name,
+        description: type.description,
+        route: type.playRoute ?? `/lab/${type.id}`,
+        tag: 'Énigme',
+      })),
+      emptyText: 'Aucune énigme approuvée pour le moment.',
+      sortable: false,
+      showSolvedStatus: true,
+    };
+
+    return [...this.baseCategories, labCategory].map((category) => ({
       ...category,
       puzzles:
         this.sortMode() === 'oldest' && category.sortable !== false
           ? [...category.puzzles].sort((first, second) => this.compareByOldestPlayed(first, second))
           : category.puzzles,
-    })),
-  );
+    }));
+  });
+
+  constructor() {
+    void this.loadApprovedLabPuzzles();
+  }
 
   private readonly baseCategories: PuzzleCategory[] = [
     {
@@ -193,25 +222,25 @@ export class HomePage {
         },
         {
           title: 'Pyramide de sommes',
-          description: 'Complete la pyramide en additionnant deux cases collees vers le haut.',
+          description: 'Complète la pyramide en additionnant deux cases collées vers le haut.',
           route: '/sum-pyramid',
           tag: 'Sommes',
         },
         {
           title: 'Compte est bon',
-          description: 'Utilise les nombres disponibles et les operations pour approcher une cible.',
+          description: 'Utilise les nombres disponibles et les opérations pour approcher une cible.',
           route: '/count-is-good',
           tag: 'Cible',
         },
         {
           title: 'KenKen / Calcudoku',
-          description: 'Complete une grille avec chiffres uniques et contraintes de calcul.',
+          description: 'Complète une grille avec des chiffres uniques et des contraintes de calcul.',
           route: '/calcudoku',
           tag: 'Contraintes',
         },
         {
           title: 'Arithmétique mentale',
-          description: 'Resous des calculs courts et rapides en gardant le rythme.',
+          description: 'Résous des calculs courts et rapides en gardant le rythme.',
           route: '/mental-arithmetic',
           tag: 'Vitesse',
         },
@@ -333,33 +362,31 @@ export class HomePage {
     {
       id: 'multijoueurs',
       title: 'Multi-joueurs',
-      description: 'Jeux a partager en salle avec plusieurs joueurs.',
+      description: 'Jeux à partager en salle avec plusieurs joueurs.',
       puzzles: [
         {
           title: 'Description de symboles',
-          description: 'Decris un symbole pour que les autres retrouvent la bonne image.',
+          description: 'Décris un symbole pour que les autres retrouvent la bonne image.',
           route: '/describe-symbols',
           tag: 'En ligne',
         },
       ],
     },
-    {
-      id: 'enigmes',
-      title: 'Enigmes',
-      description: "Vraies enigmes de type jeu d'evasion.",
-      puzzles: [
-        {
-          title: 'Navigation',
-          description: 'Trouve ton chemin.',
-          route: '/puzzlehunt/navigation',
-          tag: 'Hunt',
-        },
-      ],
-      emptyText: 'Aucun puzzle ajoute pour le moment.',
-      sortable: false,
-      showSolvedStatus: true,
-    },
   ];
+
+  private async loadApprovedLabPuzzles(): Promise<void> {
+    if (!this.firebaseCatalog.isConfigured) {
+      return;
+    }
+
+    try {
+      const overrides = await this.firebaseCatalog.loadStatuses();
+      this.labTypeNames.set(overrides.typeNames);
+      this.labTypeStates.set(overrides.typeStates);
+    } catch {
+      // L’accueil conserve la liste vide tant que le catalogue LAB est indisponible.
+    }
+  }
 
   setSortMode(sortMode: HomeSortMode): void {
     this.sortMode.set(sortMode);
@@ -390,32 +417,32 @@ export class HomePage {
     const playedAt = this.playHistory.lastPlayedAt(route);
 
     if (!playedAt) {
-      return 'Jamais joue';
+      return 'Jamais joué';
     }
 
     const elapsedMilliseconds = Date.now() - playedAt;
     const elapsedDays = Math.floor(elapsedMilliseconds / 86_400_000);
 
     if (elapsedDays <= 0) {
-      return "Joue aujourd'hui";
+      return "Joué aujourd'hui";
     }
 
     if (elapsedDays === 1) {
-      return 'Joue hier';
+      return 'Joué hier';
     }
 
     if (elapsedDays < 7) {
-      return `Joue il y a ${elapsedDays} jours`;
+      return `Joué il y a ${elapsedDays} jours`;
     }
 
-    return `Derniere fois: ${new Intl.DateTimeFormat('fr-CA', {
+    return `Dernière fois : ${new Intl.DateTimeFormat('fr-CA', {
       day: 'numeric',
       month: 'short',
     }).format(new Date(playedAt))}`;
   }
 
   solvedStatusText(route: string): string {
-    return this.playHistory.isSolved(route) ? 'Resolue' : 'Non resolue';
+    return this.playHistory.isSolved(route) ? 'Résolue' : 'Non résolue';
   }
 
   solvedStatusClass(route: string): string {

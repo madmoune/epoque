@@ -10,6 +10,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/lab/lab.page').then((m) => m.LabPage),
   },
   {
+    path: 'lab/:typeId',
+    loadComponent: () => import('./pages/lab/lab.page').then((m) => m.LabPage),
+  },
+  {
     path: 'anagrams',
     loadComponent: () => import('./puzzles/anagrams/anagram.page').then((m) => m.AnagramsPage),
   },
@@ -173,6 +177,13 @@ export const routes: Routes = [
     path: 'puzzlehunt/navigation',
     loadComponent: () =>
       import('./puzzles/puzzlehunt/Navigation/navigation.page').then((m) => m.NavigationPuzzlePage),
+  },
+  {
+    path: 'puzzlehunt/clock-letters',
+    loadComponent: () =>
+      import('./puzzles/puzzlehunt/ClockLetters/clock-letters.page').then(
+        (m) => m.ClockLettersPuzzlePage,
+      ),
   },
   {
     path: '**',

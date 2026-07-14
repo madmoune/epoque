@@ -39,6 +39,37 @@
   color-scheme: light;
 }
 
+.clock-svg { display: none; }
+.clock-word-visual { display: flex; flex-wrap: nowrap; align-items: flex-start; justify-content: center; gap: 0.1rem; width: 100%; overflow: visible; }
+.clock-letter-card { display: flex; flex: 1 1 0; min-width: 0; flex-direction: column; align-items: center; gap: 0.2rem; color: var(--muted); font-size: 0.68rem; font-weight: 800; }
+.clock-letter-card > span { line-height: 1; }
+.clock-letter-card svg { grid-area: unset !important; width: 100%; max-width: 8rem; aspect-ratio: 1; overflow: visible; }
+.clock-letters-card { grid-template-columns: minmax(0, 1fr) !important; grid-template-areas: 'figure' 'code' 'answer' 'feedback' !important; }
+.figure-list:has(.clock-letters-card) { max-width: 42rem; }
+.clock-letters-card .clock-word-visual { gap: 0.5rem; }
+.clock-letters-card .clock-letter-card { flex: 1 1 0; }
+.clock-letters-card .clock-letter-card svg { max-width: 9rem !important; }
+.clock-letters-card > strong { display: none; }
+.clock-answer-placeholder {
+  flex: 0 0 auto;
+  align-self: center;
+  margin-left: 0.35rem;
+  color: var(--accent);
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  letter-spacing: 0.12em;
+}
+.clock-letter-circle { fill: transparent; stroke: var(--muted); stroke-width: 1.5; }
+.clock-static-line, .clock-hand { stroke: var(--text); stroke-linecap: round; stroke-width: 3; }
+.clock-hand { stroke: var(--accent); stroke-width: 2.5; }
+.puzzle-flavor-text { width: 100%; max-width: 31rem; margin: 0 auto; color: var(--muted); font-weight: 800; text-align: center; }
+.clock-legend { order: -1; width: 100%; max-width: 31rem; margin-top: 1rem; }
+.clock-legend h3 { margin: 0 0 0.55rem; color: var(--muted); font-size: 0.78rem; text-align: center; text-transform: uppercase; }
+.clock-legend-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(3.8rem, 1fr)); gap: 0.45rem; }
+.clock-legend-card { display: grid; justify-items: center; gap: 0.15rem; padding: 0.35rem 0.15rem; border: 1px solid color-mix(in srgb, var(--text) 18%, transparent); border-radius: 0.35rem; color: var(--muted); font-size: 0.65rem; font-weight: 800; }
+.clock-legend-card strong { grid-area: unset !important; color: var(--accent); font-size: 1.6rem; line-height: 1; }
+.clock-legend-card svg { grid-area: unset !important; width: 3.2rem !important; aspect-ratio: 1; overflow: visible; }
+.figure-card .clock-legend { display: none; }
+
 html {
   min-height: 100%;
   background: var(--page-bg);
@@ -268,7 +299,7 @@ html[data-theme] body :is(input, textarea, select, .answer-input):focus {
   outline-color: color-mix(in srgb, var(--focus) 32%, transparent) !important;
 }
 
-html[data-theme] body button:not(.stone-button):not(.grid-cell):not(.piece-button):not(.board-piece):not(.tile-button):not(.picker-button):not(.choice-button):not(.encode-option):not(.symbol-button):not(.piece-slot):not(.name-edit-button):not([data-board-cell]):not([data-pathway-slot]) {
+html[data-theme] body button:not(.stone-button):not(.grid-cell):not(.piece-button):not(.board-piece):not(.tile-button):not(.picker-button):not(.choice-button):not(.encode-option):not(.symbol-button):not(.piece-slot):not(.name-edit-button):not(.type-card):not(.display-mode-button):not([data-board-cell]):not([data-pathway-slot]) {
   background: var(--accent);
   color: var(--accent-contrast);
 }

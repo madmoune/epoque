@@ -16,15 +16,19 @@
       <span class="success-answer">{{ answer }}</span>
     }
   </span>
-  @if (showAction) {
+  @if (showAction || showMenuLink) {
     <span class="popup-actions">
-      <button type="button" (click)="action.emit()">{{ actionLabel }}</button>
-      @if (cameFromRandom) {
-        <button type="button" class="random-action" (click)="playAnotherRandomOldestPuzzle()">
-          Autre jeu au hasard
-        </button>
+      @if (showAction) {
+        <button type="button" (click)="action.emit()">{{ actionLabel }}</button>
+        @if (cameFromRandom) {
+          <button type="button" class="random-action" (click)="playAnotherRandomOldestPuzzle()">
+            Autre jeu au hasard
+          </button>
+        }
       }
-      <a routerLink="/" [fragment]="menuFragment">Retour au menu</a>
+      @if (showMenuLink) {
+        <a routerLink="/" [fragment]="menuFragment">Retour au menu</a>
+      }
     </span>
   }
 </section>

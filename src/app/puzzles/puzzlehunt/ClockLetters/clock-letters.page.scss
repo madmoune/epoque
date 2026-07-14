@@ -1,0 +1,20 @@
+.page { max-width: 1080px; margin: 0 auto; padding: 2rem; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: var(--focus); }
+.shell { padding: 2rem; border: 1px solid var(--border); border-radius: 1.25rem; background: var(--surface); box-shadow: 0 .8rem 2rem var(--shadow); }
+.hero { margin-bottom: 1.25rem; }
+.eyebrow { margin: 0 0 .35rem; color: var(--accent); text-transform: uppercase; letter-spacing: .1em; font-size: .8rem; font-weight: 900; }
+h1 { margin: 0; color: var(--text); font-size: clamp(2rem, 5vw, 3rem); line-height: 1; }
+.intro { max-width: 42rem; margin: .75rem 0 0; color: var(--muted); line-height: 1.45; }
+.clock-puzzle { display: grid; gap: 1.5rem; padding: 1.5rem; border: 1px solid var(--border); border-radius: 1rem; background: var(--surface-raised); }
+.clock-game-word { display: flex; flex-wrap: nowrap; justify-content: center; gap: .55rem; width: 100%; }
+.clock-game-letter { display: grid; flex: 1 1 0; min-width: 0; justify-items: center; gap: .35rem; color: var(--muted); font-size: .85rem; font-weight: 900; }
+.clock-game-letter svg { width: 100%; max-width: 9rem; aspect-ratio: 1; overflow: visible; }
+.clock-game-letter .clock-letter-circle { fill: transparent; stroke: var(--muted); stroke-width: 1.5; }
+.clock-game-letter .clock-static-line { stroke: var(--text); stroke-linecap: round; stroke-width: 3; }
+
+@media (max-width: 700px) {
+  .page { padding: .75rem; }
+  .shell { padding: .85rem; }
+  .clock-puzzle { padding: .8rem; }
+  .clock-game-word { gap: .2rem; }
+}

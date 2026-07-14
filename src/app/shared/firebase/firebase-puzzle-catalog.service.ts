@@ -16,12 +16,13 @@ export type PuzzleCatalogApprovalState = 'approved' | 'pending' | 'deleted';
 export type PuzzleCatalogStatusOverrides = {
   typeNames: Record<string, string>;
   typeStates: Record<string, PuzzleCatalogApprovalState>;
-  familyNames: Record<string, Record<string, string>>;
-  familyStates: Record<string, Record<string, PuzzleCatalogApprovalState>>;
+  typeCreatedAt: Record<string, number>;
+  typeUpdatedAt: Record<string, number>;
+  typeDescriptions: Record<string, string>;
   variantNames: Record<string, Record<string, string>>;
   variantStates: Record<string, Record<string, PuzzleCatalogApprovalState>>;
+  variantDescriptions: Record<string, Record<string, string>>;
   typeComments: Record<string, string>;
-  familyComments: Record<string, Record<string, string>>;
   variantComments: Record<string, Record<string, string>>;
   variantExampleCounts: Record<string, Record<string, number>>;
 };
@@ -34,22 +35,18 @@ type StoredPuzzleType = {
   id?: unknown;
   name?: unknown;
   state?: unknown;
+  description?: unknown;
   comment?: unknown;
+  createdAt?: unknown;
+  updatedAt?: unknown;
   variants?: Record<string, StoredPuzzleVariant>;
-  families?: Record<string, StoredPuzzleFamily>;
-};
-
-type StoredPuzzleFamily = {
-  id?: unknown;
-  name?: unknown;
-  state?: unknown;
-  comment?: unknown;
 };
 
 type StoredPuzzleVariant = {
   id?: unknown;
   name?: unknown;
   state?: unknown;
+  description?: unknown;
   comment?: unknown;
   exampleCount?: unknown;
 };
@@ -85,6 +82,25 @@ export class FirebasePuzzleCatalogService {
     return this.parseStatuses(catalog);
   }
 
+  async ensureTypeDates(typeId: string, createdAt: string, updatedAt: string): Promise<void> {
+    const typeRef = ref(await this.getDatabase(), `puzzleCatalog/types/${typeId}`);
+    const snapshot = await get(typeRef);
+    const storedType = snapshot.val() as StoredPuzzleType | null;
+    const updates: Record<string, unknown> = { id: typeId };
+
+    if (this.parseTimestamp(storedType?.createdAt) === undefined) {
+      updates['createdAt'] = createdAt;
+    }
+
+    if (this.parseTimestamp(storedType?.updatedAt) === undefined) {
+      updates['updatedAt'] = updatedAt;
+    }
+
+    if (Object.keys(updates).length > 1) {
+      await update(typeRef, updates);
+    }
+  }
+
   async saveTypeStatus(typeId: string, state: PuzzleCatalogApprovalState): Promise<void> {
     await update(ref(await this.getDatabase(), `puzzleCatalog/types/${typeId}`), {
       id: typeId,
@@ -101,11 +117,34 @@ export class FirebasePuzzleCatalogService {
     });
   }
 
+  async saveTypeDescription(typeId: string, description: string): Promise<void> {
+    await update(ref(await this.getDatabase(), `puzzleCatalog/types/${typeId}`), {
+      id: typeId,
+      description: description || null,
+      updatedAt: serverTimestamp(),
+    });
+  }
+
   async saveVariantName(typeId: string, variantId: string, name: string): Promise<void> {
     await update(ref(await this.getDatabase(), `puzzleCatalog/types/${typeId}`), {
       id: typeId,
+      updatedAt: serverTimestamp(),
       [`variants/${variantId}/id`]: variantId,
       [`variants/${variantId}/name`]: name,
+      [`variants/${variantId}/updatedAt`]: serverTimestamp(),
+    });
+  }
+
+  async saveVariantDescription(
+    typeId: string,
+    variantId: string,
+    description: string,
+  ): Promise<void> {
+    await update(ref(await this.getDatabase(), `puzzleCatalog/types/${typeId}`), {
+      id: typeId,
+      updatedAt: serverTimestamp(),
+      [`variants/${variantId}/id`]: variantId,
+      [`variants/${variantId}/description`]: description || null,
       [`variants/${variantId}/updatedAt`]: serverTimestamp(),
     });
   }
@@ -117,31 +156,10 @@ export class FirebasePuzzleCatalogService {
   ): Promise<void> {
     await update(ref(await this.getDatabase(), `puzzleCatalog/types/${typeId}`), {
       id: typeId,
+      updatedAt: serverTimestamp(),
       [`variants/${variantId}/id`]: variantId,
       [`variants/${variantId}/state`]: state,
       [`variants/${variantId}/updatedAt`]: serverTimestamp(),
-    });
-  }
-
-  async saveFamilyStatus(
-    typeId: string,
-    familyId: string,
-    state: PuzzleCatalogApprovalState,
-  ): Promise<void> {
-    await update(ref(await this.getDatabase(), `puzzleCatalog/types/${typeId}`), {
-      id: typeId,
-      [`families/${familyId}/id`]: familyId,
-      [`families/${familyId}/state`]: state,
-      [`families/${familyId}/updatedAt`]: serverTimestamp(),
-    });
-  }
-
-  async saveFamilyName(typeId: string, familyId: string, name: string): Promise<void> {
-    await update(ref(await this.getDatabase(), `puzzleCatalog/types/${typeId}`), {
-      id: typeId,
-      [`families/${familyId}/id`]: familyId,
-      [`families/${familyId}/name`]: name,
-      [`families/${familyId}/updatedAt`]: serverTimestamp(),
     });
   }
 
@@ -156,24 +174,17 @@ export class FirebasePuzzleCatalogService {
   async saveVariantComment(typeId: string, variantId: string, comment: string): Promise<void> {
     await update(ref(await this.getDatabase(), `puzzleCatalog/types/${typeId}`), {
       id: typeId,
+      updatedAt: serverTimestamp(),
       [`variants/${variantId}/id`]: variantId,
       [`variants/${variantId}/comment`]: comment || null,
       [`variants/${variantId}/updatedAt`]: serverTimestamp(),
     });
   }
 
-  async saveFamilyComment(typeId: string, familyId: string, comment: string): Promise<void> {
-    await update(ref(await this.getDatabase(), `puzzleCatalog/types/${typeId}`), {
-      id: typeId,
-      [`families/${familyId}/id`]: familyId,
-      [`families/${familyId}/comment`]: comment || null,
-      [`families/${familyId}/updatedAt`]: serverTimestamp(),
-    });
-  }
-
   async saveVariantExampleCount(typeId: string, variantId: string, exampleCount: number): Promise<void> {
     await update(ref(await this.getDatabase(), `puzzleCatalog/types/${typeId}`), {
       id: typeId,
+      updatedAt: serverTimestamp(),
       [`variants/${variantId}/id`]: variantId,
       [`variants/${variantId}/exampleCount`]: exampleCount,
       [`variants/${variantId}/updatedAt`]: serverTimestamp(),
@@ -226,12 +237,13 @@ export class FirebasePuzzleCatalogService {
   private parseStatuses(catalog: StoredPuzzleCatalog | null): PuzzleCatalogStatusOverrides {
     const typeNames: Record<string, string> = {};
     const typeStates: Record<string, PuzzleCatalogApprovalState> = {};
-    const familyNames: Record<string, Record<string, string>> = {};
-    const familyStates: Record<string, Record<string, PuzzleCatalogApprovalState>> = {};
+    const typeCreatedAt: Record<string, number> = {};
+    const typeUpdatedAt: Record<string, number> = {};
+    const typeDescriptions: Record<string, string> = {};
     const variantNames: Record<string, Record<string, string>> = {};
     const variantStates: Record<string, Record<string, PuzzleCatalogApprovalState>> = {};
+    const variantDescriptions: Record<string, Record<string, string>> = {};
     const typeComments: Record<string, string> = {};
-    const familyComments: Record<string, Record<string, string>> = {};
     const variantComments: Record<string, Record<string, string>> = {};
     const variantExampleCounts: Record<string, Record<string, number>> = {};
 
@@ -242,23 +254,19 @@ export class FirebasePuzzleCatalogService {
       if (this.isApprovalState(type.state)) {
         typeStates[typeId] = type.state;
       }
+      if (this.isDescription(type.description)) {
+        typeDescriptions[typeId] = type.description;
+      }
       if (this.isComment(type.comment)) {
         typeComments[typeId] = type.comment;
       }
-
-      for (const [familyId, family] of Object.entries(type.families ?? {})) {
-        if (this.isName(family.name)) {
-          familyNames[typeId] ??= {};
-          familyNames[typeId][familyId] = family.name;
-        }
-        if (this.isApprovalState(family.state)) {
-          familyStates[typeId] ??= {};
-          familyStates[typeId][familyId] = family.state;
-        }
-        if (this.isComment(family.comment)) {
-          familyComments[typeId] ??= {};
-          familyComments[typeId][familyId] = family.comment;
-        }
+      const createdAt = this.parseTimestamp(type.createdAt);
+      if (createdAt !== undefined) {
+        typeCreatedAt[typeId] = createdAt;
+      }
+      const updatedAt = this.parseTimestamp(type.updatedAt);
+      if (updatedAt !== undefined) {
+        typeUpdatedAt[typeId] = updatedAt;
       }
 
       for (const [variantId, variant] of Object.entries(type.variants ?? {})) {
@@ -269,6 +277,10 @@ export class FirebasePuzzleCatalogService {
         if (this.isApprovalState(variant.state)) {
           variantStates[typeId] ??= {};
           variantStates[typeId][variantId] = variant.state;
+        }
+        if (this.isDescription(variant.description)) {
+          variantDescriptions[typeId] ??= {};
+          variantDescriptions[typeId][variantId] = variant.description;
         }
         if (this.isComment(variant.comment)) {
           variantComments[typeId] ??= {};
@@ -284,12 +296,13 @@ export class FirebasePuzzleCatalogService {
     return {
       typeNames,
       typeStates,
-      familyNames,
-      familyStates,
+      typeCreatedAt,
+      typeUpdatedAt,
+      typeDescriptions,
       variantNames,
       variantStates,
+      variantDescriptions,
       typeComments,
-      familyComments,
       variantComments,
       variantExampleCounts,
     };
@@ -303,11 +316,28 @@ export class FirebasePuzzleCatalogService {
     return typeof value === 'string' && value.trim().length > 0 && value.length <= MAX_COMMENT_LENGTH;
   }
 
+  private isDescription(value: unknown): value is string {
+    return this.isComment(value);
+  }
+
   private isName(value: unknown): value is string {
     return typeof value === 'string' && value.trim().length > 0 && value.length <= 120;
   }
 
   private isExampleCount(value: unknown): value is number {
     return typeof value === 'number' && Number.isInteger(value) && value >= 0 && value <= 20;
+  }
+
+  private parseTimestamp(value: unknown): number | undefined {
+    if (typeof value === 'number' && Number.isFinite(value) && value > 0) {
+      return value;
+    }
+
+    if (typeof value === 'string') {
+      const timestamp = Date.parse(value);
+      return Number.isNaN(timestamp) ? undefined : timestamp;
+    }
+
+    return undefined;
   }
 }

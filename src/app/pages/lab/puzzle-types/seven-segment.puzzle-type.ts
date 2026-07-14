@@ -12,6 +12,8 @@ export class SevenSegmentPuzzleType extends PuzzleType {
         'Code numérique à quatre chiffres, déduit à partir des segments allumés.',
       clueFormat:
         'Figures exemples accompagnées de leur code, suivies d’un afficheur à résoudre.',
+      createdAt: '2026-07-14',
+      updatedAt: '2026-07-14',
       variants: [
         {
           id: '3-1-broken-segment',

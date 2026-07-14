@@ -1,12 +1,10 @@
 import { PuzzleType } from '../lab.model';
-import { GeometricShapesPuzzleType } from './geometric-shapes.puzzle-type';
-import { SevenSegmentPuzzleType } from './seven-segment.puzzle-type';
 
 export class CountBySymbolPuzzleType extends PuzzleType {
   constructor() {
     super({
       id: 'count-by-symbol',
-      name: 'Compter par symbole',
+      name: 'Segments',
       state: 'pending',
       description:
         'Le joueur déduit une combinaison en comptant des éléments visuels précis dans une figure selon une légende donnée. L’ordre des quatre premiers chiffres est mélangé à chaque partie et se déduit grâce aux exemples.',
@@ -14,6 +12,8 @@ export class CountBySymbolPuzzleType extends PuzzleType {
         'Code numérique à quatre chiffres, chaque chiffre correspondant à une quantité comptée.',
       clueFormat:
         'Série de figures exemples accompagnées de leur code, suivie d’une figure à résoudre sans code.',
+      createdAt: '2026-07-14',
+      updatedAt: '2026-07-14',
       variants: [
         {
           id: '1-1-segments-by-orientation',
@@ -211,8 +211,6 @@ export class CountBySymbolPuzzleType extends PuzzleType {
             },
           ],
         },
-        ...new GeometricShapesPuzzleType().variants,
-        ...new SevenSegmentPuzzleType().variants,
       ],
     });
   }

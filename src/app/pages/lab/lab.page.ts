@@ -1,8 +1,12 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { ApprovalState, PuzzleExample, PuzzleFamily, PuzzleType, PuzzleVariant } from './lab.model';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ApprovalState, PuzzleExample, PuzzleType, PuzzleVariant } from './lab.model';
 import { LAB_PUZZLE_TYPES } from './lab.puzzle-types';
 import { FirebasePuzzleCatalogService } from '../../shared/firebase/firebase-puzzle-catalog.service';
+import {
+  CLOCK_LETTER_DEFINITIONS,
+  CLOCK_LETTER_FALLBACK_WORDS,
+} from '../../puzzles/puzzlehunt/ClockLetters/clock-letters.data';
 
 type SegmentKind = 'horizontal' | 'vertical' | 'slash' | 'backslash';
 type FigureSide = 'top' | 'right' | 'bottom' | 'left';
@@ -91,7 +95,17 @@ type PuzzleExampleFigure = {
   notes?: FigureTextLine[];
   markers: FigureMarker[];
   code: string;
-  displayMode?: 'standard' | 'seven-segment';
+  displayMode?: 'standard' | 'seven-segment' | 'navigation' | 'clock-letters';
+  imageSrc?: string;
+  clue?: string;
+  clockLetters?: ClockLetterFigure[];
+};
+
+type ClockLetterFigure = {
+  id: string;
+  time: string;
+  staticLines: PuzzleSegment[];
+  clockHands: PuzzleSegment[];
 };
 
 type GeneratedFigure = {
@@ -102,7 +116,9 @@ type GeneratedFigure = {
   markers?: FigureMarker[];
   code: string;
   gridSize?: number;
-  displayMode?: 'standard' | 'seven-segment';
+  displayMode?: 'standard' | 'seven-segment' | 'navigation' | 'clock-letters';
+  imageSrc?: string;
+  clue?: string;
 };
 
 type LabInstance = {
@@ -112,7 +128,17 @@ type LabInstance = {
 };
 
 type SeededRandom = () => number;
-type ExampleFeedback = 'correct' | 'incorrect';
+type ExampleFeedback = 'correct' | 'incorrect' | 'partial';
+type TypeViewMode = 'cards' | 'lines';
+type PuzzleSortMode =
+  | 'name-asc'
+  | 'name-desc'
+  | 'created-desc'
+  | 'created-asc'
+  | 'updated-desc'
+  | 'updated-asc'
+  | 'status-asc'
+  | 'status-desc';
 
 @Component({
   selector: 'app-lab-page',
@@ -121,15 +147,47 @@ type ExampleFeedback = 'correct' | 'incorrect';
   styleUrl: './lab.page.scss',
 })
 export class LabPage {
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly selectedTypeStorageKey = 'epique-lab-selected-type';
-  private readonly selectedFamilyStorageKey = 'epique-lab-selected-family';
   private readonly selectedVariantStorageKey = 'epique-lab-selected-variant';
+  private readonly typeViewModeStorageKey = 'epique-lab-type-view-mode';
+  private readonly typeNameFilterStorageKey = 'epique-lab-type-name-filter';
+  private readonly typeStatusFilterStorageKey = 'epique-lab-type-status-filter';
+  private readonly puzzleSortModeStorageKey = 'epique-lab-puzzle-sort-mode';
   protected readonly puzzleTypes = LAB_PUZZLE_TYPES;
+  protected readonly clockLegend = Object.entries(CLOCK_LETTER_DEFINITIONS).map(([letter, definition]) => ({
+    letter,
+    time: definition.time,
+    staticLines: definition.staticLines.map((line, index) => ({
+      id: `legend-${letter}-static-${index}`,
+      kind: 'horizontal' as SegmentKind,
+      x1: line[0],
+      y1: line[1],
+      x2: line[2],
+      y2: line[3],
+    })),
+    clockHands: this.clockHands(definition.time, `legend-${letter}`),
+  }));
   protected readonly approvalStates: ApprovalState[] = ['approved', 'pending', 'deleted'];
-  protected readonly selectedTypeId = signal(this.readStoredTypeId());
-  protected readonly selectedFamilyId = signal(this.readStoredFamilyId(this.selectedTypeId()));
+  protected readonly isTypeDetailPage = signal(this.route.snapshot.paramMap.has('typeId'));
+  protected readonly typeViewMode = signal<TypeViewMode>(this.readTypeViewMode());
+  protected readonly typeNameFilter = signal(this.readTypeNameFilter());
+  protected readonly typeStatusFilter = signal<ApprovalState | 'all'>(this.readTypeStatusFilter());
+  protected readonly puzzleSortMode = signal<PuzzleSortMode>(this.readPuzzleSortMode());
+  protected readonly visiblePuzzleTypes = computed(() => {
+    const filter = this.typeNameFilter().trim().toLocaleLowerCase('fr-CA');
+    const status = this.typeStatusFilter();
+    const filteredTypes = this.puzzleTypes.filter((type) =>
+      (!filter || this.typeName(type).toLocaleLowerCase('fr-CA').includes(filter)) &&
+      (status === 'all' || this.typeState(type) === status),
+    );
+
+    return [...filteredTypes].sort((first, second) => this.comparePuzzleTypes(first, second));
+  });
+  protected readonly selectedTypeId = signal(this.readInitialTypeId());
   protected readonly selectedVariantId = signal(
-    this.readStoredVariantId(this.selectedTypeId(), this.selectedFamilyId()),
+    this.readStoredVariantId(this.selectedTypeId()),
   );
   private readonly difficulty = 2;
   protected readonly seed = signal(this.createSeed());
@@ -138,41 +196,39 @@ export class LabPage {
   private readonly firebaseCatalog = inject(FirebasePuzzleCatalogService);
   private readonly typeNameOverrides = signal<Record<string, string>>({});
   private readonly typeStatusOverrides = signal<Record<string, ApprovalState>>({});
-  private readonly familyNameOverrides = signal<Record<string, Record<string, string>>>({});
-  private readonly familyStatusOverrides = signal<Record<string, Record<string, ApprovalState>>>({});
+  private readonly typeCreatedAtOverrides = signal<Record<string, number>>({});
+  private readonly typeUpdatedAtOverrides = signal<Record<string, number>>({});
+  private readonly typeDescriptionOverrides = signal<Record<string, string>>({});
   private readonly variantStatusOverrides = signal<
     Record<string, Record<string, ApprovalState>>
   >({});
   private readonly variantNameOverrides = signal<Record<string, Record<string, string>>>({});
+  private readonly variantDescriptionOverrides = signal<Record<string, Record<string, string>>>({});
+  private readonly variantDescriptionDrafts = signal<Record<string, Record<string, string>>>({});
   private readonly typeCommentOverrides = signal<Record<string, string>>({});
-  private readonly familyCommentOverrides = signal<Record<string, Record<string, string>>>({});
   private readonly variantCommentOverrides = signal<Record<string, Record<string, string>>>({});
   private readonly variantExampleCountOverrides = signal<Record<string, Record<string, number>>>({});
+  private readonly clockWordPool = signal<string[]>(CLOCK_LETTER_FALLBACK_WORDS);
   private readonly challengeSolutionShown = signal(false);
   private readonly challengeAnswerState = signal('');
   private readonly challengeFeedbackState = signal<ExampleFeedback | undefined>(undefined);
+  private readonly challengePartialMessageState = signal('');
   protected readonly editingTypeName = signal(false);
-  protected readonly editingFamilyName = signal(false);
   protected readonly editingVariantName = signal(false);
 
   constructor() {
     void this.loadPersistedStatuses();
+    void this.loadClockWords();
   }
 
   protected readonly selectedType = computed(
     () => this.puzzleTypes.find((type) => type.id === this.selectedTypeId()) ?? this.puzzleTypes[0],
   );
 
-  protected readonly selectedFamily = computed(
-    () =>
-      this.selectedType().families.find((family) => family.id === this.selectedFamilyId()) ??
-      this.selectedType().families[0],
-  );
-
   protected readonly selectedVariant = computed(
     () =>
-      this.selectedFamily().variants.find((variant) => variant.id === this.selectedVariantId()) ??
-      this.selectedFamily().variants[0],
+      this.selectedType().variants.find((variant) => variant.id === this.selectedVariantId()) ??
+      this.selectedType().variants[0],
   );
 
   protected readonly instance = computed(() =>
@@ -187,37 +243,79 @@ export class LabPage {
 
   protected selectType(type: PuzzleType): void {
     this.editingTypeName.set(false);
-    this.editingFamilyName.set(false);
     this.editingVariantName.set(false);
     this.selectedTypeId.set(type.id);
-    this.selectedFamilyId.set(type.families[0].id);
-    this.selectedVariantId.set(type.families[0].variants[0].id);
-    this.saveSelection(type.id, type.families[0].id, type.families[0].variants[0].id);
+    this.selectedVariantId.set(type.variants[0].id);
+    this.saveSelection(type.id, type.variants[0].id);
     this.resetExampleAttempts();
+    void this.router.navigate(['/lab', type.id]);
   }
 
-  protected setFamily(event: Event): void {
-    const familyId = (event.target as HTMLSelectElement).value;
-    const family = this.selectedType().families.find((candidate) => candidate.id === familyId);
+  protected setTypeViewMode(mode: TypeViewMode): void {
+    this.typeViewMode.set(mode);
 
-    if (!family) {
+    try {
+      globalThis.localStorage?.setItem(this.typeViewModeStorageKey, mode);
+    } catch {
+      // The selected view still applies for the current page when storage is unavailable.
+    }
+  }
+
+  protected setTypeNameFilter(event: Event): void {
+    const filter = (event.target as HTMLInputElement).value;
+    this.typeNameFilter.set(filter);
+
+    try {
+      globalThis.localStorage?.setItem(this.typeNameFilterStorageKey, filter);
+    } catch {
+      // Le filtre continue de fonctionner pour la session courante.
+    }
+  }
+
+  protected setTypeStatusFilter(event: Event): void {
+    const status = (event.target as HTMLSelectElement).value;
+
+    if (status === 'all' || this.isApprovalState(status)) {
+      this.typeStatusFilter.set(status);
+
+      try {
+        globalThis.localStorage?.setItem(this.typeStatusFilterStorageKey, status);
+      } catch {
+        // Le filtre continue de fonctionner pour la session courante.
+      }
+    }
+  }
+
+  protected setPuzzleSortMode(event: Event): void {
+    const mode = (event.target as HTMLSelectElement).value;
+
+    if (!this.isPuzzleSortMode(mode)) {
       return;
     }
 
-    this.editingFamilyName.set(false);
+    this.puzzleSortMode.set(mode);
+
+    try {
+      globalThis.localStorage?.setItem(this.puzzleSortModeStorageKey, mode);
+    } catch {
+      // The selected sort still applies for the current page when storage is unavailable.
+    }
+  }
+
+  protected selectVariant(variant: PuzzleVariant): void {
     this.editingVariantName.set(false);
-    this.selectedFamilyId.set(family.id);
-    this.selectedVariantId.set(family.variants[0].id);
-    this.saveSelection(this.selectedTypeId(), family.id, family.variants[0].id);
+    this.selectedVariantId.set(variant.id);
+    this.saveSelection(this.selectedTypeId(), variant.id);
     this.resetExampleAttempts();
   }
 
   protected setVariant(event: Event): void {
     const variantId = (event.target as HTMLSelectElement).value;
-    this.editingVariantName.set(false);
-    this.selectedVariantId.set(variantId);
-    this.saveSelection(this.selectedTypeId(), this.selectedFamilyId(), variantId);
-    this.resetExampleAttempts();
+    const variant = this.selectedType().variants.find((candidate) => candidate.id === variantId);
+
+    if (variant) {
+      this.selectVariant(variant);
+    }
   }
 
   protected randomizeSeed(): void {
@@ -230,15 +328,45 @@ export class LabPage {
   }
 
   protected setChallengeAnswer(event: Event): void {
-    const answer = (event.target as HTMLInputElement).value.replace(/\D/g, '').slice(0, 4);
+    const rawAnswer = (event.target as HTMLInputElement).value;
+    const answer = this.isTextAnswer()
+      ? rawAnswer.replace(/[^a-zA-ZÀ-ÿ]/g, '').slice(0, 20).toUpperCase()
+      : rawAnswer.replace(/\D/g, '').slice(0, 4);
     this.challengeAnswerState.set(answer);
     this.challengeFeedbackState.set(undefined);
+    this.challengePartialMessageState.set('');
+  }
+
+  protected isTextAnswer(): boolean {
+    return this.selectedType().id === 'navigation' || this.selectedType().id === 'clock-letters';
   }
 
   protected checkChallenge(): void {
+    const partialAnswer = this.selectedVariant().partialAnswers.find(
+      (partial) => partial.answer.toLocaleUpperCase('fr-CA') === this.challengeAnswerState(),
+    );
+
+    if (partialAnswer) {
+      this.challengePartialMessageState.set(partialAnswer.message);
+      this.challengeFeedbackState.set('partial');
+      return;
+    }
+
     this.challengeFeedbackState.set(
       this.challengeAnswerState() === this.instance().solution ? 'correct' : 'incorrect',
     );
+  }
+
+  protected challengeFeedbackMessage(feedback: ExampleFeedback): string {
+    if (feedback === 'correct') {
+      return 'Bonne réponse.';
+    }
+
+    if (feedback === 'partial') {
+      return this.challengePartialMessageState();
+    }
+
+    return 'À revoir.';
   }
 
   protected challengeFeedback(): ExampleFeedback | undefined {
@@ -246,7 +374,9 @@ export class LabPage {
   }
 
   protected challengeSolution(): string {
-    return this.challengeSolutionShown() ? this.instance().solution : '????';
+    return this.challengeSolutionShown()
+      ? this.instance().solution
+      : '?'.repeat(this.instance().solution.length);
   }
 
   protected revealChallengeSolution(): void {
@@ -255,10 +385,6 @@ export class LabPage {
 
   protected toggleTypeNameEdit(): void {
     this.editingTypeName.update((editing) => !editing);
-  }
-
-  protected toggleFamilyNameEdit(): void {
-    this.editingFamilyName.update((editing) => !editing);
   }
 
   protected toggleVariantNameEdit(): void {
@@ -280,7 +406,8 @@ export class LabPage {
 
     try {
       await this.firebaseCatalog.saveTypeName(type.id, name);
-      this.setFirebaseReady('Nom du type sauvegardé.');
+      this.markTypeUpdated(type.id);
+      this.setFirebaseReady('Nom de l’énigme sauvegardé.');
     } catch (error) {
       this.typeNameOverrides.update((names) => {
         const nextNames = { ...names };
@@ -289,36 +416,6 @@ export class LabPage {
         return nextNames;
       });
       input.value = this.typeName(type);
-      this.setFirebaseError(error);
-    }
-  }
-
-  protected async saveFamilyName(event: Event): Promise<void> {
-    const input = event.target as HTMLInputElement;
-    const type = this.selectedType();
-    const family = this.selectedFamily();
-    const name = input.value.trim();
-
-    if (!name || name.length > 120) {
-      input.value = this.familyName(family);
-      return;
-    }
-
-    const previousName = this.familyNameOverrides()[type.id]?.[family.id];
-    this.familyNameOverrides.update((names) => ({
-      ...names,
-      [type.id]: { ...names[type.id], [family.id]: name },
-    }));
-
-    try {
-      await this.firebaseCatalog.saveFamilyName(type.id, family.id, name);
-      this.setFirebaseReady('Nom de la famille sauvegardé.');
-    } catch (error) {
-      this.familyNameOverrides.update((names) => ({
-        ...names,
-        [type.id]: { ...names[type.id], [family.id]: previousName ?? family.name },
-      }));
-      input.value = this.familyName(family);
       this.setFirebaseError(error);
     }
   }
@@ -342,7 +439,8 @@ export class LabPage {
 
     try {
       await this.firebaseCatalog.saveVariantName(type.id, variant.id, name);
-      this.setFirebaseReady('Nom de la variante sauvegardé.');
+      this.markTypeUpdated(type.id);
+      this.setFirebaseReady('Nom de l’étape sauvegardé.');
     } catch (error) {
       this.variantNameOverrides.update((names) => ({
         ...names,
@@ -353,12 +451,109 @@ export class LabPage {
     }
   }
 
+  protected async saveTypeDescription(event: Event): Promise<void> {
+    const input = event.target as HTMLTextAreaElement;
+    const type = this.selectedType();
+    const description = input.value.trim();
+    const previousDescription = this.typeDescriptionOverrides()[type.id];
+
+    this.typeDescriptionOverrides.update((descriptions) => ({
+      ...descriptions,
+      [type.id]: description,
+    }));
+
+    try {
+      await this.firebaseCatalog.saveTypeDescription(type.id, description);
+      this.markTypeUpdated(type.id);
+      this.setFirebaseReady('Description de l’énigme sauvegardée.');
+    } catch (error) {
+      this.typeDescriptionOverrides.update((descriptions) => {
+        const nextDescriptions = { ...descriptions };
+        if (previousDescription !== undefined) nextDescriptions[type.id] = previousDescription;
+        else delete nextDescriptions[type.id];
+        return nextDescriptions;
+      });
+      input.value = this.typeDescription(type);
+      this.setFirebaseError(error);
+    }
+  }
+
+  protected updateTypeDescription(event: Event): void {
+    const type = this.selectedType();
+    const description = (event.target as HTMLTextAreaElement).value;
+    this.typeDescriptionOverrides.update((descriptions) => ({
+      ...descriptions,
+      [type.id]: description,
+    }));
+  }
+
+  protected async saveVariantDescription(event: Event): Promise<void> {
+    const input = event.target as HTMLTextAreaElement;
+    const type = this.selectedType();
+    const variant = this.selectedVariant();
+    const description = input.value.trim();
+    const previousDescription = this.variantDescriptionOverrides()[type.id]?.[variant.id];
+
+    this.variantDescriptionOverrides.update((descriptions) => ({
+      ...descriptions,
+      [type.id]: { ...descriptions[type.id], [variant.id]: description },
+    }));
+    this.variantDescriptionDrafts.update((descriptions) => {
+      const nextDescriptions = { ...descriptions };
+      delete nextDescriptions[type.id]?.[variant.id];
+      return nextDescriptions;
+    });
+
+    try {
+      await this.firebaseCatalog.saveVariantDescription(type.id, variant.id, description);
+      this.markTypeUpdated(type.id);
+      this.setFirebaseReady('Flavor text sauvegardé.');
+    } catch (error) {
+      this.variantDescriptionOverrides.update((descriptions) => ({
+        ...descriptions,
+        [type.id]: {
+          ...descriptions[type.id],
+          [variant.id]: previousDescription ?? variant.description,
+        },
+      }));
+      this.variantDescriptionDrafts.update((descriptions) => {
+        const nextDescriptions = { ...descriptions };
+        delete nextDescriptions[type.id]?.[variant.id];
+        return nextDescriptions;
+      });
+      input.value = this.variantDescription(variant);
+      this.setFirebaseError(error);
+    }
+  }
+
+  protected updateVariantDescription(event: Event): void {
+    const type = this.selectedType();
+    const variant = this.selectedVariant();
+    const description = (event.target as HTMLTextAreaElement).value;
+    this.variantDescriptionDrafts.update((descriptions) => ({
+      ...descriptions,
+      [type.id]: { ...descriptions[type.id], [variant.id]: description },
+    }));
+  }
+
   protected typeState(type: PuzzleType): ApprovalState {
     return this.typeStatusOverrides()[type.id] ?? type.state;
   }
 
   protected typeName(type: PuzzleType): string {
     return this.typeNameOverrides()[type.id] ?? type.name;
+  }
+
+  protected typeDescription(type: PuzzleType): string {
+    return this.typeDescriptionOverrides()[type.id] ?? type.description;
+  }
+
+  protected typeCreatedAt(type: PuzzleType): string {
+    return this.formatDate(this.typeCreatedAtOverrides()[type.id] ?? type.createdAt);
+  }
+
+  protected typeUpdatedAt(type: PuzzleType): string {
+    return this.formatDate(this.typeUpdatedAtOverrides()[type.id] ?? type.updatedAt);
   }
 
   protected variantState(variant: PuzzleVariant): ApprovalState {
@@ -369,20 +564,23 @@ export class LabPage {
     return this.variantNameOverrides()[this.selectedType().id]?.[variant.id] ?? variant.name;
   }
 
+  protected variantDescription(variant: PuzzleVariant): string {
+    return (
+      this.variantDescriptionDrafts()[this.selectedType().id]?.[variant.id] ??
+      this.variantDescriptionOverrides()[this.selectedType().id]?.[variant.id] ??
+      variant.description
+    );
+  }
+
+  protected savedVariantDescription(variant: PuzzleVariant): string {
+    return (
+      this.variantDescriptionOverrides()[this.selectedType().id]?.[variant.id] ??
+      variant.description
+    );
+  }
+
   protected typeComment(type: PuzzleType): string {
     return this.typeCommentOverrides()[type.id] ?? '';
-  }
-
-  protected familyState(family: PuzzleFamily): ApprovalState {
-    return this.familyStatusOverrides()[this.selectedType().id]?.[family.id] ?? family.state;
-  }
-
-  protected familyName(family: PuzzleFamily): string {
-    return this.familyNameOverrides()[this.selectedType().id]?.[family.id] ?? family.name;
-  }
-
-  protected familyComment(family: PuzzleFamily): string {
-    return this.familyCommentOverrides()[this.selectedType().id]?.[family.id] ?? '';
   }
 
   protected variantComment(variant: PuzzleVariant): string {
@@ -397,10 +595,6 @@ export class LabPage {
     return Object.values(this.variantCommentOverrides()[type.id] ?? {}).some(
       (comment) => comment.trim().length > 0,
     );
-  }
-
-  protected hasFamilyComment(family: PuzzleFamily): boolean {
-    return this.familyComment(family).trim().length > 0;
   }
 
   protected hasVariantComment(variant: PuzzleVariant): boolean {
@@ -434,6 +628,7 @@ export class LabPage {
 
     try {
       await this.firebaseCatalog.saveVariantExampleCount(type.id, variant.id, count);
+      this.markTypeUpdated(type.id);
       this.setFirebaseReady('Nombre d’exemples sauvegardé.');
     } catch (error) {
       this.variantExampleCountOverrides.update((overrides) => {
@@ -465,70 +660,12 @@ export class LabPage {
 
     try {
       await this.firebaseCatalog.saveTypeStatus(type.id, nextState);
-      this.setFirebaseReady('État du type sauvegardé.');
+      this.markTypeUpdated(type.id);
+      this.setFirebaseReady('État de l’énigme sauvegardé.');
     } catch (error) {
       this.restoreTypeState(type.id, previousOverride);
       this.setFirebaseError(error);
     }
-  }
-
-  protected async setFamilyState(event: Event): Promise<void> {
-    const nextState = (event.target as HTMLSelectElement).value;
-
-    if (!this.isApprovalState(nextState)) {
-      return;
-    }
-
-    const type = this.selectedType();
-    const family = this.selectedFamily();
-    const previousOverrides = this.familyStatusOverrides()[type.id];
-    const previousOverride = previousOverrides?.[family.id];
-
-    this.familyStatusOverrides.update((overrides) => ({
-      ...overrides,
-      [type.id]: { ...overrides[type.id], [family.id]: nextState },
-    }));
-
-    try {
-      await this.firebaseCatalog.saveFamilyStatus(type.id, family.id, nextState);
-      this.setFirebaseReady('État de la famille sauvegardé.');
-    } catch (error) {
-      this.restoreFamilyState(type.id, family.id, previousOverrides, previousOverride);
-      this.setFirebaseError(error);
-    }
-  }
-
-  protected async saveFamilyComment(event: Event): Promise<void> {
-    const type = this.selectedType();
-    const family = this.selectedFamily();
-    const comment = (event.target as HTMLTextAreaElement).value.trim();
-    const previousComment = this.familyCommentOverrides()[type.id]?.[family.id] ?? '';
-
-    this.familyCommentOverrides.update((comments) => ({
-      ...comments,
-      [type.id]: { ...comments[type.id], [family.id]: comment },
-    }));
-
-    try {
-      await this.firebaseCatalog.saveFamilyComment(type.id, family.id, comment);
-      this.setFirebaseReady('Commentaire de la famille sauvegardé.');
-    } catch (error) {
-      this.familyCommentOverrides.update((comments) => ({
-        ...comments,
-        [type.id]: { ...comments[type.id], [family.id]: previousComment },
-      }));
-      this.setFirebaseError(error);
-    }
-  }
-
-  protected updateFamilyComment(event: Event): void {
-    const type = this.selectedType();
-    const family = this.selectedFamily();
-    const comment = (event.target as HTMLTextAreaElement).value;
-    this.familyCommentOverrides.update((comments) => ({
-      ...comments,
-      [type.id]: { ...comments[type.id], [family.id]: comment },
-    }));
   }
 
   protected async setVariantState(event: Event): Promise<void> {
@@ -550,7 +687,8 @@ export class LabPage {
 
     try {
       await this.firebaseCatalog.saveVariantStatus(type.id, variant.id, nextState);
-      this.setFirebaseReady('État de la variante sauvegardé.');
+      this.markTypeUpdated(type.id);
+      this.setFirebaseReady('État de l’étape sauvegardé.');
     } catch (error) {
       this.restoreVariantState(type.id, variant.id, previousOverrides, previousOverride);
       this.setFirebaseError(error);
@@ -566,7 +704,8 @@ export class LabPage {
 
     try {
       await this.firebaseCatalog.saveTypeComment(type.id, comment);
-      this.setFirebaseReady('Commentaire du type sauvegardé.');
+      this.markTypeUpdated(type.id);
+      this.setFirebaseReady('Commentaire de l’énigme sauvegardé.');
     } catch (error) {
       this.typeCommentOverrides.update((comments) => ({ ...comments, [type.id]: previousComment }));
       this.setFirebaseError(error);
@@ -592,7 +731,8 @@ export class LabPage {
 
     try {
       await this.firebaseCatalog.saveVariantComment(type.id, variant.id, comment);
-      this.setFirebaseReady('Commentaire de la variante sauvegardé.');
+      this.markTypeUpdated(type.id);
+      this.setFirebaseReady('Commentaire de l’étape sauvegardé.');
     } catch (error) {
       this.variantCommentOverrides.update((comments) => ({
         ...comments,
@@ -630,19 +770,53 @@ export class LabPage {
 
     try {
       const overrides = await this.firebaseCatalog.loadStatuses();
-      this.typeNameOverrides.set(overrides.typeNames);
+      const typeNames = { ...overrides.typeNames };
+      const savedCountTypeName = typeNames['count-by-symbol'];
+      if (savedCountTypeName?.trim().toLocaleLowerCase('fr-CA') === 'compter') {
+        typeNames['count-by-symbol'] = 'Segments';
+        void this.firebaseCatalog.saveTypeName('count-by-symbol', 'Segments').catch(() => undefined);
+      }
+      this.typeNameOverrides.set(typeNames);
       this.typeStatusOverrides.set(overrides.typeStates);
-      this.familyNameOverrides.set(overrides.familyNames);
-      this.familyStatusOverrides.set(overrides.familyStates);
+      this.typeCreatedAtOverrides.set(overrides.typeCreatedAt);
+      this.typeUpdatedAtOverrides.set(overrides.typeUpdatedAt);
+      this.typeDescriptionOverrides.set(overrides.typeDescriptions);
       this.variantStatusOverrides.set(overrides.variantStates);
       this.variantNameOverrides.set(overrides.variantNames);
+      this.variantDescriptionOverrides.set(overrides.variantDescriptions);
       this.typeCommentOverrides.set(overrides.typeComments);
-      this.familyCommentOverrides.set(overrides.familyComments);
       this.variantCommentOverrides.set(overrides.variantComments);
       this.variantExampleCountOverrides.set(overrides.variantExampleCounts);
+      await Promise.all(
+        this.puzzleTypes.map((type) =>
+          this.firebaseCatalog.ensureTypeDates(type.id, type.createdAt, type.updatedAt),
+        ),
+      );
       this.setFirebaseReady('États synchronisés avec Firebase.');
     } catch (error) {
       this.setFirebaseError(error);
+    }
+  }
+
+  private async loadClockWords(): Promise<void> {
+    try {
+      const response = await fetch('words.txt');
+      if (!response.ok) {
+        return;
+      }
+
+      const words = (await response.text())
+        .split(/\r?\n/)
+        .map((word) => word.trim().normalize('NFD').replace(/\p{Diacritic}/gu, '').toUpperCase())
+        .filter((word, index, allWords) =>
+          /^[AEFHIKLMNTUVXY]{4,8}$/.test(word) && allWords.indexOf(word) === index,
+        );
+
+      if (words.length > 0) {
+        this.clockWordPool.set(words);
+      }
+    } catch {
+      // Les mots de secours permettent de continuer à générer l’exemple hors ligne.
     }
   }
 
@@ -666,36 +840,6 @@ export class LabPage {
         nextOverrides[typeId] = previousOverride;
       } else {
         delete nextOverrides[typeId];
-      }
-
-      return nextOverrides;
-    });
-  }
-
-  private restoreFamilyState(
-    typeId: string,
-    familyId: string,
-    previousOverrides: Record<string, ApprovalState> | undefined,
-    previousOverride: ApprovalState | undefined,
-  ): void {
-    this.familyStatusOverrides.update((overrides) => {
-      const nextOverrides = { ...overrides };
-
-      if (previousOverrides) {
-        nextOverrides[typeId] = previousOverrides;
-      } else {
-        const typeOverrides = { ...nextOverrides[typeId] };
-        delete typeOverrides[familyId];
-
-        if (Object.keys(typeOverrides).length) {
-          nextOverrides[typeId] = typeOverrides;
-        } else {
-          delete nextOverrides[typeId];
-        }
-      }
-
-      if (previousOverride && previousOverrides) {
-        nextOverrides[typeId] = { ...previousOverrides, [familyId]: previousOverride };
       }
 
       return nextOverrides;
@@ -744,7 +888,10 @@ export class LabPage {
     seed: string,
   ): LabInstance {
     const random = this.seededRandom(`${type.id}-${variant.id}-${difficulty}-${seed}`);
-    const shouldShuffleCode = type.id === 'count-by-symbol' && !variant.id.startsWith('3-');
+    const shouldShuffleCode =
+      !variant.id.startsWith('3-') &&
+      variant.id !== 'navigation-main' &&
+      variant.id !== 'clock-letters-main';
     const digitOrder = shouldShuffleCode ? this.shuffle([0, 1, 2, 3], random) : [0, 1, 2, 3];
     const sharedSegmentConfiguration = variant.id === '3-1-broken-segment'
       ? this.shuffle([0, 1, 2, 3, 4, 5, 6], random).slice(0, 2)
@@ -831,6 +978,12 @@ export class LabPage {
     variantId: string,
     sharedSegmentConfiguration?: number[],
   ): PuzzleExampleFigure {
+    if (variantId === 'navigation-main') {
+      return this.createNavigationFigure(example);
+    }
+    if (variantId === 'clock-letters-main') {
+      return this.createClockLettersFigure(random, example);
+    }
     if (variantId.startsWith('3-')) {
       return this.createSevenSegmentFigure(
         random,
@@ -844,6 +997,87 @@ export class LabPage {
       return this.createGeometricFigure(random, difficulty, example, variantId);
     }
     return this.createCountBySymbolFigure(random, difficulty, example, variantId);
+  }
+
+  private createNavigationFigure(example: PuzzleExample): PuzzleExampleFigure {
+    return {
+      id: `example-${example.id}`,
+      example,
+      viewBox: '0 0 1 1',
+      frame: { x: 0, y: 0, width: 1, height: 1 },
+      gridSize: 1,
+      segments: [],
+      shapes: [],
+      markers: [],
+      code: 'POULIE',
+      displayMode: 'navigation',
+      imageSrc: 'puzzles/navigation.png',
+      clue: 'Les itinéraires devraient m’indiquer ce dont j’ai besoin pour la suite.',
+    };
+  }
+
+  private createClockLettersFigure(
+    random: SeededRandom,
+    example: PuzzleExample,
+  ): PuzzleExampleFigure {
+    const word = this.pick(this.clockWordPool(), random);
+    const clockLetters = [...word].map((letter, index) => {
+      const definition = CLOCK_LETTER_DEFINITIONS[letter] ?? CLOCK_LETTER_DEFINITIONS['I'];
+      const staticLines = definition.staticLines.map((line, lineIndex) => ({
+        id: `clock-${example.id}-${index}-static-${lineIndex}`,
+        kind: 'horizontal' as SegmentKind,
+        x1: line[0],
+        y1: line[1],
+        x2: line[2],
+        y2: line[3],
+      }));
+
+      return {
+        id: `clock-${example.id}-${index}`,
+        time: definition.time,
+        staticLines,
+        clockHands: this.clockHands(definition.time, `clock-${example.id}-${index}`),
+      };
+    });
+
+    return {
+      id: `example-${example.id}`,
+      example,
+      viewBox: '0 0 1 1',
+      frame: { x: 0, y: 0, width: 1, height: 1 },
+      gridSize: 1,
+      segments: [],
+      shapes: [],
+      markers: [],
+      code: word,
+      displayMode: 'clock-letters',
+      clockLetters,
+    };
+  }
+
+  private clockHands(time: string, id: string): PuzzleSegment[] {
+    const [hours, minutes] = time.split(':').map(Number);
+    const minuteAngle = (minutes / 60) * Math.PI * 2 - Math.PI / 2;
+    const hourAngle = ((hours % 12) / 12) * Math.PI * 2 - Math.PI / 2;
+
+    return [
+      {
+        id: `${id}-hour`,
+        kind: 'slash',
+        x1: 50,
+        y1: 50,
+        x2: 50 + Math.cos(hourAngle) * 20,
+        y2: 50 + Math.sin(hourAngle) * 20,
+      },
+      {
+        id: `${id}-minute`,
+        kind: 'backslash',
+        x1: 50,
+        y1: 50,
+        x2: 50 + Math.cos(minuteAngle) * 20,
+        y2: 50 + Math.sin(minuteAngle) * 20,
+      },
+    ];
   }
 
   protected segmentClass(kind: SegmentKind): string {
@@ -2951,6 +3185,90 @@ export class LabPage {
     return [...items].sort(() => random() - 0.5);
   }
 
+  private markTypeUpdated(typeId: string): void {
+    this.typeUpdatedAtOverrides.update((timestamps) => ({
+      ...timestamps,
+      [typeId]: Date.now(),
+    }));
+  }
+
+  private formatDate(value: string | number): string {
+    const date = typeof value === 'number'
+      ? new Date(value)
+      : new Date(value.length === 10 ? `${value}T12:00:00` : value);
+
+    if (Number.isNaN(date.getTime())) {
+      return 'Date inconnue';
+    }
+
+    return new Intl.DateTimeFormat('fr-CA', {
+      dateStyle: 'medium',
+    }).format(date);
+  }
+
+  private comparePuzzleTypes(first: PuzzleType, second: PuzzleType): number {
+    const mode = this.puzzleSortMode();
+
+    if (mode === 'name-asc' || mode === 'name-desc') {
+      const comparison = this.typeName(first).localeCompare(this.typeName(second), 'fr-CA', {
+        sensitivity: 'base',
+      });
+      return mode === 'name-desc' ? -comparison : comparison;
+    }
+
+    if (mode === 'status-asc' || mode === 'status-desc') {
+      const statusOrder: Record<ApprovalState, number> = {
+        approved: 0,
+        pending: 1,
+        deleted: 2,
+      };
+      const comparison = statusOrder[this.typeState(first)] - statusOrder[this.typeState(second)];
+      const statusComparison = mode === 'status-desc' ? -comparison : comparison;
+
+      return statusComparison || this.typeName(first).localeCompare(this.typeName(second), 'fr-CA', {
+        sensitivity: 'base',
+      });
+    }
+
+    const firstDate = this.puzzleDateTimestamp(first, mode.startsWith('created'));
+    const secondDate = this.puzzleDateTimestamp(second, mode.startsWith('created'));
+    const comparison = secondDate - firstDate;
+    const dateComparison = mode.endsWith('asc') ? -comparison : comparison;
+
+    return dateComparison || this.typeName(first).localeCompare(this.typeName(second), 'fr-CA', {
+      sensitivity: 'base',
+    });
+  }
+
+  private puzzleDateTimestamp(type: PuzzleType, created: boolean): number {
+    const override = created
+      ? this.typeCreatedAtOverrides()[type.id]
+      : this.typeUpdatedAtOverrides()[type.id];
+    const fallback = created ? type.createdAt : type.updatedAt;
+
+    if (override !== undefined) {
+      return override;
+    }
+
+    const timestamp = Date.parse(fallback.length === 10 ? `${fallback}T12:00:00` : fallback);
+    return Number.isNaN(timestamp) ? 0 : timestamp;
+  }
+
+  private readPuzzleSortMode(): PuzzleSortMode {
+    try {
+      const storedMode = globalThis.localStorage?.getItem(this.puzzleSortModeStorageKey);
+      return this.isPuzzleSortMode(storedMode) ? storedMode : 'name-asc';
+    } catch {
+      return 'name-asc';
+    }
+  }
+
+  private isPuzzleSortMode(value: string | null): value is PuzzleSortMode {
+    return value === 'name-asc' || value === 'name-desc' || value === 'created-desc' ||
+      value === 'created-asc' || value === 'updated-desc' || value === 'updated-asc' ||
+      value === 'status-asc' || value === 'status-desc';
+  }
+
   private readStoredTypeId(): string {
     const fallback = LAB_PUZZLE_TYPES[0].id;
 
@@ -2965,34 +3283,53 @@ export class LabPage {
     }
   }
 
-  private readStoredFamilyId(typeId: string): string {
-    const type = LAB_PUZZLE_TYPES.find((candidate) => candidate.id === typeId) ?? LAB_PUZZLE_TYPES[0];
-    const fallback = type.families[0].id;
-
+  private readTypeViewMode(): TypeViewMode {
     try {
-      const storedFamilyId = globalThis.localStorage?.getItem(this.selectedFamilyStorageKey);
-      if (type.families.some((family) => family.id === storedFamilyId)) {
-        return storedFamilyId as string;
-      }
-
-      const storedVariantId = globalThis.localStorage?.getItem(this.selectedVariantStorageKey);
-      return type.families.find((family) =>
-        family.variants.some((variant) => variant.id === storedVariantId),
-      )?.id ?? fallback;
+      return globalThis.localStorage?.getItem(this.typeViewModeStorageKey) === 'lines'
+        ? 'lines'
+        : 'cards';
     } catch {
-      return fallback;
+      return 'cards';
     }
   }
 
-  private readStoredVariantId(typeId: string, familyId: string): string {
+  private readTypeNameFilter(): string {
+    try {
+      return globalThis.localStorage?.getItem(this.typeNameFilterStorageKey) ?? '';
+    } catch {
+      return '';
+    }
+  }
+
+  private readTypeStatusFilter(): ApprovalState | 'all' {
+    try {
+      const storedStatus = globalThis.localStorage?.getItem(this.typeStatusFilterStorageKey);
+      if (storedStatus === 'all') {
+        return 'all';
+      }
+
+      return storedStatus && this.isApprovalState(storedStatus) ? storedStatus : 'all';
+    } catch {
+      return 'all';
+    }
+  }
+
+  private readInitialTypeId(): string {
+    const routeTypeId = this.route.snapshot.paramMap.get('typeId');
+
+    return LAB_PUZZLE_TYPES.some((type) => type.id === routeTypeId)
+      ? routeTypeId as string
+      : this.readStoredTypeId();
+  }
+
+  private readStoredVariantId(typeId: string): string {
     const type = LAB_PUZZLE_TYPES.find((candidate) => candidate.id === typeId) ?? LAB_PUZZLE_TYPES[0];
-    const family = type.families.find((candidate) => candidate.id === familyId) ?? type.families[0];
-    const fallback = family.variants[0].id;
+    const fallback = type.variants[0].id;
 
     try {
       const storedVariantId = globalThis.localStorage?.getItem(this.selectedVariantStorageKey);
 
-      return family.variants.some((variant) => variant.id === storedVariantId)
+      return type.variants.some((variant) => variant.id === storedVariantId)
         ? storedVariantId as string
         : fallback;
     } catch {
@@ -3000,10 +3337,9 @@ export class LabPage {
     }
   }
 
-  private saveSelection(typeId: string, familyId: string, variantId: string): void {
+  private saveSelection(typeId: string, variantId: string): void {
     try {
       globalThis.localStorage?.setItem(this.selectedTypeStorageKey, typeId);
-      globalThis.localStorage?.setItem(this.selectedFamilyStorageKey, familyId);
       globalThis.localStorage?.setItem(this.selectedVariantStorageKey, variantId);
     } catch {
       // The selection still applies for the current page when storage is unavailable.
@@ -3013,6 +3349,7 @@ export class LabPage {
   private resetExampleAttempts(): void {
     this.challengeSolutionShown.set(false);
     this.challengeAnswerState.set('');
+    this.challengePartialMessageState.set('');
     this.challengeFeedbackState.set(undefined);
   }
 

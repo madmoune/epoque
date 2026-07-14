@@ -95,6 +95,7 @@ export class PuzzleSuccessPopupComponent {
     'timing-drop': 'strategie-timing',
     'describe-symbols': 'multijoueurs',
     'puzzlehunt/navigation': 'enigmes',
+    'puzzlehunt/clock-letters': 'enigmes',
   };
 
   private readonly router = inject(Router);
@@ -106,6 +107,7 @@ export class PuzzleSuccessPopupComponent {
   @Input() answer = '';
   @Input() actionLabel = 'Nouvelle partie';
   @Input() showAction = true;
+  @Input() showMenuLink = true;
   @Input() tone: PuzzlePopupTone = 'success';
 
   @Output() readonly action = new EventEmitter<void>();

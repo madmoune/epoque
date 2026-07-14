@@ -1,0 +1,40 @@
+<main class="page">
+  <a routerLink="/" fragment="enigmes" class="back-link">Retour au menu</a>
+
+  <section class="shell">
+    <header class="hero">
+      <p class="eyebrow">Énigme</p>
+      <h1>Lettres horaires</h1>
+      <p class="intro">Les traits fixes et l’heure indiquent les lettres du mot à trouver.</p>
+    </header>
+
+    <section class="clock-puzzle" aria-label="Mot à trouver">
+      <div class="clock-game-word">
+        @for (letter of letters; track letter.id) {
+          <div class="clock-game-letter">
+            <span>{{ letter.time }}</span>
+            <svg viewBox="0 0 100 100" role="img" [attr.aria-label]="'Combinaison à décoder à ' + letter.time">
+              <circle class="clock-letter-circle" cx="50" cy="50" r="36" />
+              @for (line of letter.staticLines; track line.id) {
+                <line
+                  class="clock-static-line"
+                  [attr.x1]="line.x1"
+                  [attr.y1]="line.y1"
+                  [attr.x2]="line.x2"
+                  [attr.y2]="line.y2"
+                />
+              }
+            </svg>
+          </div>
+        }
+      </div>
+
+      <app-puzzle-answer
+        label="Votre réponse"
+        submitLabel="Vérifier"
+        [answer]="answer"
+        (correctAnswer)="markSolved()"
+      />
+    </section>
+  </section>
+</main>

@@ -6,6 +6,11 @@ export type PuzzleExampleInput = {
   description: string;
 };
 
+export type PuzzlePartialAnswer = {
+  answer: string;
+  message: string;
+};
+
 type PuzzleVariantInput = {
   id: string;
   name: string;
@@ -13,6 +18,7 @@ type PuzzleVariantInput = {
   description: string;
   examples: PuzzleExampleInput[];
   exampleCount?: number;
+  partialAnswers?: PuzzlePartialAnswer[];
 };
 
 type PuzzleTypeInput = {
@@ -22,13 +28,10 @@ type PuzzleTypeInput = {
   description: string;
   answerFormat: string;
   clueFormat: string;
+  playRoute?: string;
   variants: PuzzleVariantInput[];
-};
-
-const FAMILY_NAMES: Record<string, string> = {
-  '1': 'Segments',
-  '2': 'Formes géométriques',
-  '3': 'Afficheurs à sept segments',
+  createdAt: string;
+  updatedAt: string;
 };
 
 export class PuzzleExample {
@@ -50,10 +53,11 @@ export class PuzzleVariant {
   readonly description: string;
   readonly examples: PuzzleExample[];
   readonly exampleCount: number;
+  readonly partialAnswers: PuzzlePartialAnswer[];
 
   constructor(input: PuzzleVariantInput) {
-    if (input.examples.length < 2) {
-      throw new Error(`La variante « ${input.name} » doit contenir au moins deux exemples.`);
+    if (input.examples.length < 1) {
+      throw new Error(`La variante « ${input.name} » doit contenir au moins un exemple.`);
     }
 
     this.id = input.id;
@@ -66,20 +70,7 @@ export class PuzzleVariant {
       throw new Error(`Le nombre d'exemples de la variante est invalide.`);
     }
     this.exampleCount = exampleCount;
-  }
-}
-
-export class PuzzleFamily {
-  readonly id: string;
-  readonly name: string;
-  readonly state: ApprovalState;
-  readonly variants: PuzzleVariant[];
-
-  constructor(id: string, name: string, variants: PuzzleVariant[], state: ApprovalState = 'pending') {
-    this.id = id;
-    this.name = name;
-    this.state = state;
-    this.variants = variants;
+    this.partialAnswers = input.partialAnswers ?? [];
   }
 }
 
@@ -90,8 +81,10 @@ export class PuzzleType {
   readonly description: string;
   readonly answerFormat: string;
   readonly clueFormat: string;
+  readonly playRoute?: string;
   readonly variants: PuzzleVariant[];
-  readonly families: PuzzleFamily[];
+  readonly createdAt: string;
+  readonly updatedAt: string;
 
   constructor(input: PuzzleTypeInput) {
     this.id = input.id;
@@ -100,20 +93,9 @@ export class PuzzleType {
     this.description = input.description;
     this.answerFormat = input.answerFormat;
     this.clueFormat = input.clueFormat;
+    this.playRoute = input.playRoute;
     this.variants = input.variants.map((variant) => new PuzzleVariant(variant));
-    const groupedVariants = new Map<string, PuzzleVariant[]>();
-
-    for (const variant of this.variants) {
-      const familyId = variant.id.split('-')[0];
-      groupedVariants.set(familyId, [...(groupedVariants.get(familyId) ?? []), variant]);
-    }
-
-    this.families = [...groupedVariants.entries()].map(
-      ([familyId, variants]) => new PuzzleFamily(
-        familyId,
-        FAMILY_NAMES[familyId] ?? `Famille ${familyId}`,
-        variants,
-      ),
-    );
+    this.createdAt = input.createdAt;
+    this.updatedAt = input.updatedAt;
   }
 }
