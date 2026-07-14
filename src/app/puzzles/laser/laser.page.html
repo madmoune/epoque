@@ -1,0 +1,114 @@
+<main class="page">
+  <a routerLink="/" fragment="spatial-placement" class="back-link">Retour au menu</a>
+
+  <section class="card">
+    <header class="header">
+      <p class="eyebrow">Réflexion spatiale</p>
+      <h1>Laser</h1>
+      <p class="instructions">
+        Fais tourner les miroirs pour guider le laser jusqu'à la cible verte. Certains miroirs ne
+        servent pas au chemin.
+      </p>
+    </header>
+
+    <section class="stats" aria-label="Progression">
+      <div>
+        <span>Rotations</span>
+        <strong>{{ moves() }}</strong>
+      </div>
+      <div>
+        <span>Objectif</span>
+        <strong>Sortie verte</strong>
+      </div>
+    </section>
+
+    <div class="game-layout">
+      <section class="board-section" aria-label="Boîte à miroirs">
+        <div class="board-heading">
+          <span class="source-label">Source</span>
+          <span class="target-label">Cible</span>
+        </div>
+
+        <div
+          class="laser-board"
+          [style.--columns]="puzzle().cols"
+          [style.--rows]="puzzle().rows"
+          [attr.aria-label]="'Grille laser de ' + puzzle().rows + ' par ' + puzzle().cols"
+        >
+          @for (cell of boardCells(); track cell.row + ':' + cell.col) {
+            <div class="board-cell">
+              @if (mirrorAt(cell.row, cell.col); as mirror) {
+                <button
+                  type="button"
+                  [class]="'mirror orientation-' + mirror.orientation"
+                  [class.hinted]="hintVisible() && mirror.id === hintMirrorId()"
+                  [attr.aria-label]="
+                    'Miroir orienté à ' + mirrorOrientationLabel(mirror.orientation) +
+                    ', tourner de 90 degrés'
+                  "
+                  [disabled]="isSolved()"
+                  (click)="rotateMirror(mirror.id)"
+                >
+                  <span aria-hidden="true"></span>
+                </button>
+              }
+            </div>
+          }
+
+          <svg class="laser-svg" viewBox="0 0 8 7" preserveAspectRatio="none" aria-hidden="true">
+            @for (segment of trace().segments; track $index) {
+              <line
+                class="laser-segment"
+                [attr.x1]="segment.x1"
+                [attr.y1]="segment.y1"
+                [attr.x2]="segment.x2"
+                [attr.y2]="segment.y2"
+              />
+            }
+          </svg>
+
+          <span
+            class="laser-start"
+            [style.top]="(puzzle().startRow + 0.5) / puzzle().rows * 100 + '%'"
+            aria-label="Départ du laser"
+          ></span>
+          <span
+            class="laser-target"
+            [class.reached]="isSolved()"
+            [style.top]="(puzzle().targetRow + 0.5) / puzzle().rows * 100 + '%'"
+            aria-label="Cible du laser"
+          ></span>
+        </div>
+
+        <p class="status" [class.success]="isSolved()" aria-live="polite">{{ statusText() }}</p>
+      </section>
+
+      <aside class="side-panel">
+        <div class="legend">
+          <div><span class="legend-mirror slash"></span><span>Miroir rotatif</span></div>
+          <div><span class="legend-target"></span><span>Sortie à atteindre</span></div>
+        </div>
+        <p class="tip">Un miroir peut être complètement inutile pour résoudre la grille.</p>
+        <div class="actions">
+          <button type="button" class="secondary-button" [disabled]="isSolved()" (click)="showHint()">
+            Indice
+          </button>
+          <button type="button" class="secondary-button" (click)="resetPuzzle()">Recommencer</button>
+          <button type="button" (click)="newPuzzle()">Nouveau laser</button>
+        </div>
+        @if (hintVisible()) {
+          <p class="hint" aria-live="polite">{{ hintText() }}</p>
+        }
+      </aside>
+    </div>
+  </section>
+
+  @if (isSolved()) {
+    <app-puzzle-success-popup
+      title="Laser réussi !"
+      message="Le rayon a trouvé la sortie de l'autre côté."
+      actionLabel="Nouveau laser"
+      (action)="newPuzzle()"
+    />
+  }
+</main>

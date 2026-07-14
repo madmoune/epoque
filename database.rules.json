@@ -13,6 +13,66 @@
           }
         }
       }
+    },
+    "puzzleCatalog": {
+      ".read": "auth != null",
+      "types": {
+        "$typeId": {
+          ".write": "auth != null",
+          ".validate": "newData.hasChildren(['id']) && newData.child('id').val() === $typeId",
+          "id": {
+            ".validate": "newData.isString() && newData.val() === $typeId"
+          },
+          "name": {
+            ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 120"
+          },
+          "state": {
+            ".validate": "newData.isString() && newData.val().matches(/^(approved|pending|deleted)$/)"
+          },
+          "comment": {
+            ".validate": "newData.val() === null || (newData.isString() && newData.val().length <= 1000)"
+          },
+          "families": {
+            "$familyId": {
+              ".write": "auth != null",
+              ".validate": "newData.hasChildren(['id']) && newData.child('id').val() === $familyId",
+              "id": {
+                ".validate": "newData.isString() && newData.val() === $familyId"
+              },
+              "name": {
+                ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 120"
+              },
+              "state": {
+                ".validate": "newData.isString() && newData.val().matches(/^(approved|pending|deleted)$/)"
+              },
+              "comment": {
+                ".validate": "newData.val() === null || (newData.isString() && newData.val().length <= 1000)"
+              }
+            }
+          },
+          "variants": {
+            "$variantId": {
+              ".write": "auth != null",
+              ".validate": "newData.hasChildren(['id']) && newData.child('id').val() === $variantId",
+              "id": {
+                ".validate": "newData.isString() && newData.val() === $variantId"
+              },
+              "name": {
+                ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 120"
+              },
+              "state": {
+                ".validate": "newData.isString() && newData.val().matches(/^(approved|pending|deleted)$/)"
+              },
+              "comment": {
+                ".validate": "newData.val() === null || (newData.isString() && newData.val().length <= 1000)"
+              },
+              "exampleCount": {
+                ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 20"
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

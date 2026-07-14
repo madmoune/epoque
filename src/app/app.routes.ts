@@ -6,6 +6,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/home/home.page').then((m) => m.HomePage),
   },
   {
+    path: 'lab',
+    loadComponent: () => import('./pages/lab/lab.page').then((m) => m.LabPage),
+  },
+  {
     path: 'anagrams',
     loadComponent: () => import('./puzzles/anagrams/anagram.page').then((m) => m.AnagramsPage),
   },
@@ -61,6 +65,10 @@ export const routes: Routes = [
     path: 'sliding-puzzle',
     loadComponent: () =>
       import('./puzzles/sliding-puzzle/sliding-puzzle.page').then((m) => m.SlidingPuzzlePage),
+  },
+  {
+    path: 'laser',
+    loadComponent: () => import('./puzzles/laser/laser.page').then((m) => m.LaserPage),
   },
   {
     path: 'shape-layers',

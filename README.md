@@ -46,6 +46,8 @@ This project has a lightweight Firebase Realtime Database room service for multi
 4. Copy the web app config values into `src/environments/environment.ts`.
 5. In the Firebase console, add the rules from `database.rules.json` to Realtime Database rules.
 
+The puzzle laboratory stores type and variant states under `puzzleCatalog/types`. The laboratory signs in anonymously before reading or saving these states, so anonymous authentication must be enabled in Firebase Authentication.
+
 The current rules are intended for early prototypes with shareable room codes. Tighten them before using public player data or launching a public game.
 
 ## Running unit tests

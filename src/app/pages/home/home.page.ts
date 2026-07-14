@@ -292,6 +292,12 @@ export class HomePage {
           tag: 'Formes',
         },
         {
+          title: 'Laser',
+          description: 'Fais tourner les miroirs pour guider le laser jusqu’à la bonne sortie.',
+          route: '/laser',
+          tag: 'Réflexion',
+        },
+        {
           title: 'Rush Hour',
           description: 'Déplace les véhicules dans une grille 6×6 pour libérer la voiture rouge.',
           route: '/rush-hour',
