@@ -6,29 +6,13 @@
       <p class="eyebrow">Réflexion spatiale</p>
       <h1>Laser</h1>
       <p class="instructions">
-        Fais tourner les miroirs pour guider le laser jusqu'à la cible verte. Certains miroirs ne
-        servent pas au chemin.
+        Clique sur un miroir pour le faire pivoter avec un ou plusieurs autres miroirs. Guide le
+        laser jusqu’à la sortie verte.
       </p>
     </header>
 
-    <section class="stats" aria-label="Progression">
-      <div>
-        <span>Rotations</span>
-        <strong>{{ moves() }}</strong>
-      </div>
-      <div>
-        <span>Objectif</span>
-        <strong>Sortie verte</strong>
-      </div>
-    </section>
-
     <div class="game-layout">
       <section class="board-section" aria-label="Boîte à miroirs">
-        <div class="board-heading">
-          <span class="source-label">Source</span>
-          <span class="target-label">Cible</span>
-        </div>
-
         <div
           class="laser-board"
           [style.--columns]="puzzle().cols"
@@ -40,14 +24,14 @@
               @if (mirrorAt(cell.row, cell.col); as mirror) {
                 <button
                   type="button"
-                  [class]="'mirror orientation-' + mirror.orientation"
-                  [class.hinted]="hintVisible() && mirror.id === hintMirrorId()"
-                  [attr.aria-label]="
-                    'Miroir orienté à ' + mirrorOrientationLabel(mirror.orientation) +
-                    ', tourner de 90 degrés'
+                  [class]="
+                    'mirror orientation-' +
+                    mirror.orientation +
+                    (controlLocked(mirror.id) ? ' hinted' : '')
                   "
-                  [disabled]="isSolved()"
-                  (click)="rotateMirror(mirror.id)"
+                  [disabled]="isSolved() || controlLocked(mirror.id)"
+                  (click)="clickMirror(mirror.id)"
+                  [attr.aria-label]="'Miroir orienté à ' + mirrorOrientationLabel(mirror.orientation)"
                 >
                   <span aria-hidden="true"></span>
                 </button>
@@ -55,7 +39,12 @@
             </div>
           }
 
-          <svg class="laser-svg" viewBox="0 0 8 7" preserveAspectRatio="none" aria-hidden="true">
+          <svg
+            class="laser-svg"
+            [attr.viewBox]="'0 0 ' + puzzle().cols + ' ' + puzzle().rows"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
             @for (segment of trace().segments; track $index) {
               <line
                 class="laser-segment"
@@ -79,34 +68,29 @@
             aria-label="Cible du laser"
           ></span>
         </div>
-
-        <p class="status" [class.success]="isSolved()" aria-live="polite">{{ statusText() }}</p>
       </section>
 
-      <aside class="side-panel">
-        <div class="legend">
-          <div><span class="legend-mirror slash"></span><span>Miroir rotatif</span></div>
-          <div><span class="legend-target"></span><span>Sortie à atteindre</span></div>
-        </div>
-        <p class="tip">Un miroir peut être complètement inutile pour résoudre la grille.</p>
-        <div class="actions">
-          <button type="button" class="secondary-button" [disabled]="isSolved()" (click)="showHint()">
-            Indice
-          </button>
-          <button type="button" class="secondary-button" (click)="resetPuzzle()">Recommencer</button>
-          <button type="button" (click)="newPuzzle()">Nouveau laser</button>
-        </div>
-        @if (hintVisible()) {
-          <p class="hint" aria-live="polite">{{ hintText() }}</p>
-        }
-      </aside>
     </div>
+
+    <section class="button-controls" aria-label="Actions du jeu">
+      <div class="actions" aria-label="Actions du jeu">
+        <button
+          type="button"
+          class="secondary-button"
+          [disabled]="isSolved() || allControlsLocked()"
+          (click)="useHint()"
+        >
+          Indice
+        </button>
+        <button type="button" (click)="newPuzzle()">Nouveau laser</button>
+      </div>
+    </section>
   </section>
 
   @if (isSolved()) {
     <app-puzzle-success-popup
       title="Laser réussi !"
-      message="Le rayon a trouvé la sortie de l'autre côté."
+      message="Le rayon a atteint la sortie verte."
       actionLabel="Nouveau laser"
       (action)="newPuzzle()"
     />

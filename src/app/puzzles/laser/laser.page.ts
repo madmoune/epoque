@@ -3,16 +3,29 @@ import { RouterLink } from '@angular/router';
 import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
 
 type Direction = 'up' | 'right' | 'down' | 'left';
-type MirrorOrientation = 0 | 1 | 2 | 3;
+type MirrorOrientation = 0 | 1 | 2 | 3 | 4 | 5;
+type MirrorState = 0 | 1 | 2;
+type MirrorClicks = Record<number, number>;
 
 type Mirror = {
   id: number;
   row: number;
   col: number;
   orientation: MirrorOrientation;
+  orientationOptions: [MirrorOrientation, MirrorOrientation, MirrorOrientation];
+  orientationIndex: MirrorState;
   initialOrientation: MirrorOrientation;
   solution: MirrorOrientation;
-  decoy: boolean;
+  solutionIndex: MirrorState;
+};
+
+type MirrorEffect = {
+  mirrorId: number;
+};
+
+type MirrorControl = {
+  mirrorId: number;
+  effects: MirrorEffect[];
 };
 
 type LaserPuzzle = {
@@ -21,6 +34,8 @@ type LaserPuzzle = {
   startRow: number;
   targetRow: number;
   mirrors: Mirror[];
+  controls: MirrorControl[];
+  solutionClicks: MirrorClicks;
 };
 
 type LaserSegment = {
@@ -45,7 +60,7 @@ type LaserTrace = {
 })
 export class LaserPage {
   protected readonly puzzle = signal<LaserPuzzle>(this.createPuzzle());
-  protected readonly moves = signal(0);
+  protected readonly mirrorClicks = signal<MirrorClicks>({});
   protected readonly boardCells = computed(() =>
     Array.from(
       { length: this.puzzle().rows * this.puzzle().cols },
@@ -56,173 +71,251 @@ export class LaserPage {
     ),
   );
   protected readonly trace = computed(() => this.traceLaser());
-  protected readonly isSolved = computed(() => this.trace().reachedTarget);
-  protected readonly hintVisible = signal(false);
-  protected readonly hintMirrorId = computed(() => {
-    const mirror = this.puzzle().mirrors.find(
-      (candidate) =>
-        !candidate.decoy && !this.orientationMatches(candidate.orientation, candidate.solution),
-    );
-
-    return mirror?.id ?? null;
-  });
-  protected readonly hintText = computed(() => {
-    const mirror = this.puzzle().mirrors.find((candidate) => candidate.id === this.hintMirrorId());
-
-    return mirror
-      ? `Essaie le miroir à la ligne ${mirror.row + 1}, colonne ${mirror.col + 1}.`
-      : 'Tous les miroirs utiles sont bien orientés.';
-  });
+  protected readonly isSolved = computed(
+    () => this.trace().reachedTarget && this.mirrorsMatchSolution(),
+  );
+  protected readonly lockedControls = signal<Set<number>>(new Set());
+  protected readonly allControlsLocked = computed(() =>
+    this.puzzle().controls.every((control) => this.lockedControls().has(control.mirrorId)),
+  );
 
   protected newPuzzle(): void {
     this.puzzle.set(this.createPuzzle());
-    this.moves.set(0);
-    this.hintVisible.set(false);
+    this.mirrorClicks.set({});
+    this.lockedControls.set(new Set());
   }
 
-  protected resetPuzzle(): void {
-    this.puzzle.update((puzzle) => ({
-      ...puzzle,
-      mirrors: puzzle.mirrors.map((mirror) => ({
-        ...mirror,
-        orientation: mirror.initialOrientation,
-      })),
-    }));
-    this.moves.set(0);
-    this.hintVisible.set(false);
-  }
-
-  protected showHint(): void {
+  protected useHint(): void {
     if (this.isSolved()) return;
 
-    this.hintVisible.set(true);
+    const availableControls = this.puzzle().controls.filter(
+      (control) => !this.lockedControls().has(control.mirrorId),
+    );
+    const controlsNeedingAdjustment = availableControls.filter((control) => {
+      const currentClicks = (this.mirrorClicks()[control.mirrorId] ?? 0) % 3;
+
+      return currentClicks !== this.puzzle().solutionClicks[control.mirrorId];
+    });
+    const hintCandidates = controlsNeedingAdjustment.length
+      ? controlsNeedingAdjustment
+      : availableControls;
+    const control = hintCandidates[this.randomInt(0, hintCandidates.length - 1)];
+
+    if (!control) {
+      return;
+    }
+
+    const currentClicks = (this.mirrorClicks()[control.mirrorId] ?? 0) % 3;
+    const targetClicks = this.puzzle().solutionClicks[control.mirrorId];
+    const additionalClicks = (targetClicks - currentClicks + 3) % 3;
+
+    this.puzzle.update((puzzle) => {
+      let mirrors = puzzle.mirrors;
+
+      for (let click = 0; click < additionalClicks; click += 1) {
+        mirrors = this.applyMirrorControl(mirrors, control);
+      }
+
+      return { ...puzzle, mirrors };
+    });
+    this.mirrorClicks.update((clicks) => ({
+      ...clicks,
+      [control.mirrorId]: targetClicks,
+    }));
+    this.lockedControls.update((locked) => new Set([...locked, control.mirrorId]));
   }
 
-  protected rotateMirror(id: number): void {
-    if (this.isSolved()) return;
+  protected clickMirror(mirrorId: number): void {
+    if (this.isSolved() || this.lockedControls().has(mirrorId)) {
+      return;
+    }
+
+    const control = this.puzzle().controls.find((candidate) => candidate.mirrorId === mirrorId);
+
+    if (!control) {
+      return;
+    }
 
     this.puzzle.update((puzzle) => ({
       ...puzzle,
-      mirrors: puzzle.mirrors.map((mirror) =>
-        mirror.id === id
-          ? {
-              ...mirror,
-              orientation: ((mirror.orientation + 1) % 4) as MirrorOrientation,
-            }
-          : mirror,
-      ),
+      mirrors: this.applyMirrorControl(puzzle.mirrors, control),
     }));
-    this.moves.update((value) => value + 1);
+    this.mirrorClicks.update((clicks) => ({
+      ...clicks,
+      [mirrorId]: (clicks[mirrorId] ?? 0) + 1,
+    }));
   }
 
   protected mirrorAt(row: number, col: number): Mirror | undefined {
     return this.puzzle().mirrors.find((mirror) => mirror.row === row && mirror.col === col);
   }
 
-  protected directionLabel(direction: Direction): string {
-    return {
-      up: 'vers le haut',
-      right: 'vers la droite',
-      down: 'vers le bas',
-      left: 'vers la gauche',
-    }[direction];
+  protected controlLocked(mirrorId: number): boolean {
+    return this.lockedControls().has(mirrorId);
   }
 
   protected mirrorOrientationLabel(orientation: MirrorOrientation): string {
     return `${orientation * 90} degrés`;
   }
 
-  protected statusText(): string {
-    const trace = this.trace();
-    if (trace.reachedTarget) return 'Le laser a atteint la cible.';
-    if (trace.looped) return 'Le laser tourne en boucle.';
-    return 'Le laser sort de la boîte avant la cible.';
+  private createPuzzle(): LaserPuzzle {
+    for (let attempt = 0; attempt < 800; attempt += 1) {
+      const candidate = this.createCandidatePuzzle();
+
+      if (this.isValidCandidate(candidate)) {
+        return candidate;
+      }
+    }
+
+    return this.createCandidatePuzzle();
   }
 
-  private createPuzzle(): LaserPuzzle {
-    const rows = 7;
-    const cols = 8;
-    const startRow = this.randomInt(2, rows - 3);
-    const upperRow = this.randomInt(1, startRow - 1);
-    const lowerRow = this.randomInt(startRow + 1, rows - 2);
-    const firstCol = this.randomInt(1, 2);
-    const secondCol = this.randomInt(firstCol + 2, cols - 2);
+  private createCandidatePuzzle(): LaserPuzzle {
+    const rows = 5;
+    const cols = 7;
+    const mirrorCount = 8;
+    const startRow = this.randomInt(1, rows - 2);
+    const verticalLegs = this.randomInt(2, 3);
+    const columns = this.shuffle(
+      Array.from({ length: cols - 2 }, (_, index) => index + 1),
+    )
+      .slice(0, verticalLegs)
+      .sort((first, second) => first - second);
+    const solutionPlacements: Array<Pick<Mirror, 'row' | 'col' | 'solution'>> = [];
+    const passThroughCandidates: Array<Pick<Mirror, 'row' | 'col' | 'solution'>> = [];
+    let currentRow = startRow;
+    let previousColumn = -1;
 
-    const solutionPlacements: Array<Pick<Mirror, 'row' | 'col' | 'solution'>> = [
-      { row: startRow, col: firstCol, solution: 1 },
-      { row: lowerRow, col: firstCol, solution: 1 },
-      { row: lowerRow, col: secondCol, solution: 0 },
-      { row: upperRow, col: secondCol, solution: 0 },
-    ];
-    const occupied = new Set(solutionPlacements.map((mirror) => this.positionKey(mirror.row, mirror.col)));
-    const decoyPositions: Array<{ row: number; col: number }> = [];
-
-    while (decoyPositions.length < 5) {
-      const row = this.randomInt(0, rows - 1);
-      const col = this.randomInt(0, cols - 1);
-      const key = this.positionKey(row, col);
-
-      if (occupied.has(key) || decoyPositions.some((mirror) => mirror.row === row && mirror.col === col)) {
-        continue;
+    for (const column of columns) {
+      for (let passColumn = previousColumn + 1; passColumn < column; passColumn += 1) {
+        passThroughCandidates.push({ row: currentRow, col: passColumn, solution: 4 });
       }
 
-      decoyPositions.push({ row, col });
+      const nextRow = this.randomRowDifferentFrom(currentRow, rows);
+      const turnOrientation = nextRow > currentRow ? 1 : 0;
+
+      solutionPlacements.push({ row: currentRow, col: column, solution: turnOrientation });
+
+      const rowStep = nextRow > currentRow ? 1 : -1;
+
+      for (let passRow = currentRow + rowStep; passRow !== nextRow; passRow += rowStep) {
+        passThroughCandidates.push({ row: passRow, col: column, solution: 5 });
+      }
+
+      solutionPlacements.push({ row: nextRow, col: column, solution: turnOrientation });
+      currentRow = nextRow;
+      previousColumn = column;
     }
 
-    const mirrors: Mirror[] = solutionPlacements.map((placement, id) => ({
-      id,
-      row: placement.row,
-      col: placement.col,
-      orientation: ((placement.solution + 1) % 4) as MirrorOrientation,
-      initialOrientation: ((placement.solution + 1) % 4) as MirrorOrientation,
-      solution: placement.solution,
-      decoy: false,
-    }));
+    for (let passColumn = previousColumn + 1; passColumn < cols; passColumn += 1) {
+      passThroughCandidates.push({ row: currentRow, col: passColumn, solution: 4 });
+    }
 
-    decoyPositions.forEach((position, index) => {
-      mirrors.push({
-        id: solutionPlacements.length + index,
-        ...position,
-        orientation: this.randomOrientation(),
-        initialOrientation: 0,
-        solution: 0,
-        decoy: true,
-      });
+    solutionPlacements.push(
+      ...this.shuffle(passThroughCandidates).slice(0, mirrorCount - solutionPlacements.length),
+    );
+    const controls = this.createMirrorControls(mirrorCount);
+    const solutionClicks = Object.fromEntries(
+      controls.map((control) => [control.mirrorId, this.randomInt(1, 2)]),
+    );
+    const mirrors: Mirror[] = solutionPlacements.map((placement, id) => {
+      const orientationOptions = this.createOrientationOptions(placement.solution);
+      const solutionIndex = orientationOptions.indexOf(placement.solution) as MirrorState;
+      const totalRotation = controls.reduce(
+        (sum, control) =>
+          sum +
+            (solutionClicks[control.mirrorId] ?? 0) *
+            (control.effects.some((effect) => effect.mirrorId === id) ? 1 : 0),
+        0,
+      );
+      const orientationIndex = ((solutionIndex - totalRotation) % 3 + 3) % 3 as MirrorState;
+      const initialOrientation = orientationOptions[orientationIndex];
+
+      return {
+        id,
+        row: placement.row,
+        col: placement.col,
+        orientation: initialOrientation,
+        orientationOptions,
+        orientationIndex,
+        initialOrientation,
+        solution: placement.solution,
+        solutionIndex,
+      };
     });
 
-    const scrambled = mirrors.map((mirror) => ({
-      ...mirror,
-      initialOrientation: mirror.orientation,
-      orientation: mirror.orientation,
-    }));
-
-    if (scrambled.slice(0, solutionPlacements.length).every((mirror) =>
-      this.orientationMatches(mirror.orientation, mirror.solution),
-    )) {
-      scrambled[0] = {
-        ...scrambled[0],
-        orientation: ((scrambled[0].orientation + 1) % 4) as MirrorOrientation,
-        initialOrientation: ((scrambled[0].orientation + 1) % 4) as MirrorOrientation,
-      };
-    }
-
-    const puzzle: LaserPuzzle = {
+    return {
       rows,
       cols,
       startRow,
-      targetRow: upperRow,
-      mirrors: scrambled,
+      targetRow: currentRow,
+      mirrors,
+      controls,
+      solutionClicks,
     };
+  }
 
-    const solutionPuzzle: LaserPuzzle = {
-      ...puzzle,
-      mirrors: puzzle.mirrors.map((mirror) => ({
-        ...mirror,
-        orientation: mirror.solution,
-      })),
-    };
+  private createMirrorControls(mirrorCount: number): MirrorControl[] {
+    const mirrorIds = Array.from({ length: mirrorCount }, (_, index) => index);
 
-    return this.tracePuzzle(solutionPuzzle).reachedTarget ? puzzle : this.createPuzzle();
+    for (let attempt = 0; attempt < 500; attempt += 1) {
+      const controls = mirrorIds.map((mirrorId) => {
+        const linkedMirrors = this.shuffle(
+          mirrorIds.filter((candidate) => candidate !== mirrorId),
+        ).slice(0, this.randomInt(1, 3));
+
+        return {
+          mirrorId,
+          effects: [mirrorId, ...linkedMirrors].map((affectedMirrorId) => ({
+            mirrorId: affectedMirrorId,
+          })),
+        };
+      });
+
+      if (this.isInvertibleControlMatrix(controls, mirrorCount)) {
+        return controls;
+      }
+    }
+
+    const shuffledIds = this.shuffle(mirrorIds);
+    const fallbackControls = shuffledIds.map((mirrorId, index) => {
+      const groupStart = Math.floor(index / 3) * 3;
+      const nextMirrorId = shuffledIds[groupStart + ((index - groupStart + 1) % 3)];
+
+      return {
+        mirrorId,
+        effects: [{ mirrorId }, { mirrorId: nextMirrorId }],
+      };
+    });
+
+    return fallbackControls.sort((first, second) => first.mirrorId - second.mirrorId);
+  }
+
+  private isValidCandidate(puzzle: LaserPuzzle): boolean {
+    const solvedMirrors = this.applyMirrorClicks(
+      puzzle.mirrors,
+      puzzle.controls,
+      puzzle.solutionClicks,
+    );
+    const solvedPuzzle = { ...puzzle, mirrors: solvedMirrors };
+
+    if (!this.mirrorsMatchSolutionFor(solvedPuzzle) || !this.tracePuzzle(solvedPuzzle).reachedTarget) {
+      return false;
+    }
+
+    if (
+      this.mirrorsMatchSolutionFor(puzzle) ||
+      !this.isInvertibleControlMatrix(puzzle.controls, puzzle.mirrors.length) ||
+      puzzle.controls.some(
+        (control) =>
+          control.effects.length < 2 ||
+          !control.effects.some((effect) => effect.mirrorId === control.mirrorId),
+      )
+    ) {
+      return false;
+    }
+
+    return !this.tracePuzzle(puzzle).reachedTarget;
   }
 
   private traceLaser(): LaserTrace {
@@ -243,13 +336,16 @@ export class LaserPage {
     for (let step = 0; step < puzzle.rows * puzzle.cols * 4; step += 1) {
       if (row < 0 || row >= puzzle.rows || col < 0 || col >= puzzle.cols) {
         const reachedTarget = col >= puzzle.cols && row === puzzle.targetRow;
+
         return { segments, reachedTarget, escaped: true, looped: false };
       }
 
       const stateKey = `${row}:${col}:${direction}`;
+
       if (visited.has(stateKey)) {
         return { segments, reachedTarget: false, escaped: false, looped: true };
       }
+
       visited.add(stateKey);
 
       const center = { x: col + 0.5, y: row + 0.5 };
@@ -276,13 +372,131 @@ export class LaserPage {
     return { segments, reachedTarget: false, escaped: false, looped: true };
   }
 
+  private applyMirrorControl(mirrors: Mirror[], control: MirrorControl): Mirror[] {
+    const affectedMirrors = new Set(control.effects.map((effect) => effect.mirrorId));
+
+    return mirrors.map((mirror) =>
+      affectedMirrors.has(mirror.id)
+        ? {
+            ...mirror,
+            orientationIndex: ((mirror.orientationIndex + 1) % 3) as MirrorState,
+            orientation: mirror.orientationOptions[
+              ((mirror.orientationIndex + 1) % 3) as MirrorState
+            ],
+          }
+        : { ...mirror },
+    );
+  }
+
+  private applyMirrorClicks(
+    mirrors: Mirror[],
+    controls: MirrorControl[],
+    clicks: MirrorClicks,
+  ): Mirror[] {
+    const controlByMirrorId = new Map(
+      controls.map((control) => [control.mirrorId, control]),
+    );
+    let result = mirrors.map((mirror) => ({ ...mirror }));
+
+    for (const [mirrorId, count] of Object.entries(clicks)) {
+      const control = controlByMirrorId.get(Number(mirrorId));
+
+      for (let click = 0; control && click < count; click += 1) {
+        result = this.applyMirrorControl(result, control);
+      }
+    }
+
+    return result;
+  }
+
+  private mirrorsMatchSolution(): boolean {
+    return this.mirrorsMatchSolutionFor(this.puzzle());
+  }
+
+  private mirrorsMatchSolutionFor(puzzle: LaserPuzzle): boolean {
+    return puzzle.mirrors.every((mirror) => mirror.orientationIndex === mirror.solutionIndex);
+  }
+
+  private isInvertibleControlMatrix(controls: MirrorControl[], mirrorCount: number): boolean {
+    if (controls.length !== mirrorCount) {
+      return false;
+    }
+
+    const matrix: number[][] = Array.from({ length: mirrorCount }, (_, mirrorId) =>
+      controls.map((control) =>
+        control.effects.some((effect) => effect.mirrorId === mirrorId) ? 1 : 0,
+      ),
+    );
+    const moduloThree = (value: number) => ((value % 3) + 3) % 3;
+    let pivotRow = 0;
+
+    for (let column = 0; column < mirrorCount && pivotRow < mirrorCount; column += 1) {
+      const candidateRow = matrix.findIndex(
+        (row, rowIndex) => rowIndex >= pivotRow && row[column] !== 0,
+      );
+
+      if (candidateRow < 0) {
+        continue;
+      }
+
+      [matrix[pivotRow], matrix[candidateRow]] = [matrix[candidateRow], matrix[pivotRow]];
+
+      if (matrix[pivotRow][column] === 2) {
+        for (let valueIndex = column; valueIndex < mirrorCount; valueIndex += 1) {
+          matrix[pivotRow][valueIndex] = moduloThree(matrix[pivotRow][valueIndex] * 2);
+        }
+      }
+
+      for (let rowIndex = 0; rowIndex < mirrorCount; rowIndex += 1) {
+        if (rowIndex === pivotRow || matrix[rowIndex][column] === 0) {
+          continue;
+        }
+
+        const factor = matrix[rowIndex][column];
+
+        for (let valueIndex = column; valueIndex < mirrorCount; valueIndex += 1) {
+          matrix[rowIndex][valueIndex] = moduloThree(
+            matrix[rowIndex][valueIndex] - factor * matrix[pivotRow][valueIndex],
+          );
+        }
+      }
+
+      pivotRow += 1;
+    }
+
+    return pivotRow === mirrorCount;
+  }
+
   private reflect(direction: Direction, orientation: MirrorOrientation): Direction {
+    if (orientation === 4) {
+      return direction === 'left' || direction === 'right'
+        ? direction
+        : this.oppositeDirection(direction);
+    }
+
+    if (orientation === 5) {
+      return direction === 'up' || direction === 'down'
+        ? direction
+        : this.oppositeDirection(direction);
+    }
+
     const reflections: Record<'slash' | 'backslash', Record<Direction, Direction>> = {
       slash: { up: 'right', right: 'up', down: 'left', left: 'down' },
       backslash: { up: 'left', right: 'down', down: 'right', left: 'up' },
     };
 
     return reflections[this.isSlashOrientation(orientation) ? 'slash' : 'backslash'][direction];
+  }
+
+  private oppositeDirection(direction: Direction): Direction {
+    const opposites: Record<Direction, Direction> = {
+      up: 'down',
+      right: 'left',
+      down: 'up',
+      left: 'right',
+    };
+
+    return opposites[direction];
   }
 
   private boundaryPoint(row: number, col: number, direction: Direction): { x: number; y: number } {
@@ -308,20 +522,46 @@ export class LaserPage {
     return { row: row + offset.row, col: col + offset.col };
   }
 
-  private randomOrientation(): MirrorOrientation {
-    return this.randomInt(0, 3) as MirrorOrientation;
+  private randomRowDifferentFrom(row: number, rowCount: number): number {
+    const candidates = Array.from({ length: rowCount }, (_, index) => index).filter(
+      (candidate) => Math.abs(candidate - row) >= 2,
+    );
+
+    return this.shuffle(candidates)[0] ?? (row === 0 ? 1 : 0);
+  }
+
+  private createOrientationOptions(
+    solution: MirrorOrientation,
+  ): [MirrorOrientation, MirrorOrientation, MirrorOrientation] {
+    const distinctOrientations: MirrorOrientation[] = [0, 1, 4, 5];
+    const otherOrientations = this.shuffle(
+      distinctOrientations.filter((orientation) => orientation !== solution),
+    ).slice(0, 2);
+
+    return this.shuffle([solution, ...otherOrientations]) as [
+      MirrorOrientation,
+      MirrorOrientation,
+      MirrorOrientation,
+    ];
   }
 
   private isSlashOrientation(orientation: MirrorOrientation): boolean {
     return orientation % 2 === 0;
   }
 
-  private orientationMatches(first: MirrorOrientation, second: MirrorOrientation): boolean {
-    return first % 2 === second % 2;
-  }
-
   private positionKey(row: number, col: number): string {
     return `${row}:${col}`;
+  }
+
+  private shuffle<T>(items: T[]): T[] {
+    const shuffled = [...items];
+
+    for (let index = shuffled.length - 1; index > 0; index -= 1) {
+      const swapIndex = this.randomInt(0, index);
+      [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+    }
+
+    return shuffled;
   }
 
   private randomInt(min: number, max: number): number {

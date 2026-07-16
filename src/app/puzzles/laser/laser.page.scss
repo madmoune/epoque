@@ -54,7 +54,7 @@ h1 {
   margin: 1.5rem 0;
 }
 
-.stats > div {
+.stats>div {
   display: grid;
   min-width: 8rem;
   gap: 0.2rem;
@@ -78,7 +78,7 @@ h1 {
 
 .game-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(12rem, 15rem);
+  grid-template-columns: minmax(0, 1fr);
   align-items: start;
   gap: clamp(1rem, 3vw, 2rem);
 }
@@ -107,7 +107,7 @@ h1 {
   display: grid;
   grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
   grid-template-rows: repeat(var(--rows), minmax(0, 1fr));
-  width: min(100%, 48rem);
+  width: min(100%, 42rem);
   margin: 0 auto;
   aspect-ratio: var(--columns) / var(--rows);
   overflow: visible;
@@ -144,9 +144,17 @@ h1 {
   transition: background 0.15s, transform 0.15s;
 }
 
-.mirror:hover {
+.mirror:hover:not(:disabled) {
   background: #466960;
-  transform: scale(1.05);
+}
+
+.mirror:active:not(:disabled) {
+  transform: scale(0.92);
+}
+
+.mirror:disabled {
+  cursor: default;
+  opacity: 1;
 }
 
 .mirror:focus-visible {
@@ -177,34 +185,12 @@ h1 {
   transform: rotate(225deg);
 }
 
-.mirror::after {
-  position: absolute;
-  top: 12%;
-  right: 14%;
-  width: 0.28rem;
-  height: 0.28rem;
-  border-radius: 50%;
-  background: #73dfd0;
-  box-shadow: 0 0 0.35rem rgb(115 223 208 / 80%);
-  content: '';
+.mirror.orientation-4 span {
+  transform: rotate(0deg);
 }
 
-.mirror.orientation-1::after {
-  top: 12%;
-  right: auto;
-  left: 14%;
-}
-
-.mirror.orientation-2::after {
-  top: auto;
-  right: auto;
-  bottom: 12%;
-  left: 14%;
-}
-
-.mirror.orientation-3::after {
-  top: auto;
-  bottom: 12%;
+.mirror.orientation-5 span {
+  transform: rotate(90deg);
 }
 
 .mirror.hinted {
@@ -289,7 +275,7 @@ h1 {
   font-weight: 700;
 }
 
-.legend > div {
+.legend>div {
   display: flex;
   align-items: center;
   gap: 0.65rem;
@@ -327,9 +313,83 @@ h1 {
   line-height: 1.45;
 }
 
+.button-pad {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.button-pad button {
+  min-height: 3.1rem;
+  border: 1px solid var(--accent);
+  border-radius: 0.65rem;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 900;
+  transition: opacity 0.15s, transform 0.15s, background 0.15s;
+}
+
+.button-pad button:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.button-pad button.used,
+.button-pad button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.button-pad button.used {
+  background: var(--surface-soft);
+  color: var(--muted);
+}
+
+.sequence {
+  margin: 0;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 0.65rem;
+  background: var(--surface-soft);
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.sequence strong {
+  color: var(--accent);
+}
+
+.button-controls {
+  display: grid;
+  gap: 0.45rem;
+  margin-top: 0.45rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.8rem;
+  background: var(--surface-soft);
+  text-align: center;
+}
+
+.button-controls .button-pad {
+  width: min(100%, 34rem);
+  margin: 0 auto;
+}
+
+.button-controls .button-pad button {
+  display: grid;
+  gap: 0.1rem;
+  place-items: center;
+  min-height: 4rem;
+}
+
 .actions {
   display: grid;
-  width: 100%;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: min(100%, 34rem);
+  margin: 0 auto;
   gap: 0.65rem;
 }
 
@@ -356,18 +416,6 @@ h1 {
 .actions button:focus-visible {
   outline: 3px solid rgb(20 125 112 / 30%);
   outline-offset: 2px;
-}
-
-.hint {
-  margin: 0;
-  padding: 0.7rem 0.8rem;
-  border: 1px solid #c9902e;
-  border-radius: 0.65rem;
-  background: #3b3018;
-  color: #ffe3a3;
-  font-size: 0.88rem;
-  font-weight: 700;
-  line-height: 1.4;
 }
 
 @media (max-width: 700px) {
@@ -407,7 +455,7 @@ h1 {
     gap: 0.5rem;
   }
 
-  .stats > div {
+  .stats>div {
     min-width: 0;
     flex: 1;
     padding-inline: 0.6rem;
