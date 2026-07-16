@@ -16,6 +16,12 @@
       <section class="puzzle-area">
         <p class="cipher-note">{{ currentPuzzle.note }}</p>
 
+        @if (selectedCipher() === 'caesar' && currentPuzzle.caesarShift !== null) {
+          <p class="cipher-shift">
+            Décalage : {{ currentPuzzle.caesarShift > 0 ? '+' : '' }}{{ currentPuzzle.caesarShift }}
+          </p>
+        }
+
         <div
           class="encoded-word"
           [class.symbolic]="selectedCipher() === 'pigpen' || selectedCipher() === 'braille' || selectedCipher() === 'semaphore'"
@@ -26,7 +32,13 @@
         >
           @for (token of currentPuzzle.encoded; track $index; let tokenIndex = $index) {
             @if (selectedCipher() === 'pigpen') {
-              <span class="pigpen-tile" [attr.aria-label]="token">
+              <button
+                type="button"
+                class="encoded-token pigpen-tile"
+                [class.revealed]="isLetterRevealed(tokenIndex)"
+                [attr.aria-label]="isLetterRevealed(tokenIndex) ? 'Letter: ' + revealedLetterFor(currentPuzzle, tokenIndex) : 'Reveal letter'"
+                (click)="revealLetter(tokenIndex)"
+              >
                 <span [class]="pigpenSymbolClass(token)">
                   @if (pigpenHasDot(token)) {
                     <span class="pigpen-dot"></span>
@@ -34,25 +46,57 @@
                   <span class="pigpen-stroke one"></span>
                   <span class="pigpen-stroke two"></span>
                 </span>
-              </span>
+                @if (isLetterRevealed(tokenIndex)) {
+                  <span class="revealed-letter">{{ revealedLetterFor(currentPuzzle, tokenIndex) }}</span>
+                }
+              </button>
             } @else if (selectedCipher() === 'braille') {
-              <span class="braille-word-tile" [attr.aria-label]="token">
+              <button
+                type="button"
+                class="encoded-token braille-word-tile"
+                [class.revealed]="isLetterRevealed(tokenIndex)"
+                [attr.aria-label]="isLetterRevealed(tokenIndex) ? 'Letter: ' + revealedLetterFor(currentPuzzle, tokenIndex) : 'Reveal letter'"
+                (click)="revealLetter(tokenIndex)"
+              >
                 <span class="braille-cell word-cell">
                   @for (dot of [1, 4, 2, 5, 3, 6]; track dot) {
                     <span class="braille-dot" [class.active]="isBrailleDotActive(currentPuzzle.normalizedAnswer[tokenIndex], dot)"></span>
                   }
                 </span>
-              </span>
+                @if (isLetterRevealed(tokenIndex)) {
+                  <span class="revealed-letter">{{ revealedLetterFor(currentPuzzle, tokenIndex) }}</span>
+                }
+              </button>
             } @else if (selectedCipher() === 'semaphore') {
-              <span class="semaphore-tile" [attr.aria-label]="token">
+              <button
+                type="button"
+                class="encoded-token semaphore-tile"
+                [class.revealed]="isLetterRevealed(tokenIndex)"
+                [attr.aria-label]="isLetterRevealed(tokenIndex) ? 'Letter: ' + revealedLetterFor(currentPuzzle, tokenIndex) : 'Reveal letter'"
+                (click)="revealLetter(tokenIndex)"
+              >
                 <span class="semaphore-symbol">
                   @for (armClass of semaphoreArmClassesForLetter(token); track armClass) {
                     <span class="semaphore-arm {{ armClass }}"></span>
                   }
                 </span>
-              </span>
+                @if (isLetterRevealed(tokenIndex)) {
+                  <span class="revealed-letter">{{ revealedLetterFor(currentPuzzle, tokenIndex) }}</span>
+                }
+              </button>
             } @else {
-              <span>{{ token }}</span>
+              <button
+                type="button"
+                class="encoded-token"
+                [class.revealed]="isLetterRevealed(tokenIndex)"
+                [attr.aria-label]="isLetterRevealed(tokenIndex) ? 'Letter: ' + revealedLetterFor(currentPuzzle, tokenIndex) : 'Reveal letter'"
+                (click)="revealLetter(tokenIndex)"
+              >
+                <span>{{ token }}</span>
+                @if (isLetterRevealed(tokenIndex)) {
+                  <span class="revealed-letter">{{ revealedLetterFor(currentPuzzle, tokenIndex) }}</span>
+                }
+              </button>
             }
           }
         </div>
@@ -137,22 +181,64 @@
           </details>
         }
 
-        <label class="answer-group">
-          <span>Mot original</span>
-          <input
-            #answerField
-            class="answer-input"
-            type="text"
-            inputmode="none"
-            autocomplete="off"
-            [ngModel]="answerInput()"
-            (ngModelChange)="updateAnswer($event)"
-            (focus)="selectInputContent($event)"
-            (click)="selectInputContent($event)"
-            [class.correct]="isCorrect()"
-            [disabled]="isCorrect()"
-          />
-        </label>
+        <div class="answer-mode" role="group" aria-label="Mode de saisie">
+          <span class="answer-mode-label">Réponse</span>
+          <button
+            type="button"
+            class="input-mode-button"
+            [class.active]="!letterByLetter()"
+            (click)="letterByLetter() && toggleInputMode()"
+          >
+            Mot complet
+          </button>
+          <button
+            type="button"
+            class="input-mode-button"
+            [class.active]="letterByLetter()"
+            (click)="!letterByLetter() && toggleInputMode()"
+          >
+            Lettre par lettre
+          </button>
+        </div>
+
+        @if (letterByLetter()) {
+          <div class="letter-answer-group" role="group" aria-label="Réponse lettre par lettre">
+            @for (letter of answerLetters(); track $index) {
+              <input
+                #letterField
+                class="answer-letter-input"
+                type="text"
+                maxlength="1"
+                inputmode="none"
+                autocomplete="off"
+                [value]="letter"
+                (input)="updateAnswerLetterFromEvent($event, $index)"
+                (keydown)="handleAnswerLetterKeydown($event, $index)"
+                (focus)="selectLetterInput($event, $index)"
+                [attr.aria-label]="'Lettre ' + ($index + 1)"
+                [class.correct]="isCorrect()"
+                [disabled]="isCorrect()"
+              />
+            }
+          </div>
+        } @else {
+          <label class="answer-group">
+            <span>Mot original</span>
+            <input
+              #answerField
+              class="answer-input"
+              type="text"
+              inputmode="none"
+              autocomplete="off"
+              [value]="answerInput()"
+              (input)="updateAnswerFromEvent($event)"
+              (focus)="selectInputContent($event)"
+              (click)="selectInputContent($event)"
+              [class.correct]="isCorrect()"
+              [disabled]="isCorrect()"
+            />
+          </label>
+        }
 
         <app-custom-keyboard
           [rows]="letterKeyboardRows"

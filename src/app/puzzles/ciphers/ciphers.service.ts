@@ -20,6 +20,7 @@ export type CipherPuzzle = {
   cipher: CipherType;
   encoded: string[];
   note: string;
+  caesarShift: number | null;
 };
 
 export type CipherOption = {
@@ -81,13 +82,15 @@ export class CiphersService {
     const wordPool = cipher === 'tap-code' ? this.words.filter((word) => !this.normalize(word).includes('j')) : this.words;
     const answer = this.randomWords.pick(wordPool, (word) => `${cipher}:${this.normalize(word)}`);
     const normalizedAnswer = this.normalize(answer);
+    const caesarShift = cipher === 'caesar' ? this.randomCaesarShift() : null;
 
     return {
       answer,
       normalizedAnswer,
       cipher,
-      encoded: this.encode(normalizedAnswer, cipher),
+      encoded: this.encode(normalizedAnswer, cipher, caesarShift === null ? 0 : -caesarShift),
       note: this.noteFor(cipher),
+      caesarShift,
     };
   }
 
@@ -131,9 +134,9 @@ export class CiphersService {
       .toLowerCase();
   }
 
-  private encode(word: string, cipher: CipherType): string[] {
+  private encode(word: string, cipher: CipherType, shift = 0): string[] {
     if (cipher === 'caesar') {
-      return word.split('').map((letter) => this.shiftLetter(letter, 3));
+      return word.split('').map((letter) => this.shiftLetter(letter, shift));
     }
 
     if (cipher === 'pigpen') {
@@ -169,7 +172,12 @@ export class CiphersService {
 
   private shiftLetter(letter: string, shift: number): string {
     const alphabetIndex = letter.charCodeAt(0) - 97;
-    return String.fromCharCode(((alphabetIndex + shift) % 26) + 97);
+    const shiftedIndex = ((alphabetIndex + shift) % 26 + 26) % 26;
+    return String.fromCharCode(shiftedIndex + 97);
+  }
+
+  private randomCaesarShift(): number {
+    return -(Math.floor(Math.random() * 25) + 1);
   }
 
   private atbashLetter(letter: string): string {

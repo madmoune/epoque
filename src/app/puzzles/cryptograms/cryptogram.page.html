@@ -10,6 +10,15 @@
     } @else if (loadError()) {
       <p class="error">{{ loadError() }}</p>
     } @else if (puzzle()) {
+      <label class="auto-fill-option">
+        <input
+          type="checkbox"
+          [checked]="fillOccurrencesAutomatically()"
+          (change)="setFillOccurrencesAutomatically($event)"
+        />
+        <span>Remplir automatiquement les occurrences</span>
+      </label>
+
       <div class="cryptogram" aria-label="Cryptogramme à résoudre">
         @for (wordGroup of wordGroups(); track $index) {
           <span
@@ -39,7 +48,8 @@
                       'Réponse pour la lettre chiffrée ' + character.encryptedCharacter
                     "
                     [attr.data-character-index]="character.index"
-                    [ngModel]="guesses()[character.index]"
+                    [value]="guesses()[character.index]"
+                    (input)="updateGuess(character.index, $any($event.target).value)"
                     (focus)="activateInput(character.index, guessInput)"
                     (click)="activateInput(character.index, guessInput)"
                     (keydown)="handleGuessKeydown(character.index, $event, guessInput)"

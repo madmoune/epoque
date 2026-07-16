@@ -11,7 +11,6 @@ import {
   ViewChildren,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { CryptogramCharacter, CryptogramPuzzle } from '../../puzzles/cryptograms/cryptogram.model';
 import { CryptogramService } from '../../puzzles/cryptograms/cryptogram.service';
@@ -23,7 +22,7 @@ import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzz
 
 @Component({
   selector: 'app-cryptograms-page',
-  imports: [FormsModule, RouterLink, PuzzleSuccessPopupComponent, CustomKeyboardComponent],
+  imports: [RouterLink, PuzzleSuccessPopupComponent, CustomKeyboardComponent],
   templateUrl: './cryptogram.page.html',
   styleUrl: './cryptogram.page.scss',
 })
@@ -36,6 +35,7 @@ export class CryptogramsPage implements AfterViewInit {
 
   private readonly cryptogramService = inject(CryptogramService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly fillOccurrencesStorageKey = 'epique-cryptogram-fill-occurrences';
 
   protected readonly isLoading = signal(true);
   protected readonly loadError = signal<string | null>(null);
@@ -43,6 +43,7 @@ export class CryptogramsPage implements AfterViewInit {
   protected readonly puzzle = signal<CryptogramPuzzle | null>(null);
   protected readonly guesses = signal<string[]>([]);
   protected readonly activeCharacterIndex = signal<number | null>(null);
+  protected readonly fillOccurrencesAutomatically = signal(this.readFillOccurrencesPreference());
   protected readonly wrappedWordIndexes = signal<Set<number>>(new Set());
   protected readonly lineBreakAfterIndexes = signal<Set<number>>(new Set());
   protected readonly letterKeyboardRows: CustomKeyboardKey[][] = [
@@ -118,13 +119,10 @@ export class CryptogramsPage implements AfterViewInit {
     this.queueWrappedWordHintUpdate();
   }
 
-  protected updateGuess(index: number, value: string, currentInput: HTMLInputElement): void {
+  protected updateGuess(index: number, value: string): void {
     this.activeCharacterIndex.set(index);
-    const nextGuesses = [...this.guesses()];
     const character = value.slice(-1).toUpperCase();
-
-    nextGuesses[index] = character;
-    this.guesses.set(nextGuesses);
+    this.setGuess(index, character);
 
     if (!character || this.isCorrect()) {
       return;
@@ -175,11 +173,23 @@ export class CryptogramsPage implements AfterViewInit {
 
     if (key === 'space') return;
 
-    const nextGuesses = [...this.guesses()];
-    nextGuesses[activeIndex] = key;
-    this.guesses.set(nextGuesses);
+    this.setGuess(activeIndex, key);
 
     if (this.isCorrect()) return;
+  }
+
+  protected setFillOccurrencesAutomatically(event: Event): void {
+    const checkbox = event.target;
+
+    if (checkbox instanceof HTMLInputElement) {
+      this.fillOccurrencesAutomatically.set(checkbox.checked);
+
+      try {
+        globalThis.localStorage?.setItem(this.fillOccurrencesStorageKey, String(checkbox.checked));
+      } catch {
+        // Local storage can be unavailable in private or restricted browsing contexts.
+      }
+    }
   }
 
   protected nextPuzzle(): void {
@@ -249,11 +259,8 @@ export class CryptogramsPage implements AfterViewInit {
   protected handleBackspace(index: number, event: Event, currentInput: HTMLInputElement): void {
     event.preventDefault();
 
-    const nextGuesses = [...this.guesses()];
-
-    if (nextGuesses[index]) {
-      nextGuesses[index] = '';
-      this.guesses.set(nextGuesses);
+    if (this.guesses()[index]) {
+      this.setGuess(index, '');
       return;
     }
 
@@ -269,8 +276,7 @@ export class CryptogramsPage implements AfterViewInit {
       return;
     }
 
-    nextGuesses[previousIndex] = '';
-    this.guesses.set(nextGuesses);
+    this.setGuess(previousIndex, '');
 
     queueMicrotask(() => {
       this.suppressNextSelection = true;
@@ -322,11 +328,8 @@ export class CryptogramsPage implements AfterViewInit {
 
     event.preventDefault();
 
-    const nextGuesses = [...this.guesses()];
     const character = event.key.toUpperCase();
-
-    nextGuesses[index] = character;
-    this.guesses.set(nextGuesses);
+    this.setGuess(index, character);
 
     if (this.isCorrect()) {
       return;
@@ -344,6 +347,37 @@ export class CryptogramsPage implements AfterViewInit {
       puzzle.answer.split('').map((character) => (this.isLetter(character) ? '' : character)),
     );
     this.activeCharacterIndex.set(null);
+  }
+
+  private setGuess(index: number, character: string): void {
+    const puzzle = this.puzzle();
+    const nextGuesses = [...this.guesses()];
+    const encryptedCharacter = puzzle?.encrypted[index];
+
+    if (
+      this.fillOccurrencesAutomatically() &&
+      puzzle &&
+      encryptedCharacter &&
+      this.isLetter(encryptedCharacter)
+    ) {
+      puzzle.encrypted.split('').forEach((candidate, candidateIndex) => {
+        if (candidate === encryptedCharacter) {
+          nextGuesses[candidateIndex] = character;
+        }
+      });
+    } else {
+      nextGuesses[index] = character;
+    }
+
+    this.guesses.set(nextGuesses);
+  }
+
+  private readFillOccurrencesPreference(): boolean {
+    try {
+      return globalThis.localStorage?.getItem(this.fillOccurrencesStorageKey) === 'true';
+    } catch {
+      return false;
+    }
   }
 
   private queueWrappedWordHintUpdate(): void {

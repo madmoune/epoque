@@ -19,6 +19,46 @@
     }
 
     <section class="puzzle-area">
+      <aside class="pedmas-guide" aria-label="Ordre des opérations PEDMAS">
+        <div class="pedmas-heading">
+          <span>Ordre à suivre</span>
+          <strong>PEDMAS</strong>
+        </div>
+        <ol class="pedmas-steps" aria-label="Étapes de priorité">
+          <li class="pedmas-step">
+            <span class="pedmas-rank">1</span>
+            <strong class="pedmas-letter">P</strong>
+            <span class="pedmas-label">Parenthèses</span>
+          </li>
+          <li class="pedmas-step">
+            <span class="pedmas-rank">2</span>
+            <strong class="pedmas-letter">E</strong>
+            <span class="pedmas-label">Exposants</span>
+          </li>
+          <li class="pedmas-step same-priority">
+            <span class="pedmas-rank">3</span>
+            <strong class="pedmas-letter">D</strong>
+            <span class="pedmas-label">Division</span>
+          </li>
+          <li class="pedmas-step same-priority">
+            <span class="pedmas-rank">3</span>
+            <strong class="pedmas-letter">M</strong>
+            <span class="pedmas-label">Multiplication</span>
+          </li>
+          <li class="pedmas-step same-priority">
+            <span class="pedmas-rank">4</span>
+            <strong class="pedmas-letter">A</strong>
+            <span class="pedmas-label">Addition</span>
+          </li>
+          <li class="pedmas-step same-priority">
+            <span class="pedmas-rank">4</span>
+            <strong class="pedmas-letter">S</strong>
+            <span class="pedmas-label">Soustraction</span>
+          </li>
+        </ol>
+        <p class="pedmas-note"><strong>À retenir :</strong> D/M puis A/S se calculent de gauche à droite.</p>
+      </aside>
+
       <div class="problem" [style.--equation-size]="equationSize()" [innerHTML]="displayExpression()"></div>
 
       <label class="answer-group">

@@ -37,7 +37,7 @@ export class PathwaysService {
                 id: `tile-${index}`,
                 name: `Pièce ${index + 1}`,
                 ports,
-                pathData: this.createSmoothRandomPathData(ports),
+                pathData: this.createRandomPathData(ports),
             };
         });
 
@@ -109,15 +109,30 @@ export class PathwaysService {
     }
 
     private createRandomFullPath(slots: PathwaySlot[]): PathwaySlot[] {
-        const maxAttempts = 500;
+        const maxAttempts = 100;
+        const candidatePaths: PathwaySlot[][] = [];
+        const candidateKeys = new Set<string>();
 
         for (let attempt = 0; attempt < maxAttempts; attempt++) {
             const startSlot = this.getRandomItem(slots);
             const path = this.findHamiltonianPath(startSlot, slots);
 
             if (path.length === slots.length) {
-                return path;
+                const key = path.map((slot) => slot.id).join('|');
+
+                if (!candidateKeys.has(key)) {
+                    candidateKeys.add(key);
+                    candidatePaths.push(path);
+                }
+
+                if (candidatePaths.length >= 8) {
+                    return this.getRandomItem(candidatePaths);
+                }
             }
+        }
+
+        if (candidatePaths.length > 0) {
+            return this.getRandomItem(candidatePaths);
         }
 
         return this.createFallbackPath(slots);
@@ -142,11 +157,15 @@ export class PathwaysService {
                 this.getNeighborSlots(currentSlot, allSlots).filter(
                     (neighbor) => !visitedSlotIds.has(neighbor.id),
                 ),
-            ).sort(
-                (first, second) =>
-                    this.countUnvisitedNeighbors(first, allSlots, visitedSlotIds) -
-                    this.countUnvisitedNeighbors(second, allSlots, visitedSlotIds),
             );
+
+            if (Math.random() < 0.55) {
+                candidateNeighbors.sort(
+                    (first, second) =>
+                        this.countUnvisitedNeighbors(first, allSlots, visitedSlotIds) -
+                        this.countUnvisitedNeighbors(second, allSlots, visitedSlotIds),
+                );
+            }
 
             for (const neighbor of candidateNeighbors) {
                 visitedSlotIds.add(neighbor.id);
@@ -226,6 +245,25 @@ export class PathwaysService {
         return this.createSmoothConnectorPathData(ports[0], ports[1]);
     }
 
+    private createRandomPathData(ports: PathwayPort[]): string {
+        if (ports.length === 0) {
+            return '';
+        }
+
+        if (ports.length === 1) {
+            return this.getRandomItem([
+                this.createSmoothEndPathData(ports[0]),
+                this.createAngularEndPathData(ports[0]),
+            ]);
+        }
+
+        return this.getRandomItem([
+            this.createSmoothConnectorPathData(ports[0], ports[1]),
+            this.createAngularConnectorPathData(ports[0], ports[1]),
+            this.createQuadraticConnectorPathData(ports[0], ports[1]),
+        ]);
+    }
+
     private createSmoothEndPathData(port: PathwayPort): string {
         const start = this.getOuterPortPoint(port);
         const startVector = this.getInwardVector(port);
@@ -249,6 +287,27 @@ export class PathwaysService {
             `C ${this.formatPoint(firstControl)}`,
             `${this.formatPoint(secondControl)}`,
             `${this.formatPoint(end)}`,
+        ].join(' ');
+    }
+
+    private createAngularEndPathData(port: PathwayPort): string {
+        const start = this.getOuterPortPoint(port);
+        const inwardVector = this.getInwardVector(port);
+        const bend = this.clampPoint(
+            this.addVector(
+                start,
+                this.addVectors(
+                    this.scaleVector(inwardVector, this.randomInt(24, 40)),
+                    this.getPerpendicularOffset(inwardVector, this.randomInt(-18, 18)),
+                ),
+            ),
+        );
+        const end = this.getRandomInnerEndPoint(port);
+
+        return [
+            `M ${this.formatPoint(start)}`,
+            `L ${this.formatPoint(bend)}`,
+            `L ${this.formatPoint(end)}`,
         ].join(' ');
     }
 
@@ -287,6 +346,59 @@ export class PathwaysService {
             `M ${this.formatPoint(start)}`,
             `C ${this.formatPoint(firstControl)}`,
             `${this.formatPoint(secondControl)}`,
+            `${this.formatPoint(end)}`,
+        ].join(' ');
+    }
+
+    private createAngularConnectorPathData(
+        firstPort: PathwayPort,
+        secondPort: PathwayPort,
+    ): string {
+        const start = this.getOuterPortPoint(firstPort);
+        const end = this.getOuterPortPoint(secondPort);
+        const firstInwardVector = this.getInwardVector(firstPort);
+        const secondInwardVector = this.getInwardVector(secondPort);
+        const firstBend = this.clampPoint(
+            this.addVector(
+                start,
+                this.addVectors(
+                    this.scaleVector(firstInwardVector, this.randomInt(26, 42)),
+                    this.getPerpendicularOffset(firstInwardVector, this.randomInt(-12, 12)),
+                ),
+            ),
+        );
+        const secondBend = this.clampPoint(
+            this.addVector(
+                end,
+                this.addVectors(
+                    this.scaleVector(secondInwardVector, this.randomInt(26, 42)),
+                    this.getPerpendicularOffset(secondInwardVector, this.randomInt(-12, 12)),
+                ),
+            ),
+        );
+
+        return [
+            `M ${this.formatPoint(start)}`,
+            `L ${this.formatPoint(firstBend)}`,
+            `L ${this.formatPoint(secondBend)}`,
+            `L ${this.formatPoint(end)}`,
+        ].join(' ');
+    }
+
+    private createQuadraticConnectorPathData(
+        firstPort: PathwayPort,
+        secondPort: PathwayPort,
+    ): string {
+        const start = this.getOuterPortPoint(firstPort);
+        const end = this.getOuterPortPoint(secondPort);
+        const midpoint = this.clampPoint({
+            x: (start.x + end.x) / 2 + this.randomInt(-16, 16),
+            y: (start.y + end.y) / 2 + this.randomInt(-16, 16),
+        });
+
+        return [
+            `M ${this.formatPoint(start)}`,
+            `Q ${this.formatPoint(midpoint)}`,
             `${this.formatPoint(end)}`,
         ].join(' ');
     }

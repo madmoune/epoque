@@ -1,5 +1,15 @@
-import { Component, ElementRef, HostListener, ViewChild, computed, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import {
+  Component,
+  ElementRef,
+  HostListener,
+  OnDestroy,
+  QueryList,
+  ViewChild,
+  ViewChildren,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import {
   CustomKeyboardComponent,
@@ -10,13 +20,15 @@ import { CipherPuzzle, CipherType, CiphersService } from './ciphers.service';
 
 @Component({
   selector: 'app-ciphers-page',
-  imports: [FormsModule, RouterLink, PuzzleSuccessPopupComponent, CustomKeyboardComponent],
+  imports: [RouterLink, PuzzleSuccessPopupComponent, CustomKeyboardComponent],
   templateUrl: './ciphers.page.html',
   styleUrl: './ciphers.page.scss',
 })
-export class CiphersPage {
+export class CiphersPage implements OnDestroy {
   @ViewChild('answerField')
   private readonly answerField?: ElementRef<HTMLInputElement>;
+  @ViewChildren('letterField')
+  private readonly letterFields?: QueryList<ElementRef<HTMLInputElement>>;
   private suppressNextSelection = false;
 
   private readonly route = inject(ActivatedRoute);
@@ -25,6 +37,10 @@ export class CiphersPage {
   protected readonly selectedCipher = signal<CipherType>('caesar');
   protected readonly puzzle = signal<CipherPuzzle | null>(null);
   protected readonly answerInput = signal('');
+  protected readonly answerLetters = signal<string[]>([]);
+  protected readonly letterByLetter = signal(false);
+  protected readonly activeLetterIndex = signal(0);
+  protected readonly revealedLetterIndex = signal<number | null>(null);
   protected readonly hintLevel = signal(0);
   protected readonly isLoading = signal(true);
   protected readonly loadError = signal<string | null>(null);
@@ -48,8 +64,8 @@ export class CiphersPage {
     ],
   ];
   protected readonly pigpenXKeys = [
-    { top: 'S', right: 'T', bottom: 'U', left: 'V', dotted: false },
-    { top: 'W', right: 'X', bottom: 'Y', left: 'Z', dotted: true },
+    { top: 'U', right: 'T', bottom: 'S', left: 'V', dotted: false },
+    { top: 'Y', right: 'X', bottom: 'W', left: 'Z', dotted: true },
   ];
   protected readonly tapCodeGrid = [
     ['A', 'B', 'C', 'D', 'E'],
@@ -58,6 +74,7 @@ export class CiphersPage {
     ['Q', 'R', 'S', 'T', 'U'],
     ['V', 'W', 'X', 'Y', 'Z'],
   ];
+  private revealTimer: number | null = null;
 
   protected readonly isCorrect = computed(() => {
     const puzzle = this.puzzle();
@@ -135,8 +152,106 @@ export class CiphersPage {
     this.answerInput.set(value);
   }
 
+  protected updateAnswerFromEvent(event: Event): void {
+    if (event.target instanceof HTMLInputElement) {
+      this.updateAnswer(event.target.value);
+    }
+  }
+
+  protected toggleInputMode(): void {
+    const nextMode = !this.letterByLetter();
+
+    if (nextMode) {
+      const length = this.puzzle()?.normalizedAnswer.length ?? 0;
+      const letters = this.lettersFromValue(this.answerInput(), length);
+      this.answerLetters.set(letters);
+      this.letterByLetter.set(true);
+
+      const firstEmptyIndex = letters.findIndex((letter) => !letter);
+      this.focusLetterField(firstEmptyIndex >= 0 ? firstEmptyIndex : Math.max(0, length - 1));
+      return;
+    }
+
+    this.answerInput.set(this.answerLetters().join(''));
+    this.letterByLetter.set(false);
+    this.focusAnswerField(false);
+  }
+
+  protected updateAnswerLetterFromEvent(event: Event, index: number): void {
+    if (!(event.target instanceof HTMLInputElement)) return;
+
+    const letter = event.target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 1);
+    this.setAnswerLetter(index, letter);
+    event.target.value = letter;
+
+    if (letter && index < this.answerLetters().length - 1) {
+      this.focusLetterField(index + 1);
+    }
+  }
+
+  protected selectLetterInput(event: Event, index: number): void {
+    this.activeLetterIndex.set(index);
+    this.keyboardVisible.set(true);
+
+    if (event.target instanceof HTMLInputElement) {
+      event.target.select();
+    }
+  }
+
+  protected handleAnswerLetterKeydown(event: KeyboardEvent, index: number): void {
+    if (event.key === 'ArrowLeft' && index > 0) {
+      event.preventDefault();
+      this.focusLetterField(index - 1);
+      return;
+    }
+
+    if (event.key === 'ArrowRight' && index < this.answerLetters().length - 1) {
+      event.preventDefault();
+      this.focusLetterField(index + 1);
+      return;
+    }
+
+    if (event.key === 'Backspace' && !this.answerLetters()[index] && index > 0) {
+      event.preventDefault();
+      this.setAnswerLetter(index - 1, '');
+      this.focusLetterField(index - 1);
+      return;
+    }
+
+    if (event.key === 'Delete') {
+      event.preventDefault();
+      this.setAnswerLetter(index, '');
+    }
+  }
+
+  protected revealLetter(index: number): void {
+    this.revealedLetterIndex.set(index);
+
+    if (this.revealTimer !== null) {
+      window.clearTimeout(this.revealTimer);
+    }
+
+    this.revealTimer = window.setTimeout(() => {
+      this.revealedLetterIndex.set(null);
+      this.revealTimer = null;
+    }, 3000);
+  }
+
+  protected isLetterRevealed(index: number): boolean {
+    return this.revealedLetterIndex() === index;
+  }
+
+  protected revealedLetterFor(puzzle: CipherPuzzle, index: number): string {
+    return puzzle.normalizedAnswer[index]?.toUpperCase() ?? '';
+  }
+
   protected handleKeyboardKey(key: CustomKeyboardKey): void {
     if (this.isCorrect()) return;
+
+    if (this.letterByLetter()) {
+      this.handleLetterKeyboardKey(key);
+      return;
+    }
 
     if (key === 'backspace') {
       this.answerInput.update((answer) => answer.slice(0, -1));
@@ -173,6 +288,7 @@ export class CiphersPage {
     if (!(target instanceof Element)) return;
     if (
       target.closest('.answer-input') ||
+      target.closest('.answer-letter-input') ||
       target.closest('app-custom-keyboard') ||
       target.closest('app-puzzle-success-popup')
     ) {
@@ -186,10 +302,32 @@ export class CiphersPage {
   }
 
   protected nextPuzzle(): void {
-    this.puzzle.set(this.ciphersService.createPuzzle(this.selectedCipher()));
+    this.clearLetterReveal();
+    const nextPuzzle = this.ciphersService.createPuzzle(this.selectedCipher());
+    this.puzzle.set(nextPuzzle);
     this.answerInput.set('');
+    this.answerLetters.set(Array.from({ length: nextPuzzle.normalizedAnswer.length }, () => ''));
+    this.activeLetterIndex.set(0);
     this.hintLevel.set(0);
-    this.focusAnswerField(false);
+
+    if (this.letterByLetter()) {
+      this.focusLetterField(0);
+    } else {
+      this.focusAnswerField(false);
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.clearLetterReveal();
+  }
+
+  private clearLetterReveal(): void {
+    if (this.revealTimer !== null) {
+      window.clearTimeout(this.revealTimer);
+      this.revealTimer = null;
+    }
+
+    this.revealedLetterIndex.set(null);
   }
 
   private async loadPuzzle(): Promise<void> {
@@ -207,6 +345,65 @@ export class CiphersPage {
   private focusAnswerField(selectOnFocus = true): void {
     this.suppressNextSelection = !selectOnFocus;
     window.setTimeout(() => this.answerField?.nativeElement.focus());
+  }
+
+  private focusLetterField(index: number): void {
+    window.setTimeout(() => {
+      const fieldIndex = Math.max(0, Math.min(index, (this.letterFields?.length ?? 1) - 1));
+      const field = this.letterFields?.get(fieldIndex)?.nativeElement;
+      if (!field) return;
+
+      this.activeLetterIndex.set(fieldIndex);
+      field.focus();
+      field.select();
+    });
+  }
+
+  private handleLetterKeyboardKey(key: CustomKeyboardKey): void {
+    const index = this.activeLetterIndex();
+
+    if (key === 'backspace') {
+      if (this.answerLetters()[index]) {
+        this.setAnswerLetter(index, '');
+      } else if (index > 0) {
+        this.setAnswerLetter(index - 1, '');
+        this.focusLetterField(index - 1);
+      }
+      return;
+    }
+
+    if (key === 'clear') {
+      this.answerLetters.update((letters) => letters.map(() => ''));
+      this.answerInput.set('');
+      this.focusLetterField(index);
+      return;
+    }
+
+    if (key === 'space') return;
+
+    const letter = key.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 1);
+    if (!letter || index >= this.answerLetters().length) return;
+
+    this.setAnswerLetter(index, letter);
+    if (index < this.answerLetters().length - 1) {
+      this.focusLetterField(index + 1);
+    }
+  }
+
+  private setAnswerLetter(index: number, letter: string): void {
+    this.answerLetters.update((letters) => {
+      if (index < 0 || index >= letters.length) return letters;
+
+      const nextLetters = [...letters];
+      nextLetters[index] = letter;
+      return nextLetters;
+    });
+    this.answerInput.set(this.answerLetters().join(''));
+  }
+
+  private lettersFromValue(value: string, length: number): string[] {
+    const letters = value.toUpperCase().replace(/[^A-Z]/g, '').split('');
+    return Array.from({ length }, (_, index) => letters[index] ?? '');
   }
 
   private cipherFromRoute(value: string | null): CipherType {
@@ -244,13 +441,13 @@ export class CiphersPage {
     p: 'grid top right',
     q: 'grid top right left',
     r: 'grid top left',
-    s: 'angle angle-top',
+    s: 'angle angle-bottom',
     t: 'angle angle-right',
-    u: 'angle angle-bottom',
+    u: 'angle angle-top',
     v: 'angle angle-left',
-    w: 'angle angle-top',
+    w: 'angle angle-bottom',
     x: 'angle angle-right',
-    y: 'angle angle-bottom',
+    y: 'angle angle-top',
     z: 'angle angle-left',
   };
 

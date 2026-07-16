@@ -53,6 +53,102 @@ h1 {
   background: #fffaf2;
 }
 
+.pedmas-guide {
+  width: min(100%, 48rem);
+  box-sizing: border-box;
+  padding: 1rem;
+  border: 2px solid #d8a04b;
+  border-radius: 0.85rem;
+  background: #fff1d6;
+  color: #5b3a00;
+}
+
+.pedmas-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.pedmas-heading span {
+  color: #6f4c1c;
+  font-size: 0.75rem;
+  font-weight: 950;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.pedmas-heading strong {
+  color: #a45200;
+  font-size: 1.25rem;
+  letter-spacing: 0.16em;
+}
+
+.pedmas-steps {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pedmas-step {
+  display: grid;
+  grid-template-areas: 'rank letter' 'rank label';
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  min-width: 0;
+  gap: 0 0.35rem;
+  padding: 0.45rem 0.35rem;
+  border: 1px solid #e3bd7a;
+  border-radius: 0.55rem;
+  background: #fff;
+}
+
+.pedmas-step.same-priority {
+  background: #fff8eb;
+}
+
+.pedmas-rank {
+  display: grid;
+  grid-area: rank;
+  place-items: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 999px;
+  background: #6d3b00;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 950;
+}
+
+.pedmas-letter {
+  grid-area: letter;
+  color: #a45200;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.pedmas-label {
+  grid-area: label;
+  min-width: 0;
+  color: #6f4c1c;
+  font-size: 0.65rem;
+  font-weight: 850;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+.pedmas-note {
+  margin: 0.75rem 0 0;
+  color: #6f4c1c;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: center;
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;
@@ -193,9 +289,51 @@ button {
   .problem {
     padding: 0.5rem 0.25rem;
   }
+
+  .pedmas-guide {
+    padding: 0.75rem;
+  }
+
+  .pedmas-steps {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .pedmas-heading {
+    align-items: center;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
 }
 
 :host-context(html[data-theme='dark']) {
+  .pedmas-guide {
+    border-color: var(--border-strong);
+    background: var(--surface-soft);
+    color: var(--text);
+  }
+
+  .pedmas-heading span,
+  .pedmas-label,
+  .pedmas-note {
+    color: var(--muted-strong);
+  }
+
+  .pedmas-heading strong,
+  .pedmas-letter {
+    color: var(--accent);
+  }
+
+  .pedmas-step,
+  .pedmas-step.same-priority {
+    border-color: var(--border);
+    background: var(--surface-raised);
+  }
+
+  .pedmas-rank {
+    background: var(--accent);
+    color: var(--accent-contrast);
+  }
+
   .problem {
     color: var(--text) !important;
   }
