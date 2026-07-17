@@ -1,5 +1,4 @@
 import { Component, HostListener, computed, ElementRef, inject, signal, ViewChild } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import {
     PhraseCharacter,
@@ -14,7 +13,7 @@ import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzz
 
 @Component({
     selector: 'app-phrases-page',
-    imports: [RouterLink, FormsModule, PuzzleSuccessPopupComponent, CustomKeyboardComponent],
+    imports: [RouterLink, PuzzleSuccessPopupComponent, CustomKeyboardComponent],
     templateUrl: './phrase.page.html',
     styleUrl: './phrase.page.scss',
 })

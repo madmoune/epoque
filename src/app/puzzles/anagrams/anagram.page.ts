@@ -1,5 +1,4 @@
 import { Component, HostListener, computed, ElementRef, inject, signal, ViewChild } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AnagramService } from '../../puzzles/anagrams/anagram.service';
 import { AnagramWord } from '../../puzzles/anagrams/anagram-word.model';
@@ -14,7 +13,7 @@ type LetterLayoutMode = 'line' | 'circle';
 
 @Component({
     selector: 'app-anagrams-page',
-    imports: [FormsModule, RouterLink, PuzzleSuccessPopupComponent, CustomKeyboardComponent],
+    imports: [RouterLink, PuzzleSuccessPopupComponent, CustomKeyboardComponent],
     templateUrl: './anagram.page.html',
     styleUrl: './anagram.page.scss',
 })

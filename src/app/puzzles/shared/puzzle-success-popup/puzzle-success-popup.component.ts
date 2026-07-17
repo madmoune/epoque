@@ -1,6 +1,7 @@
 import { Component, EventEmitter, HostListener, inject, Input, Output, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { PuzzlePlayHistoryService } from '../../../puzzle-play-history.service';
+import { PuzzlePlaylistService } from '../../../puzzle-playlist.service';
 
 export type PuzzlePopupTone = 'success' | 'partial';
 
@@ -100,6 +101,7 @@ export class PuzzleSuccessPopupComponent {
 
   private readonly router = inject(Router);
   private readonly playHistory = inject(PuzzlePlayHistoryService);
+  private readonly playlistService = inject(PuzzlePlaylistService);
   protected readonly dismissed = signal(false);
 
   @Input({ required: true }) title = '';
@@ -120,6 +122,36 @@ export class PuzzleSuccessPopupComponent {
 
   protected get cameFromRandom(): boolean {
     return new URLSearchParams(this.router.url.split('?')[1]?.split('#')[0] ?? '').get('from') === 'random';
+  }
+
+  protected get cameFromPlaylist(): boolean {
+    return new URLSearchParams(this.router.url.split('?')[1]?.split('#')[0] ?? '').get('from') === 'playlist';
+  }
+
+  protected get primaryActionLabel(): string {
+    if (!this.cameFromPlaylist) {
+      return this.actionLabel;
+    }
+
+    return this.playlistService.progressFromUrl(this.router.url)?.nextRoute
+      ? 'Jeu suivant'
+      : 'Terminer la playlist';
+  }
+
+  protected handlePrimaryAction(): void {
+    if (!this.cameFromPlaylist) {
+      this.action.emit();
+      return;
+    }
+
+    const progress = this.playlistService.progressFromUrl(this.router.url);
+
+    if (progress?.nextRoute) {
+      void this.router.navigateByUrl(progress.nextRoute);
+      return;
+    }
+
+    void this.router.navigate(['/'], { fragment: 'playlists' });
   }
 
   protected playAnotherRandomOldestPuzzle(): void {

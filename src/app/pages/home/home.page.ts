@@ -1,6 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { PuzzlePlayHistoryService } from '../../puzzle-play-history.service';
+import { PuzzlePlaylist, PuzzlePlaylistService } from '../../puzzle-playlist.service';
 import { LAB_PUZZLE_TYPES } from '../lab/lab.puzzle-types';
 import {
   FirebasePuzzleCatalogService,
@@ -13,6 +14,10 @@ type PuzzleCard = {
   route: string;
   tag?: string;
   needsCompletion?: boolean;
+};
+
+type PlaylistPuzzleOption = PuzzleCard & {
+  categoryTitle: string;
 };
 
 type PuzzleCategory = {
@@ -37,11 +42,23 @@ export class HomePage {
   private readonly sortModeStorageKey = 'epique-home-sort-mode';
   private readonly router = inject(Router);
   private readonly playHistory = inject(PuzzlePlayHistoryService);
+  private readonly playlistService = inject(PuzzlePlaylistService);
   private readonly firebaseCatalog = inject(FirebasePuzzleCatalogService);
   private readonly labTypeNames = signal<Record<string, string>>({});
   private readonly labTypeStates = signal<Record<string, PuzzleCatalogApprovalState>>({});
 
   readonly sortMode = signal<HomeSortMode>(this.readSortMode());
+  readonly playlists = this.playlistService.playlists;
+  readonly newPlaylistName = signal('');
+  readonly editingPlaylistId = signal<string | null>(null);
+  readonly editingPlaylist = computed(() =>
+    this.playlists().find((playlist) => playlist.id === this.editingPlaylistId()) ?? null,
+  );
+  readonly playlistPuzzleOptions = computed<PlaylistPuzzleOption[]>(() =>
+    this.categories().flatMap((category) =>
+      category.puzzles.map((puzzle) => ({ ...puzzle, categoryTitle: category.title })),
+    ),
+  );
   readonly categories = computed<PuzzleCategory[]>(() => {
     const labCategory: PuzzleCategory = {
       id: 'enigmes',
@@ -391,6 +408,94 @@ export class HomePage {
   setSortMode(sortMode: HomeSortMode): void {
     this.sortMode.set(sortMode);
     this.writeSortMode(sortMode);
+  }
+
+  setNewPlaylistName(event: Event): void {
+    this.newPlaylistName.set((event.target as HTMLInputElement).value);
+  }
+
+  createPlaylist(): void {
+    const name = this.newPlaylistName().trim();
+    const playlist = this.playlistService.create(name || `Playlist ${this.playlists().length + 1}`);
+
+    this.newPlaylistName.set('');
+    this.editingPlaylistId.set(playlist.id);
+  }
+
+  editPlaylist(playlistId: string): void {
+    this.editingPlaylistId.set(playlistId);
+  }
+
+  closePlaylistEditor(): void {
+    this.editingPlaylistId.set(null);
+  }
+
+  renamePlaylist(playlistId: string, event: Event): void {
+    this.playlistService.update(playlistId, {
+      name: (event.target as HTMLInputElement).value,
+    });
+  }
+
+  isPuzzleInPlaylist(playlistId: string, route: string): boolean {
+    return this.playlistService.find(playlistId)?.routes.includes(route) ?? false;
+  }
+
+  togglePlaylistPuzzle(playlistId: string, route: string, event: Event): void {
+    const playlist = this.playlistService.find(playlistId);
+
+    if (!playlist) {
+      return;
+    }
+
+    const checked = (event.target as HTMLInputElement).checked;
+    const routes = checked
+      ? [...playlist.routes, ...(playlist.routes.includes(route) ? [] : [route])]
+      : playlist.routes.filter((candidate) => candidate !== route);
+
+    this.playlistService.update(playlistId, { routes });
+  }
+
+  removePlaylistPuzzle(playlistId: string, route: string): void {
+    const playlist = this.playlistService.find(playlistId);
+
+    if (playlist) {
+      this.playlistService.update(playlistId, {
+        routes: playlist.routes.filter((candidate) => candidate !== route),
+      });
+    }
+  }
+
+  movePlaylistPuzzle(playlistId: string, index: number, offset: number): void {
+    const playlist = this.playlistService.find(playlistId);
+    const targetIndex = index + offset;
+
+    if (!playlist || targetIndex < 0 || targetIndex >= playlist.routes.length) {
+      return;
+    }
+
+    const routes = [...playlist.routes];
+    [routes[index], routes[targetIndex]] = [routes[targetIndex], routes[index]];
+    this.playlistService.update(playlistId, { routes });
+  }
+
+  deletePlaylist(playlistId: string): void {
+    this.playlistService.remove(playlistId);
+
+    if (this.editingPlaylistId() === playlistId) {
+      this.editingPlaylistId.set(null);
+    }
+  }
+
+  playPlaylist(playlist: PuzzlePlaylist, randomOrder = false): void {
+    const url = this.playlistService.startUrl(playlist, randomOrder);
+
+    if (url) {
+      void this.router.navigateByUrl(url);
+    }
+  }
+
+  playlistPuzzleTitle(route: string): string {
+    return this.playlistPuzzleOptions().find((puzzle) => puzzle.route === route)?.title ?? route;
   }
 
   playRandomOldestPuzzle(): void {

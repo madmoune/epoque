@@ -21,6 +21,144 @@
         </div>
     </section>
 
+    <section class="playlists-panel" id="playlists" aria-labelledby="playlists-title">
+        <div class="playlists-heading">
+            <div>
+                <p class="eyebrow">À ton rythme</p>
+                <h2 id="playlists-title">Mes playlists</h2>
+                <p>Crée des parcours personnalisés et joue les jeux dans l’ordre choisi.</p>
+            </div>
+
+            <form class="playlist-create" (submit)="$event.preventDefault(); createPlaylist()">
+                <label for="new-playlist-name">Nouvelle playlist</label>
+                <div class="playlist-create-row">
+                    <input
+                        id="new-playlist-name"
+                        type="text"
+                        placeholder="Nom de la playlist"
+                        [value]="newPlaylistName()"
+                        (input)="setNewPlaylistName($event)"
+                    />
+                    <button type="submit">Créer</button>
+                </div>
+            </form>
+        </div>
+
+        @if (playlists().length > 0) {
+        <div class="playlist-list">
+            @for (playlist of playlists(); track playlist.id) {
+            <article class="playlist-card">
+                <div class="playlist-card-copy">
+                    <h3>{{ playlist.name }}</h3>
+                    <span>{{ playlist.routes.length }} jeu{{ playlist.routes.length === 1 ? '' : 'x' }}</span>
+                </div>
+                <div class="playlist-card-actions">
+                    <button type="button" [disabled]="playlist.routes.length === 0" (click)="playPlaylist(playlist)">
+                        Jouer dans l’ordre
+                    </button>
+                    <button
+                        type="button"
+                        class="secondary-button"
+                        [disabled]="playlist.routes.length === 0"
+                        (click)="playPlaylist(playlist, true)"
+                    >
+                        Jouer aléatoirement
+                    </button>
+                    <button type="button" class="secondary-button" (click)="editPlaylist(playlist.id)">
+                        Modifier
+                    </button>
+                    <button type="button" class="text-button" (click)="deletePlaylist(playlist.id)">
+                        Supprimer
+                    </button>
+                </div>
+            </article>
+            }
+        </div>
+        } @else {
+        <p class="playlist-empty">Aucune playlist pour le moment.</p>
+        }
+
+        @if (editingPlaylist(); as playlist) {
+        <div class="playlist-editor">
+            <div class="playlist-editor-heading">
+                <div>
+                    <p class="eyebrow">Édition</p>
+                    <h3>Préparer « {{ playlist.name }} »</h3>
+                </div>
+                <button type="button" class="text-button" (click)="closePlaylistEditor()">Fermer</button>
+            </div>
+
+            <label class="playlist-name-field" for="playlist-name">
+                <span>Nom</span>
+                <input
+                    id="playlist-name"
+                    type="text"
+                    [value]="playlist.name"
+                    (change)="renamePlaylist(playlist.id, $event)"
+                />
+            </label>
+
+            <div class="playlist-editor-grid">
+                <div class="playlist-picker">
+                    <h4>Choisir les jeux</h4>
+                    @for (category of categories(); track category.id) {
+                    <fieldset>
+                        <legend>{{ category.title }}</legend>
+                        @for (puzzle of category.puzzles; track puzzle.route) {
+                        <label class="playlist-option">
+                            <input
+                                type="checkbox"
+                                [checked]="isPuzzleInPlaylist(playlist.id, puzzle.route)"
+                                (change)="togglePlaylistPuzzle(playlist.id, puzzle.route, $event)"
+                            />
+                            <span>{{ puzzle.title }}</span>
+                        </label>
+                        }
+                    </fieldset>
+                    }
+                </div>
+
+                <div class="playlist-order">
+                    <h4>Ordre de la playlist</h4>
+                    @if (playlist.routes.length > 0) {
+                    <ol>
+                        @for (route of playlist.routes; track route; let index = $index) {
+                        <li>
+                            <span>{{ playlistPuzzleTitle(route) }}</span>
+                            <span class="playlist-order-actions">
+                                <button
+                                    type="button"
+                                    class="icon-button"
+                                    [disabled]="index === 0"
+                                    [attr.aria-label]="'Monter ' + playlistPuzzleTitle(route)"
+                                    (click)="movePlaylistPuzzle(playlist.id, index, -1)"
+                                >↑</button>
+                                <button
+                                    type="button"
+                                    class="icon-button"
+                                    [disabled]="index === playlist.routes.length - 1"
+                                    [attr.aria-label]="'Descendre ' + playlistPuzzleTitle(route)"
+                                    (click)="movePlaylistPuzzle(playlist.id, index, 1)"
+                                >↓</button>
+                                <button
+                                    type="button"
+                                    class="icon-button remove"
+                                    [attr.aria-label]="'Retirer ' + playlistPuzzleTitle(route)"
+                                    (click)="removePlaylistPuzzle(playlist.id, route)"
+                                >×</button>
+                            </span>
+                        </li>
+                        }
+                    </ol>
+                    } @else {
+                    <p class="playlist-empty">Ajoute des jeux pour commencer.</p>
+                    }
+                </div>
+            </div>
+        </div>
+        }
+    </section>
+
     <section class="category-list" aria-label="Catégories de puzzles">
         @for (category of categories(); track category.title) {
         <section class="category-card" [attr.id]="category.id">

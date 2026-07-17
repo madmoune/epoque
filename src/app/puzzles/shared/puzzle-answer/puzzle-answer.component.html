@@ -1,4 +1,4 @@
-<form class="answer-form" (ngSubmit)="submitAnswer()">
+<form class="answer-form" (submit)="submitAnswer($event)">
   <label for="puzzle-answer">{{ label }}</label>
 
   <div class="answer-row">
@@ -8,8 +8,8 @@
       type="text"
       autocomplete="off"
       [placeholder]="placeholder"
-      [ngModel]="answerInput()"
-      (ngModelChange)="updateAnswer($event)"
+      [value]="answerInput()"
+      (input)="updateAnswer($any($event.target).value)"
       [disabled]="isLocked()"
     />
 

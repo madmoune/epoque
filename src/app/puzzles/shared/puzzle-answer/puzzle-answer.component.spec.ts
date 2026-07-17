@@ -24,7 +24,7 @@ describe('PuzzleAnswerComponent', () => {
 
     input.value = 'bins';
     input.dispatchEvent(new Event('input'));
-    form.triggerEventHandler('ngSubmit');
+    form.triggerEventHandler('submit');
     fixture.detectChanges();
 
     const attempt = fixture.nativeElement.querySelector('.answer-attempt') as HTMLElement;
@@ -40,7 +40,7 @@ describe('PuzzleAnswerComponent', () => {
 
     input.value = 'bingo';
     input.dispatchEvent(new Event('input'));
-    form.triggerEventHandler('ngSubmit');
+    form.triggerEventHandler('submit');
     fixture.detectChanges();
 
     expect(input.disabled).toBe(true);
@@ -52,7 +52,7 @@ describe('PuzzleAnswerComponent', () => {
 
     input.value = 'nope';
     input.dispatchEvent(new Event('input'));
-    form.triggerEventHandler('ngSubmit');
+    form.triggerEventHandler('submit');
     fixture.detectChanges();
 
     const attempt = fixture.nativeElement.querySelector('.answer-attempt') as HTMLElement;

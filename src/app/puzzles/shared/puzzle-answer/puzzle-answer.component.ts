@@ -1,5 +1,4 @@
 import { Component, EventEmitter, Input, Output, computed, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { PuzzleSuccessPopupComponent } from '../puzzle-success-popup/puzzle-success-popup.component';
 
 export type PuzzleAnswerStatus = 'correct' | 'incorrect' | 'partial';
@@ -25,7 +24,7 @@ export interface PuzzlePartialAnswer {
 
 @Component({
   selector: 'app-puzzle-answer',
-  imports: [FormsModule, PuzzleSuccessPopupComponent],
+  imports: [PuzzleSuccessPopupComponent],
   templateUrl: './puzzle-answer.component.html',
   styleUrl: './puzzle-answer.component.scss',
 })
@@ -74,7 +73,9 @@ export class PuzzleAnswerComponent {
     this.formMessage.set('');
   }
 
-  protected submitAnswer(): void {
+  protected submitAnswer(event?: Event): void {
+    event?.preventDefault();
+
     if (this.isLocked()) {
       return;
     }

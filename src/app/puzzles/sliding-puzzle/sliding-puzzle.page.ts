@@ -129,13 +129,15 @@ export class SlidingPuzzlePage {
       ['#0b132b', '#1c2541', '#3a506b', '#5bc0be', '#fde74c'],
     ];
     const palette = palettes[this.randomInt(0, palettes.length - 1)];
-    const theme = this.randomInt(0, 5);
+    const theme = this.randomInt(0, 7);
 
     if (theme === 0) return this.createLandscapeArtwork(palette);
     if (theme === 1) return this.createOrbitalArtwork(palette);
     if (theme === 2) return this.createRocketArtwork(palette);
-    if (theme === 3) return this.createCircuitArtwork(palette);
-    if (theme === 4) return this.createSatelliteArtwork(palette);
+    if (theme === 3) return this.createSatelliteArtwork(palette);
+    if (theme === 4) return this.createHouseArtwork(palette);
+    if (theme === 5) return this.createHotAirBalloonArtwork(palette);
+    if (theme === 6) return this.createFlowerArtwork(palette);
     return this.createRobotArtwork(palette);
   }
 
@@ -189,25 +191,6 @@ export class SlidingPuzzlePage {
     return `<rect width="400" height="400" fill="${palette[0]}"/><path d="M0 ${roadY} H400" stroke="${palette[2]}" stroke-width="34" opacity=".32"/><path d="M${this.randomInt(70, 145)} -20 V420" stroke="${palette[3]}" stroke-width="28" opacity=".22"/><path d="M-20 330 L420 10" stroke="${palette[1]}" stroke-width="24" opacity=".22"/>${blocks}<path d="${route}" fill="none" stroke="${palette[4]}" stroke-width="16" stroke-linecap="round"/><path d="${route}" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".75"/><circle cx="${this.randomInt(40, 100)}" cy="${this.randomInt(270, 350)}" r="26" fill="${palette[2]}"/><rect x="${this.randomInt(265, 330)}" y="${this.randomInt(35, 95)}" width="48" height="48" rx="10" fill="${palette[4]}"/>`;
   }
 
-  private createCircuitArtwork(palette: string[]): string {
-    const traces = Array.from({ length: 16 }, () => {
-      const x1 = this.randomInt(10, 390);
-      const y1 = this.randomInt(10, 390);
-      const x2 = this.randomInt(10, 390);
-      const y2 = this.randomInt(10, 390);
-      return `<path d="M${x1} ${y1} H${x2} V${y2}" fill="none" stroke="${palette[this.randomInt(2, 4)]}" stroke-width="${this.randomInt(5, 10)}" stroke-linecap="round" opacity=".72"/>`;
-    }).join('');
-    const nodes = Array.from({ length: 28 }, () => {
-      const x = this.randomInt(16, 384);
-      const y = this.randomInt(16, 384);
-      return `<circle cx="${x}" cy="${y}" r="${this.randomInt(5, 13)}" fill="${palette[this.randomInt(1, 4)]}" stroke="${palette[0]}" stroke-width="4"/>`;
-    }).join('');
-    const chipX = this.randomInt(110, 210);
-    const chipY = this.randomInt(95, 215);
-
-    return `<rect width="400" height="400" fill="${palette[0]}"/><path d="M0 0 H400 V400 H0Z" fill="none" stroke="${palette[1]}" stroke-width="20" opacity=".36"/>${traces}<rect x="${chipX}" y="${chipY}" width="${this.randomInt(95, 145)}" height="${this.randomInt(82, 135)}" rx="16" fill="${palette[1]}" stroke="${palette[3]}" stroke-width="8"/><path d="M${chipX + 25} ${chipY + 35} H${chipX + 95} M${chipX + 25} ${chipY + 65} H${chipX + 115} M${chipX + 25} ${chipY + 95} H${chipX + 80}" stroke="${palette[4]}" stroke-width="8" stroke-linecap="round"/>${nodes}`;
-  }
-
   private createRocketArtwork(palette: string[]): string {
     const stars = Array.from({ length: 26 }, () => {
       const x = this.randomInt(10, 390);
@@ -234,6 +217,38 @@ export class SlidingPuzzlePage {
     }).join('');
 
     return `<rect width="400" height="400" fill="${palette[0]}"/>${stars}<circle cx="${earthX}" cy="${earthY}" r="${this.randomInt(72, 100)}" fill="${palette[1]}"/><path d="M${earthX - 54} ${earthY - 16} C${earthX - 12} ${earthY - 42} ${earthX + 30} ${earthY - 8} ${earthX + 58} ${earthY - 35} C${earthX + 42} ${earthY + 14} ${earthX - 6} ${earthY + 30} ${earthX - 42} ${earthY + 58}" fill="${palette[2]}" opacity=".78"/><path d="M${earthX - 78} ${earthY - 8} C${earthX + 8} ${earthY - 65} ${earthX + 120} ${earthY - 54} ${satelliteX + 22} ${satelliteY + 20}" fill="none" stroke="${palette[3]}" stroke-width="5" stroke-dasharray="10 10" opacity=".7"/><g transform="translate(${satelliteX} ${satelliteY}) rotate(${this.randomInt(-22, 22)} 45 34)"><rect x="22" y="14" width="48" height="42" rx="8" fill="${palette[4]}" stroke="#fff" stroke-width="5"/><rect x="-46" y="5" width="60" height="58" fill="${palette[1]}" stroke="${palette[3]}" stroke-width="5"/><rect x="78" y="5" width="60" height="58" fill="${palette[1]}" stroke="${palette[3]}" stroke-width="5"/><path d="M70 36 H78 M14 36 H22 M46 56 V88" stroke="#fff" stroke-width="6" stroke-linecap="round"/><circle cx="46" cy="94" r="8" fill="${palette[2]}"/></g>`;
+  }
+
+  private createHouseArtwork(palette: string[]): string {
+    const houseX = this.randomInt(125, 185);
+    const houseY = this.randomInt(155, 185);
+    const sunX = this.randomInt(55, 345);
+    const sunY = this.randomInt(55, 105);
+
+    return `<rect width="400" height="400" fill="${palette[0]}"/><circle cx="${sunX}" cy="${sunY}" r="${this.randomInt(28, 44)}" fill="${palette[4]}"/><path d="M0 300 Q100 255 205 305 T400 290 V400 H0Z" fill="${palette[1]}" opacity=".72"/><rect x="${houseX - 82}" y="${houseY + 44}" width="164" height="126" rx="8" fill="${palette[3]}" stroke="#fff" stroke-width="7"/><path d="M${houseX - 104} ${houseY + 50} L${houseX} ${houseY - 38} L${houseX + 104} ${houseY + 50}Z" fill="${palette[2]}" stroke="#fff" stroke-width="7" stroke-linejoin="round"/><rect x="${houseX - 25}" y="${houseY + 98}" width="50" height="72" rx="5" fill="${palette[0]}" stroke="#fff" stroke-width="6"/><rect x="${houseX - 65}" y="${houseY + 78}" width="34" height="34" rx="4" fill="${palette[4]}" stroke="#fff" stroke-width="5"/><rect x="${houseX + 31}" y="${houseY + 78}" width="34" height="34" rx="4" fill="${palette[4]}" stroke="#fff" stroke-width="5"/>`;
+  }
+
+  private createHotAirBalloonArtwork(palette: string[]): string {
+    const balloonX = this.randomInt(135, 265);
+    const balloonY = this.randomInt(95, 135);
+    const balloonWidth = this.randomInt(66, 86);
+
+    return `<rect width="400" height="400" fill="${palette[0]}"/><circle cx="70" cy="72" r="${this.randomInt(24, 38)}" fill="${palette[4]}" opacity=".92"/><path d="M0 305 Q120 265 235 310 T400 285 V400 H0Z" fill="${palette[1]}" opacity=".72"/><path d="M${balloonX} ${balloonY - 78} C${balloonX - balloonWidth} ${balloonY - 55} ${balloonX - balloonWidth} ${balloonY + 54} ${balloonX} ${balloonY + 74} C${balloonX + balloonWidth} ${balloonY + 54} ${balloonX + balloonWidth} ${balloonY - 55} ${balloonX} ${balloonY - 78}Z" fill="${palette[4]}" stroke="#fff" stroke-width="7"/><path d="M${balloonX - 13} ${balloonY - 68} V${balloonY + 63} M${balloonX + 13} ${balloonY - 68} V${balloonY + 63}" stroke="${palette[2]}" stroke-width="9" opacity=".9"/><path d="M${balloonX - 31} ${balloonY + 58} L${balloonX - 20} ${balloonY + 108} M${balloonX + 31} ${balloonY + 58} L${balloonX + 20} ${balloonY + 108}" stroke="#fff" stroke-width="6"/><rect x="${balloonX - 25}" y="${balloonY + 99}" width="50" height="33" rx="5" fill="${palette[2]}" stroke="#fff" stroke-width="6"/>`;
+  }
+
+  private createFlowerArtwork(palette: string[]): string {
+    const flowerX = this.randomInt(145, 255);
+    const flowerY = this.randomInt(115, 165);
+
+    const petals = Array.from({ length: 6 }, (_, index) => {
+      const angle = index * 60;
+      const radians = (angle * Math.PI) / 180;
+      const x = flowerX + Math.cos(radians) * 38;
+      const y = flowerY + Math.sin(radians) * 38;
+      return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${this.randomInt(20, 28)}" fill="${palette[4]}" stroke="#fff" stroke-width="5"/>`;
+    }).join('');
+
+    return `<rect width="400" height="400" fill="${palette[0]}"/><circle cx="${this.randomInt(55, 345)}" cy="${this.randomInt(52, 92)}" r="${this.randomInt(28, 42)}" fill="${palette[2]}"/><path d="M0 318 Q92 275 195 320 T400 300 V400 H0Z" fill="${palette[1]}" opacity=".8"/><path d="M${flowerX} ${flowerY + 34} V335" stroke="${palette[3]}" stroke-width="12" stroke-linecap="round"/><path d="M${flowerX - 4} 270 C${flowerX - 70} 240 ${flowerX - 72} 300 ${flowerX - 24} 303 M${flowerX + 5} 290 C${flowerX + 72} 258 ${flowerX + 76} 318 ${flowerX + 26} 322" fill="${palette[1]}" stroke="#fff" stroke-width="5"/>${petals}<circle cx="${flowerX}" cy="${flowerY}" r="24" fill="${palette[2]}" stroke="#fff" stroke-width="6"/>`;
   }
 
   private createRobotArtwork(palette: string[]): string {

@@ -16,11 +16,16 @@
       <span class="success-answer">{{ answer }}</span>
     }
   </span>
-  @if (showAction || showMenuLink) {
+  @if (showAction || showMenuLink || cameFromPlaylist) {
     <span class="popup-actions">
-      @if (showAction) {
-        <button type="button" (click)="action.emit()">{{ actionLabel }}</button>
-        @if (cameFromRandom) {
+      @if (showAction || cameFromPlaylist) {
+        <button type="button" (click)="handlePrimaryAction()">{{ primaryActionLabel }}</button>
+        @if (cameFromPlaylist && showAction) {
+          <button type="button" class="replay-action" (click)="action.emit()">
+            Rejouer
+          </button>
+        }
+        @if (cameFromRandom && !cameFromPlaylist) {
           <button type="button" class="random-action" (click)="playAnotherRandomOldestPuzzle()">
             Autre jeu au hasard
           </button>

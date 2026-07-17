@@ -25,7 +25,7 @@ export class NavigationPuzzlePage {
   protected readonly partials: PuzzlePartialAnswer[] = [
     {
       answer: 'TRAJET',
-      message: 'Oui, mais quels trajets?',
+      message: 'Oui, mais que représente ces trajets?',
     },
   ];
 

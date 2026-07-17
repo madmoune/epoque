@@ -7,7 +7,6 @@ import {
   signal,
   ViewChildren,
 } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import {
   CustomKeyboardComponent,
@@ -38,7 +37,7 @@ const CROSSMATH_DIGITS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 @Component({
   selector: 'app-crossmath-page',
-  imports: [FormsModule, RouterLink, PuzzleSuccessPopupComponent, CustomKeyboardComponent],
+  imports: [RouterLink, PuzzleSuccessPopupComponent, CustomKeyboardComponent],
   templateUrl: './crossmath.page.html',
   styleUrl: './crossmath.page.scss',
 })

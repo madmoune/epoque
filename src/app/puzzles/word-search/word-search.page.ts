@@ -1,6 +1,5 @@
 import { Component, ElementRef, HostListener, ViewChild, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { FormsModule } from '@angular/forms';
 import {
   WordSearchCell,
   WordSearchHiddenWord,
@@ -20,7 +19,7 @@ type GridPosition = {
 
 @Component({
   selector: 'app-word-search-page',
-  imports: [FormsModule, RouterLink, PuzzleSuccessPopupComponent, CustomKeyboardComponent],
+  imports: [RouterLink, PuzzleSuccessPopupComponent, CustomKeyboardComponent],
   templateUrl: './word-search.page.html',
   styleUrl: './word-search.page.scss',
 })
