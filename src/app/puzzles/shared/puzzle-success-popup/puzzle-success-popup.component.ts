@@ -1,4 +1,12 @@
-import { Component, EventEmitter, HostListener, inject, Input, Output, signal } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  HostListener,
+  inject,
+  Input,
+  Output,
+  signal,
+} from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { PuzzlePlayHistoryService } from '../../../puzzle-play-history.service';
 import { PuzzlePlaylistService } from '../../../puzzle-playlist.service';
@@ -16,6 +24,8 @@ export class PuzzleSuccessPopupComponent {
     '/anagrams',
     '/cryptograms',
     '/word-search',
+    '/word-ladder',
+    '/pivot-word',
     '/hidden-phrase',
     '/phrases',
     '/ciphers/caesar',
@@ -28,6 +38,7 @@ export class PuzzleSuccessPopupComponent {
     '/ciphers/semaphore',
     '/ciphers/nato',
     '/memory-grid',
+    '/symbol-pairs',
     '/mnemonic',
     '/sequences',
     '/crossmath',
@@ -58,6 +69,8 @@ export class PuzzleSuccessPopupComponent {
     anagrams: 'mots-langage',
     cryptograms: 'mots-langage',
     'word-search': 'mots-langage',
+    'word-ladder': 'mots-langage',
+    'pivot-word': 'mots-langage',
     'hidden-phrase': 'mots-langage',
     phrases: 'mots-langage',
     'ciphers/caesar': 'ciphers',
@@ -70,6 +83,7 @@ export class PuzzleSuccessPopupComponent {
     'ciphers/semaphore': 'ciphers',
     'ciphers/nato': 'ciphers',
     'memory-grid': 'memoire',
+    'symbol-pairs': 'memoire',
     mnemonic: 'memoire',
     sequences: 'nombres-calcul',
     crossmath: 'nombres-calcul',
@@ -121,11 +135,17 @@ export class PuzzleSuccessPopupComponent {
   }
 
   protected get cameFromRandom(): boolean {
-    return new URLSearchParams(this.router.url.split('?')[1]?.split('#')[0] ?? '').get('from') === 'random';
+    return (
+      new URLSearchParams(this.router.url.split('?')[1]?.split('#')[0] ?? '').get('from') ===
+      'random'
+    );
   }
 
   protected get cameFromPlaylist(): boolean {
-    return new URLSearchParams(this.router.url.split('?')[1]?.split('#')[0] ?? '').get('from') === 'playlist';
+    return (
+      new URLSearchParams(this.router.url.split('?')[1]?.split('#')[0] ?? '').get('from') ===
+      'playlist'
+    );
   }
 
   protected get primaryActionLabel(): string {

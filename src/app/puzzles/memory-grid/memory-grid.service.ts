@@ -6,30 +6,33 @@ import {
     PlayerMemoryGridCell,
 } from './memory-grid.model';
 
+export const MEMORY_GRID_COLORS: MemoryGridColor[] = [
+    'blue',
+    'red',
+    'gray',
+    'yellow',
+    'green',
+    'orange',
+    'pink',
+    'purple',
+];
+
+export const MEMORY_GRID_SHAPES: MemoryGridShape[] = [
+    'circle',
+    'square',
+    'rectangle',
+    'triangle',
+    'losange',
+    'pentagon',
+    'hexagon',
+];
+
 @Injectable({
     providedIn: 'root',
 })
 export class MemoryGridService {
-    readonly colors: MemoryGridColor[] = [
-        'blue',
-        'red',
-        'gray',
-        'yellow',
-        'green',
-        'orange',
-        'pink',
-        'purple',
-    ];
-
-    readonly shapes: MemoryGridShape[] = [
-        'circle',
-        'square',
-        'rectangle',
-        'triangle',
-        'losange',
-        'pentagon',
-        'hexagon',
-    ];
+    readonly colors = MEMORY_GRID_COLORS;
+    readonly shapes = MEMORY_GRID_SHAPES;
 
     createAnswerGrid(): MemoryGridCell[] {
         return Array.from({ length: 9 }, () => ({

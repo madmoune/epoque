@@ -26,6 +26,7 @@ type DragState = {
   pointerY: number;
   offsetX: number;
   offsetY: number;
+  previewWidth: number;
   startedOnBoard: boolean;
 };
 
@@ -59,9 +60,11 @@ type Edge = {
 export class TangramPage {
   private readonly gridDivisions = 50;
   private readonly gridStep = 100 / this.gridDivisions;
-  private readonly magneticSnapDistance = 3;
+  private readonly magneticSnapDistance = 4;
   private readonly longTangramUnit = 20 * Math.SQRT2;
   private readonly shortTangramUnit = 10 * Math.SQRT2;
+  private dragAnimationFrame: number | null = null;
+  private pendingDragPoint: Point | null = null;
 
   protected readonly pieces: TangramPiece[] = [
     {
@@ -139,7 +142,6 @@ export class TangramPage {
   protected readonly placedPieces = signal<PlacedPiece[]>([]);
   protected readonly targetPieces = signal<PlacedPiece[]>([]);
   protected readonly selectedPieceId = signal<string | null>(null);
-  protected readonly lastSelectedPieceId = signal<string | null>(null);
   protected readonly dragState = signal<DragState | null>(null);
   protected readonly pieceRotations = signal<PieceRotationMap>(
     Object.fromEntries(this.pieces.map((piece) => [piece.id, 0])),
@@ -153,6 +155,13 @@ export class TangramPage {
   protected readonly selectedPiece = computed(() => {
     const id = this.selectedPieceId();
     return id ? this.pieces.find((piece) => piece.id === id) ?? null : null;
+  });
+
+  protected readonly selectedPieceIsPlaced = computed(() => {
+    const id = this.selectedPieceId();
+    return (
+      id !== null && this.placedPieces().some((piece) => piece.pieceId === id)
+    );
   });
 
   protected readonly needsHint = computed(() =>
@@ -173,16 +182,28 @@ export class TangramPage {
 
   @HostListener('document:pointermove', ['$event'])
   protected movePiece(event: PointerEvent): void {
-    const drag = this.dragState();
-    if (!drag) {
+    if (!this.dragState()) {
       return;
     }
 
-    event.preventDefault();
-    this.dragState.set({
-      ...drag,
-      pointerX: event.clientX,
-      pointerY: event.clientY,
+    if (event.cancelable) {
+      event.preventDefault();
+    }
+
+    this.pendingDragPoint = { x: event.clientX, y: event.clientY };
+
+    if (this.dragAnimationFrame !== null) {
+      return;
+    }
+
+    if (typeof requestAnimationFrame !== 'function') {
+      this.flushPendingDragPoint();
+      return;
+    }
+
+    this.dragAnimationFrame = requestAnimationFrame(() => {
+      this.dragAnimationFrame = null;
+      this.flushPendingDragPoint();
     });
   }
 
@@ -193,17 +214,28 @@ export class TangramPage {
       return;
     }
 
-    event.preventDefault();
+    if (event.cancelable) {
+      event.preventDefault();
+    }
+
+    this.cancelPendingDragFrame();
     const board = document.querySelector<HTMLElement>('.tangram-board');
 
     let droppedOnBoard = false;
 
     if (board) {
       const bounds = board.getBoundingClientRect();
-      const x = ((event.clientX - bounds.left - drag.offsetX) / bounds.width) * 100;
-      const y = ((event.clientY - bounds.top - drag.offsetY) / bounds.height) * 100;
+      const x =
+        ((event.clientX - bounds.left - drag.offsetX) / bounds.width) * 100;
+      const y =
+        ((event.clientY - bounds.top - drag.offsetY) / bounds.height) * 100;
+      const pointerIsOnBoard =
+        event.clientX >= bounds.left &&
+        event.clientX <= bounds.right &&
+        event.clientY >= bounds.top &&
+        event.clientY <= bounds.bottom;
 
-      if (x >= 0 && x <= 100 && y >= 0 && y <= 100) {
+      if (pointerIsOnBoard) {
         this.placePiece(drag.pieceId, x, y);
         droppedOnBoard = true;
       }
@@ -218,20 +250,15 @@ export class TangramPage {
 
   @HostListener('document:pointercancel')
   protected cancelDrag(): void {
+    this.cancelPendingDragFrame();
     this.dragState.set(null);
   }
 
-  @HostListener('document:contextmenu', ['$event'])
-  protected rotateWithRightClick(event: MouseEvent): void {
-    if (!this.lastSelectedPieceId()) {
+  protected startTrayDrag(pieceId: string, event: PointerEvent): void {
+    if (event.button !== 0) {
       return;
     }
 
-    event.preventDefault();
-    this.rotateSelectedPiece();
-  }
-
-  protected startTrayDrag(pieceId: string, event: PointerEvent): void {
     event.preventDefault();
     this.capturePointer(event);
     const piece = this.getDefinition(pieceId);
@@ -244,18 +271,22 @@ export class TangramPage {
     );
 
     this.selectedPieceId.set(pieceId);
-    this.lastSelectedPieceId.set(pieceId);
     this.dragState.set({
       pieceId,
       pointerX: event.clientX,
       pointerY: event.clientY,
       offsetX: trayOffset.x,
       offsetY: trayOffset.y,
+      previewWidth: boardSize * (piece.width / 100),
       startedOnBoard: false,
     });
   }
 
   protected startBoardDrag(placedPiece: PlacedPiece, event: PointerEvent): void {
+    if (event.button !== 0) {
+      return;
+    }
+
     event.preventDefault();
     event.stopPropagation();
     this.capturePointer(event);
@@ -270,13 +301,14 @@ export class TangramPage {
     const anchorY = bounds.top + (placedPiece.y / 100) * bounds.height;
 
     this.selectedPieceId.set(placedPiece.pieceId);
-    this.lastSelectedPieceId.set(placedPiece.pieceId);
     this.dragState.set({
       pieceId: placedPiece.pieceId,
       pointerX: event.clientX,
       pointerY: event.clientY,
       offsetX: event.clientX - anchorX,
       offsetY: event.clientY - anchorY,
+      previewWidth:
+        bounds.width * (this.getDefinition(placedPiece.pieceId).width / 100),
       startedOnBoard: true,
     });
   }
@@ -284,7 +316,6 @@ export class TangramPage {
   protected selectPlacedPiece(pieceId: string, event: MouseEvent): void {
     event.stopPropagation();
     this.selectedPieceId.set(pieceId);
-    this.lastSelectedPieceId.set(pieceId);
   }
 
   protected clearSelection(): void {
@@ -293,13 +324,56 @@ export class TangramPage {
     }
   }
 
-  protected rotateSelectedPiece(): void {
-    const pieceId = this.lastSelectedPieceId();
+  protected selectTrayPiece(pieceId: string, event: MouseEvent): void {
+    event.stopPropagation();
+    this.selectedPieceId.set(pieceId);
+  }
+
+  protected placeSelectedPiece(event: MouseEvent): void {
+    const pieceId = this.selectedPieceId();
+    const board = event.currentTarget;
+
+    if (!pieceId || !(board instanceof HTMLElement)) {
+      return;
+    }
+
+    this.placePieceAtBoardPoint(pieceId, board, event.clientX, event.clientY);
+  }
+
+  protected placeSelectedPieceAtCenter(event: Event): void {
+    const pieceId = this.selectedPieceId();
+    const board = event.currentTarget;
+
+    if (!pieceId || !(board instanceof HTMLElement)) {
+      return;
+    }
+
+    event.preventDefault();
+    const bounds = board.getBoundingClientRect();
+    this.placePieceAtBoardPoint(
+      pieceId,
+      board,
+      bounds.left + bounds.width / 2,
+      bounds.top + bounds.height / 2,
+    );
+  }
+
+  protected rotatePieceFromShortcut(pieceId: string, event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.selectedPieceId.set(pieceId);
+    this.rotateSelectedPiece();
+  }
+
+  protected rotateSelectedPiece(direction: -1 | 1 = 1): void {
+    const pieceId = this.selectedPieceId();
     if (!pieceId) {
       return;
     }
 
-    const nextRotation = (this.pieceRotation(pieceId) + 45) % 360;
+    const nextRotation = this.normalizedRotation(
+      this.pieceRotation(pieceId) + direction * 45,
+    );
 
     this.pieceRotations.update((rotations) => ({
       ...rotations,
@@ -318,10 +392,18 @@ export class TangramPage {
     );
   }
 
+  protected returnSelectedPieceToTray(): void {
+    const pieceId = this.selectedPieceId();
+
+    if (pieceId && this.selectedPieceIsPlaced()) {
+      this.returnPieceToTray(pieceId);
+    }
+  }
+
   protected resetBoard(): void {
     this.placedPieces.set([]);
     this.selectedPieceId.set(null);
-    this.lastSelectedPieceId.set(null);
+    this.cancelPendingDragFrame();
     this.dragState.set(null);
     this.pieceRotations.set(
       Object.fromEntries(this.pieces.map((piece) => [piece.id, 0])),
@@ -372,7 +454,6 @@ export class TangramPage {
       [compatiblePiece.id]: hintPiece.rotation,
     }));
     this.selectedPieceId.set(compatiblePiece.id);
-    this.lastSelectedPieceId.set(compatiblePiece.id);
   }
 
   protected getDefinition(pieceId: string): TangramPiece {
@@ -392,13 +473,16 @@ export class TangramPage {
 
   protected dragPreviewStyle(drag: DragState): Record<string, string> {
     const piece = this.getDefinition(drag.pieceId);
-    const scale = 3.2;
+    const x = drag.pointerX - drag.offsetX;
+    const y = drag.pointerY - drag.offsetY;
+
     return {
-      left: `${drag.pointerX - drag.offsetX}px`,
-      top: `${drag.pointerY - drag.offsetY}px`,
-      width: `${piece.width * scale}px`,
+      width: `${drag.previewWidth}px`,
       aspectRatio: `${piece.width} / ${piece.height}`,
-      transform: this.pieceTransform(piece, this.pieceRotation(piece.id)),
+      transform: `translate3d(${x}px, ${y}px, 0) ${this.pieceTransform(
+        piece,
+        this.pieceRotation(piece.id),
+      )}`,
     };
   }
 
@@ -427,7 +511,13 @@ export class TangramPage {
 
   private placePiece(pieceId: string, x: number, y: number): void {
     const rotation = this.pieceRotation(pieceId);
-    const position = this.getSnappedPosition(pieceId, x, y, rotation);
+    const snappedPosition = this.getSnappedPosition(pieceId, x, y, rotation);
+    const position = this.keepPieceInsideBoard(
+      pieceId,
+      snappedPosition.x,
+      snappedPosition.y,
+      rotation,
+    );
     const nextPiece: PlacedPiece = {
       pieceId,
       x: position.x,
@@ -440,7 +530,6 @@ export class TangramPage {
       nextPiece,
     ]);
     this.selectedPieceId.set(pieceId);
-    this.lastSelectedPieceId.set(pieceId);
   }
 
   private getSnappedPosition(
@@ -1287,12 +1376,89 @@ export class TangramPage {
     };
   }
 
+  private placePieceAtBoardPoint(
+    pieceId: string,
+    board: HTMLElement,
+    clientX: number,
+    clientY: number,
+  ): void {
+    const bounds = board.getBoundingClientRect();
+
+    if (bounds.width === 0 || bounds.height === 0) {
+      return;
+    }
+
+    const piece = this.getDefinition(pieceId);
+    const centerOffset = this.rotatedCenterOffset(
+      piece,
+      this.pieceRotation(pieceId),
+      bounds.width,
+    );
+    const x = ((clientX - bounds.left - centerOffset.x) / bounds.width) * 100;
+    const y = ((clientY - bounds.top - centerOffset.y) / bounds.height) * 100;
+
+    this.placePiece(pieceId, x, y);
+  }
+
+  private keepPieceInsideBoard(
+    pieceId: string,
+    x: number,
+    y: number,
+    rotation: number,
+  ): Point {
+    const vertices = this.transformedVertices(
+      this.getDefinition(pieceId),
+      x,
+      y,
+      rotation,
+    );
+    const minX = Math.min(...vertices.map((point) => point.x));
+    const maxX = Math.max(...vertices.map((point) => point.x));
+    const minY = Math.min(...vertices.map((point) => point.y));
+    const maxY = Math.max(...vertices.map((point) => point.y));
+
+    return {
+      x: x + (minX < 0 ? -minX : maxX > 100 ? 100 - maxX : 0),
+      y: y + (minY < 0 ? -minY : maxY > 100 ? 100 - maxY : 0),
+    };
+  }
+
+  private flushPendingDragPoint(): void {
+    const point = this.pendingDragPoint;
+    this.pendingDragPoint = null;
+
+    if (!point) {
+      return;
+    }
+
+    this.dragState.update((drag) =>
+      drag
+        ? {
+            ...drag,
+            pointerX: point.x,
+            pointerY: point.y,
+          }
+        : null,
+    );
+  }
+
+  private cancelPendingDragFrame(): void {
+    if (
+      this.dragAnimationFrame !== null &&
+      typeof cancelAnimationFrame === 'function'
+    ) {
+      cancelAnimationFrame(this.dragAnimationFrame);
+    }
+
+    this.dragAnimationFrame = null;
+    this.pendingDragPoint = null;
+  }
+
   private returnPieceToTray(pieceId: string): void {
     this.placedPieces.update((pieces) =>
       pieces.filter((piece) => piece.pieceId !== pieceId),
     );
     this.selectedPieceId.set(pieceId);
-    this.lastSelectedPieceId.set(pieceId);
   }
 
   private capturePointer(event: PointerEvent): void {

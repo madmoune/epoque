@@ -1,0 +1,154 @@
+<main class="page">
+  <a routerLink="/" fragment="mots-langage" class="back-link">Retour au menu</a>
+
+  <section class="shell">
+    <header class="header">
+      <p class="eyebrow">Échelle de mots</p>
+      <h1>Transforme le mot</h1>
+      <p class="intro">
+        Change une seule lettre à la fois et atteins la cible avec le moins de changements possible.
+        Chaque étape doit former un mot français valide.
+      </p>
+    </header>
+
+    @if (isLoading()) {
+      <p>Préparation de l’échelle…</p>
+    } @else if (loadError()) {
+      <p class="error">{{ loadError() }}</p>
+    } @else if (puzzle(); as currentPuzzle) {
+      <section class="game-panel">
+        <div class="challenge-summary" aria-label="Départ et objectif">
+          <div class="endpoint start-endpoint">
+            <span>Départ</span>
+            <strong>{{ currentPuzzle.start }}</strong>
+          </div>
+          <div class="challenge-arrow" aria-hidden="true">
+            <span>→</span>
+            <small>{{ currentPuzzle.minimumMoves }} changements</small>
+          </div>
+          <div class="endpoint target-endpoint">
+            <span>Objectif</span>
+            <strong>{{ currentPuzzle.target }}</strong>
+          </div>
+        </div>
+
+        <div class="progress-strip" aria-label="Progression">
+          <span
+            ><strong>{{ moveCount() }} / {{ currentPuzzle.minimumMoves }}</strong> changements</span
+          >
+          <span
+            ><strong>{{ remainingMoves() }}</strong>
+            {{ remainingMoves() === 1 ? 'restant' : 'restants' }}</span
+          >
+          <span
+            ><strong>{{ hintCount() }}</strong> indices</span
+          >
+        </div>
+
+        <ol class="ladder-list" aria-label="Mots de l’échelle">
+          @for (word of ladder(); track $index; let stepIndex = $index) {
+            <li
+              class="ladder-step"
+              [class.hinted-step]="isHintedWord(word)"
+              [class.current-step]="stepIndex === ladder().length - 1"
+            >
+              <span class="step-label">
+                {{ stepIndex === 0 ? 'Départ' : 'Étape ' + stepIndex }}
+              </span>
+              <span class="word-tiles" [attr.aria-label]="word">
+                @for (letter of letters(word); track $index; let letterIndex = $index) {
+                  <span
+                    class="letter-box"
+                    [class.changed]="isChangedLetter(stepIndex, letterIndex)"
+                  >
+                    {{ letter }}
+                  </span>
+                }
+              </span>
+              @if (isHintedWord(word)) {
+                <span class="hint-badge">Indice</span>
+              }
+            </li>
+          }
+        </ol>
+
+        @if (!isSolved() && remainingMoves() > 0) {
+          <form class="word-entry" (submit)="$event.preventDefault(); submitWord()">
+            <label for="word-ladder-answer">Prochain mot</label>
+            <div class="entry-row">
+              <input
+                #wordInput
+                id="word-ladder-answer"
+                class="answer-input"
+                type="text"
+                autocomplete="off"
+                autocapitalize="characters"
+                spellcheck="false"
+                [attr.maxlength]="currentPuzzle.letterCount"
+                [value]="answerInput()"
+                (input)="updateAnswer($any($event.target).value)"
+                aria-describedby="word-ladder-help word-ladder-feedback"
+              />
+              <button type="submit" [disabled]="answerInput().length === 0">Ajouter</button>
+            </div>
+            <small id="word-ladder-help">
+              Les accents peuvent être omis. Appuie sur Entrée pour ajouter le mot.
+            </small>
+          </form>
+        }
+
+        <div id="word-ladder-feedback" class="feedback-zone" aria-live="polite">
+          @if (feedback(); as currentFeedback) {
+            <p
+              class="feedback"
+              [class.feedback-error]="currentFeedback.tone === 'error'"
+              [class.feedback-hint]="currentFeedback.tone === 'hint'"
+            >
+              {{ currentFeedback.text }}
+            </p>
+          }
+        </div>
+
+        <div class="actions">
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="useHint()"
+            [disabled]="isSolved() || remainingMoves() === 0"
+          >
+            Indice
+          </button>
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="undoLastWord()"
+            [disabled]="ladder().length <= 1 || isSolved()"
+          >
+            Annuler
+          </button>
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="restartPuzzle()"
+            [disabled]="ladder().length <= 1"
+          >
+            Recommencer
+          </button>
+          <button type="button" class="secondary-button" (click)="newPuzzle()">
+            Nouvelle échelle
+          </button>
+        </div>
+      </section>
+
+      @if (isSolved()) {
+        <app-puzzle-success-popup
+          title="Échelle complétée!"
+          [message]="successMessage()"
+          [answer]="successAnswer()"
+          actionLabel="Nouvelle échelle"
+          (action)="newPuzzle()"
+        />
+      }
+    }
+  </section>
+</main>

@@ -37,6 +37,16 @@ export const routes: Routes = [
       import('./puzzles/word-search/word-search.page').then((m) => m.WordSearchPage),
   },
   {
+    path: 'word-ladder',
+    loadComponent: () =>
+      import('./puzzles/word-ladder/word-ladder.page').then((m) => m.WordLadderPage),
+  },
+  {
+    path: 'pivot-word',
+    loadComponent: () =>
+      import('./puzzles/pivot-word/pivot-word.page').then((m) => m.PivotWordPage),
+  },
+  {
     path: 'hidden-phrase',
     loadComponent: () =>
       import('./puzzles/hidden-phrase/hidden-phrase.page').then((m) => m.HiddenPhrasePage),
@@ -49,6 +59,11 @@ export const routes: Routes = [
     path: 'memory-grid',
     loadComponent: () =>
       import('./puzzles/memory-grid/memory-grid.page').then((m) => m.MemoryGridPage),
+  },
+  {
+    path: 'symbol-pairs',
+    loadComponent: () =>
+      import('./puzzles/symbol-pairs/symbol-pairs.page').then((m) => m.SymbolPairsPage),
   },
   {
     path: 'jigsaw-grid',
@@ -148,8 +163,7 @@ export const routes: Routes = [
   },
   {
     path: 'zebra',
-    loadComponent: () =>
-      import('./puzzles/zebra/zebra.page').then((m) => m.ZebraPage),
+    loadComponent: () => import('./puzzles/zebra/zebra.page').then((m) => m.ZebraPage),
   },
   {
     path: 'tic-tac-toe',

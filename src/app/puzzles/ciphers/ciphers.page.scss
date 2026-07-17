@@ -54,6 +54,13 @@ h1 {
   background: #fcf8fd;
 }
 
+.cipher-workspace {
+  display: grid;
+  place-items: center;
+  gap: 1rem;
+  width: 100%;
+}
+
 .cipher-tabs,
 .actions {
   display: flex;
@@ -767,6 +774,35 @@ input.correct {
   justify-items: center;
   gap: 0.2rem;
   color: #1f7a3d;
+}
+
+@media (max-width: 700px), (hover: none) and (pointer: coarse) {
+  .puzzle-area.keyboard-open .cipher-workspace {
+    position: sticky;
+    top: 0.45rem;
+    max-height: calc(100dvh - 12.5rem - env(safe-area-inset-bottom));
+    box-sizing: border-box;
+    overflow: auto;
+    padding: 0.55rem;
+    background: #fff;
+    gap: 0.55rem;
+  }
+
+  .puzzle-area.keyboard-open .encoded-word {
+    max-height: 8.5rem;
+    overflow: auto;
+    padding: 0.35rem;
+  }
+
+  .puzzle-area.keyboard-open .encoded-word.nato-word > .encoded-token {
+    min-width: 2.98rem;
+    padding-inline: 0.1rem;
+    font-size: 0.56rem;
+  }
+
+  .puzzle-area.keyboard-open .legend {
+    display: none;
+  }
 }
 
 @media (max-width: 600px) {

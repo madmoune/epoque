@@ -13,7 +13,7 @@
     } @else if (loadError()) {
       <p class="error">{{ loadError() }}</p>
     } @else if (puzzle(); as currentPuzzle) {
-      <section class="puzzle-area">
+      <section class="puzzle-area" [class.keyboard-open]="keyboardVisible()">
         <p class="cipher-note">{{ currentPuzzle.note }}</p>
 
         @if (selectedCipher() === 'caesar' && currentPuzzle.caesarShift !== null) {
@@ -22,6 +22,7 @@
           </p>
         }
 
+        <div class="cipher-workspace">
         <div
           class="encoded-word"
           [class.symbolic]="selectedCipher() === 'pigpen' || selectedCipher() === 'braille' || selectedCipher() === 'semaphore'"
@@ -239,6 +240,7 @@
             />
           </label>
         }
+        </div>
 
         <app-custom-keyboard
           [rows]="letterKeyboardRows"

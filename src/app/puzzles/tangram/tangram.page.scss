@@ -26,12 +26,37 @@ h1 {
   margin-top: 0;
 }
 
+.quick-guide {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--border, #ddd);
+  border-radius: 0.875rem;
+  background: var(--surface-soft, #f7f7f7);
+
+  p {
+    margin: 0;
+    color: var(--muted-strong, #555);
+    line-height: 1.4;
+  }
+
+  span {
+    flex: 0 0 auto;
+    color: var(--muted, #777);
+    font-size: 0.85rem;
+    font-weight: 800;
+  }
+}
+
 .game-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 14rem;
   align-items: start;
   gap: 1.5rem;
-  margin-top: 2rem;
+  margin-top: 1rem;
 }
 
 .board-section {
@@ -52,6 +77,20 @@ h1 {
     var(--surface-soft, #f5f5f5);
   background-size: 2% 2%;
   touch-action: none;
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease;
+
+  &.has-selection {
+    border-color: var(--focus, #147d70);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus, #147d70) 24%, transparent);
+    cursor: crosshair;
+  }
+
+  &:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--focus, #147d70) 55%, transparent);
+    outline-offset: 3px;
+  }
 }
 
 .empty-board {
@@ -92,6 +131,13 @@ h1 {
   touch-action: none;
   user-select: none;
   transform-origin: 0 0;
+  will-change: left, top, transform, opacity;
+  transition:
+    left 140ms ease-out,
+    top 140ms ease-out,
+    transform 140ms ease-out,
+    filter 120ms ease,
+    opacity 100ms ease;
 
   &:active {
     cursor: grabbing;
@@ -100,6 +146,10 @@ h1 {
   &.selected {
     z-index: 2;
     filter: drop-shadow(0 0 0.35rem var(--focus, #147d70));
+  }
+
+  &.dragging {
+    opacity: 0.16;
   }
 
   svg {
@@ -113,6 +163,82 @@ h1 {
   polygon {
     stroke: none;
   }
+}
+
+.piece-controls {
+  display: flex;
+  min-height: 4rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border, #ddd);
+  border-radius: 0.875rem;
+  background: var(--surface-soft, #f7f7f7);
+
+  > p {
+    margin: 0;
+    color: var(--muted, #777);
+    font-size: 0.9rem;
+  }
+
+  &.active {
+    border-color: color-mix(in srgb, var(--focus, #147d70) 45%, var(--border, #ddd));
+  }
+}
+
+.selected-piece-info {
+  display: grid;
+  min-width: 0;
+  gap: 0.15rem;
+
+  span {
+    color: var(--muted, #777);
+    font-size: 0.7rem;
+    font-weight: 850;
+    text-transform: uppercase;
+  }
+
+  strong {
+    overflow: hidden;
+    font-size: 0.9rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.piece-control-buttons {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.piece-control-button,
+.clear-selection-button {
+  min-height: 2.6rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--border, #ddd);
+  background: var(--surface-raised, #fff);
+  color: var(--text, #222);
+}
+
+.piece-control-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+
+  span {
+    font-size: 1.15rem;
+    line-height: 1;
+  }
+}
+
+.clear-selection-button {
+  min-width: 2.6rem;
+  padding-inline: 0.5rem;
+  font-size: 1.2rem;
 }
 
 .piece-tray {
@@ -146,6 +272,10 @@ h1 {
   cursor: grab;
   touch-action: none;
   user-select: none;
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease,
+    opacity 100ms ease;
 
   &:active {
     cursor: grabbing;
@@ -154,6 +284,10 @@ h1 {
   &.selected {
     border-color: var(--focus, #147d70);
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus, #147d70) 35%, transparent);
+  }
+
+  &.dragging {
+    opacity: 0.28;
   }
 }
 
@@ -180,10 +314,13 @@ h1 {
 .drag-preview {
   position: fixed;
   z-index: 100;
+  top: 0;
+  left: 0;
   pointer-events: none;
-  opacity: 0.9;
+  opacity: 0.96;
   filter: drop-shadow(0 0.75rem 1rem rgb(0 0 0 / 28%));
   transform-origin: 0 0;
+  will-change: transform;
 
   svg {
     display: block;
@@ -200,6 +337,7 @@ h1 {
 .actions {
   display: flex;
   flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 0.75rem;
   margin-top: 1.5rem;
 }
@@ -275,14 +413,65 @@ button {
     display: none;
   }
 
+  .quick-guide {
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    padding: 0.55rem 0.65rem;
+
+    p {
+      font-size: 0.78rem;
+    }
+
+    span {
+      font-size: 0.72rem;
+    }
+  }
+
   .game-layout {
     gap: 0.75rem;
-    margin-top: 0.75rem;
+    margin-top: 0.5rem;
   }
 
   .tangram-board {
     width: min(100%, 52dvh);
     border-radius: 0.75rem;
+  }
+
+  .piece-controls {
+    min-height: 3.5rem;
+    align-items: stretch;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+  }
+
+  .selected-piece-info {
+    align-content: center;
+    max-width: 6.5rem;
+  }
+
+  .piece-control-buttons {
+    flex: 1;
+    justify-content: flex-end;
+    gap: 0.25rem;
+  }
+
+  .piece-control-button,
+  .clear-selection-button {
+    min-height: 2.7rem;
+    padding: 0.45rem;
+    font-size: 0.72rem;
+  }
+
+  .piece-control-button {
+    flex: 1 1 auto;
+    justify-content: center;
+    gap: 0.15rem;
+  }
+
+  .clear-selection-button {
+    min-width: 2.5rem;
+    flex: 0 0 2.5rem;
   }
 
   .piece-tray {
@@ -310,6 +499,24 @@ button {
   }
 
   .actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     margin-top: 0.75rem;
+
+    button {
+      width: 100%;
+    }
+
+    button:last-child {
+      grid-column: 1 / -1;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tangram-board,
+  .board-piece,
+  .piece-button {
+    transition: none;
   }
 }

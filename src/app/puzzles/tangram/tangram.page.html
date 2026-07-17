@@ -9,12 +9,80 @@
       autre pièce sur un côté complet.
     </p>
 
+    <div class="quick-guide" id="tangram-help">
+      <p>
+        <strong>Mode rapide :</strong> touche une pièce, puis touche le plateau. Tu peux aussi la
+        glisser.
+      </p>
+      <span>{{ placedPieces().length }} / {{ pieces.length }} pièces</span>
+    </div>
+
     <div class="game-layout">
       <section class="board-section">
+        <div class="piece-controls" [class.active]="selectedPiece()">
+          @if (selectedPiece(); as piece) {
+            <div class="selected-piece-info" aria-live="polite">
+              <span>Pièce active</span>
+              <strong>{{ piece.name }}</strong>
+            </div>
+
+            <div class="piece-control-buttons">
+              <button
+                type="button"
+                class="piece-control-button"
+                aria-label="Pivoter la pièce vers la gauche"
+                (click)="rotateSelectedPiece(-1)"
+              >
+                <span aria-hidden="true">↶</span>
+                Gauche
+              </button>
+              <button
+                type="button"
+                class="piece-control-button"
+                aria-label="Pivoter la pièce vers la droite"
+                (click)="rotateSelectedPiece(1)"
+              >
+                <span aria-hidden="true">↷</span>
+                Droite
+              </button>
+              <button
+                type="button"
+                class="piece-control-button"
+                (click)="returnSelectedPieceToTray()"
+                [disabled]="!selectedPieceIsPlaced()"
+              >
+                Retirer
+              </button>
+              <button
+                type="button"
+                class="clear-selection-button"
+                aria-label="Désélectionner la pièce"
+                (click)="clearSelection()"
+              >
+                ×
+              </button>
+            </div>
+          } @else {
+            <p>Sélectionne une pièce pour la placer ou la faire pivoter.</p>
+          }
+        </div>
+
         <div
           class="tangram-board"
-          aria-label="Plateau de tangram"
-          (pointerdown)="clearSelection()"
+          [class.has-selection]="selectedPieceId()"
+          [class.dragging]="dragState()"
+          [attr.aria-label]="
+            'Plateau de tangram, ' +
+            placedPieces().length +
+            ' sur ' +
+            pieces.length +
+            ' pièces placées'
+          "
+          aria-describedby="tangram-help"
+          tabindex="0"
+          (click)="placeSelectedPiece($event)"
+          (keydown.enter)="placeSelectedPieceAtCenter($event)"
+          (keydown.space)="placeSelectedPieceAtCenter($event)"
         >
           <svg
             class="silhouette"
@@ -40,10 +108,14 @@
               type="button"
               class="board-piece"
               [class.selected]="selectedPieceId() === piece.id"
+              [class.dragging]="dragState()?.pieceId === piece.id"
               [style]="pieceStyle(placedPiece)"
               (pointerdown)="startBoardDrag(placedPiece, $event)"
               (click)="selectPlacedPiece(piece.id, $event)"
-              [attr.aria-label]="'Déplacer ' + piece.name"
+              (dblclick)="rotatePieceFromShortcut(piece.id, $event)"
+              (contextmenu)="rotatePieceFromShortcut(piece.id, $event)"
+              [attr.aria-pressed]="selectedPieceId() === piece.id"
+              [attr.aria-label]="'Sélectionner ou déplacer ' + piece.name"
             >
               <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
                 <polygon [attr.points]="piece.points" [attr.fill]="piece.color"></polygon>
@@ -52,10 +124,9 @@
           }
 
           @if (placedPieces().length === 0) {
-            <p class="empty-board">Dépose les pièces ici</p>
+            <p class="empty-board">Choisis une pièce, puis touche ici</p>
           }
         </div>
-
       </section>
 
       <aside class="piece-tray" aria-label="Pièces à placer">
@@ -67,8 +138,13 @@
               type="button"
               class="piece-button"
               [class.selected]="selectedPieceId() === piece.id"
+              [class.dragging]="dragState()?.pieceId === piece.id"
               (pointerdown)="startTrayDrag(piece.id, $event)"
-              [attr.aria-label]="'Déplacer ' + piece.name"
+              (click)="selectTrayPiece(piece.id, $event)"
+              (dblclick)="rotatePieceFromShortcut(piece.id, $event)"
+              (contextmenu)="rotatePieceFromShortcut(piece.id, $event)"
+              [attr.aria-pressed]="selectedPieceId() === piece.id"
+              [attr.aria-label]="'Sélectionner ou déplacer ' + piece.name"
             >
               <svg
                 class="piece-preview"
@@ -93,22 +169,12 @@
       <button
         type="button"
         class="secondary-button"
-        (click)="rotateSelectedPiece()"
-        [disabled]="!lastSelectedPieceId()"
-      >
-        Pivoter
-      </button>
-      <button
-        type="button"
-        class="secondary-button"
         (click)="placeHintPiece()"
         [disabled]="!needsHint()"
       >
         Indice
       </button>
-      <button type="button" class="secondary-button" (click)="resetBoard()">
-        Recommencer
-      </button>
+      <button type="button" class="secondary-button" (click)="resetBoard()">Recommencer</button>
       <button type="button" (click)="newPuzzle()">Nouvelle silhouette</button>
     </div>
 
@@ -125,11 +191,7 @@
   @if (dragState(); as drag) {
     @let piece = getDefinition(drag.pieceId);
     <div class="drag-preview" [style]="dragPreviewStyle(drag)">
-      <svg
-        viewBox="0 0 100 100"
-        preserveAspectRatio="none"
-        aria-hidden="true"
-      >
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
         <polygon [attr.points]="piece.points" [attr.fill]="piece.color"></polygon>
       </svg>
     </div>

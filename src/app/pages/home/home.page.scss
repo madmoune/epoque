@@ -273,10 +273,11 @@ h1 {
     padding-right: 0.35rem;
 
     fieldset {
+        position: relative;
         display: grid;
         gap: 0.25rem;
         margin: 0;
-        padding: 0.45rem;
+        padding: 1rem 0.45rem 0.45rem;
         border: 1px solid var(--border);
         border-radius: 0.55rem;
     }
@@ -287,6 +288,25 @@ h1 {
         font-size: 0.75rem;
         font-weight: 850;
     }
+}
+
+.playlist-category-toggle {
+    position: absolute;
+    top: 0;
+    right: 0.45rem;
+    min-width: 3rem;
+    min-height: 1.65rem;
+    padding: 0.2rem 0.55rem;
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    background: var(--accent) !important;
+    color: var(--accent-contrast) !important;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.68rem;
+    font-weight: 900;
+    line-height: 1;
+    transform: translateY(-50%);
 }
 
 .playlist-option {
@@ -537,6 +557,103 @@ h1 {
     }
 }
 
+@media (max-width: 680px) {
+    .playlists-heading {
+        display: grid;
+        gap: 0.75rem;
+    }
+
+    .playlist-create,
+    .playlist-name-field {
+        width: 100%;
+        max-width: none;
+        min-width: 0;
+    }
+
+    .playlist-create-row {
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .playlist-card {
+        display: grid;
+        align-items: stretch;
+        gap: 0.65rem;
+    }
+
+    .playlist-card-copy {
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: baseline;
+        column-gap: 0.75rem;
+
+        span {
+            white-space: nowrap;
+        }
+    }
+
+    .playlist-card-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.4rem;
+
+        button {
+            width: 100%;
+            min-width: 0;
+            min-height: 2.65rem;
+            line-height: 1.2;
+            overflow-wrap: anywhere;
+        }
+
+        .text-button {
+            border-color: transparent;
+            background: transparent;
+            color: var(--muted-strong);
+        }
+    }
+
+    .playlist-editor-heading {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 0.5rem;
+
+        h3 {
+            overflow-wrap: anywhere;
+        }
+    }
+
+    .playlist-editor-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 1rem;
+    }
+
+    .playlist-picker {
+        max-height: min(55vh, 24rem);
+        overflow-x: hidden;
+        overscroll-behavior: contain;
+    }
+
+    .playlist-order ol {
+        padding-left: 1.45rem;
+    }
+
+    .playlist-order li {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 0.55rem;
+        min-height: 2.6rem;
+    }
+
+    .playlist-order-actions {
+        flex-wrap: nowrap;
+        flex-shrink: 0;
+    }
+
+    .icon-button {
+        width: 2.35rem;
+        min-height: 2.35rem;
+    }
+}
+
 @media (max-width: 560px) {
     .home-page {
         padding: 0.75rem;
@@ -576,6 +693,27 @@ h1 {
     .sort-button {
         width: 100%;
         min-height: 2.45rem;
+    }
+
+    .playlists-panel {
+        gap: 0.7rem;
+        margin-top: 0.75rem;
+        padding: 0.75rem;
+        border-radius: 0.9rem;
+    }
+
+    .playlist-create-row {
+        gap: 0.35rem;
+    }
+
+    .playlist-create button {
+        min-width: 4.6rem;
+        padding-inline: 0.55rem;
+    }
+
+    .playlist-card,
+    .playlist-editor {
+        padding: 0.75rem;
     }
 
     .category-list {

@@ -17,22 +17,36 @@
     }
   </span>
   @if (showAction || showMenuLink || cameFromPlaylist) {
-    <span class="popup-actions">
-      @if (showAction || cameFromPlaylist) {
-        <button type="button" (click)="handlePrimaryAction()">{{ primaryActionLabel }}</button>
-        @if (cameFromPlaylist && showAction) {
-          <button type="button" class="replay-action" (click)="action.emit()">
+    <span class="popup-actions" [class.journey-actions]="cameFromRandom || cameFromPlaylist">
+      @if (cameFromPlaylist) {
+        @if (showAction) {
+          <button type="button" class="primary-action replay-action" (click)="action.emit()">
             Rejouer
           </button>
         }
-        @if (cameFromRandom && !cameFromPlaylist) {
-          <button type="button" class="random-action" (click)="playAnotherRandomOldestPuzzle()">
+        <button
+          type="button"
+          class="secondary-action playlist-next-action"
+          (click)="handlePrimaryAction()"
+        >
+          {{ primaryActionLabel }}
+        </button>
+      } @else if (showAction) {
+        <button type="button" class="primary-action" (click)="handlePrimaryAction()">
+          {{ primaryActionLabel }}
+        </button>
+        @if (cameFromRandom) {
+          <button
+            type="button"
+            class="secondary-action random-action"
+            (click)="playAnotherRandomOldestPuzzle()"
+          >
             Autre jeu au hasard
           </button>
         }
       }
       @if (showMenuLink) {
-        <a routerLink="/" [fragment]="menuFragment">Retour au menu</a>
+        <a class="menu-action" routerLink="/" [fragment]="menuFragment">Retour au menu</a>
       }
     </span>
   }

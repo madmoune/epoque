@@ -43,6 +43,11 @@ export class CountIsGoodPage {
   protected readonly currentResult = computed(() =>
     this.evaluateExpression(this.filledNumbers(), this.filledOperations()),
   );
+  protected readonly currentResultDisplay = computed(() => {
+    const result = this.currentResult();
+
+    return result === null ? '—' : Math.round(result * 1000) / 1000;
+  });
   protected readonly isSolved = computed(
     () =>
       this.expressionNumbers().every((number) => number !== undefined) &&
@@ -296,7 +301,7 @@ export class CountIsGoodPage {
       if (operation === '-') return total - nextValue;
       if (operation === 'x') return total * nextValue;
 
-      return nextValue === 0 || total % nextValue !== 0 ? null : total / nextValue;
+      return nextValue === 0 ? null : total / nextValue;
     }, numbers[0]);
   }
 

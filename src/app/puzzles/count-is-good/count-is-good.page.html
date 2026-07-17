@@ -5,7 +5,9 @@
     <header class="header">
       <p class="eyebrow">Cible numérique</p>
       <h1>Compte est bon</h1>
-      <p class="intro">Choisis les nombres et les opérations. Le calcul se lit de gauche à droite.</p>
+      <p class="intro">
+        Choisis les nombres et les opérations. Le calcul se lit de gauche à droite.
+      </p>
     </header>
 
     @if (isSolved()) {
@@ -88,6 +90,13 @@
           }
         </div>
 
+        <div class="current-total" role="status" aria-live="polite" aria-atomic="true">
+          <span class="current-total-equals" aria-hidden="true">=</span>
+          <span class="current-total-summary">
+            <span class="current-total-label">Total actuel</span>
+            <strong class="equation-result">{{ currentResultDisplay() }}</strong>
+          </span>
+        </div>
       </div>
 
       <div class="entry-layout">
@@ -110,7 +119,11 @@
 
         <section class="entry-panel" aria-label="Opérations">
           <h2>Opérations</h2>
-          <div class="operation-row" (dragover)="allowDrop($event)" (drop)="dropOnOperationPool($event)">
+          <div
+            class="operation-row"
+            (dragover)="allowDrop($event)"
+            (drop)="dropOnOperationPool($event)"
+          >
             @for (operation of availableOperations(); track $index) {
               <button
                 type="button"

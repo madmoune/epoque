@@ -51,8 +51,8 @@ export class HomePage {
   readonly playlists = this.playlistService.playlists;
   readonly newPlaylistName = signal('');
   readonly editingPlaylistId = signal<string | null>(null);
-  readonly editingPlaylist = computed(() =>
-    this.playlists().find((playlist) => playlist.id === this.editingPlaylistId()) ?? null,
+  readonly editingPlaylist = computed(
+    () => this.playlists().find((playlist) => playlist.id === this.editingPlaylistId()) ?? null,
   );
   readonly playlistPuzzleOptions = computed<PlaylistPuzzleOption[]>(() =>
     this.categories().flatMap((category) =>
@@ -113,6 +113,18 @@ export class HomePage {
           description: 'Trouve les mots dans la grille, puis déchiffre les lettres restantes.',
           route: '/word-search',
           tag: 'Grille',
+        },
+        {
+          title: 'Échelle de mots',
+          description: 'Change une lettre à la fois pour passer du mot de départ au mot cible.',
+          route: '/word-ladder',
+          tag: 'Lettres',
+        },
+        {
+          title: 'Mot pivot',
+          description: 'Trouve le mot commun qui relie trois expressions.',
+          route: '/pivot-word',
+          tag: 'Associations',
         },
         {
           title: 'Lettres parasites',
@@ -201,6 +213,12 @@ export class HomePage {
           tag: 'Mémoire',
         },
         {
+          title: 'Paires de symboles',
+          description: 'Retourne les cartes et retrouve tous les symboles identiques.',
+          route: '/symbol-pairs',
+          tag: 'Paires',
+        },
+        {
           title: 'Mnémotechnique',
           description: 'Pratique les associations objet, qualité, action et lieu.',
           route: '/mnemonic',
@@ -245,13 +263,15 @@ export class HomePage {
         },
         {
           title: 'Compte est bon',
-          description: 'Utilise les nombres disponibles et les opérations pour approcher une cible.',
+          description:
+            'Utilise les nombres disponibles et les opérations pour approcher une cible.',
           route: '/count-is-good',
           tag: 'Cible',
         },
         {
           title: 'KenKen / Calcudoku',
-          description: 'Complète une grille avec des chiffres uniques et des contraintes de calcul.',
+          description:
+            'Complète une grille avec des chiffres uniques et des contraintes de calcul.',
           route: '/calcudoku',
           tag: 'Contraintes',
         },
@@ -438,6 +458,33 @@ export class HomePage {
 
   isPuzzleInPlaylist(playlistId: string, route: string): boolean {
     return this.playlistService.find(playlistId)?.routes.includes(route) ?? false;
+  }
+
+  areAllCategoryPuzzlesInPlaylist(playlistId: string, puzzles: PuzzleCard[]): boolean {
+    const playlist = this.playlistService.find(playlistId);
+
+    return (
+      puzzles.length > 0 &&
+      !!playlist &&
+      puzzles.every((puzzle) => playlist.routes.includes(puzzle.route))
+    );
+  }
+
+  togglePlaylistCategory(playlistId: string, puzzles: PuzzleCard[]): void {
+    const playlist = this.playlistService.find(playlistId);
+
+    if (!playlist || puzzles.length === 0) {
+      return;
+    }
+
+    const categoryRoutes = puzzles.map((puzzle) => puzzle.route);
+    const selectedRoutes = new Set(playlist.routes);
+    const shouldSelectAll = categoryRoutes.some((route) => !selectedRoutes.has(route));
+    const routes = shouldSelectAll
+      ? [...playlist.routes, ...categoryRoutes.filter((route) => !selectedRoutes.has(route))]
+      : playlist.routes.filter((route) => !categoryRoutes.includes(route));
+
+    this.playlistService.update(playlistId, { routes });
   }
 
   togglePlaylistPuzzle(playlistId: string, route: string, event: Event): void {

@@ -1,0 +1,184 @@
+@use '../memory-grid/memory-grid-symbols' as memory-grid;
+
+@include memory-grid.symbols;
+
+.page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: var(--focus);
+  font-weight: 800;
+}
+
+.card {
+  padding: 2rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surface);
+  box-shadow: 0 0.75rem 2rem var(--shadow);
+}
+
+.header {
+  text-align: center;
+}
+
+.eyebrow {
+  margin: 0 0 0.5rem;
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(2rem, 7vw, 3rem);
+  line-height: 1;
+}
+
+.instructions {
+  max-width: 34rem;
+  margin: 0.75rem auto 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.puzzle-area {
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 0.85rem;
+  background: var(--surface-raised);
+}
+
+.scoreboard {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  width: min(100%, 30rem);
+  color: var(--muted-strong);
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.scoreboard strong {
+  color: var(--accent);
+  font-size: 1.25rem;
+}
+
+.pair-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(0.4rem, 2vw, 0.7rem);
+  width: min(100%, 30rem);
+}
+
+.pair-card {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 2px solid var(--border-strong);
+  border-radius: clamp(0.6rem, 2vw, 0.9rem);
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--focus) 11%, transparent), transparent 55%),
+    var(--surface-soft) !important;
+  color: var(--muted-strong) !important;
+  box-shadow: 0 0.3rem 0.75rem rgb(0 0 0 / 14%);
+  cursor: pointer;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms ease;
+  touch-action: manipulation;
+}
+
+.pair-card:hover:not(:disabled),
+.pair-card:focus-visible {
+  border-color: var(--focus);
+  box-shadow: 0 0.45rem 1rem color-mix(in srgb, var(--focus) 22%, transparent);
+  outline: none;
+  transform: translateY(-2px);
+}
+
+.pair-card.revealed {
+  border-color: var(--accent);
+  background:
+    radial-gradient(
+      circle at 50% 40%,
+      color-mix(in srgb, var(--accent) 14%, transparent),
+      transparent 62%
+    ),
+    var(--surface-raised) !important;
+}
+
+.pair-card.matched {
+  border-color: color-mix(in srgb, var(--focus) 70%, var(--border));
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--focus) 22%, transparent);
+}
+
+.pair-card:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.card-back {
+  color: color-mix(in srgb, var(--muted) 70%, transparent);
+  font-size: clamp(1.55rem, 7vw, 2.35rem);
+  font-weight: 950;
+}
+
+.pair-symbol {
+  filter: drop-shadow(0 2px 0 rgb(0 0 0 / 18%));
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+}
+
+.actions button {
+  min-height: 2.7rem;
+  padding: 0.65rem 1rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.65rem;
+  background: var(--surface-soft);
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 850;
+}
+
+@media (max-width: 600px) {
+  .page {
+    padding: 0.75rem;
+  }
+
+  .card {
+    padding: 1rem;
+  }
+
+  .puzzle-area {
+    gap: 0.75rem;
+    margin-top: 1rem;
+    padding: 0.75rem;
+  }
+
+  .scoreboard {
+    font-size: 0.8rem;
+  }
+
+  .pair-grid {
+    gap: 0.4rem;
+  }
+}

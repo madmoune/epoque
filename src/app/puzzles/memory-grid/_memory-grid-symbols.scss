@@ -1,0 +1,70 @@
+@mixin symbols {
+    .shape {
+        display: block;
+        width: 62%;
+        height: 62%;
+        background: currentColor;
+    }
+
+    .shape-circle {
+        border-radius: 50%;
+    }
+
+    .shape-square {
+        border-radius: 0.2rem;
+    }
+
+    .shape-rectangle {
+        width: 72%;
+        height: 44%;
+        border-radius: 0.2rem;
+    }
+
+    .shape-triangle {
+        clip-path: polygon(50% 0, 100% 100%, 0 100%);
+    }
+
+    .shape-losange {
+        clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+    }
+
+    .shape-pentagon {
+        clip-path: polygon(50% 0, 100% 38%, 82% 100%, 18% 100%, 0 38%);
+    }
+
+    .shape-hexagon {
+        clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
+    }
+
+    .color-blue {
+        color: #2563eb;
+    }
+
+    .color-red {
+        color: #dc2626;
+    }
+
+    .color-gray {
+        color: #6b7280;
+    }
+
+    .color-yellow {
+        color: #facc15;
+    }
+
+    .color-green {
+        color: #16a34a;
+    }
+
+    .color-orange {
+        color: #f97316;
+    }
+
+    .color-pink {
+        color: #ec4899;
+    }
+
+    .color-purple {
+        color: #9333ea;
+    }
+}

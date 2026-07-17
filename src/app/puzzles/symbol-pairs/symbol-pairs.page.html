@@ -1,0 +1,61 @@
+<main class="page">
+  <a routerLink="/" fragment="memoire" class="back-link">Retour au menu</a>
+
+  <section class="card">
+    <header class="header">
+      <p class="eyebrow">Mémoire visuelle</p>
+      <h1>Paires de symboles</h1>
+      <p class="instructions">
+        Retourne deux cartes à la fois et retrouve les huit paires de formes colorées.
+      </p>
+    </header>
+
+    <section class="puzzle-area">
+      <div class="scoreboard" aria-live="polite">
+        <span
+          ><strong>{{ pairsFound() }}</strong> / {{ totalPairs }} paires</span
+        >
+        <span
+          ><strong>{{ moves() }}</strong> coups</span
+        >
+      </div>
+
+      <div class="pair-grid" aria-label="Grille de 16 cartes">
+        @for (card of cards(); track card.cardId; let cardIndex = $index) {
+          <button
+            type="button"
+            class="pair-card"
+            [class.revealed]="isCardVisible(cardIndex)"
+            [class.matched]="matchedIndexes().has(cardIndex)"
+            [disabled]="locked() || matchedIndexes().has(cardIndex)"
+            [attr.aria-label]="cardLabel(card, cardIndex)"
+            [attr.aria-pressed]="isCardVisible(cardIndex)"
+            (click)="flipCard(cardIndex)"
+          >
+            @if (isCardVisible(cardIndex)) {
+              <span
+                [class]="'shape pair-symbol shape-' + card.shape + ' color-' + card.color"
+                aria-hidden="true"
+              ></span>
+            } @else {
+              <span class="card-back" aria-hidden="true">?</span>
+            }
+          </button>
+        }
+      </div>
+
+      <div class="actions">
+        <button type="button" class="secondary-button" (click)="newGame()">Nouvelle partie</button>
+      </div>
+
+      @if (isSolved()) {
+        <app-puzzle-success-popup
+          title="Toutes les paires sont trouvées!"
+          [message]="'Grille complétée en ' + moves() + ' coups.'"
+          actionLabel="Rejouer"
+          (action)="newGame()"
+        />
+      }
+    </section>
+  </section>
+</main>

@@ -135,6 +135,32 @@ button {
   gap: 0.35rem;
 }
 
+.current-total {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.current-total-equals {
+  color: #6b6254;
+  font-size: 1.6rem;
+  font-weight: 900;
+}
+
+.current-total-summary {
+  display: grid;
+  justify-items: center;
+  gap: 0.2rem;
+}
+
+.current-total-label {
+  color: #6b6254;
+  font-size: 0.7rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
 .equation-slot,
 .equation-result {
   display: grid;
@@ -262,6 +288,13 @@ button:disabled {
     gap: 0.35rem;
   }
 
+  .current-total {
+    width: 100%;
+    justify-content: center;
+    padding-top: 0.25rem;
+    border-top: 1px solid #e3ded2;
+  }
+
   .equation-slot,
   .equation-result {
     min-width: 3.35rem;
@@ -296,7 +329,19 @@ button:disabled {
   }
 
   .equation-operator,
-  .entry-panel h2 {
+  .entry-panel h2,
+  .current-total-equals,
+  .current-total-label {
     color: var(--text) !important;
+  }
+
+  .current-total {
+    border-color: var(--border);
+  }
+
+  .equation-result {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--accent-contrast);
   }
 }

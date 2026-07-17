@@ -101,6 +101,23 @@ button {
   justify-items: stretch;
 }
 
+.journey-actions {
+  grid-template-rows: minmax(2.75rem, auto) minmax(2.75rem, auto) auto;
+  width: 12rem;
+
+  .primary-action {
+    grid-row: 1;
+  }
+
+  .secondary-action {
+    grid-row: 2;
+  }
+
+  .menu-action {
+    grid-row: 3;
+  }
+}
+
 .popup-actions a {
   color: currentColor !important;
   font-size: 0.72rem;
@@ -137,7 +154,8 @@ button {
     width: 100%;
   }
 
-  .popup-actions {
+  .popup-actions,
+  .journey-actions {
     grid-column: 1 / -1;
     width: 100%;
   }

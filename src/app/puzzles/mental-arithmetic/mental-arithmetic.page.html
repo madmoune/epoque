@@ -3,9 +3,12 @@
 
   <section class="card">
     <header class="header">
-      <p class="eyebrow">Calcul rapide</p>
+      <p class="eyebrow">Défi PEDMAS</p>
       <h1>Arithmétique mentale</h1>
-      <p class="intro">Une base de drill rapide pour pratiquer additions, soustractions, produits et divisions.</p>
+      <p class="intro">
+        Des opérations imbriquées avec carrés, cubes et divisions exactes — sans perdre le fil des
+        priorités.
+      </p>
     </header>
 
     @if (isSolved()) {
@@ -56,10 +59,19 @@
             <span class="pedmas-label">Soustraction</span>
           </li>
         </ol>
-        <p class="pedmas-note"><strong>À retenir :</strong> D/M puis A/S se calculent de gauche à droite.</p>
+        <p class="pedmas-note">
+          <strong>À retenir :</strong> D/M puis A/S se calculent de gauche à droite.
+        </p>
       </aside>
 
-      <div class="problem" [style.--equation-size]="equationSize()" [innerHTML]="displayExpression()"></div>
+      <section class="equation-panel" aria-label="Équation à résoudre">
+        <span class="equation-label">Équation à résoudre</span>
+        <div
+          class="problem"
+          [style.--equation-size]="equationSize()"
+          [innerHTML]="displayExpression()"
+        ></div>
+      </section>
 
       <label class="answer-group">
         <span>Réponse</span>
@@ -93,7 +105,9 @@
         >
           Indice
         </button>
-        <button type="button" class="secondary-button" (click)="nextProblem()">Nouvelle équation</button>
+        <button type="button" class="secondary-button" (click)="nextProblem()">
+          Nouvelle équation
+        </button>
       </div>
 
       @if (answerHint()) {

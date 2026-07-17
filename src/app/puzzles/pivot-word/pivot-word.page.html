@@ -1,0 +1,109 @@
+<main class="page">
+  <a routerLink="/" fragment="mots-langage" class="back-link">Retour au menu</a>
+
+  <section class="shell">
+    <header class="header">
+      <p class="eyebrow">Associations</p>
+      <h1>Mot pivot</h1>
+      <p class="intro">
+        Trouve le mot commun qui forme une expression naturelle avec chacun des trois indices.
+      </p>
+    </header>
+
+    <section class="game-panel">
+      <div class="clue-grid" aria-label="Les trois indices">
+        @for (link of puzzle().links; track link.clue; let linkIndex = $index) {
+          <article class="clue-card" [class.completed-clue]="showExpression(linkIndex)">
+            <span>Indice {{ linkIndex + 1 }}</span>
+            <strong>{{ link.clue }}</strong>
+            @if (showExpression(linkIndex)) {
+              <small>{{ link.expression }}</small>
+            }
+          </article>
+        }
+      </div>
+
+      <div class="pivot-marker" [class.revealed-pivot]="isFinished()" aria-live="polite">
+        <span>Mot commun</span>
+        <strong>{{ isFinished() ? puzzle().answer : '????' }}</strong>
+      </div>
+
+      @if (hintLevel() > 0 && !isFinished()) {
+        <section class="hint-panel" aria-label="Indices supplémentaires" aria-live="polite">
+          @if (hintLevel() >= 1) {
+            <p><span>Définition</span>{{ puzzle().definition }}</p>
+          }
+          @if (hintLevel() >= 2) {
+            <p>
+              <span>Première lettre</span>
+              {{ firstLetter() }} · {{ answerLength() }} lettres
+            </p>
+          }
+          @if (hintLevel() >= 3) {
+            <p><span>Association</span>Une expression a été complétée ci-dessus.</p>
+          }
+        </section>
+      }
+
+      <div class="answer-form">
+        <label for="pivot-word-answer">Ta réponse</label>
+        <input
+          #answerInputField
+          id="pivot-word-answer"
+          class="answer-input"
+          type="text"
+          autocomplete="off"
+          autocapitalize="characters"
+          spellcheck="false"
+          maxlength="20"
+          [value]="answerInput()"
+          [disabled]="isFinished()"
+          [class.correct]="isSolved()"
+          (input)="updateAnswer($any($event.target).value)"
+        />
+      </div>
+
+      <div class="actions">
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="useHint()"
+          [disabled]="isFinished() || hintLevel() >= 3"
+        >
+          Indice
+        </button>
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="revealAnswer()"
+          [disabled]="isFinished()"
+        >
+          Réponse
+        </button>
+      </div>
+
+      @if (isFinished()) {
+        <section class="solution-panel" aria-label="Expressions complètes">
+          <span>Les trois liens</span>
+          <ul>
+            @for (link of puzzle().links; track link.expression) {
+              <li>{{ link.expression }}</li>
+            }
+          </ul>
+          <p>{{ puzzle().definition }}</p>
+        </section>
+      }
+    </section>
+
+    @if (isFinished()) {
+      <app-puzzle-success-popup
+        [title]="isSolved() ? 'Mot pivot trouvé!' : 'Réponse révélée'"
+        [message]="successMessage()"
+        [answer]="puzzle().answer.toLocaleUpperCase('fr-CA')"
+        [tone]="isSolved() ? 'success' : 'partial'"
+        actionLabel="Autre mot"
+        (action)="newPuzzle()"
+      />
+    }
+  </section>
+</main>

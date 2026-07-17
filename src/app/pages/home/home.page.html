@@ -104,6 +104,27 @@
                     @for (category of categories(); track category.id) {
                     <fieldset>
                         <legend>{{ category.title }}</legend>
+                        @if (category.puzzles.length > 0) {
+                        <button
+                            type="button"
+                            class="playlist-category-toggle"
+                            [attr.aria-label]="
+                                areAllCategoryPuzzlesInPlaylist(playlist.id, category.puzzles)
+                                    ? 'Tout enlever de la section ' + category.title
+                                    : 'Tout sélectionner dans la section ' + category.title
+                            "
+                            [attr.aria-pressed]="
+                                areAllCategoryPuzzlesInPlaylist(playlist.id, category.puzzles)
+                            "
+                            (click)="togglePlaylistCategory(playlist.id, category.puzzles)"
+                        >
+                            {{
+                                areAllCategoryPuzzlesInPlaylist(playlist.id, category.puzzles)
+                                    ? 'Rien'
+                                    : 'Tout'
+                            }}
+                        </button>
+                        }
                         @for (puzzle of category.puzzles; track puzzle.route) {
                         <label class="playlist-option">
                             <input

@@ -287,8 +287,7 @@ export class CiphersPage implements OnDestroy {
     const target = event.target;
     if (!(target instanceof Element)) return;
     if (
-      target.closest('.answer-input') ||
-      target.closest('.answer-letter-input') ||
+      target.closest('.cipher-workspace') ||
       target.closest('app-custom-keyboard') ||
       target.closest('app-puzzle-success-popup')
     ) {
