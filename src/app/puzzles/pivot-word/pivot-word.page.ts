@@ -1,17 +1,30 @@
-import { Component, computed, ElementRef, inject, signal, ViewChild } from '@angular/core';
+import {
+  Component,
+  HostListener,
+  computed,
+  ElementRef,
+  inject,
+  signal,
+  ViewChild,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
+import {
+  CustomKeyboardComponent,
+  CustomKeyboardKey,
+} from '../shared/custom-keyboard/custom-keyboard.component';
 import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
 import { PivotWordService } from './pivot-word.service';
 
 @Component({
   selector: 'app-pivot-word-page',
-  imports: [RouterLink, PuzzleSuccessPopupComponent],
+  imports: [RouterLink, PuzzleSuccessPopupComponent, CustomKeyboardComponent],
   templateUrl: './pivot-word.page.html',
   styleUrl: './pivot-word.page.scss',
 })
 export class PivotWordPage {
   @ViewChild('answerInputField')
   private readonly answerInputField?: ElementRef<HTMLInputElement>;
+  private suppressNextSelection = false;
 
   private readonly pivotWordService = inject(PivotWordService);
 
@@ -20,6 +33,13 @@ export class PivotWordPage {
   protected readonly hintLevel = signal(0);
   protected readonly isSolved = signal(false);
   protected readonly isRevealed = signal(false);
+  protected readonly keyboardVisible = signal(false);
+  protected readonly letterKeyboardRows: CustomKeyboardKey[][] = [
+    ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+    ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
+    ['Z', 'X', 'C', 'V', 'B', 'N', 'M', 'backspace'],
+    ['clear'],
+  ];
 
   protected readonly isFinished = computed(() => this.isSolved() || this.isRevealed());
   protected readonly firstLetter = computed(() =>
@@ -54,6 +74,63 @@ export class PivotWordPage {
     }
   }
 
+  protected handleKeyboardKey(key: CustomKeyboardKey): void {
+    if (this.isFinished()) {
+      return;
+    }
+
+    if (key === 'backspace') {
+      this.updateAnswer(this.answerInput().slice(0, -1));
+      this.focusAnswer(false);
+      return;
+    }
+
+    if (key === 'clear') {
+      this.updateAnswer('');
+      this.focusAnswer(false);
+      return;
+    }
+
+    if (key === 'space') {
+      return;
+    }
+
+    this.updateAnswer(`${this.answerInput()}${key}`);
+    this.focusAnswer(false);
+  }
+
+  protected selectInputContent(event: Event): void {
+    if (event.target instanceof HTMLInputElement) {
+      this.keyboardVisible.set(true);
+
+      if (this.suppressNextSelection) {
+        this.suppressNextSelection = false;
+        return;
+      }
+
+      event.target.select();
+    }
+  }
+
+  @HostListener('document:pointerdown', ['$event'])
+  protected hideKeyboardWhenClickingAway(event: PointerEvent): void {
+    const target = event.target;
+
+    if (!(target instanceof Element)) {
+      return;
+    }
+
+    if (
+      target.closest('.answer-input') ||
+      target.closest('app-custom-keyboard') ||
+      target.closest('app-puzzle-success-popup')
+    ) {
+      return;
+    }
+
+    this.keyboardVisible.set(false);
+  }
+
   protected useHint(): void {
     if (this.isFinished() || this.hintLevel() >= 3) {
       return;
@@ -86,6 +163,7 @@ export class PivotWordPage {
   }
 
   private focusAnswer(selectContent: boolean): void {
+    this.suppressNextSelection = !selectContent;
     window.setTimeout(() => {
       this.answerInputField?.nativeElement.focus();
 

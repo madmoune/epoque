@@ -221,6 +221,28 @@ button {
     color: #222;
 }
 
+.reset-confirmation {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.65rem;
+    border: 1px solid var(--border, #e3bd7a);
+    border-radius: 0.75rem;
+    background: color-mix(in srgb, var(--accent, #b92e4a) 10%, var(--surface-raised, #fff8eb));
+
+    span {
+        color: var(--muted-strong, #6f4c1c);
+        font-size: 0.82rem;
+        font-weight: 800;
+    }
+}
+
+.confirm-reset-button {
+    background: var(--accent, #b92e4a);
+    color: var(--accent-contrast, #fff);
+}
+
 .actions>button:not(.secondary-button) {
     background: #222;
     color: white;
@@ -355,6 +377,17 @@ button {
         grid-template-columns: repeat(2, 1fr);
         gap: 0.5rem;
         margin-top: 0.75rem;
+    }
+
+    .reset-confirmation {
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+
+        span {
+            grid-column: 1 / -1;
+            text-align: center;
+        }
     }
 
     button {

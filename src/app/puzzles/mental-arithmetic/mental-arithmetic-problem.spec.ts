@@ -44,6 +44,29 @@ describe('createArithmeticProblem', () => {
       true,
     );
   });
+
+  it('does not cancel adjacent division and multiplication factors', () => {
+    let state = 0x7eed1234;
+    const random = (): number => {
+      state = (Math.imul(state, 1_664_525) + 1_013_904_223) >>> 0;
+      return state / 0x1_0000_0000;
+    };
+    const problems = Array.from({ length: 2_000 }, () => createArithmeticProblem(random));
+
+    for (const problem of problems) {
+      const directFactors = problem.expression.match(/\/ (\d+) x (\d+)/);
+      if (directFactors) {
+        expect(directFactors[1]).not.toBe(directFactors[2]);
+      }
+
+      const groupedFactors = problem.expression.match(/\/ \((\d+) \+ (\d+)\) x (\d+)/);
+      if (groupedFactors) {
+        expect(Number(groupedFactors[1]) + Number(groupedFactors[2])).not.toBe(
+          Number(groupedFactors[3]),
+        );
+      }
+    }
+  });
 });
 
 function evaluateExpression(expression: string): number {

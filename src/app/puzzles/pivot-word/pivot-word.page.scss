@@ -13,6 +13,7 @@
 }
 
 .shell {
+  box-sizing: border-box;
   display: grid;
   gap: 1.35rem;
   padding: clamp(1rem, 3vw, 1.65rem);
@@ -21,6 +22,11 @@
   background: var(--surface);
   color: var(--text);
   box-shadow: 0 0.75rem 2rem var(--shadow);
+}
+
+.game-panel,
+.clue-grid {
+  min-width: 0;
 }
 
 .header {
@@ -125,8 +131,10 @@ h1 {
   justify-items: center;
   gap: 0.25rem;
   width: min(100%, 22rem);
+  max-width: 100%;
   margin: -0.2rem auto 0;
   padding: 0.75rem 1rem;
+  box-sizing: border-box;
   border: 1px dashed var(--border-strong);
   border-radius: 999px;
   background: var(--surface-soft);
@@ -188,8 +196,10 @@ h1 {
   display: grid;
   gap: 0.45rem;
   width: min(100%, 35rem);
+  max-width: 100%;
   margin: 0 auto;
   padding: 0.85rem;
+  box-sizing: border-box;
   border: 1px solid var(--border);
   border-radius: 0.85rem;
   background: var(--surface-raised);

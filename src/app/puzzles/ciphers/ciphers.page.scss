@@ -784,7 +784,7 @@ input.correct {
     box-sizing: border-box;
     overflow: auto;
     padding: 0.55rem;
-    background: #fff;
+    background: var(--surface-raised);
     gap: 0.55rem;
   }
 

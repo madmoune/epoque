@@ -56,12 +56,22 @@
           autocapitalize="characters"
           spellcheck="false"
           maxlength="20"
+          inputmode="none"
           [value]="answerInput()"
           [disabled]="isFinished()"
           [class.correct]="isSolved()"
           (input)="updateAnswer($any($event.target).value)"
+          (focus)="selectInputContent($event)"
+          (click)="selectInputContent($event)"
         />
       </div>
+
+      <app-custom-keyboard
+        [rows]="letterKeyboardRows"
+        [visible]="keyboardVisible()"
+        [disabled]="isFinished()"
+        (keyPress)="handleKeyboardKey($event)"
+      />
 
       <div class="actions">
         <button

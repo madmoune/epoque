@@ -46,6 +46,7 @@ export class PathwaysPage {
     protected readonly hoveredSlotId = signal<string | null>(null);
     protected readonly isDraggingTile = signal(false);
     protected readonly errorMessage = signal<string | null>(null);
+    protected readonly isResetConfirmationVisible = signal(false);
 
     protected readonly unplacedTiles = computed(() => {
         const placedTileIds = new Set(
@@ -307,6 +308,14 @@ export class PathwaysPage {
         this.errorMessage.set(null);
     }
 
+    protected requestReset(): void {
+        this.isResetConfirmationVisible.set(true);
+    }
+
+    protected cancelReset(): void {
+        this.isResetConfirmationVisible.set(false);
+    }
+
     protected resetPuzzle(): void {
         this.placedTiles.set([]);
         this.selectedTileId.set(null);
@@ -316,6 +325,7 @@ export class PathwaysPage {
         this.hoveredSlotId.set(null);
         this.errorMessage.set(null);
         this.isDraggingTile.set(false);
+        this.isResetConfirmationVisible.set(false);
     }
 
     protected newPuzzle(): void {
@@ -330,6 +340,7 @@ export class PathwaysPage {
         this.hoveredSlotId.set(null);
         this.errorMessage.set(null);
         this.isDraggingTile.set(false);
+        this.isResetConfirmationVisible.set(false);
     }
 
     protected getTileForSlot(slotId: string): PathwayTile | null {

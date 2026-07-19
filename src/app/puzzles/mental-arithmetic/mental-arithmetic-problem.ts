@@ -8,6 +8,15 @@ export const MENTAL_ARITHMETIC_TEMPLATE_COUNT = 12;
 export function createArithmeticProblem(random: () => number = Math.random): ArithmeticProblem {
   const randomInt = (min: number, max: number): number =>
     min + Math.floor(random() * (max - min + 1));
+  const randomIntExcluding = (min: number, max: number, excluded: number): number => {
+    const value = randomInt(min, max);
+
+    if (value !== excluded || excluded < min || excluded > max) {
+      return value;
+    }
+
+    return value === max ? min : value + 1;
+  };
   const type = randomInt(0, MENTAL_ARITHMETIC_TEMPLATE_COUNT - 1);
 
   if (type === 0) {
@@ -77,7 +86,7 @@ export function createArithmeticProblem(random: () => number = Math.random): Ari
     const start = randomInt(140, 280);
     const quotient = randomInt(9, 24);
     const divisor = randomInt(2, 8);
-    const multiplier = randomInt(2, 6);
+    const multiplier = randomIntExcluding(2, 6, divisor);
     const a = randomInt(3, 9);
     const b = randomInt(3, 9);
     const root = randomInt(4, 13);
@@ -115,7 +124,7 @@ export function createArithmeticProblem(random: () => number = Math.random): Ari
     const f = randomInt(2, 7);
     const g = randomInt(2, 7);
     const quotient = randomInt(8, 25);
-    const multiplier = randomInt(2, 6);
+    const multiplier = randomIntExcluding(2, 6, f + g);
 
     return {
       expression: `${a}^2 - (${b} + ${c}) x (${d} - ${e}) + ${(f + g) * quotient} / (${f} + ${g}) x ${multiplier}`,

@@ -88,9 +88,21 @@
                 Indice
             </button>
 
-            <button type="button" class="secondary-button" (click)="resetPuzzle()">
+            @if (isResetConfirmationVisible()) {
+            <div class="reset-confirmation" role="group" aria-label="Confirmer le redémarrage">
+                <span aria-live="polite">Effacer les pièces placées&nbsp;?</span>
+                <button type="button" class="secondary-button" (click)="cancelReset()">
+                    Annuler
+                </button>
+                <button type="button" class="confirm-reset-button" (click)="resetPuzzle()">
+                    Confirmer
+                </button>
+            </div>
+            } @else {
+            <button type="button" class="secondary-button" (click)="requestReset()">
                 Recommencer
             </button>
+            }
 
             <button type="button" (click)="newPuzzle()">
                 Nouvelle pyramide
