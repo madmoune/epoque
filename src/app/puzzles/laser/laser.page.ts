@@ -62,13 +62,10 @@ export class LaserPage {
   protected readonly puzzle = signal<LaserPuzzle>(this.createPuzzle());
   protected readonly mirrorClicks = signal<MirrorClicks>({});
   protected readonly boardCells = computed(() =>
-    Array.from(
-      { length: this.puzzle().rows * this.puzzle().cols },
-      (_, index) => ({
-        row: Math.floor(index / this.puzzle().cols),
-        col: index % this.puzzle().cols,
-      }),
-    ),
+    Array.from({ length: this.puzzle().rows * this.puzzle().cols }, (_, index) => ({
+      row: Math.floor(index / this.puzzle().cols),
+      col: index % this.puzzle().cols,
+    })),
   );
   protected readonly trace = computed(() => this.traceLaser());
   protected readonly isSolved = computed(
@@ -167,7 +164,13 @@ export class LaserPage {
       }
     }
 
-    return this.createCandidatePuzzle();
+    while (true) {
+      const candidate = this.createCandidatePuzzle();
+
+      if (this.isValidCandidate(candidate)) {
+        return candidate;
+      }
+    }
   }
 
   private createCandidatePuzzle(): LaserPuzzle {
@@ -176,9 +179,7 @@ export class LaserPage {
     const mirrorCount = 8;
     const startRow = this.randomInt(1, rows - 2);
     const verticalLegs = this.randomInt(2, 3);
-    const columns = this.shuffle(
-      Array.from({ length: cols - 2 }, (_, index) => index + 1),
-    )
+    const columns = this.shuffle(Array.from({ length: cols - 2 }, (_, index) => index + 1))
       .slice(0, verticalLegs)
       .sort((first, second) => first - second);
     const solutionPlacements: Array<Pick<Mirror, 'row' | 'col' | 'solution'>> = [];
@@ -224,11 +225,11 @@ export class LaserPage {
       const totalRotation = controls.reduce(
         (sum, control) =>
           sum +
-            (solutionClicks[control.mirrorId] ?? 0) *
+          (solutionClicks[control.mirrorId] ?? 0) *
             (control.effects.some((effect) => effect.mirrorId === id) ? 1 : 0),
         0,
       );
-      const orientationIndex = ((solutionIndex - totalRotation) % 3 + 3) % 3 as MirrorState;
+      const orientationIndex = ((((solutionIndex - totalRotation) % 3) + 3) % 3) as MirrorState;
       const initialOrientation = orientationOptions[orientationIndex];
 
       return {
@@ -262,7 +263,7 @@ export class LaserPage {
       const controls = mirrorIds.map((mirrorId) => {
         const linkedMirrors = this.shuffle(
           mirrorIds.filter((candidate) => candidate !== mirrorId),
-        ).slice(0, this.randomInt(1, 3));
+        ).slice(0, 1);
 
         return {
           mirrorId,
@@ -278,15 +279,24 @@ export class LaserPage {
     }
 
     const shuffledIds = this.shuffle(mirrorIds);
-    const fallbackControls = shuffledIds.map((mirrorId, index) => {
-      const groupStart = Math.floor(index / 3) * 3;
-      const nextMirrorId = shuffledIds[groupStart + ((index - groupStart + 1) % 3)];
+    const cycleLengths = mirrorCount % 2 === 0 ? [3, mirrorCount - 3] : [mirrorCount];
+    const fallbackControls: MirrorControl[] = [];
+    let cycleStart = 0;
 
-      return {
-        mirrorId,
-        effects: [{ mirrorId }, { mirrorId: nextMirrorId }],
-      };
-    });
+    for (const cycleLength of cycleLengths) {
+      const cycle = shuffledIds.slice(cycleStart, cycleStart + cycleLength);
+
+      cycle.forEach((mirrorId, index) => {
+        const nextMirrorId = cycle[(index + 1) % cycle.length];
+
+        fallbackControls.push({
+          mirrorId,
+          effects: [{ mirrorId }, { mirrorId: nextMirrorId }],
+        });
+      });
+
+      cycleStart += cycleLength;
+    }
 
     return fallbackControls.sort((first, second) => first.mirrorId - second.mirrorId);
   }
@@ -299,13 +309,17 @@ export class LaserPage {
     );
     const solvedPuzzle = { ...puzzle, mirrors: solvedMirrors };
 
-    if (!this.mirrorsMatchSolutionFor(solvedPuzzle) || !this.tracePuzzle(solvedPuzzle).reachedTarget) {
+    if (
+      !this.mirrorsMatchSolutionFor(solvedPuzzle) ||
+      !this.tracePuzzle(solvedPuzzle).reachedTarget
+    ) {
       return false;
     }
 
     if (
       this.mirrorsMatchSolutionFor(puzzle) ||
       !this.isInvertibleControlMatrix(puzzle.controls, puzzle.mirrors.length) ||
+      !this.hasAtMostOneLinkedMirror(puzzle.controls, puzzle.mirrors.length) ||
       puzzle.controls.some(
         (control) =>
           control.effects.length < 2 ||
@@ -316,6 +330,32 @@ export class LaserPage {
     }
 
     return !this.tracePuzzle(puzzle).reachedTarget;
+  }
+
+  private hasAtMostOneLinkedMirror(controls: MirrorControl[], mirrorCount: number): boolean {
+    const incomingLinks = Array.from({ length: mirrorCount }, () => 0);
+
+    for (const control of controls) {
+      const linkedMirrorIds = new Set(
+        control.effects
+          .map((effect) => effect.mirrorId)
+          .filter((mirrorId) => mirrorId !== control.mirrorId),
+      );
+
+      if (linkedMirrorIds.size > 1) {
+        return false;
+      }
+
+      for (const linkedMirrorId of linkedMirrorIds) {
+        incomingLinks[linkedMirrorId] += 1;
+
+        if (incomingLinks[linkedMirrorId] > 1) {
+          return false;
+        }
+      }
+    }
+
+    return true;
   }
 
   private traceLaser(): LaserTrace {
@@ -380,9 +420,8 @@ export class LaserPage {
         ? {
             ...mirror,
             orientationIndex: ((mirror.orientationIndex + 1) % 3) as MirrorState,
-            orientation: mirror.orientationOptions[
-              ((mirror.orientationIndex + 1) % 3) as MirrorState
-            ],
+            orientation:
+              mirror.orientationOptions[((mirror.orientationIndex + 1) % 3) as MirrorState],
           }
         : { ...mirror },
     );
@@ -393,9 +432,7 @@ export class LaserPage {
     controls: MirrorControl[],
     clicks: MirrorClicks,
   ): Mirror[] {
-    const controlByMirrorId = new Map(
-      controls.map((control) => [control.mirrorId, control]),
-    );
+    const controlByMirrorId = new Map(controls.map((control) => [control.mirrorId, control]));
     let result = mirrors.map((mirror) => ({ ...mirror }));
 
     for (const [mirrorId, count] of Object.entries(clicks)) {
