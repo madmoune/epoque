@@ -3,11 +3,12 @@
 
   <section class="card">
     <header class="header">
-      <p class="eyebrow">Grille calculee</p>
+      <p class="eyebrow">Grille calculée</p>
       <h1>KenKen / Calcudoku</h1>
       <p class="intro">
-        Place 1 a 4 une seule fois par ligne et colonne. Dans chaque cage, additionne ou multiplie
-        toutes les cases; pour - et /, fais grand moins petit ou grand divise par petit.
+        Place les nombres de 1 à 6 une seule fois par ligne et colonne. Dans chaque cage, additionne
+        ou multiplie toutes les cases ; pour - et /, fais grand moins petit ou grand divise par
+        petit.
       </p>
     </header>
 
@@ -22,8 +23,8 @@
 
     <section class="puzzle-area">
       <div class="calcudoku-grid" aria-label="Grille Calcudoku">
-        @for (row of [0, 1, 2, 3]; track row) {
-          @for (col of [0, 1, 2, 3]; track $index) {
+        @for (row of gridIndexes; track row) {
+          @for (col of gridIndexes; track col) {
             @let cell = cellAt(row, col);
             <div
               [class]="cellClass(cell)"
@@ -68,7 +69,9 @@
           Indice
         </button>
         <button type="button" class="secondary-button" (click)="resetPuzzle()">Recommencer</button>
-        <button type="button" class="secondary-button" (click)="newPuzzle()">Nouvelle grille</button>
+        <button type="button" class="secondary-button" (click)="newPuzzle()">
+          Nouvelle grille
+        </button>
       </div>
     </section>
   </section>

@@ -1,140 +1,222 @@
 <main class="page">
-    <a routerLink="/" fragment="spatial-placement" class="back-link">Retour au menu</a>
+  <a routerLink="/" fragment="spatial-placement" class="back-link">Retour au menu</a>
 
-    <section class="card">
-        <p class="eyebrow">Casse-Grille</p>
-        <h1>Place les pièces</h1>
+  <section class="card">
+    <p class="eyebrow">Casse-Grille</p>
+    <h1>Place les pièces</h1>
 
-        <p class="instructions">
-            Place toutes les pièces pour compléter la grille.
-        </p>
+    <p class="instructions">Place toutes les pièces pour compléter la grille.</p>
 
-        <div class="game-layout">
-            <div class="board-section">
-                <div class="board-wrapper">
-                    <div class="column-labels">
-                        <span></span>
+    <div class="puzzle-summary" aria-live="polite">
+      <strong>Solutions possibles : {{ solutionCountLabel() }}</strong>
+      <span>
+        Une solution correspond à une façon de placer chaque pièce. Les rotations qui donnent la
+        même forme ne sont comptées qu’une fois.
+      </span>
+    </div>
 
-                        @for (column of columns(); track column) {
-                        <span>{{ column + 1 }}</span>
-                        }
-                    </div>
+    <label class="learning-toggle">
+      <input
+        type="checkbox"
+        [checked]="isLearningMode()"
+        (change)="setLearningMode($any($event.target).checked)"
+      />
+      <span>Activer le mode apprentissage</span>
+    </label>
 
-                    <div class="board-layout">
-                        <div class="row-labels">
-                            @for (row of rows(); track row) {
-                            <span>{{ row + 1 }}</span>
-                            }
-                        </div>
+    @if (isLearningMode()) {
+      <section class="learning-guide" aria-labelledby="learning-guide-title">
+        <button
+          type="button"
+          class="learning-guide-toggle"
+          [attr.aria-expanded]="isLearningGuideExpanded()"
+          aria-controls="learning-guide-content"
+          (click)="toggleLearningGuide()"
+        >
+          <span id="learning-guide-title">Comprendre les blocages</span>
+          <span aria-hidden="true">{{ isLearningGuideExpanded() ? '−' : '+' }}</span>
+        </button>
 
-                        <div class="jigsaw-board" aria-label="Grille du casse-tête" (pointerleave)="clearHoveredAnchor()">
-                            @for (cell of boardCells(); track cell.row + '-' + cell.column) {
-                            <button type="button" data-board-cell="true" [attr.data-row]="cell.row"
-                                [attr.data-column]="cell.column" [class]="boardCellClasses(cell)" (pointerenter)="
-                    setHoveredAnchor({ row: cell.row, column: cell.column })
-                  " (pointermove)="
-                    setHoveredAnchor({ row: cell.row, column: cell.column })
-                  " (click)="handleBoardCellClick(cell, $event)" [attr.aria-label]="
-                    'Ligne ' + (cell.row + 1) + ', colonne ' + (cell.column + 1)
-                  ">
-                                @if (cell.isBlocked) {
-                                ×
-                                }
+        @if (isLearningGuideExpanded()) {
+          <div id="learning-guide-content" class="learning-guide-content">
+            <p class="learning-summary">
+              Une pose peut être valide et bloquer la suite. Commence par les cases qui ont le moins
+              d’options et vérifie qu’aucune case libre ne devient impossible.
+            </p>
+          </div>
+        }
 
-                                @if (cell.isLocked) {
-                                <span class="lock-icon" aria-hidden="true">🔒</span>
-                                }
-                            </button>
-                            }
-                        </div>
-                    </div>
-                </div>
+        @if (activePlacementAnalysis(); as analysis) {
+          <p
+            class="learning-feedback"
+            [class.analysis-ok]="placementAnalysisTone(analysis) === 'analysis-ok'"
+            [class.analysis-warning]="placementAnalysisTone(analysis) === 'analysis-warning'"
+            [class.analysis-invalid]="placementAnalysisTone(analysis) === 'analysis-invalid'"
+            aria-live="polite"
+          >
+            {{ placementAnalysisMessage(analysis) }}
+          </p>
+        } @else {
+          <p class="learning-tip">
+            Sélectionne une pièce et survole une case pour voir si son placement bloque la suite.
+          </p>
+        }
+      </section>
+    }
 
-                @if (errorMessage()) {
-                <p class="error" role="status">{{ errorMessage() }}</p>
-                }
+    <div class="game-layout">
+      <div class="board-section">
+        <div class="board-wrapper">
+          <div class="column-labels">
+            <span></span>
 
-                @if (selectedPiece(); as piece) {
-                <div class="selected-info">
-                    Sélection : <strong>{{ piece.name }}</strong>
-                </div>
-                }
+            @for (column of columns(); track column) {
+              <span>{{ column + 1 }}</span>
+            }
+          </div>
+
+          <div class="board-layout">
+            <div class="row-labels">
+              @for (row of rows(); track row) {
+                <span>{{ row + 1 }}</span>
+              }
             </div>
 
-            <aside class="piece-tray" aria-label="Pièces à placer">
-                <h2>Pièces à placer</h2>
+            <div
+              class="jigsaw-board"
+              aria-label="Grille du casse-tête"
+              (pointerleave)="clearHoveredAnchor()"
+            >
+              @for (cell of boardCells(); track cell.row + '-' + cell.column) {
+                <button
+                  type="button"
+                  data-board-cell="true"
+                  [attr.data-row]="cell.row"
+                  [attr.data-column]="cell.column"
+                  [class]="boardCellClasses(cell)"
+                  (pointerenter)="setHoveredAnchor({ row: cell.row, column: cell.column })"
+                  (pointermove)="setHoveredAnchor({ row: cell.row, column: cell.column })"
+                  (click)="handleBoardCellClick(cell, $event)"
+                  [attr.aria-label]="'Ligne ' + (cell.row + 1) + ', colonne ' + (cell.column + 1)"
+                >
+                  @if (cell.isBlocked) {
+                    ×
+                  }
 
-                <div class="piece-list">
-                    @for (piece of unplacedPieces(); track piece.id) {
-                    <button type="button" class="piece-button" [class.selected]="selectedPieceId() === piece.id"
-                        (pointerdown)="startPieceDrag(piece.id, $event)" [attr.aria-label]="'Déplacer ' + piece.name">
-                        <span class="piece-preview" [style.gridTemplateColumns]="
-                  'repeat(' + previewGridSize(piece) + ', 1fr)'
-                " [style.gridTemplateRows]="
-                  'repeat(' + previewGridSize(piece) + ', 1fr)'
-                ">
-                            @for (
-                            previewCell of previewCells(piece);
-                            track previewCell.row + '-' + previewCell.column
-                            ) {
-                            <span class="piece-preview-cell" [class]="'piece-preview-cell ' + colorClass(piece)"
-                                [style.gridRow]="previewCell.row + 1"
-                                [style.gridColumn]="previewCell.column + 1"></span>
-                            }
-                        </span>
-                    </button>
-                    }
-                </div>
-            </aside>
+                  @if (cell.isLocked) {
+                    <span class="lock-icon" aria-hidden="true">🔒</span>
+                  }
+                </button>
+              }
+            </div>
+          </div>
         </div>
 
-        <div class="actions">
-            <button type="button" class="secondary-button" (click)="rotateSelectedPiece()"
-                [disabled]="!selectedPiece()">
-                Pivoter
-            </button>
-
-            <button type="button" class="secondary-button" (click)="placeHintPiece()"
-                [disabled]="isSolved() || unplacedPieces().length === 0">
-                Indice
-            </button>
-
-            <button type="button" class="secondary-button" (click)="resetPuzzle()">
-                Recommencer
-            </button>
-
-            <button type="button" (click)="newPuzzle()">
-                Nouvelle grille
-            </button>
-        </div>
-
-        @if (isSolved()) {
-        <app-puzzle-success-popup
-            title="Puzzle complété!"
-            message="Toutes les pièces sont correctement placées."
-            actionLabel="Nouveau puzzle"
-            (action)="newPuzzle()"
-        />
+        @if (errorMessage()) {
+          <p class="error" role="status">{{ errorMessage() }}</p>
         }
-    </section>
 
-    @if (selectedPiece(); as piece) {
+        @if (hintMessage()) {
+          <p class="hint-message" role="status">{{ hintMessage() }}</p>
+        }
+
+        @if (selectedPiece(); as piece) {
+          <div class="selected-info">
+            Sélection : <strong>{{ piece.name }}</strong>
+          </div>
+        }
+      </div>
+
+      <aside class="piece-tray" aria-label="Pièces à placer">
+        <h2>Pièces à placer</h2>
+
+        <div class="piece-list">
+          @for (piece of unplacedPieces(); track piece.id) {
+            <button
+              type="button"
+              class="piece-button"
+              [class.selected]="selectedPieceId() === piece.id"
+              (pointerdown)="startPieceDrag(piece.id, $event)"
+              [attr.aria-label]="'Déplacer ' + piece.name"
+            >
+              <span
+                class="piece-preview"
+                [style.gridTemplateColumns]="'repeat(' + previewGridSize(piece) + ', 1fr)'"
+                [style.gridTemplateRows]="'repeat(' + previewGridSize(piece) + ', 1fr)'"
+              >
+                @for (
+                  previewCell of previewCells(piece);
+                  track previewCell.row + '-' + previewCell.column
+                ) {
+                  <span
+                    class="piece-preview-cell"
+                    [class]="'piece-preview-cell ' + colorClass(piece)"
+                    [style.gridRow]="previewCell.row + 1"
+                    [style.gridColumn]="previewCell.column + 1"
+                  ></span>
+                }
+              </span>
+            </button>
+          }
+        </div>
+      </aside>
+    </div>
+
+    <div class="actions">
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="rotateSelectedPiece()"
+        [disabled]="!selectedPiece()"
+      >
+        Pivoter
+      </button>
+
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="placeHintPiece()"
+        [disabled]="isSolved() || unplacedPieces().length === 0"
+      >
+        Indice
+      </button>
+
+      <button type="button" class="secondary-button" (click)="resetPuzzle()">Recommencer</button>
+
+      <button type="button" (click)="newPuzzle()">Nouvelle grille</button>
+    </div>
+
+    @if (isSolved()) {
+      <app-puzzle-success-popup
+        title="Puzzle complété!"
+        message="Toutes les pièces sont correctement placées."
+        actionLabel="Nouveau puzzle"
+        (action)="newPuzzle()"
+      />
+    }
+  </section>
+
+  @if (selectedPiece(); as piece) {
     @if (dragPosition(); as position) {
-    <div class="drag-preview" [style.transform]="dragPreviewTransform(position)">
-        <span class="piece-preview" [style.gridTemplateColumns]="
-            'repeat(' + previewGridSize(piece) + ', 1fr)'
-          " [style.gridTemplateRows]="
-            'repeat(' + previewGridSize(piece) + ', 1fr)'
-          ">
-            @for (
+      <div class="drag-preview" [style.transform]="dragPreviewTransform(position)">
+        <span
+          class="piece-preview"
+          [style.gridTemplateColumns]="'repeat(' + previewGridSize(piece) + ', 1fr)'"
+          [style.gridTemplateRows]="'repeat(' + previewGridSize(piece) + ', 1fr)'"
+        >
+          @for (
             previewCell of previewCells(piece);
             track previewCell.row + '-' + previewCell.column
-            ) {
-            <span class="piece-preview-cell" [class]="'piece-preview-cell ' + colorClass(piece)"
-                [style.gridRow]="previewCell.row + 1" [style.gridColumn]="previewCell.column + 1"></span>
-            }
+          ) {
+            <span
+              class="piece-preview-cell"
+              [class]="'piece-preview-cell ' + colorClass(piece)"
+              [style.gridRow]="previewCell.row + 1"
+              [style.gridColumn]="previewCell.column + 1"
+            ></span>
+          }
         </span>
-    </div>
+      </div>
     }
-    }
+  }
 </main>

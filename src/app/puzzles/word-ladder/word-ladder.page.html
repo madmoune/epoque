@@ -84,9 +84,12 @@
                 autocomplete="off"
                 autocapitalize="characters"
                 spellcheck="false"
+                inputmode="none"
                 [attr.maxlength]="currentPuzzle.letterCount"
                 [value]="answerInput()"
                 (input)="updateAnswer($any($event.target).value)"
+                (focus)="selectInputContent($event)"
+                (click)="selectInputContent($event)"
                 aria-describedby="word-ladder-help word-ladder-feedback"
               />
               <button type="submit" [disabled]="answerInput().length === 0">Ajouter</button>
@@ -96,6 +99,13 @@
             </small>
           </form>
         }
+
+        <app-custom-keyboard
+          [rows]="letterKeyboardRows"
+          [visible]="keyboardVisible() && !isSolved() && remainingMoves() > 0"
+          [disabled]="isSolved() || remainingMoves() === 0"
+          (keyPress)="handleKeyboardKey($event)"
+        />
 
         <div id="word-ladder-feedback" class="feedback-zone" aria-live="polite">
           @if (feedback(); as currentFeedback) {

@@ -1,5 +1,17 @@
-import { Component, computed, ElementRef, inject, signal, ViewChild } from '@angular/core';
+import {
+  Component,
+  computed,
+  ElementRef,
+  HostListener,
+  inject,
+  signal,
+  ViewChild,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
+import {
+  CustomKeyboardComponent,
+  CustomKeyboardKey,
+} from '../shared/custom-keyboard/custom-keyboard.component';
 import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
 import { WordLadderPuzzle, WordLadderService } from './word-ladder.service';
 
@@ -10,13 +22,14 @@ type WordLadderFeedback = {
 
 @Component({
   selector: 'app-word-ladder-page',
-  imports: [RouterLink, PuzzleSuccessPopupComponent],
+  imports: [RouterLink, PuzzleSuccessPopupComponent, CustomKeyboardComponent],
   templateUrl: './word-ladder.page.html',
   styleUrl: './word-ladder.page.scss',
 })
 export class WordLadderPage {
   @ViewChild('wordInput')
   private readonly wordInput?: ElementRef<HTMLInputElement>;
+  private suppressNextSelection = false;
 
   private readonly wordLadderService = inject(WordLadderService);
 
@@ -28,6 +41,13 @@ export class WordLadderPage {
   protected readonly feedback = signal<WordLadderFeedback | null>(null);
   protected readonly hintedWordKeys = signal<Set<string>>(new Set());
   protected readonly hintCount = signal(0);
+  protected readonly keyboardVisible = signal(false);
+  protected readonly letterKeyboardRows: CustomKeyboardKey[][] = [
+    ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+    ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
+    ['Z', 'X', 'C', 'V', 'B', 'N', 'M', 'backspace'],
+    ['clear'],
+  ];
 
   protected readonly currentWord = computed(() => this.ladder().at(-1) ?? '');
   protected readonly moveCount = computed(() => Math.max(0, this.ladder().length - 1));
@@ -76,6 +96,65 @@ export class WordLadderPage {
 
     this.answerInput.set(letters.toLocaleUpperCase('fr-CA'));
     this.feedback.set(null);
+  }
+
+  protected handleKeyboardKey(key: CustomKeyboardKey): void {
+    if (this.isSolved() || this.remainingMoves() <= 0) {
+      return;
+    }
+
+    if (key === 'backspace') {
+      this.updateAnswer(this.answerInput().slice(0, -1));
+      this.focusInput(false);
+      return;
+    }
+
+    if (key === 'clear') {
+      this.updateAnswer('');
+      this.focusInput(false);
+      return;
+    }
+
+    if (key === 'space') {
+      return;
+    }
+
+    this.updateAnswer(`${this.answerInput()}${key}`);
+    this.focusInput(false);
+  }
+
+  protected selectInputContent(event: Event): void {
+    if (!(event.target instanceof HTMLInputElement)) {
+      return;
+    }
+
+    this.keyboardVisible.set(true);
+
+    if (this.suppressNextSelection) {
+      this.suppressNextSelection = false;
+      return;
+    }
+
+    event.target.select();
+  }
+
+  @HostListener('document:pointerdown', ['$event'])
+  protected hideKeyboardWhenClickingAway(event: PointerEvent): void {
+    const target = event.target;
+
+    if (!(target instanceof Element)) {
+      return;
+    }
+
+    if (
+      target.closest('.answer-input') ||
+      target.closest('app-custom-keyboard') ||
+      target.closest('app-puzzle-success-popup')
+    ) {
+      return;
+    }
+
+    this.keyboardVisible.set(false);
   }
 
   protected submitWord(): void {
@@ -278,7 +357,14 @@ export class WordLadderPage {
     this.feedback.set({ tone: 'error', text });
   }
 
-  private focusInput(): void {
-    window.setTimeout(() => this.wordInput?.nativeElement.focus());
+  private focusInput(selectContent = false): void {
+    this.suppressNextSelection = !selectContent;
+    window.setTimeout(() => {
+      this.wordInput?.nativeElement.focus();
+
+      if (selectContent) {
+        this.wordInput?.nativeElement.select();
+      }
+    });
   }
 }

@@ -29,93 +29,25 @@ type CalcudokuCageTemplate = {
   styleUrl: './calcudoku.page.scss',
 })
 export class CalcudokuPage {
-  protected readonly size = 4;
+  protected readonly size = 6;
   protected readonly numberKeyboardRows: CustomKeyboardKey[][] = [
-    ['1', '2', '3', '4'],
+    ['1', '2', '3'],
+    ['4', '5', '6'],
     ['backspace'],
   ];
 
-  private readonly cageTemplates: CalcudokuCageTemplate[] = [
-    this.createTemplate(
-      [
-        { id: 'a', operator: '+' },
-        { id: 'b', operator: 'x' },
-        { id: 'c', operator: '' },
-        { id: 'd', operator: '+' },
-        { id: 'e', operator: '/' },
-        { id: 'f', operator: '-' },
-        { id: 'g', operator: '+' },
-        { id: 'h', operator: '' },
-      ],
-      [
-        ['a', 'a', 'b', 'b'],
-        ['c', 'd', 'b', 'e'],
-        ['f', 'd', 'g', 'e'],
-        ['f', 'h', 'g', 'g'],
-      ],
-    ),
-    this.createTemplate(
-      [
-        { id: 'a', operator: '-' },
-        { id: 'b', operator: '+' },
-        { id: 'c', operator: 'x' },
-        { id: 'd', operator: '/' },
-        { id: 'e', operator: '+' },
-        { id: 'f', operator: '' },
-        { id: 'g', operator: '-' },
-        { id: 'h', operator: '+' },
-      ],
-      [
-        ['a', 'a', 'b', 'b'],
-        ['c', 'c', 'c', 'd'],
-        ['e', 'e', 'f', 'd'],
-        ['g', 'g', 'h', 'h'],
-      ],
-    ),
-    this.createTemplate(
-      [
-        { id: 'a', operator: 'x' },
-        { id: 'b', operator: '-' },
-        { id: 'c', operator: '+' },
-        { id: 'd', operator: '' },
-        { id: 'e', operator: '/' },
-        { id: 'f', operator: '+' },
-        { id: 'g', operator: 'x' },
-      ],
-      [
-        ['a', 'a', 'b', 'b'],
-        ['a', 'c', 'c', 'd'],
-        ['e', 'e', 'f', 'f'],
-        ['g', 'g', 'g', 'f'],
-      ],
-    ),
-    this.createTemplate(
-      [
-        { id: 'a', operator: '+' },
-        { id: 'b', operator: '' },
-        { id: 'c', operator: '/' },
-        { id: 'd', operator: '+' },
-        { id: 'e', operator: '-' },
-        { id: 'f', operator: 'x' },
-        { id: 'g', operator: '+' },
-        { id: 'h', operator: '' },
-      ],
-      [
-        ['a', 'a', 'b', 'c'],
-        ['d', 'd', 'e', 'c'],
-        ['d', 'f', 'e', 'g'],
-        ['h', 'f', 'f', 'g'],
-      ],
-    ),
-  ];
-
-  private readonly cageTemplate = signal<CalcudokuCageTemplate>(this.randomCageTemplate());
+  protected readonly gridIndexes = Array.from({ length: this.size }, (_, index) => index);
+  private readonly cageTemplate = signal<CalcudokuCageTemplate>(this.createRandomCageTemplate());
   protected readonly cages = computed(() => this.cageTemplate().cages);
   protected readonly cells = computed(() => this.cageTemplate().cells);
   protected readonly solution = signal<number[][]>(this.createSolution());
   protected readonly answers = signal<string[][]>(this.createEmptyAnswers());
   protected readonly hintedPositions = signal<Set<string>>(new Set());
   protected readonly activeCell = signal<{ row: number; col: number } | null>(null);
+
+  constructor() {
+    this.assignCageOperators();
+  }
 
   protected readonly isSolved = computed(() => {
     const enteredValues = this.enteredValues();
@@ -136,7 +68,7 @@ export class CalcudokuPage {
       return;
     }
 
-    const cleanValue = value.replace(/[^1-4]/g, '').slice(0, 1);
+    const cleanValue = value.replace(/[^1-6]/g, '').slice(0, 1);
     this.answers.update((answers) =>
       answers.map((answerRow, rowIndex) =>
         rowIndex === row
@@ -199,8 +131,9 @@ export class CalcudokuPage {
   }
 
   protected newPuzzle(): void {
-    this.cageTemplate.set(this.randomCageTemplate(this.cageTemplate()));
+    this.cageTemplate.set(this.createRandomCageTemplate());
     this.solution.set(this.createSolution());
+    this.assignCageOperators();
     this.resetPuzzle();
   }
 
@@ -219,7 +152,9 @@ export class CalcudokuPage {
       answers.map((answerRow, rowIndex) =>
         rowIndex === hintCell.row
           ? answerRow.map((answer, colIndex) =>
-              colIndex === hintCell.col ? String(this.solution()[hintCell.row][hintCell.col]) : answer,
+              colIndex === hintCell.col
+                ? String(this.solution()[hintCell.row][hintCell.col])
+                : answer,
             )
           : answerRow,
       ),
@@ -286,60 +221,151 @@ export class CalcudokuPage {
     return Array.from({ length: this.size }, () => Array.from({ length: this.size }, () => ''));
   }
 
-  private createTemplate(cages: CalcudokuCage[], cageRows: string[][]): CalcudokuCageTemplate {
-    return {
-      cages,
-      cells: cageRows.flatMap((row, rowIndex) =>
-        row.map((cage, colIndex) => ({
-          row: rowIndex,
-          col: colIndex,
-          cage,
-        })),
-      ),
-    };
-  }
-
-  private randomCageTemplate(excludedTemplate?: CalcudokuCageTemplate): CalcudokuCageTemplate {
-    const templates =
-      excludedTemplate && this.cageTemplates.length > 1
-        ? this.cageTemplates.filter((template) => template !== excludedTemplate)
-        : this.cageTemplates;
-
-    return templates[this.randomInt(0, templates.length - 1)];
-  }
-
   private createSolution(): number[][] {
-    for (let attempt = 0; attempt < 50; attempt += 1) {
-      const digits = this.shuffle([1, 2, 3, 4]);
-      const shift = this.randomInt(0, this.size - 1);
-      const solution = Array.from({ length: this.size }, (_, row) =>
-        Array.from({ length: this.size }, (_, col) => digits[(row + col + shift) % this.size]),
-      );
+    const digits = this.shuffle(Array.from({ length: this.size }, (_, index) => index + 1));
+    const shift = this.randomInt(0, this.size - 1);
 
-      if (this.hasWholeNumberDivisionCages(solution)) {
-        return solution;
+    return Array.from({ length: this.size }, (_, row) =>
+      Array.from({ length: this.size }, (_, col) => digits[(row + col + shift) % this.size]),
+    );
+  }
+
+  private createRandomCageTemplate(): CalcudokuCageTemplate {
+    const unassignedCells = new Set(
+      this.gridIndexes.flatMap((row) => this.gridIndexes.map((col) => this.positionKey(row, col))),
+    );
+    const cages: CalcudokuCage[] = [];
+    const cells: CalcudokuCell[] = [];
+    let cageIndex = 0;
+
+    while (unassignedCells.size > 0) {
+      const seedKey = this.randomItem([...unassignedCells]);
+      const cageKeys = [seedKey];
+      unassignedCells.delete(seedKey);
+      const desiredSize = Math.min(this.randomCageSize(), unassignedCells.size + 1);
+
+      while (cageKeys.length < desiredSize) {
+        const candidates = cageKeys.flatMap((key) => {
+          const [row, col] = this.parsePositionKey(key);
+
+          return this.neighborPositions(row, col).filter((position) =>
+            unassignedCells.has(this.positionKey(position.row, position.col)),
+          );
+        });
+        const uniqueCandidates = [
+          ...new Map(
+            candidates.map((candidate) => [
+              this.positionKey(candidate.row, candidate.col),
+              candidate,
+            ]),
+          ).values(),
+        ];
+
+        if (uniqueCandidates.length === 0) {
+          break;
+        }
+
+        const nextCell = this.randomItem(uniqueCandidates);
+        const nextKey = this.positionKey(nextCell.row, nextCell.col);
+        cageKeys.push(nextKey);
+        unassignedCells.delete(nextKey);
       }
+
+      const cageId = `cage-${cageIndex}`;
+      cages.push({ id: cageId, operator: '' });
+      cells.push(
+        ...cageKeys.map((key) => {
+          const [row, col] = this.parsePositionKey(key);
+
+          return { row, col, cage: cageId };
+        }),
+      );
+      cageIndex += 1;
     }
 
-    return [
-      [1, 2, 3, 4],
-      [2, 3, 4, 1],
-      [3, 4, 1, 2],
-      [4, 1, 2, 3],
-    ];
+    return { cages, cells };
   }
 
-  private hasWholeNumberDivisionCages(solution: number[][]): boolean {
-    return this.cages()
-      .filter((cage) => cage.operator === '/')
-      .every((cage) => {
-        const [first, second] = this.cells()
-          .filter((cell) => cell.cage === cage.id)
-          .map((cell) => solution[cell.row][cell.col])
-          .sort((a, b) => b - a);
+  private assignCageOperators(): void {
+    const solution = this.solution();
 
-        return Boolean(second) && first % second === 0;
-      });
+    this.cageTemplate.update((template) => ({
+      ...template,
+      cages: template.cages.map((cage) => ({
+        ...cage,
+        operator: this.randomOperatorForCage(cage.id, solution, template.cells),
+      })),
+    }));
+  }
+
+  private randomOperatorForCage(
+    cageId: string,
+    solution: number[][],
+    cells: CalcudokuCell[],
+  ): CalcudokuCage['operator'] {
+    const cageValues = cells
+      .filter((cell) => cell.cage === cageId)
+      .map((cell) => solution[cell.row][cell.col]);
+
+    if (cageValues.length <= 1) {
+      return '';
+    }
+
+    if (cageValues.length > 2) {
+      return this.randomItem(['+', 'x'] as const);
+    }
+
+    const [first, second] = [...cageValues].sort((a, b) => b - a);
+    const operators: CalcudokuCage['operator'][] = ['+', 'x'];
+
+    if (first !== second) {
+      operators.push('-');
+    }
+
+    if (second !== 0 && first % second === 0) {
+      operators.push('/');
+    }
+
+    return this.randomItem(operators);
+  }
+
+  private randomCageSize(): number {
+    const roll = Math.random();
+
+    if (roll < 0.12) {
+      return 1;
+    }
+
+    if (roll < 0.62) {
+      return 2;
+    }
+
+    if (roll < 0.92) {
+      return 3;
+    }
+
+    return 4;
+  }
+
+  private neighborPositions(row: number, col: number): Array<{ row: number; col: number }> {
+    return [
+      { row: row - 1, col },
+      { row, col: col + 1 },
+      { row: row + 1, col },
+      { row, col: col - 1 },
+    ].filter(
+      (position) =>
+        position.row >= 0 &&
+        position.row < this.size &&
+        position.col >= 0 &&
+        position.col < this.size,
+    );
+  }
+
+  private parsePositionKey(key: string): [number, number] {
+    const [row, col] = key.split(':').map(Number);
+
+    return [row, col];
   }
 
   private cageLabelFor(cageId: string): string {
@@ -401,7 +427,10 @@ export class CalcudokuPage {
   }
 
   private hasAllDigitsOnce(values: number[]): boolean {
-    return new Set(values).size === this.size && values.every((value) => value >= 1 && value <= this.size);
+    return (
+      new Set(values).size === this.size &&
+      values.every((value) => value >= 1 && value <= this.size)
+    );
   }
 
   private hasValidCages(values: number[][]): boolean {
@@ -464,12 +493,19 @@ export class CalcudokuPage {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
+  private randomItem<T>(values: T[]): T {
+    return values[this.randomInt(0, values.length - 1)]!;
+  }
+
   private shuffle<T>(values: T[]): T[] {
     const shuffledValues = [...values];
 
     for (let index = shuffledValues.length - 1; index > 0; index -= 1) {
       const swapIndex = this.randomInt(0, index);
-      [shuffledValues[index], shuffledValues[swapIndex]] = [shuffledValues[swapIndex], shuffledValues[index]];
+      [shuffledValues[index], shuffledValues[swapIndex]] = [
+        shuffledValues[swapIndex],
+        shuffledValues[index],
+      ];
     }
 
     return shuffledValues;
