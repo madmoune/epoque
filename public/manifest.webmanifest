@@ -1,0 +1,15 @@
+{
+  "name": "Époque",
+  "short_name": "Époque",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0c1a16",
+  "theme_color": "#0c1a16",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    }
+  ]
+}
