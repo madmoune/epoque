@@ -1,325 +1,601 @@
 <main class="lab-page">
   <header class="lab-header">
-    @if (isTypeDetailPage()) {
+    @if (isPlayPage()) {
+      <a class="back-link" routerLink="/">Retour au menu</a>
+    } @else if (isTypeDetailPage()) {
       <a class="back-link" routerLink="/lab">Toutes les énigmes</a>
     } @else {
       <a class="back-link" routerLink="/">Retour</a>
     }
-    <h1>Laboratoire d’énigmes</h1>
+    <h1>{{ isPlayPage() ? typeName(selectedType()) : 'Laboratoire d’énigmes' }}</h1>
   </header>
 
   @if (!isTypeDetailPage()) {
-  <section class="type-browser" aria-label="Catalogue des énigmes">
-    <div class="browser-heading">
-      <div>
-        <span class="eyebrow">Catalogue</span>
-        <h2>Choisis une énigme</h2>
-      </div>
-      <div class="browser-tools">
-        <span class="type-count">{{ visiblePuzzleTypes().length }} / {{ puzzleTypes.length }} énigmes</span>
-        <div class="display-mode-switch" role="group" aria-label="Mode d’affichage">
-          <button
-            type="button"
-            class="display-mode-button"
-            [class.active]="typeViewMode() === 'cards'"
-            [attr.aria-pressed]="typeViewMode() === 'cards'"
-            (click)="setTypeViewMode('cards')"
+    <section class="type-browser" aria-label="Catalogue des énigmes">
+      <div class="browser-heading">
+        <div>
+          <span class="eyebrow">Catalogue</span>
+          <h2>Choisis une énigme</h2>
+        </div>
+        <div class="browser-tools">
+          <span class="type-count"
+            >{{ visiblePuzzleTypes().length }} / {{ puzzleTypes.length }} énigmes</span
           >
-            Grille
-          </button>
-          <button
-            type="button"
-            class="display-mode-button"
-            [class.active]="typeViewMode() === 'lines'"
-            [attr.aria-pressed]="typeViewMode() === 'lines'"
-            (click)="setTypeViewMode('lines')"
-          >
-            Lignes
-          </button>
+          <div class="display-mode-switch" role="group" aria-label="Mode d’affichage">
+            <button
+              type="button"
+              class="display-mode-button"
+              [class.active]="typeViewMode() === 'cards'"
+              [attr.aria-pressed]="typeViewMode() === 'cards'"
+              (click)="setTypeViewMode('cards')"
+            >
+              Grille
+            </button>
+            <button
+              type="button"
+              class="display-mode-button"
+              [class.active]="typeViewMode() === 'lines'"
+              [attr.aria-pressed]="typeViewMode() === 'lines'"
+              (click)="setTypeViewMode('lines')"
+            >
+              Lignes
+            </button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="catalogue-filters">
-      <label class="type-filter">
-        <span>Filtrer par nom d’énigme</span>
-        <input
-          type="search"
-          [value]="typeNameFilter()"
-          (input)="setTypeNameFilter($event)"
-          placeholder="Ex. Segments"
-          autocomplete="off"
-        />
-      </label>
-      <label class="type-sort">
-        <span>Filtrer par statut</span>
-        <select [value]="typeStatusFilter()" (change)="setTypeStatusFilter($event)">
-          <option value="all">Tous les statuts</option>
-          @for (state of approvalStates; track state) {
-            <option [value]="state">{{ stateLabel(state) }}</option>
-          }
-        </select>
-      </label>
-      <label class="type-sort">
-        <span>Trier par</span>
-        <select [value]="puzzleSortMode()" (change)="setPuzzleSortMode($event)">
-          <option value="name-asc">Nom (A à Z)</option>
-          <option value="name-desc">Nom (Z à A)</option>
-          <option value="created-desc">Création (plus récente)</option>
-          <option value="created-asc">Création (plus ancienne)</option>
-          <option value="updated-desc">Modification (plus récente)</option>
-          <option value="updated-asc">Modification (plus ancienne)</option>
-          <option value="status-asc">Statut (approuvées en premier)</option>
-          <option value="status-desc">Statut (supprimées en premier)</option>
-        </select>
-      </label>
-    </div>
-
-    @if (visiblePuzzleTypes().length > 0) {
-    <div class="type-grid" [class.lines-view]="typeViewMode() === 'lines'">
-      @for (type of visiblePuzzleTypes(); track type.id) {
-        <button
-          type="button"
-          class="type-card"
-          [class.deleted]="typeState(type) === 'deleted'"
-          (click)="selectType(type)"
-        >
-          <span class="type-card-body">
-            <span class="type-card-name">{{ typeName(type) }}</span>
-            <span class="type-card-dates">
-              <span>Créée le {{ typeCreatedAt(type) }}</span>
-              <span>Modifiée le {{ typeUpdatedAt(type) }}</span>
-            </span>
-          </span>
-          <span class="type-card-footer">
-            <small [class]="'state-badge ' + typeState(type)">{{ stateLabel(typeState(type)) }}</small>
-            @if (hasTypeComment(type)) {
-              <span class="comment-indicator" title="Commentaire présent" aria-label="Commentaire présent"></span>
+      <div class="catalogue-filters">
+        <label class="type-filter">
+          <span>Filtrer par nom d’énigme</span>
+          <input
+            type="search"
+            [value]="typeNameFilter()"
+            (input)="setTypeNameFilter($event)"
+            placeholder="Ex. Segments"
+            autocomplete="off"
+          />
+        </label>
+        <label class="type-sort">
+          <span>Filtrer par statut</span>
+          <select [value]="typeStatusFilter()" (change)="setTypeStatusFilter($event)">
+            <option value="all">Tous les statuts</option>
+            @for (state of approvalStates; track state) {
+              <option [value]="state">{{ stateLabel(state) }}</option>
             }
-          </span>
-        </button>
+          </select>
+        </label>
+        <label class="type-sort">
+          <span>Trier par</span>
+          <select [value]="puzzleSortMode()" (change)="setPuzzleSortMode($event)">
+            <option value="name-asc">Nom (A à Z)</option>
+            <option value="name-desc">Nom (Z à A)</option>
+            <option value="created-desc">Création (plus récente)</option>
+            <option value="created-asc">Création (plus ancienne)</option>
+            <option value="updated-desc">Modification (plus récente)</option>
+            <option value="updated-asc">Modification (plus ancienne)</option>
+            <option value="status-asc">Statut (approuvées en premier)</option>
+            <option value="status-desc">Statut (supprimées en premier)</option>
+          </select>
+        </label>
+      </div>
+
+      @if (visiblePuzzleTypes().length > 0) {
+        <div class="type-grid" [class.lines-view]="typeViewMode() === 'lines'">
+          @for (type of visiblePuzzleTypes(); track type.id) {
+            <button
+              type="button"
+              class="type-card"
+              [class.deleted]="typeState(type) === 'deleted'"
+              (click)="selectType(type)"
+            >
+              <span class="type-card-body">
+                <span class="type-card-name">{{ typeName(type) }}</span>
+                <span class="type-card-dates">
+                  <span>Créée le {{ typeCreatedAt(type) }}</span>
+                  <span>Modifiée le {{ typeUpdatedAt(type) }}</span>
+                </span>
+              </span>
+              <span class="type-card-footer">
+                <small [class]="'state-badge ' + typeState(type)">{{
+                  stateLabel(typeState(type))
+                }}</small>
+                @if (hasTypeComment(type)) {
+                  <span
+                    class="comment-indicator"
+                    title="Commentaire présent"
+                    aria-label="Commentaire présent"
+                  ></span>
+                }
+              </span>
+            </button>
+          }
+        </div>
+      } @else {
+        <p class="empty-filter">Aucune énigme ne correspond à ce filtre.</p>
       }
-    </div>
-    } @else {
-      <p class="empty-filter">Aucune énigme ne correspond à ce filtre.</p>
-    }
-  </section>
+    </section>
   }
 
   @if (isTypeDetailPage()) {
-  <section class="lab-workspace" aria-label="Détails de l’énigme sélectionnée">
-    <div class="puzzle-detail-heading">
-      <span class="eyebrow">Énigme</span>
-      <div class="puzzle-title-row">
-        @if (editingTypeName()) {
-          <input
-            class="name-editor puzzle-title-editor"
-            type="text"
-            maxlength="120"
-            [value]="typeName(selectedType())"
-            aria-label="Nom de l’énigme"
-            (blur)="saveTypeName($event)"
-          />
-        } @else {
-          <h2 class="puzzle-title">{{ typeName(selectedType()) }}</h2>
-        }
-        <button type="button" class="name-edit-button" (click)="toggleTypeNameEdit()">
-          @if (editingTypeName()) {
-            <span aria-hidden="true">✓</span>
-            <span class="sr-only">Confirmer le nom de l’énigme</span>
-          } @else {
-            <span aria-hidden="true">✎</span>
-            <span class="sr-only">Modifier le nom de l’énigme</span>
-          }
-        </button>
-      </div>
-    </div>
-    <div class="type-summary puzzle-overview">
-      <div class="inline-state-field">
-        <span>État de l’énigme</span>
-        <select
-          [class]="typeState(selectedType())"
-          [value]="typeState(selectedType())"
-          (change)="setTypeState($event)"
-        >
-          @for (state of approvalStates; track state) {
-            <option [value]="state" [selected]="state === typeState(selectedType())">
-              {{ stateLabel(state) }}
-            </option>
-          }
-        </select>
-      </div>
-      <div class="comment-field description-field">
-        <span>Description de l’énigme</span>
-          <textarea
-            maxlength="1000"
-            [value]="typeDescription(selectedType())"
-            (input)="updateTypeDescription($event)"
-            (blur)="saveTypeDescription($event)"
-            aria-label="Description de l’énigme"
-          ></textarea>
-      </div>
-      <dl class="puzzle-dates">
-        <div>
-          <dt>Date de création</dt>
-          <dd>{{ typeCreatedAt(selectedType()) }}</dd>
-        </div>
-        <div>
-          <dt>Dernière modification</dt>
-          <dd>{{ typeUpdatedAt(selectedType()) }}</dd>
-        </div>
-      </dl>
-      <label class="comment-field">
-        <span>Commentaire de l’énigme</span>
-        <textarea
-          maxlength="1000"
-          [value]="typeComment(selectedType())"
-          (input)="updateTypeComment($event)"
-          (blur)="saveTypeComment($event)"
-          placeholder="Ajouter un commentaire…"
-        ></textarea>
-      </label>
-    </div>
-    <aside class="steps-panel" aria-label="Liste des étapes">
-      <div class="panel-heading">
-        <span>Étapes</span>
-        <strong>{{ selectedType().variants.length }}</strong>
-      </div>
-      <div class="step-list">
-        @for (variant of selectedType().variants; track variant.id) {
-          <button
-            type="button"
-            class="step-button"
-            [class.active]="selectedVariant().id === variant.id"
-            [class.deleted]="variantState(variant) === 'deleted'"
-            (click)="selectVariant(variant)"
-          >
-            <span class="step-button-name">{{ variantName(variant) }}</span>
-            @if (hasVariantComment(variant)) {
-              <span class="step-button-meta">Commentaire</span>
-            }
-          </button>
-        }
-      </div>
-    </aside>
-    <section class="preview-stage" aria-label="Aperçu joueur">
-      <div class="variant-summary step-overview">
-        <div class="editable-name">
-          @if (editingVariantName()) {
-            <input
-              class="name-editor"
-              type="text"
-              maxlength="120"
-              [value]="variantName(selectedVariant())"
-              aria-label="Nom de l’étape"
-              (blur)="saveVariantName($event)"
-            />
-          } @else {
-            <span class="name-label">{{ variantName(selectedVariant()) }}</span>
-          }
-          <button type="button" class="name-edit-button" (click)="toggleVariantNameEdit()">
-            @if (editingVariantName()) {
-              <span aria-hidden="true">✓</span>
-              <span class="sr-only">Confirmer le nom de l’étape</span>
+    <section
+      class="lab-workspace"
+      [class.player-workspace]="isPlayPage()"
+      [style.grid-template-columns]="isPlayPage() ? 'minmax(0, 1fr)' : ''"
+      aria-label="Détails de l’énigme sélectionnée"
+    >
+      @if (!isPlayPage()) {
+        <div class="puzzle-detail-heading">
+          <span class="eyebrow">Énigme</span>
+          <div class="puzzle-title-row">
+            @if (editingTypeName()) {
+              <input
+                class="name-editor puzzle-title-editor"
+                type="text"
+                maxlength="120"
+                [value]="typeName(selectedType())"
+                aria-label="Nom de l’énigme"
+                (blur)="saveTypeName($event)"
+              />
             } @else {
-              <span aria-hidden="true">✎</span>
-              <span class="sr-only">Modifier le nom de l’étape</span>
+              <h2 class="puzzle-title">{{ typeName(selectedType()) }}</h2>
             }
-          </button>
+            <button type="button" class="name-edit-button" (click)="toggleTypeNameEdit()">
+              @if (editingTypeName()) {
+                <span aria-hidden="true">✓</span>
+                <span class="sr-only">Confirmer le nom de l’énigme</span>
+              } @else {
+                <span aria-hidden="true">✎</span>
+                <span class="sr-only">Modifier le nom de l’énigme</span>
+              }
+            </button>
+          </div>
         </div>
-        <label class="field example-count-field">
-          <span>Nombre d’exemples</span>
-          <input
-            type="number"
-            min="0"
-            [max]="selectedVariant().examples.length"
-            [value]="selectedExampleCount()"
-            (change)="setExampleCount($event)"
-          />
-        </label>
-        <div class="comment-field description-field">
-          <span>Flavor text</span>
-          <textarea
-            maxlength="1000"
-            [value]="variantDescription(selectedVariant())"
-            (input)="updateVariantDescription($event)"
-            (blur)="saveVariantDescription($event)"
-            aria-label="Flavor text"
-          ></textarea>
+        <div class="type-summary puzzle-overview">
+          <div class="inline-state-field">
+            <span>État de l’énigme</span>
+            <select
+              [class]="typeState(selectedType())"
+              [value]="typeState(selectedType())"
+              (change)="setTypeState($event)"
+            >
+              @for (state of approvalStates; track state) {
+                <option [value]="state" [selected]="state === typeState(selectedType())">
+                  {{ stateLabel(state) }}
+                </option>
+              }
+            </select>
+          </div>
+          <div class="comment-field description-field">
+            <span>Description de l’énigme</span>
+            <textarea
+              maxlength="1000"
+              [value]="typeDescription(selectedType())"
+              (input)="updateTypeDescription($event)"
+              (blur)="saveTypeDescription($event)"
+              aria-label="Description de l’énigme"
+            ></textarea>
+          </div>
+          <dl class="puzzle-dates">
+            <div>
+              <dt>Date de création</dt>
+              <dd>{{ typeCreatedAt(selectedType()) }}</dd>
+            </div>
+            <div>
+              <dt>Dernière modification</dt>
+              <dd>{{ typeUpdatedAt(selectedType()) }}</dd>
+            </div>
+          </dl>
+          <label class="comment-field">
+            <span>Commentaire de l’énigme</span>
+            <textarea
+              maxlength="1000"
+              [value]="typeComment(selectedType())"
+              (input)="updateTypeComment($event)"
+              (blur)="saveTypeComment($event)"
+              placeholder="Ajouter un commentaire…"
+            ></textarea>
+          </label>
         </div>
-        <label class="comment-field">
-          <span>Commentaire de l’étape</span>
-          <textarea
-            maxlength="1000"
-            [value]="variantComment(selectedVariant())"
-            (input)="updateVariantComment($event)"
-            (blur)="saveVariantComment($event)"
-            placeholder="Ajouter un commentaire…"
-        ></textarea>
-        </label>
-      </div>
-      <div class="puzzle-example" aria-label="Exemple généré">
-        @if (savedVariantDescription(selectedVariant())) {
-          <p class="puzzle-flavor-text">{{ savedVariantDescription(selectedVariant()) }}</p>
+        <aside class="steps-panel" aria-label="Liste des étapes">
+          <div class="panel-heading">
+            <span>Étapes</span>
+            <strong>{{ selectedType().variants.length }}</strong>
+          </div>
+          <div class="step-list">
+            @for (variant of selectedType().variants; track variant.id) {
+              <button
+                type="button"
+                class="step-button"
+                [class.active]="selectedVariant().id === variant.id"
+                [class.deleted]="variantState(variant) === 'deleted'"
+                (click)="selectVariant(variant)"
+              >
+                <span class="step-button-name">{{ variantName(variant) }}</span>
+                @if (hasVariantComment(variant)) {
+                  <span class="step-button-meta">Commentaire</span>
+                }
+              </button>
+            }
+          </div>
+        </aside>
+      }
+      <section
+        class="preview-stage"
+        [style.grid-column]="isPlayPage() ? '1' : ''"
+        aria-label="Aperçu joueur"
+      >
+        @if (!isPlayPage()) {
+          <div class="variant-summary step-overview">
+            <div class="editable-name">
+              @if (editingVariantName()) {
+                <input
+                  class="name-editor"
+                  type="text"
+                  maxlength="120"
+                  [value]="variantName(selectedVariant())"
+                  aria-label="Nom de l’étape"
+                  (blur)="saveVariantName($event)"
+                />
+              } @else {
+                <span class="name-label">{{ variantName(selectedVariant()) }}</span>
+              }
+              <button type="button" class="name-edit-button" (click)="toggleVariantNameEdit()">
+                @if (editingVariantName()) {
+                  <span aria-hidden="true">✓</span>
+                  <span class="sr-only">Confirmer le nom de l’étape</span>
+                } @else {
+                  <span aria-hidden="true">✎</span>
+                  <span class="sr-only">Modifier le nom de l’étape</span>
+                }
+              </button>
+            </div>
+            <label class="field example-count-field">
+              <span>Nombre d’exemples</span>
+              <input
+                type="number"
+                min="0"
+                [max]="selectedVariant().examples.length"
+                [value]="selectedExampleCount()"
+                (change)="setExampleCount($event)"
+              />
+            </label>
+            <div class="comment-field description-field">
+              <span>Flavor text</span>
+              <textarea
+                maxlength="1000"
+                [value]="variantDescription(selectedVariant())"
+                (input)="updateVariantDescription($event)"
+                (blur)="saveVariantDescription($event)"
+                aria-label="Flavor text"
+              ></textarea>
+            </div>
+            <label class="comment-field">
+              <span>Commentaire de l’étape</span>
+              <textarea
+                maxlength="1000"
+                [value]="variantComment(selectedVariant())"
+                (input)="updateVariantComment($event)"
+                (blur)="saveVariantComment($event)"
+                placeholder="Ajouter un commentaire…"
+              ></textarea>
+            </label>
+          </div>
         }
-        @if (instance().challengeFigure.displayMode === 'clock-letters') {
-          <section class="clock-legend" aria-label="Légende des lettres possibles">
-            <h3>Légende des lettres</h3>
-            <div class="clock-legend-grid">
-              @for (legendLetter of clockLegend; track legendLetter.letter) {
-                <div class="clock-legend-card">
-                  <strong>{{ legendLetter.letter }}</strong>
-                  <span>{{ legendLetter.time }}</span>
-                  <svg viewBox="0 0 100 100" role="img" [attr.aria-label]="'Lettre ' + legendLetter.letter">
-                    <circle class="clock-letter-circle" cx="50" cy="50" r="36" />
-                    @for (line of legendLetter.staticLines; track line.id) {
+        <div class="puzzle-example" aria-label="Exemple généré">
+          @if (savedVariantDescription(selectedVariant())) {
+            <p class="puzzle-flavor-text">{{ savedVariantDescription(selectedVariant()) }}</p>
+          }
+          @if (instance().challengeFigure.displayMode === 'clock-letters') {
+            <section class="clock-legend" aria-label="Légende des lettres possibles">
+              <h3>Légende des lettres</h3>
+              <div class="clock-legend-grid">
+                @for (legendLetter of clockLegend; track legendLetter.letter) {
+                  <div class="clock-legend-card">
+                    <strong>{{ legendLetter.letter }}</strong>
+                    <span>{{ legendLetter.time }}</span>
+                    <svg
+                      viewBox="0 0 100 100"
+                      role="img"
+                      [attr.aria-label]="'Lettre ' + legendLetter.letter"
+                    >
+                      <circle class="clock-letter-circle" cx="50" cy="50" r="36" />
+                      @for (line of legendLetter.staticLines; track line.id) {
+                        <line
+                          class="clock-static-line"
+                          [attr.x1]="line.x1"
+                          [attr.y1]="line.y1"
+                          [attr.x2]="line.x2"
+                          [attr.y2]="line.y2"
+                        />
+                      }
+                      @for (hand of legendLetter.clockHands; track hand.id) {
+                        <line
+                          class="clock-hand"
+                          [attr.x1]="hand.x1"
+                          [attr.y1]="hand.y1"
+                          [attr.x2]="hand.x2"
+                          [attr.y2]="hand.y2"
+                        />
+                      }
+                    </svg>
+                  </div>
+                }
+              </div>
+            </section>
+          }
+          <div class="figure-list">
+            @for (figure of instance().exampleFigures; track figure.id) {
+              <article
+                class="figure-card"
+                [class.navigation-card]="
+                  figure.displayMode === 'navigation' || figure.displayMode === 'clock-letters'
+                "
+                [class.word-split-card]="figure.displayMode === 'word-split'"
+              >
+                <div
+                  class="figure-visual"
+                  [class.seven-segment-visual]="figure.displayMode === 'seven-segment'"
+                  [class.navigation-visual]="figure.displayMode === 'navigation'"
+                  [class.word-split-visual]="figure.displayMode === 'word-split'"
+                >
+                  @if (figure.displayMode === 'navigation') {
+                    <img
+                      class="navigation-example-image"
+                      [src]="figure.imageSrc"
+                      [alt]="figure.example?.description"
+                    />
+                  }
+                  @if (figure.displayMode === 'clock-letters') {
+                    <div class="clock-word-visual">
+                      @for (clockLetter of figure.clockLetters ?? []; track clockLetter.id) {
+                        <div class="clock-letter-card">
+                          <span>{{ clockLetter.time }}</span>
+                          <svg
+                            viewBox="0 0 100 100"
+                            role="img"
+                            [attr.aria-label]="'Lettre à décoder à ' + clockLetter.time"
+                          >
+                            <circle class="clock-letter-circle" cx="50" cy="50" r="36" />
+                            @for (line of clockLetter.staticLines; track line.id) {
+                              <line
+                                class="clock-static-line"
+                                [attr.x1]="line.x1"
+                                [attr.y1]="line.y1"
+                                [attr.x2]="line.x2"
+                                [attr.y2]="line.y2"
+                              />
+                            }
+                          </svg>
+                        </div>
+                      }
+                    </div>
+                  }
+                  @if (figure.displayMode === 'word-split') {
+                    <div class="word-split-list" style="display: grid; gap: 0.45rem; width: 100%">
+                      @for (
+                        entry of figure.wordSplitEntries ?? [];
+                        track entry.id;
+                        let index = $index
+                      ) {
+                        <div
+                          class="word-split-entry"
+                          style="
+                            display: grid;
+                            grid-template-columns: minmax(0, 1fr) auto;
+                            gap: 0.15rem 0.7rem;
+                            padding: 0.55rem 0.65rem;
+                            border: 1px solid var(--border);
+                            border-radius: 0.4rem;
+                          "
+                          [style.grid-template-columns]="
+                            wordSplitEntryIsRevealed(figure, index)
+                              ? 'minmax(0, 1fr) auto auto'
+                              : 'minmax(0, 1fr) auto'
+                          "
+                          [class.hinted]="wordSplitEntryIsRevealed(figure, index)"
+                        >
+                          <p
+                            class="word-split-definition"
+                            style="margin: 0; font-size: 0.82rem; line-height: 1.35"
+                          >
+                            {{ entry.definition }}.
+                          </p>
+                          <span
+                            class="word-split-answer"
+                            style="
+                              color: var(--accent);
+                              font-size: 1rem;
+                              font-weight: 900;
+                              letter-spacing: 0.1em;
+                            "
+                            [hidden]="wordSplitEntryIsRevealed(figure, index)"
+                            >{{ wordSplitUnknownAnswer(entry) }}</span
+                          >
+                          @if (wordSplitEntryIsRevealed(figure, index)) {
+                            <span
+                              class="word-split-answer"
+                              style="
+                                align-self: center;
+                                font-size: 0.78rem;
+                                font-weight: 800;
+                                text-align: right;
+                              "
+                              [style.color]="
+                                wordSplitEntryIsRevealed(figure, index)
+                                  ? 'var(--focus)'
+                                  : 'var(--muted)'
+                              "
+                            >
+                              {{ wordSplitEntryIsRevealed(figure, index) ? '→ ' : ''
+                              }}{{ entry.fauxWord }}
+                            </span>
+                          } @else {
+                            <span
+                              hidden
+                              class="word-split-answer"
+                              style="
+                                align-self: center;
+                                color: var(--muted);
+                                font-size: 0.78rem;
+                                font-weight: 800;
+                                text-align: right;
+                              "
+                              >Réponse à trouver</span
+                            >
+                          }
+                        </div>
+                      }
+                    </div>
+                  }
+                  <svg
+                    [hidden]="figure.displayMode === 'word-split'"
+                    [style.display]="figure.displayMode === 'word-split' ? 'none' : ''"
+                    [attr.viewBox]="figure.viewBox"
+                    [class.seven-segment-svg]="figure.displayMode === 'seven-segment'"
+                    [class.navigation-svg]="figure.displayMode === 'navigation'"
+                    [class.clock-svg]="figure.displayMode === 'clock-letters'"
+                    role="img"
+                    [attr.aria-label]="'Figure exemple : ' + (figure.example?.name ?? 'défi')"
+                    [attr.title]="figure.example?.description"
+                  >
+                    <rect
+                      class="figure-frame"
+                      [attr.x]="figure.frame.x"
+                      [attr.y]="figure.frame.y"
+                      [attr.width]="figure.frame.width"
+                      [attr.height]="figure.frame.height"
+                    />
+                    @for (coordinate of gridCoordinates(figure.gridSize); track coordinate) {
                       <line
-                        class="clock-static-line"
-                        [attr.x1]="line.x1"
-                        [attr.y1]="line.y1"
-                        [attr.x2]="line.x2"
-                        [attr.y2]="line.y2"
+                        class="figure-grid-line"
+                        [attr.x1]="coordinate"
+                        y1="14"
+                        [attr.x2]="coordinate"
+                        y2="116"
+                      />
+                      <line
+                        class="figure-grid-line"
+                        x1="14"
+                        [attr.y1]="coordinate"
+                        x2="116"
+                        [attr.y2]="coordinate"
                       />
                     }
-                    @for (hand of legendLetter.clockHands; track hand.id) {
+                    @for (display of figure.sevenSegmentDigits ?? []; track display.id) {
+                      @if (display.missing) {
+                        <rect
+                          class="seven-segment-slot"
+                          [attr.x]="display.x"
+                          [attr.y]="display.y"
+                          [attr.width]="display.width"
+                          [attr.height]="display.height"
+                        />
+                      }
+                      @for (part of sevenSegmentParts(display); track part.id) {
+                        <line
+                          class="seven-segment"
+                          [class.lit]="part.lit"
+                          [attr.x1]="part.x1"
+                          [attr.y1]="part.y1"
+                          [attr.x2]="part.x2"
+                          [attr.y2]="part.y2"
+                        />
+                      }
+                    }
+                    @for (shape of figure.shapes; track shape.id) {
+                      <polygon
+                        [attr.class]="'geometric-shape ' + shape.kind"
+                        [attr.points]="shapePoints(shape)"
+                      />
+                    }
+                    @for (marker of figure.markers; track marker.id) {
+                      <circle
+                        class="figure-marker"
+                        [attr.cx]="marker.x"
+                        [attr.cy]="marker.y"
+                        r="4"
+                      />
+                      <text
+                        class="figure-marker-label"
+                        [attr.x]="marker.x"
+                        [attr.y]="marker.y + 1.5"
+                      >
+                        {{ marker.label }}
+                      </text>
+                    }
+                    @if (figure.baseLine) {
                       <line
-                        class="clock-hand"
-                        [attr.x1]="hand.x1"
-                        [attr.y1]="hand.y1"
-                        [attr.x2]="hand.x2"
-                        [attr.y2]="hand.y2"
+                        class="base-line"
+                        [attr.x1]="figure.baseLine.x1"
+                        [attr.y1]="figure.baseLine.y1"
+                        [attr.x2]="figure.baseLine.x2"
+                        [attr.y2]="figure.baseLine.y2"
+                      />
+                    }
+                    @for (segment of figure.segments; track segment.id) {
+                      <line
+                        [attr.class]="segmentClass(segment.kind)"
+                        [attr.x1]="segment.x1"
+                        [attr.y1]="segment.y1"
+                        [attr.x2]="segment.x2"
+                        [attr.y2]="segment.y2"
                       />
                     }
                   </svg>
                 </div>
-              }
-            </div>
-          </section>
-        }
-        <div class="figure-list">
-          @for (figure of instance().exampleFigures; track figure.id) {
+                <strong [class.navigation-code]="figure.displayMode === 'navigation'">
+                  {{ figure.code }}
+                </strong>
+              </article>
+            }
+
             <article
-              class="figure-card"
-              [class.navigation-card]="figure.displayMode === 'navigation' || figure.displayMode === 'clock-letters'"
+              class="figure-card challenge"
+              [class.navigation-card]="
+                instance().challengeFigure.displayMode === 'navigation' ||
+                instance().challengeFigure.displayMode === 'clock-letters'
+              "
+              [class.clock-letters-card]="
+                instance().challengeFigure.displayMode === 'clock-letters'
+              "
+              [class.word-split-card]="instance().challengeFigure.displayMode === 'word-split'"
+              [style.grid-template-columns]="
+                instance().challengeFigure.displayMode === 'word-split' ? 'minmax(0, 1fr)' : ''
+              "
+              [style.border]="instance().challengeFigure.displayMode === 'word-split' ? 'none' : ''"
+              [style.background]="
+                instance().challengeFigure.displayMode === 'word-split' ? 'transparent' : ''
+              "
+              [style.padding]="instance().challengeFigure.displayMode === 'word-split' ? '0' : ''"
             >
               <div
                 class="figure-visual"
-                [class.seven-segment-visual]="figure.displayMode === 'seven-segment'"
-                [class.navigation-visual]="figure.displayMode === 'navigation'"
+                [class.seven-segment-visual]="
+                  instance().challengeFigure.displayMode === 'seven-segment'
+                "
+                [class.navigation-visual]="instance().challengeFigure.displayMode === 'navigation'"
+                [class.word-split-visual]="instance().challengeFigure.displayMode === 'word-split'"
               >
-                @if (figure.displayMode === 'navigation') {
+                @if (instance().challengeFigure.displayMode === 'navigation') {
                   <img
                     class="navigation-example-image"
-                    [src]="figure.imageSrc"
-                    [alt]="figure.example?.description"
+                    [src]="instance().challengeFigure.imageSrc"
+                    alt="Illustration de navigation"
                   />
                 }
-                @if (figure.displayMode === 'clock-letters') {
+                @if (instance().challengeFigure.displayMode === 'clock-letters') {
                   <div class="clock-word-visual">
-                    @for (clockLetter of figure.clockLetters ?? []; track clockLetter.id) {
+                    @for (
+                      clockLetter of instance().challengeFigure.clockLetters ?? [];
+                      track clockLetter.id
+                    ) {
                       <div class="clock-letter-card">
                         <span>{{ clockLetter.time }}</span>
-                        <svg viewBox="0 0 100 100" role="img" [attr.aria-label]="'Lettre à décoder à ' + clockLetter.time">
+                        <svg
+                          viewBox="0 0 100 100"
+                          role="img"
+                          [attr.aria-label]="'Lettre à décoder à ' + clockLetter.time"
+                        >
                           <circle class="clock-letter-circle" cx="50" cy="50" r="36" />
                           @for (line of clockLetter.staticLines; track line.id) {
                             <line
@@ -333,302 +609,309 @@
                         </svg>
                       </div>
                     }
+                    <strong class="clock-answer-placeholder">{{ challengeSolution() }}</strong>
                   </div>
-                }
-              <svg
-                [attr.viewBox]="figure.viewBox"
-                [class.seven-segment-svg]="figure.displayMode === 'seven-segment'"
-                [class.navigation-svg]="figure.displayMode === 'navigation'"
-                [class.clock-svg]="figure.displayMode === 'clock-letters'"
-                role="img"
-                [attr.aria-label]="'Figure exemple : ' + (figure.example?.name ?? 'défi')"
-                [attr.title]="figure.example?.description"
-              >
-                <rect
-                  class="figure-frame"
-                  [attr.x]="figure.frame.x"
-                  [attr.y]="figure.frame.y"
-                  [attr.width]="figure.frame.width"
-                  [attr.height]="figure.frame.height"
-                />
-                @for (coordinate of gridCoordinates(figure.gridSize); track coordinate) {
-                  <line
-                    class="figure-grid-line"
-                    [attr.x1]="coordinate"
-                    y1="14"
-                    [attr.x2]="coordinate"
-                    y2="116"
-                  />
-                  <line
-                    class="figure-grid-line"
-                    x1="14"
-                    [attr.y1]="coordinate"
-                    x2="116"
-                    [attr.y2]="coordinate"
-                  />
-                }
-                @for (display of figure.sevenSegmentDigits ?? []; track display.id) {
-                  @if (display.missing) {
-                    <rect
-                      class="seven-segment-slot"
-                      [attr.x]="display.x"
-                      [attr.y]="display.y"
-                      [attr.width]="display.width"
-                      [attr.height]="display.height"
-                    />
-                  }
-                  @for (part of sevenSegmentParts(display); track part.id) {
-                    <line
-                      class="seven-segment"
-                      [class.lit]="part.lit"
-                      [attr.x1]="part.x1"
-                      [attr.y1]="part.y1"
-                      [attr.x2]="part.x2"
-                      [attr.y2]="part.y2"
-                    />
-                  }
-                }
-                @for (shape of figure.shapes; track shape.id) {
-                  <polygon
-                    [attr.class]="'geometric-shape ' + shape.kind"
-                    [attr.points]="shapePoints(shape)"
-                  />
-                }
-                @for (marker of figure.markers; track marker.id) {
-                  <circle
-                    class="figure-marker"
-                    [attr.cx]="marker.x"
-                    [attr.cy]="marker.y"
-                    r="4"
-                  />
-                  <text class="figure-marker-label" [attr.x]="marker.x" [attr.y]="marker.y + 1.5">
-                    {{ marker.label }}
-                  </text>
-                }
-                @if (figure.baseLine) {
-                  <line
-                    class="base-line"
-                    [attr.x1]="figure.baseLine.x1"
-                    [attr.y1]="figure.baseLine.y1"
-                    [attr.x2]="figure.baseLine.x2"
-                    [attr.y2]="figure.baseLine.y2"
-                  />
-                }
-              @for (segment of figure.segments; track segment.id) {
-                  <line
-                    [attr.class]="segmentClass(segment.kind)"
-                    [attr.x1]="segment.x1"
-                    [attr.y1]="segment.y1"
-                    [attr.x2]="segment.x2"
-                    [attr.y2]="segment.y2"
-                  />
-              }
-              </svg>
-              </div>
-              <strong [class.navigation-code]="figure.displayMode === 'navigation'">
-                {{ figure.code }}
-              </strong>
-            </article>
-          }
-
-          <article
-            class="figure-card challenge"
-            [class.navigation-card]="instance().challengeFigure.displayMode === 'navigation' || instance().challengeFigure.displayMode === 'clock-letters'"
-            [class.clock-letters-card]="instance().challengeFigure.displayMode === 'clock-letters'"
-          >
-            <div
-                class="figure-visual"
-                [class.seven-segment-visual]="instance().challengeFigure.displayMode === 'seven-segment'"
-                [class.navigation-visual]="instance().challengeFigure.displayMode === 'navigation'"
-            >
-            @if (instance().challengeFigure.displayMode === 'navigation') {
-              <img
-                class="navigation-example-image"
-                [src]="instance().challengeFigure.imageSrc"
-                alt="Illustration de navigation"
-              />
-            }
-            @if (instance().challengeFigure.displayMode === 'clock-letters') {
-              <div class="clock-word-visual">
-                @for (clockLetter of instance().challengeFigure.clockLetters ?? []; track clockLetter.id) {
-                  <div class="clock-letter-card">
-                    <span>{{ clockLetter.time }}</span>
-                    <svg viewBox="0 0 100 100" role="img" [attr.aria-label]="'Lettre à décoder à ' + clockLetter.time">
-                      <circle class="clock-letter-circle" cx="50" cy="50" r="36" />
-                      @for (line of clockLetter.staticLines; track line.id) {
-                        <line
-                          class="clock-static-line"
-                          [attr.x1]="line.x1"
-                          [attr.y1]="line.y1"
-                          [attr.x2]="line.x2"
-                          [attr.y2]="line.y2"
-                        />
+                  <section class="clock-legend" aria-label="Légende des lettres possibles">
+                    <h3>Légende des lettres</h3>
+                    <div class="clock-legend-grid">
+                      @for (legendLetter of clockLegend; track legendLetter.letter) {
+                        <div class="clock-legend-card">
+                          <strong>{{ legendLetter.letter }}</strong>
+                          <span>{{ legendLetter.time }}</span>
+                          <svg
+                            viewBox="0 0 100 100"
+                            role="img"
+                            [attr.aria-label]="'Lettre ' + legendLetter.letter"
+                          >
+                            <circle class="clock-letter-circle" cx="50" cy="50" r="36" />
+                            @for (line of legendLetter.staticLines; track line.id) {
+                              <line
+                                class="clock-static-line"
+                                [attr.x1]="line.x1"
+                                [attr.y1]="line.y1"
+                                [attr.x2]="line.x2"
+                                [attr.y2]="line.y2"
+                              />
+                            }
+                            @for (hand of legendLetter.clockHands; track hand.id) {
+                              <line
+                                class="clock-hand"
+                                [attr.x1]="hand.x1"
+                                [attr.y1]="hand.y1"
+                                [attr.x2]="hand.x2"
+                                [attr.y2]="hand.y2"
+                              />
+                            }
+                          </svg>
+                        </div>
                       }
-                    </svg>
+                    </div>
+                  </section>
+                }
+                @if (instance().challengeFigure.displayMode === 'word-split') {
+                  <div class="word-split-list" style="display: grid; gap: 0.45rem; width: 100%">
+                    <p class="word-split-final-note" hidden>
+                      Chaque définition donne une réponse. La réponse finale comporte 4 lettres.
+                    </p>
+                    @for (
+                      entry of instance().challengeFigure.wordSplitEntries ?? [];
+                      track entry.id;
+                      let index = $index
+                    ) {
+                      <div
+                        class="word-split-entry"
+                        style="
+                          display: grid;
+                          grid-template-columns: minmax(0, 1fr) auto;
+                          gap: 0.15rem 0.7rem;
+                          padding: 0.35rem 0;
+                        "
+                        [style.grid-template-columns]="
+                          wordSplitEntryIsRevealed(instance().challengeFigure, index)
+                            ? 'minmax(0, 1fr) auto auto'
+                            : 'minmax(0, 1fr) auto'
+                        "
+                        [class.hinted]="wordSplitEntryIsRevealed(instance().challengeFigure, index)"
+                      >
+                        <p
+                          class="word-split-definition"
+                          style="margin: 0; font-size: 0.82rem; line-height: 1.35"
+                        >
+                          {{ entry.definition }}.
+                        </p>
+                        <span
+                          class="word-split-answer"
+                          style="
+                            color: var(--accent);
+                            font-size: 1rem;
+                            font-weight: 900;
+                            letter-spacing: 0.1em;
+                          "
+                          [hidden]="wordSplitEntryIsRevealed(instance().challengeFigure, index)"
+                          >{{ wordSplitUnknownAnswer(entry) }}</span
+                        >
+                        @if (wordSplitEntryIsRevealed(instance().challengeFigure, index)) {
+                          <span
+                            class="word-split-answer"
+                            style="
+                              align-self: center;
+                              font-size: 0.78rem;
+                              font-weight: 800;
+                              text-align: right;
+                            "
+                            [style.color]="
+                              wordSplitEntryIsRevealed(instance().challengeFigure, index)
+                                ? 'var(--focus)'
+                                : 'var(--muted)'
+                            "
+                          >
+                            {{
+                              wordSplitEntryIsRevealed(instance().challengeFigure, index)
+                                ? '→ '
+                                : ''
+                            }}{{ entry.fauxWord }}
+                          </span>
+                        } @else {
+                          <span
+                            hidden
+                            class="word-split-answer"
+                            style="
+                              align-self: center;
+                              color: var(--muted);
+                              font-size: 0.78rem;
+                              font-weight: 800;
+                              text-align: right;
+                            "
+                            >Réponse à trouver</span
+                          >
+                        }
+                      </div>
+                    }
                   </div>
                 }
-                <strong class="clock-answer-placeholder">{{ challengeSolution() }}</strong>
+                <svg
+                  [hidden]="instance().challengeFigure.displayMode === 'word-split'"
+                  [style.display]="
+                    instance().challengeFigure.displayMode === 'word-split' ? 'none' : ''
+                  "
+                  [attr.viewBox]="instance().challengeFigure.viewBox"
+                  [class.seven-segment-svg]="
+                    instance().challengeFigure.displayMode === 'seven-segment'
+                  "
+                  [class.navigation-svg]="instance().challengeFigure.displayMode === 'navigation'"
+                  [class.clock-svg]="instance().challengeFigure.displayMode === 'clock-letters'"
+                  role="img"
+                  aria-label="Figure à résoudre"
+                >
+                  <rect
+                    class="figure-frame"
+                    [attr.x]="instance().challengeFigure.frame.x"
+                    [attr.y]="instance().challengeFigure.frame.y"
+                    [attr.width]="instance().challengeFigure.frame.width"
+                    [attr.height]="instance().challengeFigure.frame.height"
+                  />
+                  @for (
+                    coordinate of gridCoordinates(instance().challengeFigure.gridSize);
+                    track coordinate
+                  ) {
+                    <line
+                      class="figure-grid-line"
+                      [attr.x1]="coordinate"
+                      y1="14"
+                      [attr.x2]="coordinate"
+                      y2="116"
+                    />
+                    <line
+                      class="figure-grid-line"
+                      x1="14"
+                      [attr.y1]="coordinate"
+                      x2="116"
+                      [attr.y2]="coordinate"
+                    />
+                  }
+                  @for (
+                    display of instance().challengeFigure.sevenSegmentDigits ?? [];
+                    track display.id
+                  ) {
+                    @if (display.missing) {
+                      <rect
+                        class="seven-segment-slot"
+                        [attr.x]="display.x"
+                        [attr.y]="display.y"
+                        [attr.width]="display.width"
+                        [attr.height]="display.height"
+                      />
+                    }
+                    @for (part of sevenSegmentParts(display); track part.id) {
+                      <line
+                        class="seven-segment"
+                        [class.lit]="part.lit"
+                        [attr.x1]="part.x1"
+                        [attr.y1]="part.y1"
+                        [attr.x2]="part.x2"
+                        [attr.y2]="part.y2"
+                      />
+                    }
+                  }
+                  @for (shape of instance().challengeFigure.shapes; track shape.id) {
+                    <polygon
+                      [attr.class]="'geometric-shape ' + shape.kind"
+                      [attr.points]="shapePoints(shape)"
+                    />
+                  }
+                  @for (marker of instance().challengeFigure.markers; track marker.id) {
+                    <circle class="figure-marker" [attr.cx]="marker.x" [attr.cy]="marker.y" r="4" />
+                    <text class="figure-marker-label" [attr.x]="marker.x" [attr.y]="marker.y + 1.5">
+                      {{ marker.label }}
+                    </text>
+                  }
+                  @if (instance().challengeFigure.baseLine; as baseLine) {
+                    <line
+                      class="base-line"
+                      [attr.x1]="baseLine.x1"
+                      [attr.y1]="baseLine.y1"
+                      [attr.x2]="baseLine.x2"
+                      [attr.y2]="baseLine.y2"
+                    />
+                  }
+                  @for (segment of instance().challengeFigure.segments; track segment.id) {
+                    <line
+                      [attr.class]="segmentClass(segment.kind)"
+                      [attr.x1]="segment.x1"
+                      [attr.y1]="segment.y1"
+                      [attr.x2]="segment.x2"
+                      [attr.y2]="segment.y2"
+                    />
+                  }
+                </svg>
               </div>
-              <section class="clock-legend" aria-label="Légende des lettres possibles">
-                <h3>Légende des lettres</h3>
-                <div class="clock-legend-grid">
-                  @for (legendLetter of clockLegend; track legendLetter.letter) {
-                    <div class="clock-legend-card">
-                      <strong>{{ legendLetter.letter }}</strong>
-                      <span>{{ legendLetter.time }}</span>
-                      <svg viewBox="0 0 100 100" role="img" [attr.aria-label]="'Lettre ' + legendLetter.letter">
-                        <circle class="clock-letter-circle" cx="50" cy="50" r="36" />
-                        @for (line of legendLetter.staticLines; track line.id) {
-                          <line
-                            class="clock-static-line"
-                            [attr.x1]="line.x1"
-                            [attr.y1]="line.y1"
-                            [attr.x2]="line.x2"
-                            [attr.y2]="line.y2"
-                          />
-                        }
-                        @for (hand of legendLetter.clockHands; track hand.id) {
-                          <line
-                            class="clock-hand"
-                            [attr.x1]="hand.x1"
-                            [attr.y1]="hand.y1"
-                            [attr.x2]="hand.x2"
-                            [attr.y2]="hand.y2"
-                          />
-                        }
-                      </svg>
+              <strong
+                [hidden]="instance().challengeFigure.displayMode === 'word-split'"
+                [class.navigation-code]="instance().challengeFigure.displayMode === 'navigation'"
+              >
+                {{ challengeSolution() }}
+              </strong>
+              @if (isPlayPage()) {
+                <div
+                  class="player-answer"
+                  style="grid-area: answer; display: grid; width: min(100%, 34rem); gap: 0.6rem"
+                >
+                  @if (selectedType().id === 'faux-words') {
+                    <div
+                      class="answer-length-hint"
+                      style="
+                        color: var(--accent);
+                        font-size: 1.4rem;
+                        font-weight: 900;
+                        letter-spacing: 0.2em;
+                        text-align: center;
+                      "
+                    >
+                      _ _ _ _
                     </div>
                   }
+                  <app-puzzle-answer
+                    [answer]="instance().solution"
+                    [partials]="challengePartialAnswers()"
+                    label="Votre réponse"
+                    submitLabel="Vérifier"
+                    (correctAnswer)="markPlaySolved()"
+                  />
                 </div>
-              </section>
-            }
-            <svg
-              [attr.viewBox]="instance().challengeFigure.viewBox"
-              [class.seven-segment-svg]="instance().challengeFigure.displayMode === 'seven-segment'"
-              [class.navigation-svg]="instance().challengeFigure.displayMode === 'navigation'"
-              [class.clock-svg]="instance().challengeFigure.displayMode === 'clock-letters'"
-              role="img"
-              aria-label="Figure à résoudre"
-            >
-              <rect
-                class="figure-frame"
-                [attr.x]="instance().challengeFigure.frame.x"
-                [attr.y]="instance().challengeFigure.frame.y"
-                [attr.width]="instance().challengeFigure.frame.width"
-                [attr.height]="instance().challengeFigure.frame.height"
-              />
-              @for (
-                coordinate of gridCoordinates(instance().challengeFigure.gridSize);
-                track coordinate
-              ) {
-                <line
-                  class="figure-grid-line"
-                  [attr.x1]="coordinate"
-                  y1="14"
-                  [attr.x2]="coordinate"
-                  y2="116"
-                />
-                <line
-                  class="figure-grid-line"
-                  x1="14"
-                  [attr.y1]="coordinate"
-                  x2="116"
-                  [attr.y2]="coordinate"
-                />
-              }
-              @for (display of instance().challengeFigure.sevenSegmentDigits ?? []; track display.id) {
-                @if (display.missing) {
-                  <rect
-                    class="seven-segment-slot"
-                    [attr.x]="display.x"
-                    [attr.y]="display.y"
-                    [attr.width]="display.width"
-                    [attr.height]="display.height"
+              } @else {
+                <div class="example-answer">
+                  @if (selectedType().id === 'faux-words') {
+                    <div
+                      style="
+                        grid-column: 1 / -1;
+                        color: var(--accent);
+                        font-size: 1.4rem;
+                        font-weight: 900;
+                        letter-spacing: 0.2em;
+                        text-align: center;
+                      "
+                    >
+                      _ _ _ _
+                    </div>
+                  }
+                  @if (instance().challengeFigure.displayMode === 'word-split') {
+                    <button
+                      type="button"
+                      class="hint-button"
+                      (click)="revealWordSplitHint()"
+                      [disabled]="!canRevealWordSplitHint()"
+                    >
+                      Indice
+                    </button>
+                  }
+                  <label for="challenge-answer">Votre réponse</label>
+                  <input
+                    id="challenge-answer"
+                    type="text"
+                    [attr.inputmode]="isTextAnswer() ? 'text' : 'numeric'"
+                    autocomplete="off"
+                    [value]="challengeAnswer()"
+                    (input)="setChallengeAnswer($event)"
+                    (keydown.enter)="checkChallenge()"
                   />
-                }
-                @for (part of sevenSegmentParts(display); track part.id) {
-                  <line
-                    class="seven-segment"
-                    [class.lit]="part.lit"
-                    [attr.x1]="part.x1"
-                    [attr.y1]="part.y1"
-                    [attr.x2]="part.x2"
-                    [attr.y2]="part.y2"
-                  />
+                  <button type="button" (click)="checkChallenge()">Vérifier</button>
+                  <button type="button" class="answer-button" (click)="revealChallengeSolution()">
+                    Réponse
+                  </button>
+                </div>
+                @if (challengeFeedback(); as feedback) {
+                  <small [class]="'example-feedback ' + feedback">
+                    {{ challengeFeedbackMessage(feedback) }}
+                  </small>
                 }
               }
-              @for (shape of instance().challengeFigure.shapes; track shape.id) {
-                <polygon
-                  [attr.class]="'geometric-shape ' + shape.kind"
-                  [attr.points]="shapePoints(shape)"
-                />
-              }
-              @for (marker of instance().challengeFigure.markers; track marker.id) {
-                  <circle
-                    class="figure-marker"
-                    [attr.cx]="marker.x"
-                    [attr.cy]="marker.y"
-                    r="4"
-                />
-                <text class="figure-marker-label" [attr.x]="marker.x" [attr.y]="marker.y + 1.5">
-                  {{ marker.label }}
-                </text>
-              }
-              @if (instance().challengeFigure.baseLine; as baseLine) {
-                <line
-                  class="base-line"
-                  [attr.x1]="baseLine.x1"
-                  [attr.y1]="baseLine.y1"
-                  [attr.x2]="baseLine.x2"
-                  [attr.y2]="baseLine.y2"
-                />
-              }
-              @for (segment of instance().challengeFigure.segments; track segment.id) {
-                <line
-                  [attr.class]="segmentClass(segment.kind)"
-                  [attr.x1]="segment.x1"
-                  [attr.y1]="segment.y1"
-                  [attr.x2]="segment.x2"
-                  [attr.y2]="segment.y2"
-                />
-              }
-            </svg>
-            </div>
-            <strong [class.navigation-code]="instance().challengeFigure.displayMode === 'navigation'">
-              {{ challengeSolution() }}
-            </strong>
-            <div class="example-answer">
-              <label for="challenge-answer">Votre réponse</label>
-              <input
-                id="challenge-answer"
-                type="text"
-                [attr.inputmode]="isTextAnswer() ? 'text' : 'numeric'"
-                autocomplete="off"
-                [attr.maxlength]="isTextAnswer() ? 20 : 4"
-                [value]="challengeAnswer()"
-                (input)="setChallengeAnswer($event)"
-                (keydown.enter)="checkChallenge()"
-              />
-              <button type="button" (click)="checkChallenge()">Vérifier</button>
-              <button type="button" class="answer-button" (click)="revealChallengeSolution()">
-                Réponse
-              </button>
-            </div>
-            @if (challengeFeedback(); as feedback) {
-              <small [class]="'example-feedback ' + feedback">
-                {{ challengeFeedbackMessage(feedback) }}
-              </small>
-            }
-          </article>
+            </article>
+          </div>
+          <div class="actions example-actions">
+            <button type="button" (click)="randomizeSeed()">Régénérer</button>
+          </div>
         </div>
-        <div class="actions example-actions">
-          <button type="button" (click)="randomizeSeed()">Régénérer</button>
-        </div>
-      </div>
-
+      </section>
     </section>
-
-  </section>
   }
-
 </main>

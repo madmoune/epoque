@@ -69,7 +69,7 @@ export class HomePage {
       ).map((type) => ({
         title: this.labTypeNames()[type.id] ?? type.name,
         description: type.description,
-        route: type.playRoute ?? `/lab/${type.id}`,
+        route: type.playRoute,
         tag: 'Énigme',
       })),
       emptyText: 'Aucune énigme approuvée pour le moment.',

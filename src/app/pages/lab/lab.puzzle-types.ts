@@ -4,6 +4,7 @@ import { GeometricShapesPuzzleType } from './puzzle-types/geometric-shapes.puzzl
 import { SevenSegmentPuzzleType } from './puzzle-types/seven-segment.puzzle-type';
 import { NavigationPuzzleType } from './puzzle-types/navigation.puzzle-type';
 import { ClockLettersPuzzleType } from './puzzle-types/clock-letters.puzzle-type';
+import { FauxWordsPuzzleType } from './puzzle-types/faux-words.puzzle-type';
 
 export const LAB_PUZZLE_TYPES: PuzzleType[] = [
   new CountBySymbolPuzzleType(),
@@ -11,4 +12,5 @@ export const LAB_PUZZLE_TYPES: PuzzleType[] = [
   new SevenSegmentPuzzleType(),
   new NavigationPuzzleType(),
   new ClockLettersPuzzleType(),
+  new FauxWordsPuzzleType(),
 ];

@@ -438,7 +438,10 @@ html[data-theme] body .lab-page .display-mode-button.active {
   font: inherit;
   text-align: left;
   cursor: pointer;
-  transition: border-color 140ms ease, background 140ms ease, transform 140ms ease;
+  transition:
+    border-color 140ms ease,
+    background 140ms ease,
+    transform 140ms ease;
 }
 
 .type-card:hover,
@@ -849,13 +852,27 @@ html[data-theme] body .lab-page .type-card.active {
 }
 
 .puzzle-overview > .inline-state-field,
-.step-overview > .editable-name { grid-area: 1 / 1; }
-.puzzle-overview > .puzzle-dates { grid-area: 1 / 2; }
-.step-overview > .example-count-field { grid-area: 1 / 2; }
-.puzzle-overview > .description-field { grid-area: 2 / 1; }
-.puzzle-overview > .comment-field:not(.description-field) { grid-area: 2 / 2; }
-.step-overview > .comment-field { grid-area: 2 / 2; }
-.step-overview > .description-field { grid-area: 2 / 1; }
+.step-overview > .editable-name {
+  grid-area: 1 / 1;
+}
+.puzzle-overview > .puzzle-dates {
+  grid-area: 1 / 2;
+}
+.step-overview > .example-count-field {
+  grid-area: 1 / 2;
+}
+.puzzle-overview > .description-field {
+  grid-area: 2 / 1;
+}
+.puzzle-overview > .comment-field:not(.description-field) {
+  grid-area: 2 / 2;
+}
+.step-overview > .comment-field {
+  grid-area: 2 / 2;
+}
+.step-overview > .description-field {
+  grid-area: 2 / 1;
+}
 
 .puzzle-dates {
   display: grid;

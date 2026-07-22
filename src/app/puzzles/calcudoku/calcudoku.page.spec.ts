@@ -1,17 +1,17 @@
 import { CalcudokuPage } from './calcudoku.page';
 
 describe('CalcudokuPage', () => {
-  it('creates a complete 6 by 6 Latin grid and cage layout', () => {
+  it('creates a complete 5 by 5 Latin grid and cage layout', () => {
     const page = new CalcudokuPage() as any;
-    const expectedDigits = new Set([1, 2, 3, 4, 5, 6]);
+    const expectedDigits = new Set([1, 2, 3, 4, 5]);
 
-    expect(page.size).toBe(6);
-    expect(page.gridIndexes).toEqual([0, 1, 2, 3, 4, 5]);
-    expect(page.cells()).toHaveLength(36);
+    expect(page.size).toBe(5);
+    expect(page.gridIndexes).toEqual([0, 1, 2, 3, 4]);
+    expect(page.cells()).toHaveLength(25);
     expect(
       new Set(page.cells().map((cell: { row: number; col: number }) => `${cell.row}:${cell.col}`))
         .size,
-    ).toBe(36);
+    ).toBe(25);
 
     for (const row of page.solution()) {
       expect(new Set(row)).toEqual(expectedDigits);

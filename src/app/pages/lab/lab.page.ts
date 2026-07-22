@@ -7,6 +7,9 @@ import {
   CLOCK_LETTER_DEFINITIONS,
   CLOCK_LETTER_FALLBACK_WORDS,
 } from '../../puzzles/puzzlehunt/ClockLetters/clock-letters.data';
+import { FAUX_WORD_DEFINITIONS, FauxWordDefinition } from './puzzle-types/faux-words.puzzle-type';
+import { PuzzlePlayHistoryService } from '../../puzzle-play-history.service';
+import { PuzzleAnswerComponent } from '../../puzzles/shared/puzzle-answer';
 
 type SegmentKind = 'horizontal' | 'vertical' | 'slash' | 'backslash';
 type FigureSide = 'top' | 'right' | 'bottom' | 'left';
@@ -95,10 +98,12 @@ type PuzzleExampleFigure = {
   notes?: FigureTextLine[];
   markers: FigureMarker[];
   code: string;
-  displayMode?: 'standard' | 'seven-segment' | 'navigation' | 'clock-letters';
+  displayMode?: 'standard' | 'seven-segment' | 'navigation' | 'clock-letters' | 'word-split';
   imageSrc?: string;
   clue?: string;
   clockLetters?: ClockLetterFigure[];
+  wordSplitEntries?: FauxWordDefinition[];
+  wordSplitShowAnswers?: boolean;
 };
 
 type ClockLetterFigure = {
@@ -142,7 +147,7 @@ type PuzzleSortMode =
 
 @Component({
   selector: 'app-lab-page',
-  imports: [RouterLink],
+  imports: [RouterLink, PuzzleAnswerComponent],
   templateUrl: './lab.page.html',
   styleUrl: './lab.page.scss',
 })
@@ -156,20 +161,23 @@ export class LabPage {
   private readonly typeStatusFilterStorageKey = 'epique-lab-type-status-filter';
   private readonly puzzleSortModeStorageKey = 'epique-lab-puzzle-sort-mode';
   protected readonly puzzleTypes = LAB_PUZZLE_TYPES;
-  protected readonly clockLegend = Object.entries(CLOCK_LETTER_DEFINITIONS).map(([letter, definition]) => ({
-    letter,
-    time: definition.time,
-    staticLines: definition.staticLines.map((line, index) => ({
-      id: `legend-${letter}-static-${index}`,
-      kind: 'horizontal' as SegmentKind,
-      x1: line[0],
-      y1: line[1],
-      x2: line[2],
-      y2: line[3],
-    })),
-    clockHands: this.clockHands(definition.time, `legend-${letter}`),
-  }));
+  protected readonly clockLegend = Object.entries(CLOCK_LETTER_DEFINITIONS).map(
+    ([letter, definition]) => ({
+      letter,
+      time: definition.time,
+      staticLines: definition.staticLines.map((line, index) => ({
+        id: `legend-${letter}-static-${index}`,
+        kind: 'horizontal' as SegmentKind,
+        x1: line[0],
+        y1: line[1],
+        x2: line[2],
+        y2: line[3],
+      })),
+      clockHands: this.clockHands(definition.time, `legend-${letter}`),
+    }),
+  );
   protected readonly approvalStates: ApprovalState[] = ['approved', 'pending', 'deleted'];
+  protected readonly isPlayPage = signal(this.route.snapshot.url[0]?.path === 'play');
   protected readonly isTypeDetailPage = signal(this.route.snapshot.paramMap.has('typeId'));
   protected readonly typeViewMode = signal<TypeViewMode>(this.readTypeViewMode());
   protected readonly typeNameFilter = signal(this.readTypeNameFilter());
@@ -178,41 +186,44 @@ export class LabPage {
   protected readonly visiblePuzzleTypes = computed(() => {
     const filter = this.typeNameFilter().trim().toLocaleLowerCase('fr-CA');
     const status = this.typeStatusFilter();
-    const filteredTypes = this.puzzleTypes.filter((type) =>
-      (!filter || this.typeName(type).toLocaleLowerCase('fr-CA').includes(filter)) &&
-      (status === 'all' || this.typeState(type) === status),
+    const filteredTypes = this.puzzleTypes.filter(
+      (type) =>
+        (!filter || this.typeName(type).toLocaleLowerCase('fr-CA').includes(filter)) &&
+        (status === 'all' || this.typeState(type) === status),
     );
 
     return [...filteredTypes].sort((first, second) => this.comparePuzzleTypes(first, second));
   });
   protected readonly selectedTypeId = signal(this.readInitialTypeId());
-  protected readonly selectedVariantId = signal(
-    this.readStoredVariantId(this.selectedTypeId()),
-  );
+  protected readonly selectedVariantId = signal(this.readStoredVariantId(this.selectedTypeId()));
   private readonly difficulty = 2;
   protected readonly seed = signal(this.createSeed());
   protected readonly firebaseStatus = signal<'loading' | 'ready' | 'error'>('loading');
   protected readonly firebaseMessage = signal('Synchronisation des états…');
   private readonly firebaseCatalog = inject(FirebasePuzzleCatalogService);
+  private readonly playHistory = inject(PuzzlePlayHistoryService);
   private readonly typeNameOverrides = signal<Record<string, string>>({});
   private readonly typeStatusOverrides = signal<Record<string, ApprovalState>>({});
   private readonly typeCreatedAtOverrides = signal<Record<string, number>>({});
   private readonly typeUpdatedAtOverrides = signal<Record<string, number>>({});
   private readonly typeDescriptionOverrides = signal<Record<string, string>>({});
-  private readonly variantStatusOverrides = signal<
-    Record<string, Record<string, ApprovalState>>
-  >({});
+  private readonly variantStatusOverrides = signal<Record<string, Record<string, ApprovalState>>>(
+    {},
+  );
   private readonly variantNameOverrides = signal<Record<string, Record<string, string>>>({});
   private readonly variantDescriptionOverrides = signal<Record<string, Record<string, string>>>({});
   private readonly variantDescriptionDrafts = signal<Record<string, Record<string, string>>>({});
   private readonly typeCommentOverrides = signal<Record<string, string>>({});
   private readonly variantCommentOverrides = signal<Record<string, Record<string, string>>>({});
-  private readonly variantExampleCountOverrides = signal<Record<string, Record<string, number>>>({});
+  private readonly variantExampleCountOverrides = signal<Record<string, Record<string, number>>>(
+    {},
+  );
   private readonly clockWordPool = signal<string[]>(CLOCK_LETTER_FALLBACK_WORDS);
   private readonly challengeSolutionShown = signal(false);
   private readonly challengeAnswerState = signal('');
   private readonly challengeFeedbackState = signal<ExampleFeedback | undefined>(undefined);
   private readonly challengePartialMessageState = signal('');
+  private readonly wordSplitHintCount = signal(0);
   protected readonly editingTypeName = signal(false);
   protected readonly editingVariantName = signal(false);
 
@@ -330,7 +341,10 @@ export class LabPage {
   protected setChallengeAnswer(event: Event): void {
     const rawAnswer = (event.target as HTMLInputElement).value;
     const answer = this.isTextAnswer()
-      ? rawAnswer.replace(/[^a-zA-ZÀ-ÿ]/g, '').slice(0, 20).toUpperCase()
+      ? this.normalizeChallengeAnswer(rawAnswer).slice(
+          0,
+          this.selectedType().id === 'faux-words' ? undefined : 20,
+        )
       : rawAnswer.replace(/\D/g, '').slice(0, 4);
     this.challengeAnswerState.set(answer);
     this.challengeFeedbackState.set(undefined);
@@ -338,12 +352,39 @@ export class LabPage {
   }
 
   protected isTextAnswer(): boolean {
-    return this.selectedType().id === 'navigation' || this.selectedType().id === 'clock-letters';
+    return (
+      this.selectedType().id === 'navigation' ||
+      this.selectedType().id === 'clock-letters' ||
+      this.selectedType().id === 'faux-words'
+    );
+  }
+
+  protected wordSplitEntryIsRevealed(figure: PuzzleExampleFigure, index: number): boolean {
+    return Boolean(figure.wordSplitShowAnswers) || index <= this.wordSplitHintCount();
+  }
+
+  protected wordSplitUnknownAnswer(entry: FauxWordDefinition): string {
+    return `→ ${'?'.repeat(entry.firstAnswer.length + entry.secondAnswer.length)}`;
+  }
+
+  protected canRevealWordSplitHint(): boolean {
+    const entries = this.instance().challengeFigure.wordSplitEntries ?? [];
+
+    return this.wordSplitHintCount() < entries.length - 1;
+  }
+
+  protected revealWordSplitHint(): void {
+    if (!this.canRevealWordSplitHint()) {
+      return;
+    }
+
+    this.wordSplitHintCount.update((count) => count + 1);
   }
 
   protected checkChallenge(): void {
-    const partialAnswer = this.selectedVariant().partialAnswers.find(
-      (partial) => partial.answer.toLocaleUpperCase('fr-CA') === this.challengeAnswerState(),
+    const partialAnswers = this.challengePartialAnswers();
+    const partialAnswer = partialAnswers.find(
+      (partial) => this.normalizeChallengeAnswer(partial.answer) === this.challengeAnswerState(),
     );
 
     if (partialAnswer) {
@@ -352,9 +393,30 @@ export class LabPage {
       return;
     }
 
-    this.challengeFeedbackState.set(
-      this.challengeAnswerState() === this.instance().solution ? 'correct' : 'incorrect',
-    );
+    const isCorrect = this.challengeAnswerState() === this.instance().solution;
+    this.challengeFeedbackState.set(isCorrect ? 'correct' : 'incorrect');
+
+    if (isCorrect && this.isPlayPage()) {
+      this.playHistory.markSolved(this.selectedType().playRoute);
+    }
+  }
+
+  protected challengePartialAnswers() {
+    return this.selectedType().id === 'faux-words'
+      ? FAUX_WORD_DEFINITIONS.filter(
+          (entry, index, entries) =>
+            entries.findIndex((candidate) => candidate.fauxWord === entry.fauxWord) === index,
+        ).map((entry) => ({
+          answer: entry.fauxWord,
+          message: 'C’est une définition valide.',
+        }))
+      : this.selectedVariant().partialAnswers;
+  }
+
+  protected markPlaySolved(): void {
+    if (this.isPlayPage()) {
+      this.playHistory.markSolved(this.selectedType().playRoute);
+    }
   }
 
   protected challengeFeedbackMessage(feedback: ExampleFeedback): string {
@@ -367,6 +429,14 @@ export class LabPage {
     }
 
     return 'À revoir.';
+  }
+
+  private normalizeChallengeAnswer(answer: string): string {
+    return answer
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-zA-Z]/g, '')
+      .toUpperCase();
   }
 
   protected challengeFeedback(): ExampleFeedback | undefined {
@@ -774,7 +844,9 @@ export class LabPage {
       const savedCountTypeName = typeNames['count-by-symbol'];
       if (savedCountTypeName?.trim().toLocaleLowerCase('fr-CA') === 'compter') {
         typeNames['count-by-symbol'] = 'Segments';
-        void this.firebaseCatalog.saveTypeName('count-by-symbol', 'Segments').catch(() => undefined);
+        void this.firebaseCatalog
+          .saveTypeName('count-by-symbol', 'Segments')
+          .catch(() => undefined);
       }
       this.typeNameOverrides.set(typeNames);
       this.typeStatusOverrides.set(overrides.typeStates);
@@ -807,9 +879,16 @@ export class LabPage {
 
       const words = (await response.text())
         .split(/\r?\n/)
-        .map((word) => word.trim().normalize('NFD').replace(/\p{Diacritic}/gu, '').toUpperCase())
-        .filter((word, index, allWords) =>
-          /^[AEFHIKLMNTUVXY]{4,8}$/.test(word) && allWords.indexOf(word) === index,
+        .map((word) =>
+          word
+            .trim()
+            .normalize('NFD')
+            .replace(/\p{Diacritic}/gu, '')
+            .toUpperCase(),
+        )
+        .filter(
+          (word, index, allWords) =>
+            /^[AEFHIKLMNTUVXY]{4,8}$/.test(word) && allWords.indexOf(word) === index,
         );
 
       if (words.length > 0) {
@@ -891,11 +970,13 @@ export class LabPage {
     const shouldShuffleCode =
       !variant.id.startsWith('3-') &&
       variant.id !== 'navigation-main' &&
-      variant.id !== 'clock-letters-main';
+      variant.id !== 'clock-letters-main' &&
+      variant.id !== 'faux-words-main';
     const digitOrder = shouldShuffleCode ? this.shuffle([0, 1, 2, 3], random) : [0, 1, 2, 3];
-    const sharedSegmentConfiguration = variant.id === '3-1-broken-segment'
-      ? this.shuffle([0, 1, 2, 3, 4, 5, 6], random).slice(0, 2)
-      : undefined;
+    const sharedSegmentConfiguration =
+      variant.id === '3-1-broken-segment'
+        ? this.shuffle([0, 1, 2, 3, 4, 5, 6], random).slice(0, 2)
+        : undefined;
     const createFigure = (example: PuzzleExample): PuzzleExampleFigure => {
       const figure = this.createFigureForVariant(
         random,
@@ -984,6 +1065,9 @@ export class LabPage {
     if (variantId === 'clock-letters-main') {
       return this.createClockLettersFigure(random, example);
     }
+    if (variantId === 'faux-words-main') {
+      return this.createFauxWordsFigure(example);
+    }
     if (variantId.startsWith('3-')) {
       return this.createSevenSegmentFigure(
         random,
@@ -1052,6 +1136,23 @@ export class LabPage {
       code: word,
       displayMode: 'clock-letters',
       clockLetters,
+    };
+  }
+
+  private createFauxWordsFigure(example: PuzzleExample): PuzzleExampleFigure {
+    return {
+      id: `example-${example.id}`,
+      example,
+      viewBox: '0 0 1 1',
+      frame: { x: 0, y: 0, width: 1, height: 1 },
+      gridSize: 1,
+      segments: [],
+      shapes: [],
+      markers: [],
+      code: 'SORT',
+      displayMode: 'word-split',
+      wordSplitEntries: FAUX_WORD_DEFINITIONS,
+      wordSplitShowAnswers: example.id !== 'challenge',
     };
   }
 
@@ -1176,13 +1277,55 @@ export class LabPage {
     const middle = y + height / 2;
     const inset = 2;
     const parts: PuzzleSegment[] = [
-      { id: `${display.id}-a`, kind: 'horizontal', x1: x + inset, y1: y, x2: x + width - inset, y2: y },
-      { id: `${display.id}-b`, kind: 'vertical', x1: x + width, y1: y + inset, x2: x + width, y2: middle - 1 },
-      { id: `${display.id}-c`, kind: 'vertical', x1: x + width, y1: middle + 1, x2: x + width, y2: y + height - inset },
-      { id: `${display.id}-d`, kind: 'horizontal', x1: x + inset, y1: y + height, x2: x + width - inset, y2: y + height },
-      { id: `${display.id}-e`, kind: 'vertical', x1: x, y1: middle + 1, x2: x, y2: y + height - inset },
+      {
+        id: `${display.id}-a`,
+        kind: 'horizontal',
+        x1: x + inset,
+        y1: y,
+        x2: x + width - inset,
+        y2: y,
+      },
+      {
+        id: `${display.id}-b`,
+        kind: 'vertical',
+        x1: x + width,
+        y1: y + inset,
+        x2: x + width,
+        y2: middle - 1,
+      },
+      {
+        id: `${display.id}-c`,
+        kind: 'vertical',
+        x1: x + width,
+        y1: middle + 1,
+        x2: x + width,
+        y2: y + height - inset,
+      },
+      {
+        id: `${display.id}-d`,
+        kind: 'horizontal',
+        x1: x + inset,
+        y1: y + height,
+        x2: x + width - inset,
+        y2: y + height,
+      },
+      {
+        id: `${display.id}-e`,
+        kind: 'vertical',
+        x1: x,
+        y1: middle + 1,
+        x2: x,
+        y2: y + height - inset,
+      },
       { id: `${display.id}-f`, kind: 'vertical', x1: x, y1: y + inset, x2: x, y2: middle - 1 },
-      { id: `${display.id}-g`, kind: 'horizontal', x1: x + inset, y1: middle, x2: x + width - inset, y2: middle },
+      {
+        id: `${display.id}-g`,
+        kind: 'horizontal',
+        x1: x + inset,
+        y1: middle,
+        x2: x + width - inset,
+        y2: middle,
+      },
     ];
 
     return parts.map((part, index) => ({ ...part, lit: display.segments[index] ?? false }));
@@ -1246,7 +1389,9 @@ export class LabPage {
     isExample: boolean,
   ): GeneratedFigure {
     const orientations: TriangleOrientation[] = ['up', 'down', 'left', 'right'];
-    const counts = orientations.map(() => (isExample ? this.randomInt(random, 1, 2) : this.randomInt(random, 0, 3)));
+    const counts = orientations.map(() =>
+      isExample ? this.randomInt(random, 1, 2) : this.randomInt(random, 0, 3),
+    );
     const availableCells = this.shuffle(
       Array.from({ length: 16 }, (_, index) => ({
         row: Math.floor(index / 4),
@@ -1286,8 +1431,16 @@ export class LabPage {
     return {
       id: `${figureId}-triangle-${index}`,
       kind: 'triangle',
-      x: 14 + cell.column * cellSize + (cellSize - dimension) / 2 + this.randomInt(random, -jitter, jitter),
-      y: 14 + cell.row * cellSize + (cellSize - dimension) / 2 + this.randomInt(random, -jitter, jitter),
+      x:
+        14 +
+        cell.column * cellSize +
+        (cellSize - dimension) / 2 +
+        this.randomInt(random, -jitter, jitter),
+      y:
+        14 +
+        cell.row * cellSize +
+        (cellSize - dimension) / 2 +
+        this.randomInt(random, -jitter, jitter),
       width: dimension,
       height: dimension,
       orientation,
@@ -1301,7 +1454,9 @@ export class LabPage {
     isExample: boolean,
   ): GeneratedFigure {
     const sizes: TriangleSize[] = ['small', 'medium', 'large'];
-    const counts = sizes.map(() => (isExample ? this.randomInt(random, 1, 2) : this.randomInt(random, 0, 3)));
+    const counts = sizes.map(() =>
+      isExample ? this.randomInt(random, 1, 2) : this.randomInt(random, 0, 3),
+    );
     const availableCells = this.shuffle(
       Array.from({ length: 16 }, (_, index) => ({
         row: Math.floor(index / 4),
@@ -1340,8 +1495,16 @@ export class LabPage {
     return {
       id: `${figureId}-triangle-${index}`,
       kind: 'triangle',
-      x: 14 + cell.column * cellSize + (cellSize - dimension) / 2 + this.randomInt(random, -jitter, jitter),
-      y: 14 + cell.row * cellSize + (cellSize - dimension) / 2 + this.randomInt(random, -jitter, jitter),
+      x:
+        14 +
+        cell.column * cellSize +
+        (cellSize - dimension) / 2 +
+        this.randomInt(random, -jitter, jitter),
+      y:
+        14 +
+        cell.row * cellSize +
+        (cellSize - dimension) / 2 +
+        this.randomInt(random, -jitter, jitter),
       width: dimension,
       height: dimension,
       orientation: this.pick(['up', 'down', 'left', 'right'], random),
@@ -1355,7 +1518,9 @@ export class LabPage {
     isExample: boolean,
   ): GeneratedFigure {
     const kinds: GeometricShapeKind[] = ['square', 'rectangle', 'diamond', 'triangle'];
-    const counts = kinds.map(() => (isExample ? this.randomInt(random, 1, 2) : this.randomInt(random, 0, 3)));
+    const counts = kinds.map(() =>
+      isExample ? this.randomInt(random, 1, 2) : this.randomInt(random, 0, 3),
+    );
     const availableCells = this.shuffle(
       Array.from({ length: 16 }, (_, index) => ({
         row: Math.floor(index / 4),
@@ -1384,7 +1549,9 @@ export class LabPage {
     figureId: string,
     isExample: boolean,
   ): GeneratedFigure {
-    const counts = [1, 2, 3, 4].map(() => (isExample ? this.randomInt(random, 1, 2) : this.randomInt(random, 0, 3)));
+    const counts = [1, 2, 3, 4].map(() =>
+      isExample ? this.randomInt(random, 1, 2) : this.randomInt(random, 0, 3),
+    );
     const items = this.shuffle(
       counts.flatMap((count, widthIndex) =>
         Array.from({ length: count }, (_, index) => ({
@@ -1455,7 +1622,9 @@ export class LabPage {
     figureId: string,
     isExample: boolean,
   ): GeneratedFigure {
-    const counts = [1, 2, 3, 4].map(() => (isExample ? this.randomInt(random, 1, 2) : this.randomInt(random, 0, 3)));
+    const counts = [1, 2, 3, 4].map(() =>
+      isExample ? this.randomInt(random, 1, 2) : this.randomInt(random, 0, 3),
+    );
     const items = this.shuffle(
       counts.flatMap((count, areaIndex) =>
         Array.from({ length: count }, (_, index) => ({
@@ -1479,10 +1648,13 @@ export class LabPage {
     for (const item of items) {
       const [widthInSubcells, heightInSubcells] = dimensions[item.area];
       const candidates = this.shuffle(
-        Array.from({ length: (subgridSize - widthInSubcells + 1) * (subgridSize - heightInSubcells + 1) }, (_, index) => ({
-          row: Math.floor(index / (subgridSize - widthInSubcells + 1)),
-          column: index % (subgridSize - widthInSubcells + 1),
-        })),
+        Array.from(
+          { length: (subgridSize - widthInSubcells + 1) * (subgridSize - heightInSubcells + 1) },
+          (_, index) => ({
+            row: Math.floor(index / (subgridSize - widthInSubcells + 1)),
+            column: index % (subgridSize - widthInSubcells + 1),
+          }),
+        ),
         random,
       );
       const position = candidates.find((candidate) =>
@@ -1492,7 +1664,11 @@ export class LabPage {
       if (!position) continue;
 
       for (let row = position.row; row < position.row + heightInSubcells; row += 1) {
-        for (let column = position.column; column < position.column + widthInSubcells; column += 1) {
+        for (
+          let column = position.column;
+          column < position.column + widthInSubcells;
+          column += 1
+        ) {
           occupied.add(`${row}:${column}`);
         }
       }
@@ -1737,10 +1913,14 @@ export class LabPage {
     second: NetworkNode,
   ): boolean {
     return (
-      ((segment.x1 === first.x && segment.y1 === first.y) &&
-        (segment.x2 === second.x && segment.y2 === second.y)) ||
-      ((segment.x2 === first.x && segment.y2 === first.y) &&
-        (segment.x1 === second.x && segment.y1 === second.y))
+      (segment.x1 === first.x &&
+        segment.y1 === first.y &&
+        segment.x2 === second.x &&
+        segment.y2 === second.y) ||
+      (segment.x2 === first.x &&
+        segment.y2 === first.y &&
+        segment.x1 === second.x &&
+        segment.y1 === second.y)
     );
   }
 
@@ -1792,7 +1972,8 @@ export class LabPage {
       components.push({
         nodes,
         edges: graph.edges.filter(
-          (edge) => nodes.has(this.networkKey({ x: edge.x1, y: edge.y1 })) &&
+          (edge) =>
+            nodes.has(this.networkKey({ x: edge.x1, y: edge.y1 })) &&
             nodes.has(this.networkKey({ x: edge.x2, y: edge.y2 })),
         ),
       });
@@ -1843,8 +2024,11 @@ export class LabPage {
       if (degree === 4) counts[3] += 1;
       if (degree === 2) {
         const node = graph.nodes.get(key) as NetworkNode;
-        const [first, second] = [...neighbors].map((neighbor) => graph.nodes.get(neighbor) as NetworkNode);
-        const isStraight = (first.x === node.x && second.x === node.x) ||
+        const [first, second] = [...neighbors].map(
+          (neighbor) => graph.nodes.get(neighbor) as NetworkNode,
+        );
+        const isStraight =
+          (first.x === node.x && second.x === node.x) ||
           (first.y === node.y && second.y === node.y);
         if (!isStraight) counts[1] += 1;
       }
@@ -1854,7 +2038,10 @@ export class LabPage {
   }
 
   private networkCycleRank(graph: NetworkGraph): number {
-    return Math.max(0, graph.edges.length - graph.nodes.size + this.networkComponents(graph).length);
+    return Math.max(
+      0,
+      graph.edges.length - graph.nodes.size + this.networkComponents(graph).length,
+    );
   }
 
   private networkCriticalPoints(graph: NetworkGraph): { articulations: number; bridges: number } {
@@ -1875,7 +2062,10 @@ export class LabPage {
           children += 1;
           visit(neighbor, current);
           low.set(current, Math.min(low.get(current) as number, low.get(neighbor) as number));
-          if (parent !== undefined && (low.get(neighbor) as number) >= (discovery.get(current) as number)) {
+          if (
+            parent !== undefined &&
+            (low.get(neighbor) as number) >= (discovery.get(current) as number)
+          ) {
             articulationPoints.add(current);
           }
           if ((low.get(neighbor) as number) > (discovery.get(current) as number)) {
@@ -1904,8 +2094,12 @@ export class LabPage {
     secondPredicate: (node: NetworkNode) => boolean,
   ): number {
     return this.networkComponents(graph).filter((component) => {
-      const touchesFirst = [...component.nodes].some((key) => firstPredicate(graph.nodes.get(key) as NetworkNode));
-      const touchesSecond = [...component.nodes].some((key) => secondPredicate(graph.nodes.get(key) as NetworkNode));
+      const touchesFirst = [...component.nodes].some((key) =>
+        firstPredicate(graph.nodes.get(key) as NetworkNode),
+      );
+      const touchesSecond = [...component.nodes].some((key) =>
+        secondPredicate(graph.nodes.get(key) as NetworkNode),
+      );
       return touchesFirst && touchesSecond;
     }).length;
   }
@@ -1918,10 +2112,26 @@ export class LabPage {
 
     for (let row = 0; row < 2; row += 1) {
       for (let column = 0; column < 2; column += 1) {
-        const top = this.networkHasEdge(graph, { x: coordinates[column], y: coordinates[row] }, { x: coordinates[column + 1], y: coordinates[row] });
-        const right = this.networkHasEdge(graph, { x: coordinates[column + 1], y: coordinates[row] }, { x: coordinates[column + 1], y: coordinates[row + 1] });
-        const bottom = this.networkHasEdge(graph, { x: coordinates[column], y: coordinates[row + 1] }, { x: coordinates[column + 1], y: coordinates[row + 1] });
-        const left = this.networkHasEdge(graph, { x: coordinates[column], y: coordinates[row] }, { x: coordinates[column], y: coordinates[row + 1] });
+        const top = this.networkHasEdge(
+          graph,
+          { x: coordinates[column], y: coordinates[row] },
+          { x: coordinates[column + 1], y: coordinates[row] },
+        );
+        const right = this.networkHasEdge(
+          graph,
+          { x: coordinates[column + 1], y: coordinates[row] },
+          { x: coordinates[column + 1], y: coordinates[row + 1] },
+        );
+        const bottom = this.networkHasEdge(
+          graph,
+          { x: coordinates[column], y: coordinates[row + 1] },
+          { x: coordinates[column + 1], y: coordinates[row + 1] },
+        );
+        const left = this.networkHasEdge(
+          graph,
+          { x: coordinates[column], y: coordinates[row] },
+          { x: coordinates[column], y: coordinates[row + 1] },
+        );
         const sides = [top, right, bottom, left].filter(Boolean).length;
 
         if (sides === 4) closed += 1;
@@ -1947,7 +2157,12 @@ export class LabPage {
     for (let index = 0; index < 8; index += 1) {
       const key = nodes[index];
       const node = graph.nodes.get(key) as NetworkNode;
-      markers.push({ id: `${figureId}-marker-${index}`, x: node.x, y: node.y, label: String.fromCharCode(65 + index) });
+      markers.push({
+        id: `${figureId}-marker-${index}`,
+        x: node.x,
+        y: node.y,
+        label: String.fromCharCode(65 + index),
+      });
     }
     for (let index = 0; index < 8; index += 2) {
       lengths.push(this.networkShortestPath(graph, nodes[index], nodes[index + 1]));
@@ -1958,7 +2173,11 @@ export class LabPage {
 
   private networkShortestPath(graph: NetworkGraph, first: string, second: string): number;
   private networkShortestPath(graph: NetworkGraph, first: NetworkNode, second: NetworkNode): number;
-  private networkShortestPath(graph: NetworkGraph, first: string | NetworkNode, second: string | NetworkNode): number {
+  private networkShortestPath(
+    graph: NetworkGraph,
+    first: string | NetworkNode,
+    second: string | NetworkNode,
+  ): number {
     const start = typeof first === 'string' ? first : this.networkKey(first);
     const target = typeof second === 'string' ? second : this.networkKey(second);
     const distances = new Map<string, number>([[start, 0]]);
@@ -2003,7 +2222,10 @@ export class LabPage {
     return { segments: graph.edges, markers, code: code.join(''), gridSize: 2 };
   }
 
-  private createDirectionalTraversalFigure(random: SeededRandom, figureId: string): GeneratedFigure {
+  private createDirectionalTraversalFigure(
+    random: SeededRandom,
+    figureId: string,
+  ): GeneratedFigure {
     const coordinates = this.networkNodeCoordinates();
     const path: NetworkNode[] = [
       { x: coordinates[0], y: coordinates[0] },
@@ -2018,9 +2240,14 @@ export class LabPage {
     ];
     if (random() > 0.5) path.reverse();
     const pool = this.networkEdgePool(figureId);
-    const segments = path.slice(0, -1).map((node, index) =>
-      pool.find((segment) => this.networkEdgeConnects(segment, node, path[index + 1])) as PuzzleSegment,
-    );
+    const segments = path
+      .slice(0, -1)
+      .map(
+        (node, index) =>
+          pool.find((segment) =>
+            this.networkEdgeConnects(segment, node, path[index + 1]),
+          ) as PuzzleSegment,
+      );
     const counts = [0, 0, 0, 0];
 
     for (let index = 0; index < path.length - 1; index += 1) {
@@ -2052,17 +2279,20 @@ export class LabPage {
 
     switch (variantId) {
       case '3-1-broken-segment': {
-        const invertedSegments = sharedSegmentConfiguration ?? this.shuffle([0, 1, 2, 3, 4, 5, 6], random).slice(0, 2);
+        const invertedSegments =
+          sharedSegmentConfiguration ?? this.shuffle([0, 1, 2, 3, 4, 5, 6], random).slice(0, 2);
         let values = digits();
         const invertedKey = [...invertedSegments].sort((first, second) => first - second).join(',');
 
         for (let attempt = 0; attempt < 100; attempt += 1) {
           const candidateValues = digits();
-          const candidateDisplays = candidateValues.slice(0, 2).map((digit) =>
-            this.sevenSegmentMask(digit).map((lit, index) =>
-              invertedSegments.includes(index) ? !lit : lit,
-            ),
-          );
+          const candidateDisplays = candidateValues
+            .slice(0, 2)
+            .map((digit) =>
+              this.sevenSegmentMask(digit).map((lit, index) =>
+                invertedSegments.includes(index) ? !lit : lit,
+              ),
+            );
           const candidates = this.sevenSegmentInvertedPairCandidates(
             candidateValues.slice(0, 2),
             candidateDisplays,
@@ -2075,13 +2305,22 @@ export class LabPage {
         }
         return {
           sevenSegmentDigits: this.sevenSegmentRow(
-            values.map((digit) => this.sevenSegmentMask(digit).map((lit, index) =>
-              invertedSegments.includes(index) ? !lit : lit,
-            )),
+            values.map((digit) =>
+              this.sevenSegmentMask(digit).map((lit, index) =>
+                invertedSegments.includes(index) ? !lit : lit,
+              ),
+            ),
             figureId,
             50,
           ),
-          notes: [{ id: `${figureId}-note`, x: 18, y: 32, text: 'Mêmes segments inversés sur chaque chiffre' }],
+          notes: [
+            {
+              id: `${figureId}-note`,
+              x: 18,
+              y: 32,
+              text: 'Mêmes segments inversés sur chaque chiffre',
+            },
+          ],
           code: values.join(''),
           gridSize: 4,
         };
@@ -2101,7 +2340,9 @@ export class LabPage {
         }
         return {
           sevenSegmentDigits: this.sevenSegmentRow(initial, figureId, 50),
-          notes: [{ id: `${figureId}-note`, x: 18, y: 32, text: 'Deplacer 1 segment; plus grand nombre' }],
+          notes: [
+            { id: `${figureId}-note`, x: 18, y: 32, text: 'Deplacer 1 segment; plus grand nombre' },
+          ],
           code: result.join(''),
           gridSize: 4,
         };
@@ -2111,15 +2352,18 @@ export class LabPage {
         const shown = isExample ? values : [0, 8, 9, null];
         return {
           sevenSegmentDigits: this.sevenSegmentRow(shown, figureId, 50),
-          notes: [{ id: `${figureId}-note`, x: 18, y: 32, text: 'Regle: alterner ajout et retrait' }],
+          notes: [
+            { id: `${figureId}-note`, x: 18, y: 32, text: 'Regle: alterner ajout et retrait' },
+          ],
           code: values.join(''),
           gridSize: 4,
         };
       }
       case '3-5-minimum-transition-cost': {
         const available = this.shuffle([0, 1, 8, 9], random);
-        const route = this.sevenSegmentPermutations(available)
-          .sort((first, second) => this.sevenSegmentRouteCost(first) - this.sevenSegmentRouteCost(second))[0];
+        const route = this.sevenSegmentPermutations(available).sort(
+          (first, second) => this.sevenSegmentRouteCost(first) - this.sevenSegmentRouteCost(second),
+        )[0];
         return {
           sevenSegmentDigits: this.sevenSegmentRow(available, figureId, 50),
           notes: [{ id: `${figureId}-note`, x: 18, y: 32, text: 'Cout = segments changes' }],
@@ -2128,7 +2372,15 @@ export class LabPage {
         };
       }
       case '3-6-superimposed-digits': {
-        const pairs = this.shuffle([[0, 8], [2, 3], [4, 9], [5, 6]], random).slice(0, 2);
+        const pairs = this.shuffle(
+          [
+            [0, 8],
+            [2, 3],
+            [4, 9],
+            [5, 6],
+          ],
+          random,
+        ).slice(0, 2);
         const displays = pairs.map((pair, index) => ({
           ...this.sevenSegmentDisplay(
             `${figureId}-super-${index}`,
@@ -2143,20 +2395,36 @@ export class LabPage {
           sevenSegmentDigits: displays,
           notes: [
             { id: `${figureId}-note-a`, x: 18, y: 30, text: 'Deux chiffres par afficheur' },
-            { id: `${figureId}-note-b`, x: 18, y: 40, text: `Indice: ${pairs[0][0]} est dans le premier` },
+            {
+              id: `${figureId}-note-b`,
+              x: 18,
+              y: 40,
+              text: `Indice: ${pairs[0][0]} est dans le premier`,
+            },
           ],
           code: pairs.flat().join(''),
           gridSize: 4,
         };
       }
       case '3-7-common-segments': {
-        const pairs = this.shuffle([[0, 8], [2, 3], [4, 9], [5, 6]], random).slice(0, 2);
+        const pairs = this.shuffle(
+          [
+            [0, 8],
+            [2, 3],
+            [4, 9],
+            [5, 6],
+          ],
+          random,
+        ).slice(0, 2);
         const displays = pairs.map((pair, index) =>
           this.sevenSegmentDisplay(
             `${figureId}-common-${index}`,
             31 + index * 47,
             49,
-            this.sevenSegmentIntersection(this.sevenSegmentMask(pair[0]), this.sevenSegmentMask(pair[1])),
+            this.sevenSegmentIntersection(
+              this.sevenSegmentMask(pair[0]),
+              this.sevenSegmentMask(pair[1]),
+            ),
             26,
             43,
           ),
@@ -2165,7 +2433,12 @@ export class LabPage {
           sevenSegmentDigits: displays,
           notes: [
             { id: `${figureId}-note-a`, x: 18, y: 30, text: 'Segments communs aux deux chiffres' },
-            { id: `${figureId}-note-b`, x: 18, y: 40, text: `Indice: ${pairs[0][0]} est dans le premier` },
+            {
+              id: `${figureId}-note-b`,
+              x: 18,
+              y: 40,
+              text: `Indice: ${pairs[0][0]} est dans le premier`,
+            },
           ],
           code: pairs.flat().join(''),
           gridSize: 4,
@@ -2186,15 +2459,31 @@ export class LabPage {
       case '3-9-segment-frequency-map': {
         const values = this.shuffle([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], random).slice(0, 4);
         const frequencies = values.reduce(
-          (counts, digit) => counts.map((count, index) => count + Number(this.sevenSegmentMask(digit)[index])),
+          (counts, digit) =>
+            counts.map((count, index) => count + Number(this.sevenSegmentMask(digit)[index])),
           [0, 0, 0, 0, 0, 0, 0],
         );
         return {
           sevenSegmentDigits: [],
           notes: [
-            { id: `${figureId}-note-a`, x: 18, y: 34, text: `a:${frequencies[0]} b:${frequencies[1]} c:${frequencies[2]} d:${frequencies[3]}` },
-            { id: `${figureId}-note-b`, x: 18, y: 50, text: `e:${frequencies[4]} f:${frequencies[5]} g:${frequencies[6]}` },
-            { id: `${figureId}-note-c`, x: 18, y: 72, text: '4 chiffres distincts; debut 0, fin 9' },
+            {
+              id: `${figureId}-note-a`,
+              x: 18,
+              y: 34,
+              text: `a:${frequencies[0]} b:${frequencies[1]} c:${frequencies[2]} d:${frequencies[3]}`,
+            },
+            {
+              id: `${figureId}-note-b`,
+              x: 18,
+              y: 50,
+              text: `e:${frequencies[4]} f:${frequencies[5]} g:${frequencies[6]}`,
+            },
+            {
+              id: `${figureId}-note-c`,
+              x: 18,
+              y: 72,
+              text: '4 chiffres distincts; debut 0, fin 9',
+            },
           ],
           code: values.join(''),
           gridSize: 4,
@@ -2210,7 +2499,12 @@ export class LabPage {
           ],
           notes: [
             { id: `${figureId}-note-a`, x: 18, y: 104, text: 'Relier si 1 segment change' },
-            { id: `${figureId}-note-b`, x: 18, y: 113, text: `Depart ${route[0]} / arrivee ${route[3]}` },
+            {
+              id: `${figureId}-note-b`,
+              x: 18,
+              y: 113,
+              text: `Depart ${route[0]} / arrivee ${route[3]}`,
+            },
           ],
           code: route.join(''),
           gridSize: 4,
@@ -2270,7 +2564,9 @@ export class LabPage {
         y,
         value === null
           ? [false, false, false, false, false, false, false]
-          : Array.isArray(value) ? value : this.sevenSegmentMask(value),
+          : Array.isArray(value)
+            ? value
+            : this.sevenSegmentMask(value),
         width,
         height,
       ),
@@ -2349,10 +2645,7 @@ export class LabPage {
     return undefined;
   }
 
-  private sevenSegmentInvertedPairCandidates(
-    digits: number[],
-    displays: boolean[][],
-  ): number[][] {
+  private sevenSegmentInvertedPairCandidates(digits: number[], displays: boolean[][]): number[][] {
     const candidates: number[][] = [];
 
     for (let first = 0; first < 7; first += 1) {
@@ -2380,19 +2673,25 @@ export class LabPage {
     }
 
     return values.flatMap((value, index) =>
-      this.sevenSegmentPermutations([...values.slice(0, index), ...values.slice(index + 1)])
-        .map((rest) => [value, ...rest]),
+      this.sevenSegmentPermutations([...values.slice(0, index), ...values.slice(index + 1)]).map(
+        (rest) => [value, ...rest],
+      ),
     );
   }
 
   private sevenSegmentRouteCost(route: number[]): number {
-    return route.slice(1).reduce(
-      (total, digit, index) => total + this.sevenSegmentMask(digit).reduce(
-        (cost, lit, segment) => cost + Number(lit !== this.sevenSegmentMask(route[index])[segment]),
+    return route
+      .slice(1)
+      .reduce(
+        (total, digit, index) =>
+          total +
+          this.sevenSegmentMask(digit).reduce(
+            (cost, lit, segment) =>
+              cost + Number(lit !== this.sevenSegmentMask(route[index])[segment]),
+            0,
+          ),
         0,
-      ),
-      0,
-    );
+      );
   }
 
   private generateVariantFigure(
@@ -2503,9 +2802,8 @@ export class LabPage {
 
     for (let row = 0; row < 3; row += 1) {
       for (let column = 0; column < 3; column += 1) {
-        const content = ensureAllContents && cellIndex < 4
-          ? cellIndex
-          : this.randomInt(random, 0, 3);
+        const content =
+          ensureAllContents && cellIndex < 4 ? cellIndex : this.randomInt(random, 0, 3);
         counts[content] += 1;
 
         if (content === 1 || content === 3) {
@@ -2534,9 +2832,8 @@ export class LabPage {
 
     for (let row = 0; row < 3; row += 1) {
       for (let column = 0; column < 3; column += 1) {
-        const lineCount = ensureAllLineCounts && cellIndex < 4
-          ? cellIndex
-          : this.randomInt(random, 0, 3);
+        const lineCount =
+          ensureAllLineCounts && cellIndex < 4 ? cellIndex : this.randomInt(random, 0, 3);
         counts[lineCount] += 1;
         const cellKinds = this.shuffle(kinds, random).slice(0, lineCount);
         segments.push(
@@ -2907,9 +3204,10 @@ export class LabPage {
   }
 
   private enteringSegmentPool(side: FigureSide, figureId: string): PuzzleSegment[] {
-    return [...this.segmentPool('horizontal', figureId), ...this.segmentPool('vertical', figureId)].filter(
-      (segment) => this.segmentEntersFromSide(segment, side),
-    );
+    return [
+      ...this.segmentPool('horizontal', figureId),
+      ...this.segmentPool('vertical', figureId),
+    ].filter((segment) => this.segmentEntersFromSide(segment, side));
   }
 
   private countEnteringLines(segments: PuzzleSegment[], side: FigureSide): number {
@@ -2946,8 +3244,10 @@ export class LabPage {
   }
 
   private countEndpointsOnSide(segment: PuzzleSegment, side: FigureSide): number {
-    return Number(this.pointIsOnSide(segment.x1, segment.y1, side)) +
-      Number(this.pointIsOnSide(segment.x2, segment.y2, side));
+    return (
+      Number(this.pointIsOnSide(segment.x1, segment.y1, side)) +
+      Number(this.pointIsOnSide(segment.x2, segment.y2, side))
+    );
   }
 
   private pointIsOnSide(x: number, y: number, side: FigureSide): boolean {
@@ -2974,9 +3274,10 @@ export class LabPage {
     const maxSegmentsPerLine = Math.min(4, 2 + difficulty);
 
     return (['horizontal', 'vertical', 'slash', 'backslash'] as SegmentKind[]).flatMap((kind) => {
-      const lineCount = ensureJoinedLines && kind === 'horizontal'
-        ? Math.max(2, this.randomInt(random, 1, maxLines))
-        : this.randomInt(random, 1, maxLines);
+      const lineCount =
+        ensureJoinedLines && kind === 'horizontal'
+          ? Math.max(2, this.randomInt(random, 1, maxLines))
+          : this.randomInt(random, 1, maxLines);
       const segments = this.createContinuousLines(
         random,
         kind,
@@ -3012,9 +3313,10 @@ export class LabPage {
 
       const line = [this.pick(anchors, random)];
       available = available.filter((segment) => segment.id !== line[0].id);
-      const targetLength = ensureJoinedLine && lineIndex === 0
-        ? Math.max(2, this.randomInt(random, 1, maxSegmentsPerLine))
-        : this.randomInt(random, 1, maxSegmentsPerLine);
+      const targetLength =
+        ensureJoinedLine && lineIndex === 0
+          ? Math.max(2, this.randomInt(random, 1, maxSegmentsPerLine))
+          : this.randomInt(random, 1, maxSegmentsPerLine);
 
       while (line.length < targetLength) {
         const candidates = available.filter(
@@ -3088,10 +3390,8 @@ export class LabPage {
       );
     }
 
-    const firstDiagonal =
-      first.kind === 'slash' ? first.x1 + first.y1 : first.x1 - first.y1;
-    const secondDiagonal =
-      second.kind === 'slash' ? second.x1 + second.y1 : second.x1 - second.y1;
+    const firstDiagonal = first.kind === 'slash' ? first.x1 + first.y1 : first.x1 - first.y1;
+    const secondDiagonal = second.kind === 'slash' ? second.x1 + second.y1 : second.x1 - second.y1;
 
     return (
       firstDiagonal === secondDiagonal &&
@@ -3193,9 +3493,10 @@ export class LabPage {
   }
 
   private formatDate(value: string | number): string {
-    const date = typeof value === 'number'
-      ? new Date(value)
-      : new Date(value.length === 10 ? `${value}T12:00:00` : value);
+    const date =
+      typeof value === 'number'
+        ? new Date(value)
+        : new Date(value.length === 10 ? `${value}T12:00:00` : value);
 
     if (Number.isNaN(date.getTime())) {
       return 'Date inconnue';
@@ -3225,9 +3526,12 @@ export class LabPage {
       const comparison = statusOrder[this.typeState(first)] - statusOrder[this.typeState(second)];
       const statusComparison = mode === 'status-desc' ? -comparison : comparison;
 
-      return statusComparison || this.typeName(first).localeCompare(this.typeName(second), 'fr-CA', {
-        sensitivity: 'base',
-      });
+      return (
+        statusComparison ||
+        this.typeName(first).localeCompare(this.typeName(second), 'fr-CA', {
+          sensitivity: 'base',
+        })
+      );
     }
 
     const firstDate = this.puzzleDateTimestamp(first, mode.startsWith('created'));
@@ -3235,9 +3539,12 @@ export class LabPage {
     const comparison = secondDate - firstDate;
     const dateComparison = mode.endsWith('asc') ? -comparison : comparison;
 
-    return dateComparison || this.typeName(first).localeCompare(this.typeName(second), 'fr-CA', {
-      sensitivity: 'base',
-    });
+    return (
+      dateComparison ||
+      this.typeName(first).localeCompare(this.typeName(second), 'fr-CA', {
+        sensitivity: 'base',
+      })
+    );
   }
 
   private puzzleDateTimestamp(type: PuzzleType, created: boolean): number {
@@ -3264,9 +3571,16 @@ export class LabPage {
   }
 
   private isPuzzleSortMode(value: string | null): value is PuzzleSortMode {
-    return value === 'name-asc' || value === 'name-desc' || value === 'created-desc' ||
-      value === 'created-asc' || value === 'updated-desc' || value === 'updated-asc' ||
-      value === 'status-asc' || value === 'status-desc';
+    return (
+      value === 'name-asc' ||
+      value === 'name-desc' ||
+      value === 'created-desc' ||
+      value === 'created-asc' ||
+      value === 'updated-desc' ||
+      value === 'updated-asc' ||
+      value === 'status-asc' ||
+      value === 'status-desc'
+    );
   }
 
   private readStoredTypeId(): string {
@@ -3276,7 +3590,7 @@ export class LabPage {
       const storedTypeId = globalThis.localStorage?.getItem(this.selectedTypeStorageKey);
 
       return LAB_PUZZLE_TYPES.some((type) => type.id === storedTypeId)
-        ? storedTypeId as string
+        ? (storedTypeId as string)
         : fallback;
     } catch {
       return fallback;
@@ -3318,19 +3632,20 @@ export class LabPage {
     const routeTypeId = this.route.snapshot.paramMap.get('typeId');
 
     return LAB_PUZZLE_TYPES.some((type) => type.id === routeTypeId)
-      ? routeTypeId as string
+      ? (routeTypeId as string)
       : this.readStoredTypeId();
   }
 
   private readStoredVariantId(typeId: string): string {
-    const type = LAB_PUZZLE_TYPES.find((candidate) => candidate.id === typeId) ?? LAB_PUZZLE_TYPES[0];
+    const type =
+      LAB_PUZZLE_TYPES.find((candidate) => candidate.id === typeId) ?? LAB_PUZZLE_TYPES[0];
     const fallback = type.variants[0].id;
 
     try {
       const storedVariantId = globalThis.localStorage?.getItem(this.selectedVariantStorageKey);
 
       return type.variants.some((variant) => variant.id === storedVariantId)
-        ? storedVariantId as string
+        ? (storedVariantId as string)
         : fallback;
     } catch {
       return fallback;
@@ -3351,6 +3666,7 @@ export class LabPage {
     this.challengeAnswerState.set('');
     this.challengePartialMessageState.set('');
     this.challengeFeedbackState.set(undefined);
+    this.wordSplitHintCount.set(0);
   }
 
   private createSeed(): string {

@@ -6,6 +6,7 @@ export class GeometricShapesPuzzleType extends PuzzleType {
       id: 'geometric-shapes',
       name: 'Formes géométriques',
       state: 'pending',
+      playRoute: '/play/geometric-shapes',
       description:
         'Le joueur déduit une combinaison en observant des formes géométriques et leurs propriétés dans une figure.',
       answerFormat:
@@ -35,7 +36,8 @@ export class GeometricShapesPuzzleType extends PuzzleType {
             {
               id: '2-1-example-all-orientations',
               name: 'Exemple des quatre orientations',
-              description: 'Les triangles vers le haut, le bas, la gauche et la droite sont présents.',
+              description:
+                'Les triangles vers le haut, le bas, la gauche et la droite sont présents.',
             },
           ],
         },
@@ -49,7 +51,8 @@ export class GeometricShapesPuzzleType extends PuzzleType {
             {
               id: '2-2-example-sizes',
               name: 'Exemple des tailles',
-              description: 'Les trois tailles de triangle sont visibles et le dernier chiffre donne leur total.',
+              description:
+                'Les trois tailles de triangle sont visibles et le dernier chiffre donne leur total.',
             },
             {
               id: '2-2-example-size-mix',
@@ -115,8 +118,7 @@ export class GeometricShapesPuzzleType extends PuzzleType {
           id: '2-5-regions-by-area',
           name: '2.5 Régions selon leur aire',
           state: 'pending',
-          description:
-            'La combinaison compte les régions fermées contenant 1, 2, 3 et 4 cases.',
+          description: 'La combinaison compte les régions fermées contenant 1, 2, 3 et 4 cases.',
           examples: [
             {
               id: '2-5-example-areas',

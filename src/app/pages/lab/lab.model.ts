@@ -28,7 +28,7 @@ type PuzzleTypeInput = {
   description: string;
   answerFormat: string;
   clueFormat: string;
-  playRoute?: string;
+  playRoute: string;
   variants: PuzzleVariantInput[];
   createdAt: string;
   updatedAt: string;
@@ -66,7 +66,11 @@ export class PuzzleVariant {
     this.description = input.description;
     this.examples = input.examples.map((example) => new PuzzleExample(example));
     const exampleCount = input.exampleCount ?? input.examples.length;
-    if (!Number.isInteger(exampleCount) || exampleCount < 0 || exampleCount > input.examples.length) {
+    if (
+      !Number.isInteger(exampleCount) ||
+      exampleCount < 0 ||
+      exampleCount > input.examples.length
+    ) {
       throw new Error(`Le nombre d'exemples de la variante est invalide.`);
     }
     this.exampleCount = exampleCount;
@@ -81,7 +85,7 @@ export class PuzzleType {
   readonly description: string;
   readonly answerFormat: string;
   readonly clueFormat: string;
-  readonly playRoute?: string;
+  readonly playRoute: string;
   readonly variants: PuzzleVariant[];
   readonly createdAt: string;
   readonly updatedAt: string;

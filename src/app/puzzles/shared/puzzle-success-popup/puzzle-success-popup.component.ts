@@ -63,6 +63,10 @@ export class PuzzleSuccessPopupComponent {
     '/dice',
     '/tic-tac-toe',
     '/timing-drop',
+    '/play/count-by-symbol',
+    '/play/geometric-shapes',
+    '/play/seven-segment',
+    '/play/faux-words',
   ];
 
   private readonly sectionFragmentsByRoute: Record<string, string> = {
@@ -111,6 +115,10 @@ export class PuzzleSuccessPopupComponent {
     'describe-symbols': 'multijoueurs',
     'puzzlehunt/navigation': 'enigmes',
     'puzzlehunt/clock-letters': 'enigmes',
+    'play/count-by-symbol': 'enigmes',
+    'play/geometric-shapes': 'enigmes',
+    'play/seven-segment': 'enigmes',
+    'play/faux-words': 'enigmes',
   };
 
   private readonly router = inject(Router);

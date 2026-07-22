@@ -6,6 +6,7 @@ export class CountBySymbolPuzzleType extends PuzzleType {
       id: 'count-by-symbol',
       name: 'Segments',
       state: 'pending',
+      playRoute: '/play/count-by-symbol',
       description:
         'Le joueur déduit une combinaison en comptant des éléments visuels précis dans une figure selon une légende donnée. L’ordre des quatre premiers chiffres est mélangé à chaque partie et se déduit grâce aux exemples.',
       answerFormat:
@@ -106,7 +107,8 @@ export class CountBySymbolPuzzleType extends PuzzleType {
             {
               id: '1-4-example-crossed-cells',
               name: 'Exemple des cases croisées',
-              description: 'Les X permettent de distinguer les deux diagonales présentes dans une même case.',
+              description:
+                'Les X permettent de distinguer les deux diagonales présentes dans une même case.',
             },
             {
               id: '1-4-example-all-cell-contents',
@@ -130,7 +132,8 @@ export class CountBySymbolPuzzleType extends PuzzleType {
             {
               id: '1-5-example-mixed-cells',
               name: 'Exemple des cases mixtes',
-              description: 'Les traits horizontaux, verticaux et diagonaux peuvent être combinés dans une case.',
+              description:
+                'Les traits horizontaux, verticaux et diagonaux peuvent être combinés dans une case.',
             },
             {
               id: '1-5-example-all-line-counts',
@@ -149,12 +152,14 @@ export class CountBySymbolPuzzleType extends PuzzleType {
             {
               id: '1-6-example-cell-sides',
               name: 'Exemple des côtés des cases',
-              description: 'Les côtés partagés entre deux cases ne sont comptés qu’une fois dans le dessin.',
+              description:
+                'Les côtés partagés entre deux cases ne sont comptés qu’une fois dans le dessin.',
             },
             {
               id: '1-6-example-complete-cells',
               name: 'Exemple des cases complètes',
-              description: 'Certaines cases ont un contour complet tandis que d’autres sont partiellement tracées.',
+              description:
+                'Certaines cases ont un contour complet tandis que d’autres sont partiellement tracées.',
             },
             {
               id: '1-6-example-all-side-counts',
@@ -173,7 +178,8 @@ export class CountBySymbolPuzzleType extends PuzzleType {
             {
               id: '1-7-example-outer-borders',
               name: 'Exemple des bords extérieurs',
-              description: 'Les portions visibles sont réparties sur les quatre côtés de la figure.',
+              description:
+                'Les portions visibles sont réparties sur les quatre côtés de la figure.',
             },
             {
               id: '1-7-example-border-portions',
@@ -197,7 +203,8 @@ export class CountBySymbolPuzzleType extends PuzzleType {
             {
               id: '1-8-example-quadrants',
               name: 'Exemple des quadrants',
-              description: 'Les cases occupées sont réparties dans les quatre quadrants de la grille.',
+              description:
+                'Les cases occupées sont réparties dans les quatre quadrants de la grille.',
             },
             {
               id: '1-8-example-occupation',

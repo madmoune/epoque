@@ -29,10 +29,10 @@ type CalcudokuCageTemplate = {
   styleUrl: './calcudoku.page.scss',
 })
 export class CalcudokuPage {
-  protected readonly size = 6;
+  protected readonly size = 5;
   protected readonly numberKeyboardRows: CustomKeyboardKey[][] = [
     ['1', '2', '3'],
-    ['4', '5', '6'],
+    ['4', '5'],
     ['backspace'],
   ];
 
@@ -68,7 +68,7 @@ export class CalcudokuPage {
       return;
     }
 
-    const cleanValue = value.replace(/[^1-6]/g, '').slice(0, 1);
+    const cleanValue = value.replace(/[^1-5]/g, '').slice(0, 1);
     this.answers.update((answers) =>
       answers.map((answerRow, rowIndex) =>
         rowIndex === row
