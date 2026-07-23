@@ -17,6 +17,7 @@ type ZebraPuzzle = {
   positions: string[];
   categories: ZebraCategory[];
   clues: string[];
+  logicalClues?: ZebraClue[];
   solution: Record<string, string>[];
 };
 
@@ -124,12 +125,20 @@ const ZEBRA_PUZZLES: Record<ZebraLevel, ZebraPuzzle> = {
     intro: 'Associe chaque maison à sa personne, sa couleur, son animal, sa boisson et son loisir.',
     positions: ['Maison 1', 'Maison 2', 'Maison 3', 'Maison 4', 'Maison 5'],
     categories: [
-      { id: 'house', label: 'Maison', values: ['Maison 1', 'Maison 2', 'Maison 3', 'Maison 4', 'Maison 5'] },
+      {
+        id: 'house',
+        label: 'Maison',
+        values: ['Maison 1', 'Maison 2', 'Maison 3', 'Maison 4', 'Maison 5'],
+      },
       { id: 'person', label: 'Personne', values: ['Alice', 'Bruno', 'Clara', 'Diego', 'Emma'] },
       { id: 'color', label: 'Couleur', values: ['Rouge', 'Bleu', 'Vert', 'Jaune', 'Blanc'] },
       { id: 'pet', label: 'Animal', values: ['Chat', 'Chien', 'Oiseau', 'Poisson', 'Lapin'] },
       { id: 'drink', label: 'Boisson', values: ['The', 'Lait', 'Jus', 'Cafe', 'Eau'] },
-      { id: 'hobby', label: 'Loisir', values: ['Echecs', 'Peinture', 'Course', 'Violon', 'Jardin'] },
+      {
+        id: 'hobby',
+        label: 'Loisir',
+        values: ['Echecs', 'Peinture', 'Course', 'Violon', 'Jardin'],
+      },
     ],
     clues: [
       'La maison bleue est juste à droite de la maison rouge.',
@@ -151,11 +160,46 @@ const ZEBRA_PUZZLES: Record<ZebraLevel, ZebraPuzzle> = {
       'Le violon est pratique dans la maison rouge.',
     ],
     solution: [
-      { house: 'Maison 1', person: 'Alice', color: 'Rouge', pet: 'Chat', drink: 'The', hobby: 'Violon' },
-      { house: 'Maison 2', person: 'Bruno', color: 'Bleu', pet: 'Chien', drink: 'Cafe', hobby: 'Echecs' },
-      { house: 'Maison 3', person: 'Clara', color: 'Vert', pet: 'Oiseau', drink: 'Lait', hobby: 'Peinture' },
-      { house: 'Maison 4', person: 'Diego', color: 'Jaune', pet: 'Poisson', drink: 'Jus', hobby: 'Course' },
-      { house: 'Maison 5', person: 'Emma', color: 'Blanc', pet: 'Lapin', drink: 'Eau', hobby: 'Jardin' },
+      {
+        house: 'Maison 1',
+        person: 'Alice',
+        color: 'Rouge',
+        pet: 'Chat',
+        drink: 'The',
+        hobby: 'Violon',
+      },
+      {
+        house: 'Maison 2',
+        person: 'Bruno',
+        color: 'Bleu',
+        pet: 'Chien',
+        drink: 'Cafe',
+        hobby: 'Echecs',
+      },
+      {
+        house: 'Maison 3',
+        person: 'Clara',
+        color: 'Vert',
+        pet: 'Oiseau',
+        drink: 'Lait',
+        hobby: 'Peinture',
+      },
+      {
+        house: 'Maison 4',
+        person: 'Diego',
+        color: 'Jaune',
+        pet: 'Poisson',
+        drink: 'Jus',
+        hobby: 'Course',
+      },
+      {
+        house: 'Maison 5',
+        person: 'Emma',
+        color: 'Blanc',
+        pet: 'Lapin',
+        drink: 'Eau',
+        hobby: 'Jardin',
+      },
     ],
   },
 };
@@ -174,11 +218,14 @@ export class ZebraPage {
   private readonly manualGridMarks = signal<Record<string, GridMark>>({});
   protected readonly gridMarks = computed(() => this.buildGridMarks(this.manualGridMarks()));
   protected readonly hasChecked = signal(false);
+  protected readonly hintMessage = signal<string | null>(null);
 
   protected readonly isSolved = computed(
     () =>
       this.trueRelations().every((relation) => this.relationMark(relation) === 'yes') &&
-      Object.entries(this.gridMarks()).every(([key, mark]) => mark !== 'yes' || this.isTrueRelationKey(key)),
+      Object.entries(this.gridMarks()).every(
+        ([key, mark]) => mark !== 'yes' || this.isTrueRelationKey(key),
+      ),
   );
 
   protected setLevel(level: ZebraLevel): void {
@@ -186,6 +233,7 @@ export class ZebraPage {
     this.activePuzzle.set(this.createRandomPuzzle(this.puzzles[level]));
     this.manualGridMarks.set({});
     this.hasChecked.set(false);
+    this.hintMessage.set(null);
   }
 
   protected checkPuzzle(): void {
@@ -195,20 +243,27 @@ export class ZebraPage {
   protected resetPuzzle(): void {
     this.manualGridMarks.set({});
     this.hasChecked.set(false);
+    this.hintMessage.set(null);
   }
 
   protected newPuzzle(): void {
     this.activePuzzle.set(this.createRandomPuzzle(this.puzzles[this.level()]));
     this.manualGridMarks.set({});
     this.hasChecked.set(false);
+    this.hintMessage.set(null);
   }
 
   protected showHint(): void {
-    const hintRelation = this.trueRelations().find((relation) => this.relationMark(relation) !== 'yes');
+    const hintRelation = this.trueRelations().find(
+      (relation) => this.relationMark(relation) !== 'yes',
+    );
 
     if (!hintRelation) {
+      this.hintMessage.set('Toutes les associations nécessaires sont déjà déduites.');
       return;
     }
+
+    const explanation = this.explainHint(hintRelation);
 
     this.setManualGridMark(
       hintRelation.firstCategory.id,
@@ -218,6 +273,203 @@ export class ZebraPage {
       'yes',
     );
     this.hasChecked.set(false);
+    this.hintMessage.set(explanation);
+  }
+
+  protected associationText(relation: ReturnType<ZebraPage['trueRelations']>[number]): string {
+    return `${relation.firstCategory.label} « ${relation.firstValue} » avec ${relation.secondCategory.label.toLowerCase()} « ${relation.secondValue} »`;
+  }
+
+  private explainHint(relation: ReturnType<ZebraPage['trueRelations']>[number]): string {
+    const knownRelations = this.trueRelations().filter(
+      (candidate) => this.relationMark(candidate) === 'yes',
+    );
+
+    for (const first of knownRelations) {
+      for (const second of knownRelations) {
+        const implied = this.sharedRelationValue(first, second);
+
+        if (implied && this.matchesAssociation(relation, implied)) {
+          const sharedValue = this.sharedValueText(first, second);
+
+          return `Déduction : ${this.associationText(relation)}. Pourquoi : on sait déjà que ${this.associationText(first)} et ${this.associationText(second)}. Ces deux associations ont ${sharedValue} en commun; les deux valeurs restantes doivent donc être associées. Une valeur ne peut avoir qu’une seule association dans chaque catégorie.`;
+        }
+      }
+    }
+
+    const secondAlternatives = relation.secondCategory.values.filter(
+      (value) =>
+        value !== relation.secondValue &&
+        this.gridMark(
+          relation.firstCategory.id,
+          relation.firstValue,
+          relation.secondCategory.id,
+          value,
+        ) === 'no',
+    );
+
+    if (secondAlternatives.length === relation.secondCategory.values.length - 1) {
+      return `Déduction : ${this.associationText(relation)}. Pourquoi : toutes les autres valeurs de ${relation.secondCategory.label.toLowerCase()} sont déjà impossibles pour ${relation.firstCategory.label.toLowerCase()} « ${relation.firstValue} ».`;
+    }
+
+    const firstAlternatives = relation.firstCategory.values.filter(
+      (value) =>
+        value !== relation.firstValue &&
+        this.gridMark(
+          relation.firstCategory.id,
+          value,
+          relation.secondCategory.id,
+          relation.secondValue,
+        ) === 'no',
+    );
+
+    if (firstAlternatives.length === relation.firstCategory.values.length - 1) {
+      return `Déduction : ${this.associationText(relation)}. Pourquoi : toutes les autres valeurs de ${relation.firstCategory.label.toLowerCase()} sont déjà impossibles pour ${relation.secondCategory.label.toLowerCase()} « ${relation.secondValue} ».`;
+    }
+
+    const directClue = this.puzzle().logicalClues?.find((clue) =>
+      this.clueImpliesAssociation(clue, relation),
+    );
+
+    if (directClue) {
+      return `Déduction : ${this.associationText(relation)}. Pourquoi : l’indice « ${this.formatClue(directClue.text)} » donne directement cette association.`;
+    }
+
+    return `Déduction : ${this.associationText(relation)}. Pourquoi : ${this.explainExistingContext(relation)}`;
+  }
+
+  private sharedValueText(
+    firstRelation: ReturnType<ZebraPage['trueRelations']>[number],
+    secondRelation: ReturnType<ZebraPage['trueRelations']>[number],
+  ): string {
+    const sharedValue = this.findSharedRelationValue(firstRelation, secondRelation);
+
+    if (!sharedValue) {
+      return 'une valeur commune';
+    }
+
+    const category = this.puzzle().categories.find(
+      (candidate) => candidate.id === sharedValue.categoryId,
+    );
+
+    return `${category?.label.toLowerCase() ?? 'la catégorie'} « ${sharedValue.value} »`;
+  }
+
+  private explainExistingContext(relation: ReturnType<ZebraPage['trueRelations']>[number]): string {
+    const knownRelations = this.trueRelations().filter((candidate) => {
+      if (this.relationMark(candidate) !== 'yes') {
+        return false;
+      }
+
+      return (
+        (candidate.firstCategory.id === relation.firstCategory.id &&
+          candidate.firstValue === relation.firstValue) ||
+        (candidate.secondCategory.id === relation.secondCategory.id &&
+          candidate.secondValue === relation.secondValue) ||
+        (candidate.firstCategory.id === relation.secondCategory.id &&
+          candidate.firstValue === relation.secondValue) ||
+        (candidate.secondCategory.id === relation.firstCategory.id &&
+          candidate.secondValue === relation.firstValue)
+      );
+    });
+
+    const excludedSecondValues = relation.secondCategory.values.filter(
+      (value) =>
+        value !== relation.secondValue &&
+        this.gridMark(
+          relation.firstCategory.id,
+          relation.firstValue,
+          relation.secondCategory.id,
+          value,
+        ) === 'no',
+    );
+    const excludedFirstValues = relation.firstCategory.values.filter(
+      (value) =>
+        value !== relation.firstValue &&
+        this.gridMark(
+          relation.firstCategory.id,
+          value,
+          relation.secondCategory.id,
+          relation.secondValue,
+        ) === 'no',
+    );
+    const context: string[] = [];
+
+    if (knownRelations.length > 0) {
+      context.push(
+        `les associations déjà confirmées sont ${knownRelations
+          .map((candidate) => `« ${this.associationText(candidate)} »`)
+          .join(' et ')}`,
+      );
+    }
+
+    if (excludedSecondValues.length > 0) {
+      context.push(
+        `pour ${relation.firstCategory.label.toLowerCase()} « ${relation.firstValue} », les autres valeurs exclues sont : ${excludedSecondValues
+          .map((value) => `« ${value} »`)
+          .join(', ')}`,
+      );
+    }
+
+    if (excludedFirstValues.length > 0) {
+      context.push(
+        `pour ${relation.secondCategory.label.toLowerCase()} « ${relation.secondValue} », les autres valeurs exclues sont : ${excludedFirstValues
+          .map((value) => `« ${value} »`)
+          .join(', ')}`,
+      );
+    }
+
+    return context.length > 0
+      ? `${context.join('. ')}. Il ne reste donc qu’une possibilité.`
+      : `il faut maintenant vérifier l’association entre ${relation.firstCategory.label.toLowerCase()} « ${relation.firstValue} » et ${relation.secondCategory.label.toLowerCase()} « ${relation.secondValue} » pour poursuivre la déduction.`;
+  }
+
+  private clueImpliesAssociation(
+    clue: ZebraClue,
+    relation: ReturnType<ZebraPage['trueRelations']>[number],
+  ): boolean {
+    if (clue.type === 'same') {
+      return this.matchesAssociation(relation, {
+        firstCategoryId: clue.firstCategoryId,
+        firstValue: clue.firstValue,
+        secondCategoryId: clue.secondCategoryId,
+        secondValue: clue.secondValue,
+      });
+    }
+
+    if (clue.type !== 'position') {
+      return false;
+    }
+
+    const house = this.puzzle().categories[0];
+
+    return this.matchesAssociation(relation, {
+      firstCategoryId: house.id,
+      firstValue: house.values[clue.houseIndex],
+      secondCategoryId: clue.categoryId,
+      secondValue: clue.value,
+    });
+  }
+
+  private matchesAssociation(
+    relation: ReturnType<ZebraPage['trueRelations']>[number],
+    association: {
+      firstCategoryId: string;
+      firstValue: string;
+      secondCategoryId: string;
+      secondValue: string;
+    },
+  ): boolean {
+    return (
+      (relation.firstCategory.id === association.firstCategoryId &&
+        relation.firstValue === association.firstValue &&
+        relation.secondCategory.id === association.secondCategoryId &&
+        relation.secondValue === association.secondValue) ||
+      (relation.firstCategory.id === association.secondCategoryId &&
+        relation.firstValue === association.secondValue &&
+        relation.secondCategory.id === association.firstCategoryId &&
+        relation.secondValue === association.firstValue)
+    );
   }
 
   protected comparisonSections(): { first: ZebraCategory; second: ZebraCategory }[] {
@@ -252,11 +504,25 @@ export class ZebraPage {
     return this.categoryIndex(rowCategory.id) > this.categoryIndex(columnCategory.id);
   }
 
-  protected gridMark(firstCategoryId: string, firstValue: string, secondCategoryId: string, secondValue: string): GridMark {
-    return this.gridMarks()[this.gridMarkKey(firstCategoryId, firstValue, secondCategoryId, secondValue)] ?? 'unknown';
+  protected gridMark(
+    firstCategoryId: string,
+    firstValue: string,
+    secondCategoryId: string,
+    secondValue: string,
+  ): GridMark {
+    return (
+      this.gridMarks()[
+        this.gridMarkKey(firstCategoryId, firstValue, secondCategoryId, secondValue)
+      ] ?? 'unknown'
+    );
   }
 
-  protected toggleGridMark(firstCategoryId: string, firstValue: string, secondCategoryId: string, secondValue: string): void {
+  protected toggleGridMark(
+    firstCategoryId: string,
+    firstValue: string,
+    secondCategoryId: string,
+    secondValue: string,
+  ): void {
     if (!this.canToggleGridMark(firstCategoryId, firstValue, secondCategoryId, secondValue)) {
       return;
     }
@@ -267,7 +533,8 @@ export class ZebraPage {
       no: 'yes',
       yes: 'unknown',
     };
-    const nextMark = nextMarks[this.gridMark(firstCategoryId, firstValue, secondCategoryId, secondValue)];
+    const nextMark =
+      nextMarks[this.gridMark(firstCategoryId, firstValue, secondCategoryId, secondValue)];
 
     this.manualGridMarks.update((marks) => {
       const nextManualMarks = { ...marks };
@@ -281,9 +548,15 @@ export class ZebraPage {
       return nextManualMarks;
     });
     this.hasChecked.set(false);
+    this.hintMessage.set(null);
   }
 
-  protected gridMarkState(firstCategoryId: string, firstValue: string, secondCategoryId: string, secondValue: string): string {
+  protected gridMarkState(
+    firstCategoryId: string,
+    firstValue: string,
+    secondCategoryId: string,
+    secondValue: string,
+  ): string {
     if (!this.hasChecked()) {
       return '';
     }
@@ -294,12 +567,22 @@ export class ZebraPage {
       return '';
     }
 
-    const isTrueRelation = this.isTrueRelation(firstCategoryId, firstValue, secondCategoryId, secondValue);
+    const isTrueRelation = this.isTrueRelation(
+      firstCategoryId,
+      firstValue,
+      secondCategoryId,
+      secondValue,
+    );
 
     return (mark === 'yes') === isTrueRelation ? 'correct' : 'wrong';
   }
 
-  protected gridMarkOrigin(firstCategoryId: string, firstValue: string, secondCategoryId: string, secondValue: string): string {
+  protected gridMarkOrigin(
+    firstCategoryId: string,
+    firstValue: string,
+    secondCategoryId: string,
+    secondValue: string,
+  ): string {
     const key = this.gridMarkKey(firstCategoryId, firstValue, secondCategoryId, secondValue);
     const mark = this.gridMark(firstCategoryId, firstValue, secondCategoryId, secondValue);
 
@@ -310,7 +593,12 @@ export class ZebraPage {
     return this.manualGridMarks()[key] ? 'manual' : 'deduced';
   }
 
-  protected canToggleGridMark(firstCategoryId: string, firstValue: string, secondCategoryId: string, secondValue: string): boolean {
+  protected canToggleGridMark(
+    firstCategoryId: string,
+    firstValue: string,
+    secondCategoryId: string,
+    secondValue: string,
+  ): boolean {
     const key = this.gridMarkKey(firstCategoryId, firstValue, secondCategoryId, secondValue);
     const mark = this.gridMark(firstCategoryId, firstValue, secondCategoryId, secondValue);
 
@@ -445,7 +733,12 @@ export class ZebraPage {
   private sharedRelationValue(
     firstRelation: ReturnType<ZebraPage['trueRelations']>[number],
     secondRelation: ReturnType<ZebraPage['trueRelations']>[number],
-  ): { firstCategoryId: string; firstValue: string; secondCategoryId: string; secondValue: string } | null {
+  ): {
+    firstCategoryId: string;
+    firstValue: string;
+    secondCategoryId: string;
+    secondValue: string;
+  } | null {
     const firstValues = [
       { categoryId: firstRelation.firstCategory.id, value: firstRelation.firstValue },
       { categoryId: firstRelation.secondCategory.id, value: firstRelation.secondValue },
@@ -454,9 +747,7 @@ export class ZebraPage {
       { categoryId: secondRelation.firstCategory.id, value: secondRelation.firstValue },
       { categoryId: secondRelation.secondCategory.id, value: secondRelation.secondValue },
     ];
-    const sharedValue = firstValues.find((first) =>
-      secondValues.some((second) => second.categoryId === first.categoryId && second.value === first.value),
-    );
+    const sharedValue = this.findSharedRelationValue(firstRelation, secondRelation);
 
     if (!sharedValue) {
       return null;
@@ -479,6 +770,28 @@ export class ZebraPage {
       secondCategoryId: secondOther.categoryId,
       secondValue: secondOther.value,
     };
+  }
+
+  private findSharedRelationValue(
+    firstRelation: ReturnType<ZebraPage['trueRelations']>[number],
+    secondRelation: ReturnType<ZebraPage['trueRelations']>[number],
+  ): { categoryId: string; value: string } | null {
+    const firstValues = [
+      { categoryId: firstRelation.firstCategory.id, value: firstRelation.firstValue },
+      { categoryId: firstRelation.secondCategory.id, value: firstRelation.secondValue },
+    ];
+    const secondValues = [
+      { categoryId: secondRelation.firstCategory.id, value: secondRelation.firstValue },
+      { categoryId: secondRelation.secondCategory.id, value: secondRelation.secondValue },
+    ];
+
+    return (
+      firstValues.find((first) =>
+        secondValues.some(
+          (second) => second.categoryId === first.categoryId && second.value === first.value,
+        ),
+      ) ?? null
+    );
   }
 
   private trueRelations(): {
@@ -506,18 +819,28 @@ export class ZebraPage {
     );
   }
 
-  private gridMarkFromMap(gridMarks: Record<string, GridMark>, relation: ReturnType<ZebraPage['trueRelations']>[number]): GridMark {
-    return gridMarks[
-      this.gridMarkKey(
-        relation.firstCategory.id,
-        relation.firstValue,
-        relation.secondCategory.id,
-        relation.secondValue,
-      )
-    ] ?? 'unknown';
+  private gridMarkFromMap(
+    gridMarks: Record<string, GridMark>,
+    relation: ReturnType<ZebraPage['trueRelations']>[number],
+  ): GridMark {
+    return (
+      gridMarks[
+        this.gridMarkKey(
+          relation.firstCategory.id,
+          relation.firstValue,
+          relation.secondCategory.id,
+          relation.secondValue,
+        )
+      ] ?? 'unknown'
+    );
   }
 
-  private isTrueRelation(firstCategoryId: string, firstValue: string, secondCategoryId: string, secondValue: string): boolean {
+  private isTrueRelation(
+    firstCategoryId: string,
+    firstValue: string,
+    secondCategoryId: string,
+    secondValue: string,
+  ): boolean {
     return this.puzzle().solution.some(
       (row) => row[firstCategoryId] === firstValue && row[secondCategoryId] === secondValue,
     );
@@ -540,13 +863,23 @@ export class ZebraPage {
     return this.puzzle().categories.find((category) => category.id === categoryId)?.values ?? [];
   }
 
-  private gridMarkKey(firstCategoryId: string, firstValue: string, secondCategoryId: string, secondValue: string): string {
-    return [`${firstCategoryId}:${firstValue}`, `${secondCategoryId}:${secondValue}`].sort().join('|');
+  private gridMarkKey(
+    firstCategoryId: string,
+    firstValue: string,
+    secondCategoryId: string,
+    secondValue: string,
+  ): string {
+    return [`${firstCategoryId}:${firstValue}`, `${secondCategoryId}:${secondValue}`]
+      .sort()
+      .join('|');
   }
 
-  private parseGridMarkKey(
-    key: string,
-  ): { firstCategoryId: string; firstValue: string; secondCategoryId: string; secondValue: string } | null {
+  private parseGridMarkKey(key: string): {
+    firstCategoryId: string;
+    firstValue: string;
+    secondCategoryId: string;
+    secondValue: string;
+  } | null {
     const [first, second] = key.split('|');
 
     if (!first || !second) {
@@ -569,9 +902,10 @@ export class ZebraPage {
   }
 
   private createRandomPuzzle(basePuzzle: ZebraPuzzle): ZebraPuzzle {
-    const houseCategory = basePuzzle.categories[0];
+    const categories = this.createVariantCategories(basePuzzle);
+    const houseCategory = categories[0];
     const randomizedValuesByCategory = new Map(
-      basePuzzle.categories.map((category) => [
+      categories.map((category) => [
         category.id,
         category.id === houseCategory.id ? category.values : this.shuffle(category.values),
       ]),
@@ -579,22 +913,84 @@ export class ZebraPage {
 
     const solution = houseCategory.values.map((house, houseIndex) =>
       Object.fromEntries(
-        basePuzzle.categories.map((category) => [
+        categories.map((category) => [
           category.id,
-          category.id === houseCategory.id ? house : (randomizedValuesByCategory.get(category.id)?.[houseIndex] ?? ''),
+          category.id === houseCategory.id
+            ? house
+            : (randomizedValuesByCategory.get(category.id)?.[houseIndex] ?? ''),
         ]),
       ),
     );
 
+    const logicalClues = this.reduceToEssentialClues(
+      this.createCandidateClues(categories, solution),
+      categories,
+    );
+
+    if (this.countMatchingSolutions(categories, logicalClues, 2) !== 1) {
+      return this.createRandomPuzzle(basePuzzle);
+    }
+
     return {
       ...basePuzzle,
-      clues: this.shuffle(this.createRandomClues(basePuzzle.categories, solution)),
+      categories,
+      clues: this.shuffle(logicalClues.map((clue) => this.formatClue(clue.text))),
+      logicalClues,
       solution,
     };
   }
 
-  private createRandomClues(categories: ZebraCategory[], solution: Record<string, string>[]): string[] {
-    const clues = this.reduceToEssentialClues(this.createCandidateClues(categories, solution), categories);
+  private createVariantCategories(basePuzzle: ZebraPuzzle): ZebraCategory[] {
+    return basePuzzle.categories.map((category) => {
+      if (category.id === 'house') {
+        return category;
+      }
+
+      const variants = this.categoryValueVariants(category);
+      const values = this.randomItem(variants);
+
+      return { ...category, values: [...values] };
+    });
+  }
+
+  private categoryValueVariants(category: ZebraCategory): string[][] {
+    const variants: Record<string, string[][]> = {
+      person: [
+        ['Nora', 'Omar', 'Lina'],
+        ['Hugo', 'Maya', 'Noé', 'Zoé'],
+        ['Inès', 'Malik', 'Romy', 'Sacha', 'Yanis'],
+      ],
+      color: [
+        ['Orange', 'Violette', 'Rose'],
+        ['Orange', 'Violette', 'Rose', 'Noire'],
+        ['Orange', 'Violette', 'Rose', 'Noire', 'Grise'],
+      ],
+      pet: [
+        ['Renard', 'Tortue', 'Aigle'],
+        ['Renard', 'Tortue', 'Aigle', 'Souris'],
+        ['Renard', 'Tortue', 'Aigle', 'Souris', 'Panda'],
+      ],
+      hobby: [
+        ['Randonnée', 'Musique', 'Natation', 'Lecture'],
+        ['Randonnée', 'Musique', 'Natation', 'Lecture', 'Cuisine'],
+      ],
+      drink: [['Infusion', 'Limonade', 'Cacao', 'Eau', 'Lait']],
+    };
+    const alternatives = (variants[category.id] ?? []).filter(
+      (values) => values.length === category.values.length,
+    );
+
+    return [category.values, ...alternatives];
+  }
+
+  private createRandomClues(
+    categories: ZebraCategory[],
+    solution: Record<string, string>[],
+  ): string[] {
+    const clues = this.reduceToEssentialClues(
+      this.createCandidateClues(categories, solution),
+      categories,
+    );
 
     return this.shuffle(clues.map((clue) => this.formatClue(clue.text)));
   }
@@ -789,7 +1185,10 @@ export class ZebraPage {
     return values[Math.floor(Math.random() * values.length)];
   }
 
-  private createCandidateClues(categories: ZebraCategory[], solution: Record<string, string>[]): ZebraClue[] {
+  private createCandidateClues(
+    categories: ZebraCategory[],
+    solution: Record<string, string>[],
+  ): ZebraClue[] {
     const clues: ZebraClue[] = [];
     const clueKeys = new Set<string>();
     const houseCategory = categories[0];
@@ -816,19 +1215,29 @@ export class ZebraPage {
           text: this.describeHouseClue(category, row[category.id], row[houseCategory.id]),
         });
 
-        const wrongHouseIndex = this.randomItem(houseCategory.values.map((_, index) => index).filter((index) => index !== houseIndex));
+        const wrongHouseIndex = this.randomItem(
+          houseCategory.values.map((_, index) => index).filter((index) => index !== houseIndex),
+        );
 
         addClue({
           type: 'notPosition',
           categoryId: category.id,
           value: row[category.id],
           houseIndex: wrongHouseIndex,
-          text: this.describeNegativeHouseClue(category, row[category.id], houseCategory.values[wrongHouseIndex]),
+          text: this.describeNegativeHouseClue(
+            category,
+            row[category.id],
+            houseCategory.values[wrongHouseIndex],
+          ),
         });
       }
 
       for (let firstIndex = 0; firstIndex < nonHouseCategories.length; firstIndex += 1) {
-        for (let secondIndex = firstIndex + 1; secondIndex < nonHouseCategories.length; secondIndex += 1) {
+        for (
+          let secondIndex = firstIndex + 1;
+          secondIndex < nonHouseCategories.length;
+          secondIndex += 1
+        ) {
           const firstCategory = nonHouseCategories[firstIndex];
           const secondCategory = nonHouseCategories[secondIndex];
 
@@ -838,7 +1247,12 @@ export class ZebraPage {
             firstValue: row[firstCategory.id],
             secondCategoryId: secondCategory.id,
             secondValue: row[secondCategory.id],
-            text: this.describeSameClue(firstCategory, row[firstCategory.id], secondCategory, row[secondCategory.id]),
+            text: this.describeSameClue(
+              firstCategory,
+              row[firstCategory.id],
+              secondCategory,
+              row[secondCategory.id],
+            ),
           });
 
           const wrongSecondValue = this.randomItem(
@@ -851,7 +1265,12 @@ export class ZebraPage {
             firstValue: row[firstCategory.id],
             secondCategoryId: secondCategory.id,
             secondValue: wrongSecondValue,
-            text: this.describeNotSameClue(firstCategory, row[firstCategory.id], secondCategory, wrongSecondValue),
+            text: this.describeNotSameClue(
+              firstCategory,
+              row[firstCategory.id],
+              secondCategory,
+              wrongSecondValue,
+            ),
           });
         }
       }
@@ -922,7 +1341,9 @@ export class ZebraPage {
     }
 
     const firstDescription = this.capitalize(this.describeValue(firstCategory, firstValue));
-    const secondDescription = this.lowerFirst(this.describeCompanionValue(secondCategory, secondValue));
+    const secondDescription = this.lowerFirst(
+      this.describeCompanionValue(secondCategory, secondValue),
+    );
 
     return this.randomItem([
       `${firstDescription} est associée à ${secondDescription}.`,
@@ -956,7 +1377,9 @@ export class ZebraPage {
     }
 
     const firstDescription = this.capitalize(this.describeValue(firstCategory, firstValue));
-    const secondDescription = this.lowerFirst(this.describeCompanionValue(secondCategory, secondValue));
+    const secondDescription = this.lowerFirst(
+      this.describeCompanionValue(secondCategory, secondValue),
+    );
 
     return this.randomItem([
       `${firstDescription} n'est pas associée à ${secondDescription}.`,
@@ -1076,14 +1499,20 @@ export class ZebraPage {
     return `${this.describeValue(category, value)} n'est pas dans ${houseText}.`;
   }
 
-  private countMatchingSolutions(categories: ZebraCategory[], clues: ZebraClue[], limit: number): number {
+  private countMatchingSolutions(
+    categories: ZebraCategory[],
+    clues: ZebraClue[],
+    limit: number,
+  ): number {
     const houseCategory = categories[0];
     const nonHouseCategories = categories.slice(1);
     const permutationsByCategory = new Map(
       nonHouseCategories.map((category) => [category.id, this.permutations(category.values)]),
     );
     const assignments: Record<string, Record<string, number>> = {
-      [houseCategory.id]: Object.fromEntries(houseCategory.values.map((house, index) => [house, index])),
+      [houseCategory.id]: Object.fromEntries(
+        houseCategory.values.map((house, index) => [house, index]),
+      ),
     };
     let solutionCount = 0;
 
@@ -1104,7 +1533,9 @@ export class ZebraPage {
       const permutations = permutationsByCategory.get(category.id) ?? [];
 
       for (const permutation of permutations) {
-        assignments[category.id] = Object.fromEntries(permutation.map((value, index) => [value, index]));
+        assignments[category.id] = Object.fromEntries(
+          permutation.map((value, index) => [value, index]),
+        );
 
         if (clues.every((clue) => this.clueCouldMatch(clue, assignments))) {
           search(categoryIndex + 1);
@@ -1118,11 +1549,18 @@ export class ZebraPage {
     return solutionCount;
   }
 
-  private clueCouldMatch(clue: ZebraClue, assignments: Record<string, Record<string, number>>): boolean {
+  private clueCouldMatch(
+    clue: ZebraClue,
+    assignments: Record<string, Record<string, number>>,
+  ): boolean {
     return this.clueMatches(clue, assignments, true);
   }
 
-  private clueMatches(clue: ZebraClue, assignments: Record<string, Record<string, number>>, allowUnknown = false): boolean {
+  private clueMatches(
+    clue: ZebraClue,
+    assignments: Record<string, Record<string, number>>,
+    allowUnknown = false,
+  ): boolean {
     if (clue.type === 'position') {
       const houseIndex = assignments[clue.categoryId]?.[clue.value];
 
@@ -1167,7 +1605,9 @@ export class ZebraPage {
     }
 
     return values.flatMap((value, index) =>
-      this.permutations([...values.slice(0, index), ...values.slice(index + 1)]).map((permutation) => [value, ...permutation]),
+      this.permutations([...values.slice(0, index), ...values.slice(index + 1)]).map(
+        (permutation) => [value, ...permutation],
+      ),
     );
   }
 

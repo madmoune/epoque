@@ -1,62 +1,98 @@
 import { Injectable } from '@angular/core';
 import { MathSequencePuzzle } from './sequences.model';
 
-type MathTemplate = () => MathSequencePuzzle;
+type MathTemplateFactory = () => MathSequencePuzzle;
+type MathTemplate = {
+  genre: string;
+  create: MathTemplateFactory;
+};
 
 @Injectable({
   providedIn: 'root',
 })
 export class SequencesService {
+  private lastGenre: string | null = null;
+
   createPuzzle(): MathSequencePuzzle {
     const templates: MathTemplate[] = [
-      () => this.createGeometricSequence(),
-      () => this.createIncreasingDifferenceSequence(),
-      () => this.createDecreasingDifferenceSequence(),
-      () => this.createAlternatingAddSubtractSequence(),
-      () => this.createAlternatingMultiplyAddSequence(),
-      () => this.createMultiplyThenAddSequence(),
-      () => this.createMultiplyThenSubtractSequence(),
-      () => this.createInterleavedArithmeticSequence(),
-      () => this.createInterleavedArithmeticAndGeometricSequence(),
-      () => this.createInterleavedArithmeticAndSquaresSequence(),
-      () => this.createArithmeticWithPeriodicBoostSequence(),
-      () => this.createFibonacciLikeSequence(),
-      () => this.createTribonacciLikeSequence(),
-      () => this.createSquaresSequence(),
-      () => this.createCubesSequence(),
-      () => this.createTriangularNumbersSequence(),
-      () => this.createPrimeDifferenceSequence(),
-      () => this.createSquareDifferenceSequence(),
-      () => this.createRepeatedDifferenceCycleSequence(),
-      () => this.createDoublePreviousMinusOffsetSequence(),
-      () => this.createAddIncreasingOddNumbersSequence(),
-      () => this.createAddIncreasingEvenNumbersSequence(),
-      () => this.createAlternatingTwoMultipliersSequence(),
-      () => this.createPositionMultiplierSequence(),
-      () => this.createLinearPlusSquareSequence(),
+      this.withGenre('arithmetic', () => this.createArithmeticSequence()),
+      this.withGenre('geometric', () => this.createGeometricSequence()),
+      this.withGenre('arithmetic', () => this.createIncreasingDifferenceSequence()),
+      this.withGenre('arithmetic', () => this.createDecreasingDifferenceSequence()),
+      this.withGenre('arithmetic', () => this.createAlternatingAddSubtractSequence()),
+      this.withGenre('geometric', () => this.createAlternatingMultiplyAddSequence()),
+      this.withGenre('geometric', () => this.createMultiplyThenAddSequence()),
+      this.withGenre('geometric', () => this.createMultiplyThenSubtractSequence()),
+      this.withGenre('interleaved', () => this.createInterleavedArithmeticSequence()),
+      this.withGenre('interleaved', () => this.createInterleavedArithmeticAndGeometricSequence()),
+      this.withGenre('interleaved', () => this.createInterleavedArithmeticAndSquaresSequence()),
+      this.withGenre('arithmetic', () => this.createArithmeticWithPeriodicBoostSequence()),
+      this.withGenre('recurrence', () => this.createFibonacciLikeSequence()),
+      this.withGenre('recurrence', () => this.createTribonacciLikeSequence()),
+      this.withGenre('polynomial', () => this.createSquaresSequence()),
+      this.withGenre('triangular', () => this.createTriangularNumbersSequence()),
+      this.withGenre('arithmetic', () => this.createPrimeDifferenceSequence()),
+      this.withGenre('polynomial', () => this.createSquareDifferenceSequence()),
+      this.withGenre('arithmetic', () => this.createRepeatedDifferenceCycleSequence()),
+      this.withGenre('recurrence', () => this.createDoublePreviousMinusOffsetSequence()),
+      this.withGenre('arithmetic', () => this.createAddIncreasingOddNumbersSequence()),
+      this.withGenre('arithmetic', () => this.createAddIncreasingEvenNumbersSequence()),
+      this.withGenre('geometric', () => this.createAlternatingTwoMultipliersSequence()),
+      this.withGenre('geometric', () => this.createPositionMultiplierSequence()),
+      this.withGenre('polynomial', () => this.createLinearPlusSquareSequence()),
+      this.withGenre('arithmetic', () => this.createNFactorSequence()),
 
       // New variety
-      () => this.createPowersOfTwoPlusOffsetSequence(),
-      () => this.createPowersOfThreeMinusOffsetSequence(),
-      () => this.createPreviousPlusPositionSquaredSequence(),
-      () => this.createPreviousPlusPositionCubedSequence(),
-      () => this.createAlternatingPrimeAndSquareDifferencesSequence(),
-      () => this.createDoubleInterleavedMultiplicationSequence(),
-      () => this.createTwoPreviousPlusConstantSequence(),
-      () => this.createDescendingHalvesSequence(),
-      () => this.createMultiplyByIncreasingNumbersSequence(),
-      () => this.createAddThenAddDoubleSequence(),
-      () => this.createProductOfPositionSequence(),
-      () => this.createSquareMinusPositionSequence(),
-      () => this.createCubeMinusSquareSequence(),
-      () => this.createAlternatingSignGrowthSequence(),
-      () => this.createAlternatingGrowingAddSubtractSequence(),
-      () => this.createMultiplyThenAddIncreasingOffsetSequence(),
-      () => this.createInterleavedFibonacciAndSquaresSequence(),
-      () => this.createSecondDifferenceCycleSequence(),
+      this.withGenre('powers', () => this.createPowersOfTwoPlusOffsetSequence()),
+      this.withGenre('powers', () => this.createPowersOfThreeMinusOffsetSequence()),
+      this.withGenre('polynomial', () => this.createPreviousPlusPositionSquaredSequence()),
+      this.withGenre('interleaved', () =>
+        this.createAlternatingPrimeAndSquareDifferencesSequence(),
+      ),
+      this.withGenre('interleaved', () => this.createDoubleInterleavedMultiplicationSequence()),
+      this.withGenre('recurrence', () => this.createTwoPreviousPlusConstantSequence()),
+      this.withGenre('geometric', () => this.createDescendingHalvesSequence()),
+      this.withGenre('geometric', () => this.createMultiplyByIncreasingNumbersSequence()),
+      this.withGenre('arithmetic', () => this.createAddThenAddDoubleSequence()),
+      this.withGenre('recurrence', () => this.createPreviousDifferenceTimesTwoSequence()),
+      this.withGenre('arithmetic', () => this.createNegativeArithmeticSequence()),
+      this.withGenre('arithmetic', () => this.createAbsoluteBounceSequence()),
+      this.withGenre('polynomial', () => this.createProductOfPositionSequence()),
+      this.withGenre('polynomial', () => this.createSquareMinusPositionSequence()),
+      this.withGenre('arithmetic', () => this.createAlternatingSignGrowthSequence()),
+      this.withGenre('arithmetic', () => this.createAlternatingGrowingAddSubtractSequence()),
+      this.withGenre('geometric', () => this.createMultiplyThenAddIncreasingOffsetSequence()),
+      this.withGenre('interleaved', () => this.createInterleavedFibonacciAndSquaresSequence()),
+      this.withGenre('arithmetic', () => this.createSecondDifferenceCycleSequence()),
     ];
 
-    return this.getRandomItem(templates)();
+    const availableTemplates = templates.filter((template) => template.genre !== this.lastGenre);
+    let template = this.getRandomItem(availableTemplates);
+    let puzzle = template.create();
+
+    while (this.isPerfectCube(puzzle.answer)) {
+      template = this.getRandomItem(availableTemplates);
+      puzzle = template.create();
+    }
+
+    this.lastGenre = template.genre;
+
+    return puzzle;
+  }
+
+  private withGenre(genre: string, create: MathTemplateFactory): MathTemplate {
+    return { genre, create };
+  }
+
+  private isPerfectCube(value: number): boolean {
+    if (!Number.isInteger(value)) {
+      return false;
+    }
+
+    const magnitude = Math.abs(value);
+    const root = Math.round(Math.cbrt(magnitude));
+
+    return root ** 3 === magnitude;
   }
 
   private createArithmeticSequence(): MathSequencePuzzle {
@@ -568,7 +604,9 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      offset === 0 ? 'Ce sont des puissances de 2.' : `Ce sont des puissances de 2, auxquelles on ajoute ${offset}.`,
+      offset === 0
+        ? 'Ce sont des puissances de 2.'
+        : `Ce sont des puissances de 2, auxquelles on ajoute ${offset}.`,
     );
   }
 

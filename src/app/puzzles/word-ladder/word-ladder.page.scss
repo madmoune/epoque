@@ -148,7 +148,7 @@ h1 {
 
 .ladder-list {
   display: grid;
-  gap: 0;
+  gap: 0.35rem;
   width: min(100%, 35rem);
   margin: 0 auto;
   padding: 0;
@@ -184,8 +184,19 @@ h1 {
   background: color-mix(in srgb, var(--focus) 8%, var(--surface-raised));
 }
 
+.goal-step {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface-raised));
+}
+
 .hinted-step {
   background: color-mix(in srgb, #d7a438 10%, var(--surface-raised));
+}
+
+.empty-step {
+  border-style: dashed;
+  border-color: var(--border);
+  background: color-mix(in srgb, var(--surface-soft) 55%, transparent);
 }
 
 .step-label {
@@ -223,6 +234,11 @@ h1 {
     background: color-mix(in srgb, var(--accent) 24%, var(--surface-soft));
     color: color-mix(in srgb, var(--accent) 75%, var(--text));
   }
+}
+
+.empty-letter-box {
+  border-style: dashed;
+  background: transparent;
 }
 
 .hint-badge {
@@ -334,8 +350,7 @@ button {
   }
 
   .challenge-summary {
-    grid-template-columns: 1fr;
-    gap: 0.45rem;
+    display: none;
   }
 
   .challenge-arrow {
@@ -363,6 +378,10 @@ button {
     &:not(:last-child)::after {
       left: calc(3.7rem + 0.2rem + 1.05rem);
     }
+  }
+
+  .ladder-list {
+    gap: 0.25rem;
   }
 
   .step-label {

@@ -50,6 +50,24 @@ export class WordLadderPage {
   ];
 
   protected readonly currentWord = computed(() => this.ladder().at(-1) ?? '');
+  protected readonly emptyLetterSlots = computed(() =>
+    Array.from({ length: this.puzzle()?.letterCount ?? 0 }, (_, index) => index),
+  );
+  protected readonly visibleLadder = computed<Array<string | null>>(() => {
+    const currentPuzzle = this.puzzle();
+    const words = this.ladder();
+
+    if (
+      !currentPuzzle ||
+      this.wordLadderService.sameWord(words.at(-1) ?? '', currentPuzzle.target)
+    ) {
+      return words;
+    }
+
+    const missingSteps = Math.max(0, currentPuzzle.minimumMoves - words.length);
+
+    return [...words, ...Array.from({ length: missingSteps }, () => null), currentPuzzle.target];
+  });
   protected readonly moveCount = computed(() => Math.max(0, this.ladder().length - 1));
   protected readonly remainingMoves = computed(() => {
     const currentPuzzle = this.puzzle();
@@ -148,6 +166,7 @@ export class WordLadderPage {
 
     if (
       target.closest('.answer-input') ||
+      target.closest('.word-entry') ||
       target.closest('app-custom-keyboard') ||
       target.closest('app-puzzle-success-popup')
     ) {
@@ -330,14 +349,25 @@ export class WordLadderPage {
     return this.hintedWordKeys().has(this.wordLadderService.normalize(word));
   }
 
+  protected isTargetStep(stepIndex: number): boolean {
+    return stepIndex === this.visibleLadder().length - 1;
+  }
+
   protected isChangedLetter(stepIndex: number, letterIndex: number): boolean {
     if (stepIndex <= 0) {
       return false;
     }
 
-    const words = this.ladder();
-    const previousLetters = [...this.wordLadderService.normalize(words[stepIndex - 1])];
-    const currentLetters = [...this.wordLadderService.normalize(words[stepIndex])];
+    const words = this.visibleLadder();
+    const previousWord = words[stepIndex - 1];
+    const currentWord = words[stepIndex];
+
+    if (!previousWord || !currentWord) {
+      return false;
+    }
+
+    const previousLetters = [...this.wordLadderService.normalize(previousWord)];
+    const currentLetters = [...this.wordLadderService.normalize(currentWord)];
 
     return previousLetters[letterIndex] !== currentLetters[letterIndex];
   }

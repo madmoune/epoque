@@ -46,26 +46,42 @@
         </div>
 
         <ol class="ladder-list" aria-label="Mots de l’échelle">
-          @for (word of ladder(); track $index; let stepIndex = $index) {
+          @for (word of visibleLadder(); track $index; let stepIndex = $index) {
             <li
               class="ladder-step"
-              [class.hinted-step]="isHintedWord(word)"
-              [class.current-step]="stepIndex === ladder().length - 1"
+              [class.hinted-step]="word !== null && isHintedWord(word)"
+              [class.empty-step]="word === null"
+              [class.current-step]="stepIndex === ladder().length - 1 && !isTargetStep(stepIndex)"
+              [class.goal-step]="isTargetStep(stepIndex)"
             >
               <span class="step-label">
-                {{ stepIndex === 0 ? 'Départ' : 'Étape ' + stepIndex }}
+                {{
+                  stepIndex === 0
+                    ? 'Départ'
+                    : isTargetStep(stepIndex)
+                      ? 'Objectif'
+                      : 'Étape ' + stepIndex
+                }}
               </span>
-              <span class="word-tiles" [attr.aria-label]="word">
-                @for (letter of letters(word); track $index; let letterIndex = $index) {
-                  <span
-                    class="letter-box"
-                    [class.changed]="isChangedLetter(stepIndex, letterIndex)"
-                  >
-                    {{ letter }}
-                  </span>
-                }
-              </span>
-              @if (isHintedWord(word)) {
+              @if (word; as filledWord) {
+                <span class="word-tiles" [attr.aria-label]="filledWord">
+                  @for (letter of letters(filledWord); track $index; let letterIndex = $index) {
+                    <span
+                      class="letter-box"
+                      [class.changed]="isChangedLetter(stepIndex, letterIndex)"
+                    >
+                      {{ letter }}
+                    </span>
+                  }
+                </span>
+              } @else {
+                <span class="word-tiles empty-word-tiles" aria-label="Étape à remplir">
+                  @for (slot of emptyLetterSlots(); track slot) {
+                    <span class="letter-box empty-letter-box" aria-hidden="true"></span>
+                  }
+                </span>
+              }
+              @if (word !== null && isHintedWord(word)) {
                 <span class="hint-badge">Indice</span>
               }
             </li>
@@ -100,13 +116,6 @@
           </form>
         }
 
-        <app-custom-keyboard
-          [rows]="letterKeyboardRows"
-          [visible]="keyboardVisible() && !isSolved() && remainingMoves() > 0"
-          [disabled]="isSolved() || remainingMoves() === 0"
-          (keyPress)="handleKeyboardKey($event)"
-        />
-
         <div id="word-ladder-feedback" class="feedback-zone" aria-live="polite">
           @if (feedback(); as currentFeedback) {
             <p
@@ -118,6 +127,13 @@
             </p>
           }
         </div>
+
+        <app-custom-keyboard
+          [rows]="letterKeyboardRows"
+          [visible]="keyboardVisible() && !isSolved() && remainingMoves() > 0"
+          [disabled]="isSolved() || remainingMoves() === 0"
+          (keyPress)="handleKeyboardKey($event)"
+        />
 
         <div class="actions">
           <button

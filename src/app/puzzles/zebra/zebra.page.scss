@@ -121,6 +121,17 @@ h3 {
   }
 }
 
+.hint-message {
+  padding: 0.75rem 0.85rem;
+  border: 1px solid color-mix(in srgb, #d7a438 55%, var(--border));
+  border-radius: 0.7rem;
+  background: color-mix(in srgb, #d7a438 12%, var(--surface-soft));
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 750;
+  line-height: 1.4;
+}
+
 .logic-grid-wrap {
   overflow-x: auto;
 }

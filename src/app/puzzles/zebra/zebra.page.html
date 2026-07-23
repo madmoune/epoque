@@ -8,13 +8,28 @@
       <p class="intro">{{ puzzle().intro }}</p>
 
       <div class="level-switch" aria-label="Niveau du puzzle">
-        <button type="button" class="mode-button" [class.active]="level() === 3" (click)="setLevel(3)">
+        <button
+          type="button"
+          class="mode-button"
+          [class.active]="level() === 3"
+          (click)="setLevel(3)"
+        >
           3
         </button>
-        <button type="button" class="mode-button" [class.active]="level() === 4" (click)="setLevel(4)">
+        <button
+          type="button"
+          class="mode-button"
+          [class.active]="level() === 4"
+          (click)="setLevel(4)"
+        >
           4
         </button>
-        <button type="button" class="mode-button" [class.active]="level() === 5" (click)="setLevel(5)">
+        <button
+          type="button"
+          class="mode-button"
+          [class.active]="level() === 5"
+          (click)="setLevel(5)"
+        >
           5
         </button>
       </div>
@@ -38,12 +53,23 @@
           }
         </ol>
 
+        @if (hintMessage(); as message) {
+          <p class="hint-message" role="status">{{ message }}</p>
+        }
+
         <div class="actions">
           <button type="button" (click)="newPuzzle()">Nouveau jeu</button>
-          <button type="button" class="secondary-button" (click)="showHint()" [disabled]="isSolved()">
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="showHint()"
+            [disabled]="isSolved()"
+          >
             Indice
           </button>
-          <button type="button" class="secondary-button" (click)="resetPuzzle()">Recommencer</button>
+          <button type="button" class="secondary-button" (click)="resetPuzzle()">
+            Recommencer
+          </button>
         </div>
       </aside>
 
@@ -69,14 +95,21 @@
                 <th class="grid-corner"></th>
                 @for (category of columnCategories(); track category.id) {
                   @for (value of category.values; track value) {
-                    <th class="value-heading"><span>{{ value }}</span></th>
+                    <th class="value-heading">
+                      <span>{{ value }}</span>
+                    </th>
                   }
                 }
               </tr>
             </thead>
             <tbody>
               @for (rowCategory of rowCategories(); track rowCategory.id) {
-                @for (rowValue of rowCategory.values; track rowValue; let isFirstRowInSection = $first; let isLastRowInSection = $last) {
+                @for (
+                  rowValue of rowCategory.values;
+                  track rowValue;
+                  let isFirstRowInSection = $first;
+                  let isLastRowInSection = $last
+                ) {
                   <tr>
                     @if (isFirstRowInSection) {
                       <th class="row-category-heading" [attr.rowspan]="rowCategory.values.length">
@@ -85,9 +118,15 @@
                     }
                     <th class="row-heading">{{ rowValue }}</th>
                     @for (columnCategory of columnCategories(); track columnCategory.id) {
-                      @for (columnValue of columnCategory.values; track columnValue; let isFirstColumnInSection = $first; let isLastColumnInSection = $last) {
+                      @for (
+                        columnValue of columnCategory.values;
+                        track columnValue;
+                        let isFirstColumnInSection = $first;
+                        let isLastColumnInSection = $last
+                      ) {
                         @if (hasGridCell(rowCategory, columnCategory)) {
-                          @let mark = gridMark(rowCategory.id, rowValue, columnCategory.id, columnValue);
+                          @let mark =
+                            gridMark(rowCategory.id, rowValue, columnCategory.id, columnValue);
                           <td
                             [class.section-top]="isFirstRowInSection"
                             [class.section-bottom]="isLastRowInSection"
@@ -96,10 +135,49 @@
                           >
                             <button
                               type="button"
-                              [class]="'mark-cell ' + mark + ' ' + gridMarkOrigin(rowCategory.id, rowValue, columnCategory.id, columnValue) + ' ' + gridMarkState(rowCategory.id, rowValue, columnCategory.id, columnValue)"
-                              [disabled]="!canToggleGridMark(rowCategory.id, rowValue, columnCategory.id, columnValue)"
-                              (click)="toggleGridMark(rowCategory.id, rowValue, columnCategory.id, columnValue)"
-                              [attr.aria-label]="rowCategory.label + ' ' + rowValue + ', ' + columnCategory.label + ' ' + columnValue"
+                              [class]="
+                                'mark-cell ' +
+                                mark +
+                                ' ' +
+                                gridMarkOrigin(
+                                  rowCategory.id,
+                                  rowValue,
+                                  columnCategory.id,
+                                  columnValue
+                                ) +
+                                ' ' +
+                                gridMarkState(
+                                  rowCategory.id,
+                                  rowValue,
+                                  columnCategory.id,
+                                  columnValue
+                                )
+                              "
+                              [disabled]="
+                                !canToggleGridMark(
+                                  rowCategory.id,
+                                  rowValue,
+                                  columnCategory.id,
+                                  columnValue
+                                )
+                              "
+                              (click)="
+                                toggleGridMark(
+                                  rowCategory.id,
+                                  rowValue,
+                                  columnCategory.id,
+                                  columnValue
+                                )
+                              "
+                              [attr.aria-label]="
+                                rowCategory.label +
+                                ' ' +
+                                rowValue +
+                                ', ' +
+                                columnCategory.label +
+                                ' ' +
+                                columnValue
+                              "
                             >
                               <span aria-hidden="true"></span>
                             </button>
