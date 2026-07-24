@@ -247,6 +247,7 @@ export class WordSearchPage {
 
     if (
       target.closest('.final-answer-input') ||
+      target.closest('button') ||
       target.closest('app-custom-keyboard') ||
       target.closest('app-puzzle-success-popup')
     ) {

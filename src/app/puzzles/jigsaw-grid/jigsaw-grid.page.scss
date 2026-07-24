@@ -163,7 +163,7 @@ h1 {
 }
 
 .board-wrapper {
-  width: min(100%, 29rem, calc(100dvh - 9rem));
+  width: min(100%, 29rem);
   max-width: 100%;
   margin: 0 auto 0.75rem;
 }
@@ -477,7 +477,7 @@ button {
   }
 
   .board-wrapper {
-    width: min(100%, 36dvh);
+    width: 100%;
     max-width: 100%;
     margin: 0 auto;
   }
@@ -582,7 +582,7 @@ button {
 
 @media (max-width: 380px) {
   .board-wrapper {
-    width: min(100%, 32dvh);
+    width: 100%;
   }
 
   .piece-button {

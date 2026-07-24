@@ -142,7 +142,13 @@ export class CryptogramsPage implements AfterViewInit {
   protected hideKeyboardWhenClickingAway(event: PointerEvent): void {
     const target = event.target;
     if (!(target instanceof Element)) return;
-    if (target.closest('.character-tile input') || target.closest('app-custom-keyboard') || target.closest('app-puzzle-success-popup')) return;
+    if (
+      target.closest('.character-tile input') ||
+      target.closest('button') ||
+      target.closest('app-custom-keyboard') ||
+      target.closest('app-puzzle-success-popup')
+    )
+      return;
     this.activeCharacterIndex.set(null);
   }
 

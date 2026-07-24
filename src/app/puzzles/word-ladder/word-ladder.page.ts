@@ -167,6 +167,7 @@ export class WordLadderPage {
     if (
       target.closest('.answer-input') ||
       target.closest('.word-entry') ||
+      target.closest('button') ||
       target.closest('app-custom-keyboard') ||
       target.closest('app-puzzle-success-popup')
     ) {

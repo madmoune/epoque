@@ -7,14 +7,6 @@
 
     <p class="instructions">Place toutes les pièces pour compléter la grille.</p>
 
-    <div class="puzzle-summary" aria-live="polite">
-      <strong>Solutions possibles : {{ solutionCountLabel() }}</strong>
-      <span>
-        Une solution correspond à une façon de placer chaque pièce. Les rotations qui donnent la
-        même forme ne sont comptées qu’une fois.
-      </span>
-    </div>
-
     <label class="learning-toggle">
       <input
         type="checkbox"
@@ -23,6 +15,12 @@
       />
       <span>Activer le mode apprentissage</span>
     </label>
+
+    @if (isLearningMode()) {
+      <div class="puzzle-summary" aria-live="polite">
+        <strong>Solutions possibles : {{ solutionCountLabel() }}</strong>
+      </div>
+    }
 
     @if (isLearningMode()) {
       <section class="learning-guide" aria-labelledby="learning-guide-title">

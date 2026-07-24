@@ -30,6 +30,7 @@
     box-shadow: 0 -0.35rem 1.2rem rgb(0 0 0 / 10%);
     backdrop-filter: blur(8px);
     transform: translateX(-50%);
+    pointer-events: none;
   }
 
   .keyboard-row {
@@ -52,6 +53,7 @@
     font-weight: 850;
     cursor: pointer;
     touch-action: manipulation;
+    pointer-events: auto;
   }
 
   :host.roomy-keyboard .custom-keyboard {

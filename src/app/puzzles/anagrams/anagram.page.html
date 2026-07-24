@@ -12,7 +12,7 @@
         } @else if (currentWord(); as word) {
         <div class="letter-tools" aria-label="Options d'affichage des lettres">
             <button type="button" class="secondary-button compact-button"
-                [class.active]="letterDisplayMode() === 'default' && letterLayoutMode() === 'line'"
+                [class.active]="letterInteractionMode() === 'typing' && letterDisplayMode() === 'default' && letterLayoutMode() === 'line'"
                 (click)="resetLetters()">
                 Défaut
             </button>
@@ -31,12 +31,25 @@
                 [class.active]="letterLayoutMode() === 'circle'" (click)="setCircleLayout()">
                 Cercle
             </button>
+
+            <button type="button" class="secondary-button compact-button"
+                [class.active]="letterInteractionMode() === 'drag'" (click)="setDragMode()">
+                Réordonner
+            </button>
         </div>
 
         <div class="letters" [class.circle-letters]="letterLayoutMode() === 'circle'"
-            [class.vowels-first]="letterDisplayMode() === 'vowelsFirst'" aria-label="Lettres mélangées">
+            [class.vowels-first]="letterDisplayMode() === 'vowelsFirst'"
+            [class.drag-reorder]="letterInteractionMode() === 'drag'"
+            [class.dragging-active]="draggingLetterIndex() !== null" aria-label="Lettres mélangées">
             @for (letter of displayedLetters(); track $index) {
-            <span [class.vowel-letter]="isVowel(letter)" [style.transform]="
+            <span [class.vowel-letter]="isVowel(letter)" [class.dragging-letter]="draggingLetterIndex() === $index"
+                [class.drop-target]="dropTargetIndex() === $index && draggingLetterIndex() !== $index"
+                [class.placed-letter]="placedLetterIndex() === $index"
+                [attr.data-letter-index]="$index"
+                (pointerdown)="startLetterPointerDrag($index, $event)"
+                (pointermove)="moveLetterPointerDrag($event)" (pointerup)="endLetterPointerDrag()"
+                (pointercancel)="cancelLetterPointerDrag()" [style.transform]="
                     letterLayoutMode() === 'circle'
                         ? getCircleLetterStyle($index)['transform']
                         : null
@@ -50,16 +63,32 @@
             }
         </div>
 
+        @if (dragPreviewLetter(); as letter) {
+        <span class="drag-preview" aria-hidden="true" [style.left.px]="dragPointerPosition()?.x"
+            [style.top.px]="dragPointerPosition()?.y">{{ letter }}</span>
+        }
+
+        @if (letterInteractionMode() === 'drag') {
+        <p class="drag-hint" role="status" aria-live="polite">
+            @if (draggingLetterIndex() !== null) {
+            Dépose la lettre sur l'indicateur orange.
+            } @else {
+            Glisse une lettre pour former ta réponse.
+            }
+        </p>
+        }
+
         <div class="answer-field-group">
             <label class="answer-label" for="answer">Réponse</label>
             <input #answerField id="answer" class="answer-input" type="text" autocomplete="off" inputmode="none"
                 [value]="answerInput()" (input)="updateAnswer($any($event.target).value)" (focus)="selectInputContent($event)"
-                (click)="selectInputContent($event)" [class.correct]="isCorrect()" [disabled]="isCorrect()" />
+                (click)="selectInputContent($event)" [class.correct]="isCorrect()"
+                [disabled]="isCorrect() || letterInteractionMode() === 'drag'" />
         </div>
 
         <app-custom-keyboard
             [rows]="letterKeyboardRows"
-            [visible]="keyboardVisible()"
+            [visible]="keyboardVisible() && letterInteractionMode() !== 'drag'"
             [disabled]="isCorrect()"
             (keyPress)="handleKeyboardKey($event)"
         />

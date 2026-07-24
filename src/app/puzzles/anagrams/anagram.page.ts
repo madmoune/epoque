@@ -10,6 +10,8 @@ import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzz
 
 type LetterDisplayMode = 'default' | 'alphabetical' | 'vowelsFirst';
 type LetterLayoutMode = 'line' | 'circle';
+type LetterInteractionMode = 'typing' | 'drag';
+type PointerPosition = { x: number; y: number };
 
 @Component({
     selector: 'app-anagrams-page',
@@ -36,6 +38,13 @@ export class AnagramsPage {
 
     protected readonly letterDisplayMode = signal<LetterDisplayMode>('default');
     protected readonly letterLayoutMode = signal<LetterLayoutMode>('line');
+    protected readonly letterInteractionMode = signal<LetterInteractionMode>('typing');
+    protected readonly draggingLetterIndex = signal<number | null>(null);
+    protected readonly dropTargetIndex = signal<number | null>(null);
+    protected readonly placedLetterIndex = signal<number | null>(null);
+    protected readonly dragPreviewLetter = signal<string | null>(null);
+    protected readonly dragPointerPosition = signal<PointerPosition | null>(null);
+    private placementAnimationTimer: ReturnType<typeof setTimeout> | undefined;
     protected readonly letterKeyboardRows: CustomKeyboardKey[][] = [
         ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
         ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
@@ -139,13 +148,14 @@ export class AnagramsPage {
     protected hideKeyboardWhenClickingAway(event: PointerEvent): void {
         const target = event.target;
         if (!(target instanceof Element)) return;
-        if (target.closest('.answer-input') || target.closest('app-custom-keyboard') || target.closest('app-puzzle-success-popup')) return;
+        if (target.closest('.answer-input') || target.closest('button') || target.closest('app-custom-keyboard') || target.closest('app-puzzle-success-popup')) return;
         this.keyboardVisible.set(false);
     }
 
     protected nextPuzzle(): void {
         const nextWord = this.anagramService.getRandomWord();
 
+        this.clearPlacementAnimation();
         this.currentWord.set(nextWord);
         this.scrambledLetters.set(
             this.anagramService.scrambleWord(nextWord.answer),
@@ -157,20 +167,140 @@ export class AnagramsPage {
     }
 
     protected setAlphabeticalOrder(): void {
+        this.letterInteractionMode.set('typing');
         this.letterDisplayMode.set('alphabetical');
     }
 
     protected setVowelsFirstOrder(): void {
+        this.letterInteractionMode.set('typing');
         this.letterDisplayMode.set('vowelsFirst');
     }
 
     protected setCircleLayout(): void {
+        this.letterInteractionMode.set('typing');
         this.letterLayoutMode.set('circle');
     }
 
-    protected resetLetters(): void {
+    protected setDragMode(): void {
+        this.clearPlacementAnimation();
+        this.letterInteractionMode.set('drag');
         this.letterDisplayMode.set('default');
         this.letterLayoutMode.set('line');
+        this.keyboardVisible.set(false);
+        this.answerInput.set(this.scrambledLetters());
+    }
+
+    protected resetLetters(): void {
+        this.clearPlacementAnimation();
+        this.letterInteractionMode.set('typing');
+        this.letterDisplayMode.set('default');
+        this.letterLayoutMode.set('line');
+        this.clearLetterDrag();
+    }
+
+    protected startLetterPointerDrag(index: number, event: PointerEvent): void {
+        if (
+            this.letterInteractionMode() !== 'drag' ||
+            this.isCorrect() ||
+            (event.pointerType === 'mouse' && event.button !== 0)
+        ) {
+            return;
+        }
+
+        event.preventDefault();
+        this.draggingLetterIndex.set(index);
+        this.dropTargetIndex.set(index);
+        this.placedLetterIndex.set(null);
+        this.dragPreviewLetter.set(this.displayedLetters()[index] ?? null);
+        this.dragPointerPosition.set({ x: event.clientX, y: event.clientY });
+        (event.currentTarget as HTMLElement).setPointerCapture?.(event.pointerId);
+    }
+
+    protected moveLetterPointerDrag(event: PointerEvent): void {
+        const draggingIndex = this.draggingLetterIndex();
+
+        if (draggingIndex === null) {
+            return;
+        }
+
+        this.dragPointerPosition.set({ x: event.clientX, y: event.clientY });
+        const target = document
+            .elementFromPoint(event.clientX, event.clientY)
+            ?.closest<HTMLElement>('[data-letter-index]');
+        const targetIndex = Number(target?.dataset['letterIndex']);
+
+        if (!Number.isInteger(targetIndex) || targetIndex < 0) {
+            return;
+        }
+
+        this.dropTargetIndex.set(targetIndex);
+
+        if (targetIndex !== draggingIndex) {
+            this.moveLetter(draggingIndex, targetIndex);
+            this.draggingLetterIndex.set(targetIndex);
+        }
+    }
+
+    protected endLetterPointerDrag(): void {
+        const targetIndex = this.dropTargetIndex();
+        this.clearLetterDrag();
+        this.answerInput.set(this.scrambledLetters());
+        if (targetIndex !== null) {
+            this.animatePlacedLetter(targetIndex);
+        }
+    }
+
+    protected cancelLetterPointerDrag(): void {
+        this.clearLetterDrag();
+    }
+
+    private moveLetter(sourceIndex: number, targetIndex: number): void {
+        const letters = this.scrambledLetters().split('');
+
+        if (
+            sourceIndex < 0 ||
+            targetIndex < 0 ||
+            sourceIndex >= letters.length ||
+            targetIndex >= letters.length ||
+            sourceIndex === targetIndex
+        ) {
+            return;
+        }
+
+        const [letter] = letters.splice(sourceIndex, 1);
+        letters.splice(targetIndex, 0, letter);
+        const reorderedLetters = letters.join('');
+
+        this.scrambledLetters.set(reorderedLetters);
+    }
+
+    private animatePlacedLetter(index: number): void {
+        if (this.placementAnimationTimer) {
+            clearTimeout(this.placementAnimationTimer);
+        }
+
+        this.placedLetterIndex.set(null);
+        requestAnimationFrame(() => this.placedLetterIndex.set(index));
+        this.placementAnimationTimer = setTimeout(() => {
+            this.placedLetterIndex.set(null);
+            this.placementAnimationTimer = undefined;
+        }, 560);
+    }
+
+    private clearPlacementAnimation(): void {
+        if (this.placementAnimationTimer) {
+            clearTimeout(this.placementAnimationTimer);
+            this.placementAnimationTimer = undefined;
+        }
+
+        this.placedLetterIndex.set(null);
+    }
+
+    private clearLetterDrag(): void {
+        this.draggingLetterIndex.set(null);
+        this.dropTargetIndex.set(null);
+        this.dragPreviewLetter.set(null);
+        this.dragPointerPosition.set(null);
     }
 
     protected getCircleLetterStyle(index: number): Record<string, string> {

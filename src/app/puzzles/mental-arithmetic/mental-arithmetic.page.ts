@@ -152,6 +152,7 @@ export class MentalArithmeticPage {
 
     if (
       target.closest('.answer-input') ||
+      target.closest('button') ||
       target.closest('app-custom-keyboard') ||
       target.closest('app-puzzle-success-popup')
     ) {

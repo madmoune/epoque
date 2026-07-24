@@ -305,7 +305,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `Les positions alternées suivent deux règles : une suite arithmétique ajoute ${arithmeticStep}, l’autre utilise des carrés auxquels on ajoute ${squareOffset}.`,
+      `Les positions alternées suivent deux règles : une suite arithmétique ajoute ${arithmeticStep}, l’autre utilise les carrés de ${squareStart}, ${squareStart + 1}, ${squareStart + 2}... auxquels on ${this.signedAdditionText(squareOffset)}.`,
     );
   }
 
@@ -385,7 +385,7 @@ export class SequencesService {
       sequence,
       offset === 0
         ? `Ce sont des nombres carrés à partir de ${start}².`
-        : `Ce sont des nombres carrés à partir de ${start}², auxquels on ajoute ${offset}.`,
+        : `Ce sont des nombres carrés à partir de ${start}², auxquels on ${this.signedAdditionText(offset)}.`,
     );
   }
 
@@ -403,7 +403,7 @@ export class SequencesService {
       sequence,
       offset === 0
         ? `Ce sont des nombres cubiques à partir de ${start}³.`
-        : `Ce sont des nombres cubiques à partir de ${start}³, auxquels on ajoute ${offset}.`,
+        : `Ce sont des nombres cubiques à partir de ${start}³, auxquels on ${this.signedAdditionText(offset)}.`,
     );
   }
 
@@ -421,7 +421,7 @@ export class SequencesService {
       sequence,
       offset === 0
         ? `Ce sont des nombres triangulaires à partir de T${start}.`
-        : `Ce sont des nombres triangulaires à partir de T${start}, auxquels on ajoute ${offset}.`,
+        : `Ce sont des nombres triangulaires à partir de T${start}, auxquels on ${this.signedAdditionText(offset)}.`,
     );
   }
 
@@ -592,7 +592,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `Pour chaque position n, combine n² avec ${multiplier} × n, puis ajoute ${offset}.`,
+      `Pour n = ${start}, ${start + 1}, ${start + 2}..., combine n² avec ${multiplier} × n, puis ${this.signedAdditionText(offset)}.`,
     );
   }
 
@@ -606,7 +606,7 @@ export class SequencesService {
       sequence,
       offset === 0
         ? 'Ce sont des puissances de 2.'
-        : `Ce sont des puissances de 2, auxquelles on ajoute ${offset}.`,
+        : `Ce sont des puissances de 2, auxquelles on ${this.signedAdditionText(offset)}.`,
     );
   }
 
@@ -634,7 +634,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `Pour chaque position n, calcule ${factor} × n, puis ajoute ${offset}.`,
+      `Pour n = 1, 2, 3..., calcule ${factor} × n, puis ${this.signedAdditionText(offset)}.`,
     );
   }
 
@@ -857,7 +857,7 @@ export class SequencesService {
       sequence,
       offset === 0
         ? 'Pour chaque position n, calcule n × (n + 1).'
-        : `Pour chaque position n, calcule n × (n + 1), puis ajoute ${offset}.`,
+        : `Pour n = 1, 2, 3..., calcule n × (n + 1), puis ${this.signedAdditionText(offset)}.`,
     );
   }
 
@@ -983,7 +983,7 @@ export class SequencesService {
 
     return this.createPuzzleFromSequence(
       sequence,
-      `Les positions alternées suivent deux règles : des valeurs de type Fibonacci, puis des carrés auxquels on ajoute ${squareOffset}.`,
+      `Les positions alternées suivent deux règles : des valeurs de type Fibonacci, puis des carrés auxquels on ${this.signedAdditionText(squareOffset)}.`,
     );
   }
 
@@ -1040,6 +1040,18 @@ export class SequencesService {
       answer: sequence[missingIndex],
       hint,
     };
+  }
+
+  private signedAdditionText(value: number): string {
+    if (value > 0) {
+      return `ajoute ${value}`;
+    }
+
+    if (value < 0) {
+      return `soustrais ${Math.abs(value)}`;
+    }
+
+    return 'n’ajoute rien';
   }
 
   private getRandomDistinctItems<T>(items: T[], count: number): T[] {

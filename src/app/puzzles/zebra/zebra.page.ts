@@ -23,6 +23,8 @@ type ZebraPuzzle = {
 
 type GridMark = 'unknown' | 'yes' | 'no';
 
+type ZebraClueType = 'same' | 'notSame' | 'position' | 'notPosition' | 'adjacentRight';
+
 type ZebraClue =
   | {
       type: 'same';
@@ -62,6 +64,15 @@ type ZebraClue =
       rightValue: string;
       text: string;
     };
+
+const ZEBRA_CLUE_PROFILES: ZebraClueType[][] = [
+  ['position', 'same', 'adjacentRight'],
+  ['notPosition', 'notSame', 'adjacentRight'],
+  ['position', 'notSame', 'adjacentRight'],
+  ['notPosition', 'same', 'adjacentRight'],
+  ['position', 'notPosition', 'same'],
+  ['same', 'notSame', 'adjacentRight'],
+];
 
 const ZEBRA_PUZZLES: Record<ZebraLevel, ZebraPuzzle> = {
   3: {
@@ -213,6 +224,7 @@ const ZEBRA_PUZZLES: Record<ZebraLevel, ZebraPuzzle> = {
 export class ZebraPage {
   protected readonly level = signal<ZebraLevel>(3);
   private readonly puzzles = ZEBRA_PUZZLES;
+  private lastClueProfileKey: string | null = null;
   private readonly activePuzzle = signal<ZebraPuzzle>(this.createRandomPuzzle(this.puzzles[3]));
   protected readonly puzzle = computed(() => this.activePuzzle());
   private readonly manualGridMarks = signal<Record<string, GridMark>>({});
@@ -903,6 +915,7 @@ export class ZebraPage {
 
   private createRandomPuzzle(basePuzzle: ZebraPuzzle): ZebraPuzzle {
     const categories = this.createVariantCategories(basePuzzle);
+    const clueProfile = this.chooseClueProfile();
     const houseCategory = categories[0];
     const randomizedValuesByCategory = new Map(
       categories.map((category) => [
@@ -925,11 +938,14 @@ export class ZebraPage {
     const logicalClues = this.reduceToEssentialClues(
       this.createCandidateClues(categories, solution),
       categories,
+      clueProfile,
     );
 
     if (this.countMatchingSolutions(categories, logicalClues, 2) !== 1) {
       return this.createRandomPuzzle(basePuzzle);
     }
+
+    this.lastClueProfileKey = clueProfile.join('|');
 
     return {
       ...basePuzzle,
@@ -1175,6 +1191,14 @@ export class ZebraPage {
     return [...new Set(clues)];
   }
 
+  private chooseClueProfile(): ZebraClueType[] {
+    const availableProfiles = ZEBRA_CLUE_PROFILES.filter(
+      (profile) => profile.join('|') !== this.lastClueProfileKey,
+    );
+
+    return [...this.randomItem(availableProfiles)];
+  }
+
   private clueKey(clue: ZebraClue): string {
     const { text, ...logicalClue } = clue;
 
@@ -1302,11 +1326,22 @@ export class ZebraPage {
     return this.shuffle(clues);
   }
 
-  private reduceToEssentialClues(clues: ZebraClue[], categories: ZebraCategory[]): ZebraClue[] {
+  private reduceToEssentialClues(
+    clues: ZebraClue[],
+    categories: ZebraCategory[],
+    requiredTypes: ZebraClueType[] = [],
+  ): ZebraClue[] {
     let essentialClues = [...clues];
 
     for (const clue of this.shuffle(essentialClues)) {
       const nextClues = essentialClues.filter((candidate) => candidate !== clue);
+
+      if (
+        requiredTypes.includes(clue.type) &&
+        !essentialClues.some((candidate) => candidate !== clue && candidate.type === clue.type)
+      ) {
+        continue;
+      }
 
       if (this.countMatchingSolutions(categories, nextClues, 2) === 1) {
         essentialClues = nextClues;

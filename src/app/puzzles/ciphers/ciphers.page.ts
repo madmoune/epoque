@@ -288,6 +288,7 @@ export class CiphersPage implements OnDestroy {
     if (!(target instanceof Element)) return;
     if (
       target.closest('.cipher-workspace') ||
+      target.closest('button') ||
       target.closest('app-custom-keyboard') ||
       target.closest('app-puzzle-success-popup')
     ) {
@@ -508,3 +509,4 @@ export class CiphersPage implements OnDestroy {
     z: '0,2',
   };
 }
+

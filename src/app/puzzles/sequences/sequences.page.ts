@@ -98,7 +98,7 @@ export class SequencesPage {
     protected hideKeyboardWhenClickingAway(event: PointerEvent): void {
         const target = event.target;
         if (!(target instanceof Element)) return;
-        if (target.closest('.answer-input') || target.closest('app-custom-keyboard') || target.closest('app-puzzle-success-popup')) return;
+        if (target.closest('.answer-input') || target.closest('button') || target.closest('app-custom-keyboard') || target.closest('app-puzzle-success-popup')) return;
         this.keyboardVisible.set(false);
     }
 

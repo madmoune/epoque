@@ -96,6 +96,7 @@ export class CalcudokuPage {
 
     if (
       target.closest('.calcudoku-grid input') ||
+      target.closest('button') ||
       target.closest('app-custom-keyboard') ||
       target.closest('app-puzzle-success-popup')
     ) {
