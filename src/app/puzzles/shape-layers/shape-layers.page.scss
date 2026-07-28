@@ -49,6 +49,7 @@ h2 { margin: 0 0 .65rem; color: var(--muted); font-size: .9rem; text-align: cent
 .choice-shape.accent-diagonal::before { inset: 0 0 auto auto; width: 68%; height: 68%; clip-path: polygon(32% 0, 100% 0, 100% 68%); }
 .controls button { min-height: 2.7rem; padding: .65rem; border: 1px solid var(--border-strong); border-radius: .65rem; background: var(--surface-soft); color: var(--text); font: inherit; font-weight: 750; cursor: pointer; }
 .controls button:disabled { opacity: .4; cursor: default; }
+.controls .hint-button { border-color: var(--focus); color: var(--focus); }
 .new-area { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border); }
 .new-area button { width: 100%; background: var(--accent); color: var(--accent-contrast); }
 @media (max-width: 850px) {

@@ -7,7 +7,7 @@ type Theme = 'dark' | 'light';
 type ThemeTransitionDocument = Document & {
   startViewTransition?: (update: () => void) => unknown;
 };
-
+//TODO: Puzzle où une phrase donne une défitition flou et chaque mot manque des segments aux lettres. Chaque segments manquants par mot forme une lettre.
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet],

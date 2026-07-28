@@ -67,7 +67,7 @@
                     <button type="button" class="secondary-button" (click)="editPlaylist(playlist.id)">
                         Modifier
                     </button>
-                    <button type="button" class="text-button" (click)="deletePlaylist(playlist.id)">
+                    <button type="button" class="text-button" (click)="requestDeletePlaylist(playlist.id)">
                         Supprimer
                     </button>
                 </div>
@@ -179,6 +179,30 @@
         </div>
         }
     </section>
+
+    @if (pendingPlaylistDeletion(); as playlist) {
+    <div class="playlist-delete-backdrop" (click)="cancelDeletePlaylist()">
+        <section
+            class="playlist-delete-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="playlist-delete-title"
+            (click)="$event.stopPropagation()"
+        >
+            <p class="eyebrow">Confirmation</p>
+            <h2 id="playlist-delete-title">Supprimer « {{ playlist.name }} »&nbsp;?</h2>
+            <p>Cette playlist et son ordre de jeux seront supprimés.</p>
+            <div class="playlist-delete-actions">
+                <button type="button" class="secondary-button" (click)="cancelDeletePlaylist()">
+                    Annuler
+                </button>
+                <button type="button" class="confirm-delete-button" (click)="confirmDeletePlaylist()">
+                    Supprimer
+                </button>
+            </div>
+        </section>
+    </div>
+    }
 
     <section class="category-list" aria-label="Catégories de puzzles">
         @for (category of categories(); track category.title) {

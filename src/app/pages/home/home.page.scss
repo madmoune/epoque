@@ -244,6 +244,64 @@ h1 {
     background: color-mix(in srgb, var(--surface-raised) 75%, var(--accent) 5%);
 }
 
+.playlist-delete-backdrop {
+    position: fixed;
+    z-index: 1000;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: rgb(0 0 0 / 58%);
+}
+
+.playlist-delete-dialog {
+    width: min(100%, 27rem);
+    box-sizing: border-box;
+    padding: 1.25rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 1rem;
+    background: var(--surface-raised);
+    box-shadow: 0 1rem 3rem rgb(0 0 0 / 35%);
+
+    h2 {
+        margin: 0;
+        color: var(--text);
+        font-size: 1.2rem;
+    }
+
+    > p:not(.eyebrow) {
+        margin: 0.65rem 0 0;
+        color: var(--muted);
+        font-size: 0.88rem;
+    }
+}
+
+.playlist-delete-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 1.2rem;
+
+    button {
+        min-height: 2.4rem;
+        padding: 0.45rem 0.75rem;
+        border: 1px solid var(--border-strong);
+        border-radius: 0.55rem;
+        background: var(--surface-soft);
+        color: var(--text);
+        cursor: pointer;
+        font: inherit;
+        font-size: 0.78rem;
+        font-weight: 800;
+    }
+}
+
+.playlist-delete-actions .confirm-delete-button {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--accent-contrast);
+}
+
 .playlist-name-field {
     max-width: 24rem;
 }

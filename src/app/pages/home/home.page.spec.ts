@@ -47,4 +47,26 @@ describe('HomePage playlist category controls', () => {
     expect(playlistService.find(playlist.id)?.routes).toEqual([unrelatedRoute]);
     expect(page.areAllCategoryPuzzlesInPlaylist(playlist.id, wordsCategory.puzzles)).toBe(false);
   });
+
+  it('requires confirmation before deleting a playlist', () => {
+    const fixture = TestBed.createComponent(HomePage);
+    const page = fixture.componentInstance;
+    const playlistService = TestBed.inject(PuzzlePlaylistService);
+    const playlist = playlistService.create('À supprimer');
+
+    page.requestDeletePlaylist(playlist.id);
+
+    expect(page.pendingPlaylistDeletion()?.id).toBe(playlist.id);
+    expect(playlistService.find(playlist.id)).toBeDefined();
+
+    page.cancelDeletePlaylist();
+
+    expect(page.pendingPlaylistDeletion()).toBeNull();
+    expect(playlistService.find(playlist.id)).toBeDefined();
+
+    page.requestDeletePlaylist(playlist.id);
+    page.confirmDeletePlaylist();
+
+    expect(playlistService.find(playlist.id)).toBeUndefined();
+  });
 });

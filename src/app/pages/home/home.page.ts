@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, HostListener, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { PuzzlePlayHistoryService } from '../../puzzle-play-history.service';
 import { PuzzlePlaylist, PuzzlePlaylistService } from '../../puzzle-playlist.service';
@@ -51,8 +51,13 @@ export class HomePage {
   readonly playlists = this.playlistService.playlists;
   readonly newPlaylistName = signal('');
   readonly editingPlaylistId = signal<string | null>(null);
+  readonly pendingPlaylistDeletionId = signal<string | null>(null);
   readonly editingPlaylist = computed(
     () => this.playlists().find((playlist) => playlist.id === this.editingPlaylistId()) ?? null,
+  );
+  readonly pendingPlaylistDeletion = computed(
+    () =>
+      this.playlists().find((playlist) => playlist.id === this.pendingPlaylistDeletionId()) ?? null,
   );
   readonly playlistPuzzleOptions = computed<PlaylistPuzzleOption[]>(() =>
     this.categories().flatMap((category) =>
@@ -525,11 +530,36 @@ export class HomePage {
     this.playlistService.update(playlistId, { routes });
   }
 
-  deletePlaylist(playlistId: string): void {
+  requestDeletePlaylist(playlistId: string): void {
+    if (this.playlistService.find(playlistId)) {
+      this.pendingPlaylistDeletionId.set(playlistId);
+    }
+  }
+
+  cancelDeletePlaylist(): void {
+    this.pendingPlaylistDeletionId.set(null);
+  }
+
+  confirmDeletePlaylist(): void {
+    const playlistId = this.pendingPlaylistDeletionId();
+
+    if (!playlistId) {
+      return;
+    }
+
     this.playlistService.remove(playlistId);
 
     if (this.editingPlaylistId() === playlistId) {
       this.editingPlaylistId.set(null);
+    }
+
+    this.pendingPlaylistDeletionId.set(null);
+  }
+
+  @HostListener('document:keydown.escape')
+  closePlaylistDeletionOnEscape(): void {
+    if (this.pendingPlaylistDeletionId()) {
+      this.cancelDeletePlaylist();
     }
   }
 

@@ -36,6 +36,12 @@ export class ShapeLayersPage {
     const pieces = this.pieces();
     return pieces.length > 0 && this.visibleCompositionsMatch(pieces, this.solution());
   });
+  protected readonly hasAvailableHint = computed(() => {
+    if (this.isSolved()) return false;
+
+    const pieces = this.pieces();
+    return this.solution().some((piece, index) => !this.isPieceInSolutionPosition(pieces[index], piece));
+  });
 
   constructor() {
     this.newPuzzle();
@@ -172,6 +178,23 @@ export class ShapeLayersPage {
     this.moves.update((value) => value + 1);
   }
 
+  protected showHint(): void {
+    if (!this.hasAvailableHint()) return;
+
+    const solution = this.solution();
+    const currentPieces = this.pieces();
+    const firstIncorrectIndex = solution.findIndex(
+      (piece, index) => !this.isPieceInSolutionPosition(currentPieces[index], piece),
+    );
+
+    if (firstIncorrectIndex < 0) return;
+
+    const correctedPieces = solution.slice(0, firstIncorrectIndex + 1).map((piece) => ({ ...piece }));
+    this.pieces.set(correctedPieces);
+    this.selectedPieceId.set(correctedPieces[correctedPieces.length - 1].id);
+    this.moves.update((value) => value + 1);
+  }
+
   protected shapeLabel(piece: ShapePiece): string {
     const labels: Record<ShapeKind, string> = {
       circle: 'cercle',
@@ -226,6 +249,14 @@ export class ShapeLayersPage {
     }
     if (piece.kind === 'rectangle') return piece.rotation % 180;
     return piece.rotation % 360;
+  }
+
+  private isPieceInSolutionPosition(actual: ShapePiece | undefined, expected: ShapePiece): boolean {
+    return Boolean(
+      actual &&
+        actual.id === expected.id &&
+        this.normalizedRotation(actual) === this.normalizedRotation(expected),
+    );
   }
 
   private visibleCompositionsMatch(actual: ShapePiece[], expected: ShapePiece[]): boolean {

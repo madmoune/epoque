@@ -48,6 +48,9 @@
           }
         </div>
         <button type="button" (click)="rotateSelected()" [disabled]="!selectedPieceId()">↻ Tourner</button>
+        <button type="button" class="hint-button" (click)="showHint()" [disabled]="!hasAvailableHint()">
+          Indice
+        </button>
         <div class="new-area"><button type="button" (click)="newPuzzle()">Nouvelle image</button></div>
       </aside>
     </div>
