@@ -15,8 +15,6 @@ export class SequencesService {
 
   createPuzzle(): MathSequencePuzzle {
     const templates: MathTemplate[] = [
-      this.withGenre('arithmetic', () => this.createArithmeticSequence()),
-      this.withGenre('geometric', () => this.createGeometricSequence()),
       this.withGenre('arithmetic', () => this.createIncreasingDifferenceSequence()),
       this.withGenre('arithmetic', () => this.createDecreasingDifferenceSequence()),
       this.withGenre('arithmetic', () => this.createAlternatingAddSubtractSequence()),
@@ -40,7 +38,6 @@ export class SequencesService {
       this.withGenre('geometric', () => this.createAlternatingTwoMultipliersSequence()),
       this.withGenre('geometric', () => this.createPositionMultiplierSequence()),
       this.withGenre('polynomial', () => this.createLinearPlusSquareSequence()),
-      this.withGenre('arithmetic', () => this.createNFactorSequence()),
 
       // New variety
       this.withGenre('powers', () => this.createPowersOfTwoPlusOffsetSequence()),
@@ -55,7 +52,6 @@ export class SequencesService {
       this.withGenre('geometric', () => this.createMultiplyByIncreasingNumbersSequence()),
       this.withGenre('arithmetic', () => this.createAddThenAddDoubleSequence()),
       this.withGenre('recurrence', () => this.createPreviousDifferenceTimesTwoSequence()),
-      this.withGenre('arithmetic', () => this.createNegativeArithmeticSequence()),
       this.withGenre('arithmetic', () => this.createAbsoluteBounceSequence()),
       this.withGenre('polynomial', () => this.createProductOfPositionSequence()),
       this.withGenre('polynomial', () => this.createSquareMinusPositionSequence()),
@@ -70,7 +66,7 @@ export class SequencesService {
     let template = this.getRandomItem(availableTemplates);
     let puzzle = template.create();
 
-    while (this.isPerfectCube(puzzle.answer)) {
+    while (this.isPerfectCube(puzzle.answer) || this.isTooSimpleSequence(puzzle.sequence)) {
       template = this.getRandomItem(availableTemplates);
       puzzle = template.create();
     }
@@ -93,6 +89,40 @@ export class SequencesService {
     const root = Math.round(Math.cbrt(magnitude));
 
     return root ** 3 === magnitude;
+  }
+
+  private isTooSimpleSequence(sequence: number[]): boolean {
+    const differences = sequence.slice(1).map((value, index) => value - sequence[index]);
+
+    // Reject a constant addition/subtraction, such as +12 at every step.
+    if (
+      differences.length > 0 &&
+      differences.every((difference) => difference === differences[0])
+    ) {
+      return true;
+    }
+
+    // Reject a constant ratio, such as ×3 at every step.
+    if (
+      sequence[0] !== 0 &&
+      sequence.length > 1 &&
+      sequence
+        .slice(2)
+        .every((value, index) => value * sequence[0] === sequence[index + 1] * sequence[1])
+    ) {
+      return true;
+    }
+
+    // Also reject a fixed rule of the form ×a puis +b, which is only a
+    // slightly disguised version of a single repeated operation.
+    if (differences.length < 3 || differences[0] === 0) {
+      return false;
+    }
+
+    return differences.slice(2).every(
+      (difference, index) =>
+        difference * differences[0] === differences[index + 1] * differences[1],
+    );
   }
 
   private createArithmeticSequence(): MathSequencePuzzle {

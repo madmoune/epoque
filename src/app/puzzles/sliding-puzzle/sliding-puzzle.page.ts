@@ -105,7 +105,9 @@ export class SlidingPuzzlePage {
   }
 
   private createRandomArtwork(): { fullImage: string; tileImages: string[] } {
-    const content = this.createArtworkContent();
+    // The artwork can contain large areas with similar colors or shapes. Add a
+    // unique marker to every tile so the image mode always remains solvable.
+    const content = `${this.createArtworkContent()}${this.createTileMarkers()}`;
     const svgUrl = (viewBox: string) =>
       `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}">${content}</svg>`)}`;
 
@@ -117,6 +119,18 @@ export class SlidingPuzzlePage {
         return svgUrl(`${column * 100} ${row * 100} 100 100`);
       }),
     };
+  }
+
+  private createTileMarkers(): string {
+    return Array.from({ length: 15 }, (_, index) => {
+      const column = index % this.size;
+      const row = Math.floor(index / this.size);
+      const x = column * 100 + 6;
+      const y = row * 100 + 6;
+      const label = index + 1;
+
+      return `<g aria-hidden="true"><rect x="${x}" y="${y}" width="30" height="24" rx="12" fill="#fff" fill-opacity=".92" stroke="#18212d" stroke-width="2"/><text x="${x + 15}" y="${y + 17}" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#18212d">${label}</text></g>`;
+    }).join('');
   }
 
   private createArtworkContent(): string {

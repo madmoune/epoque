@@ -64,8 +64,8 @@ export class CiphersPage implements OnDestroy {
     ],
   ];
   protected readonly pigpenXKeys = [
-    { top: 'U', right: 'T', bottom: 'S', left: 'V', dotted: false },
-    { top: 'Y', right: 'X', bottom: 'W', left: 'Z', dotted: true },
+    { top: 'S', right: 'U', bottom: 'V', left: 'T', dotted: false },
+    { top: 'W', right: 'Y', bottom: 'Z', left: 'X', dotted: true },
   ];
   protected readonly tapCodeGrid = [
     ['A', 'B', 'C', 'D', 'E'],
@@ -442,13 +442,13 @@ export class CiphersPage implements OnDestroy {
     q: 'grid top right left',
     r: 'grid top left',
     s: 'angle angle-bottom',
-    t: 'angle angle-right',
-    u: 'angle angle-top',
-    v: 'angle angle-left',
+    t: 'angle angle-left',
+    u: 'angle angle-right',
+    v: 'angle angle-top',
     w: 'angle angle-bottom',
-    x: 'angle angle-right',
-    y: 'angle angle-top',
-    z: 'angle angle-left',
+    x: 'angle angle-left',
+    y: 'angle angle-right',
+    z: 'angle angle-top',
   };
 
   private readonly brailleDotsByLetter: Record<string, number[]> = {
@@ -509,4 +509,3 @@ export class CiphersPage implements OnDestroy {
     z: '0,2',
   };
 }
-
