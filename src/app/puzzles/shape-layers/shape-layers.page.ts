@@ -330,8 +330,15 @@ export class ShapeLayersPage {
         return y <= -0.28;
       case 'left':
         return x <= -0.28;
-      case 'diagonal':
-        return y - x <= -0.32;
+      case 'diagonal': {
+        // Match `.accent-diagonal::before`: a 68% top-right box clipped to
+        // the triangle `(32% 0, 100% 0, 100% 68%)`.
+        const accentBoxSize = 0.68;
+        const accentBoxLeft = 0.5 - accentBoxSize;
+        const triangleStartX = accentBoxLeft + accentBoxSize * 0.32;
+        const diagonalOffset = -0.5 - triangleStartX;
+        return x >= triangleStartX && y <= x + diagonalOffset;
+      }
     }
   }
 }
