@@ -46,6 +46,11 @@ export const routes: Routes = [
       import('./puzzles/word-ladder/word-ladder.page').then((m) => m.WordLadderPage),
   },
   {
+    path: 'knights-tour',
+    loadComponent: () =>
+      import('./puzzles/knights-tour/knights-tour.page').then((m) => m.KnightsTourPage),
+  },
+  {
     path: 'pivot-word',
     loadComponent: () =>
       import('./puzzles/pivot-word/pivot-word.page').then((m) => m.PivotWordPage),

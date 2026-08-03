@@ -1,6 +1,7 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
+import { AppStorageService } from './shared/storage/app-storage.service';
 
 type PlayHistory = Record<string, number>;
 type SolvedHistory = Record<string, boolean>;
@@ -11,6 +12,7 @@ type SolvedHistory = Record<string, boolean>;
 export class PuzzlePlayHistoryService {
   private readonly storageKey = 'epique-puzzle-play-history';
   private readonly solvedStorageKey = 'epique-puzzle-solved-history';
+  private readonly storage = inject(AppStorageService);
   private readonly history = signal<PlayHistory>(this.readHistory());
   private readonly solvedHistory = signal<SolvedHistory>(this.readSolvedHistory());
 
@@ -18,6 +20,20 @@ export class PuzzlePlayHistoryService {
   readonly solved = this.solvedHistory.asReadonly();
 
   constructor(router: Router) {
+    this.storage.changes$.subscribe((change) => {
+      if (change.source !== 'remote') {
+        return;
+      }
+
+      if (change.key === this.storageKey) {
+        this.history.set(this.readHistory());
+      }
+
+      if (change.key === this.solvedStorageKey) {
+        this.solvedHistory.set(this.readSolvedHistory());
+      }
+    });
+
     router.events
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
       .subscribe((event) => {
@@ -85,7 +101,7 @@ export class PuzzlePlayHistoryService {
 
   private readHistory(): PlayHistory {
     try {
-      const storedHistory = globalThis.localStorage?.getItem(this.storageKey);
+      const storedHistory = this.storage.get(this.storageKey);
 
       return storedHistory ? (JSON.parse(storedHistory) as PlayHistory) : {};
     } catch {
@@ -95,7 +111,7 @@ export class PuzzlePlayHistoryService {
 
   private writeHistory(history: PlayHistory): void {
     try {
-      globalThis.localStorage?.setItem(this.storageKey, JSON.stringify(history));
+      this.storage.set(this.storageKey, JSON.stringify(history));
     } catch {
       // The home screen still works when browser storage is unavailable.
     }
@@ -103,7 +119,7 @@ export class PuzzlePlayHistoryService {
 
   private readSolvedHistory(): SolvedHistory {
     try {
-      const storedHistory = globalThis.localStorage?.getItem(this.solvedStorageKey);
+      const storedHistory = this.storage.get(this.solvedStorageKey);
 
       return storedHistory ? (JSON.parse(storedHistory) as SolvedHistory) : {};
     } catch {
@@ -113,7 +129,7 @@ export class PuzzlePlayHistoryService {
 
   private writeSolvedHistory(history: SolvedHistory): void {
     try {
-      globalThis.localStorage?.setItem(this.solvedStorageKey, JSON.stringify(history));
+      this.storage.set(this.solvedStorageKey, JSON.stringify(history));
     } catch {
       // The home screen still works when browser storage is unavailable.
     }

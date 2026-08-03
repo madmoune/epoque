@@ -56,6 +56,7 @@ export class PuzzleSuccessPopupComponent {
     '/jigsaw-blocks',
     '/corner-cube',
     '/sliding-puzzle',
+    '/knights-tour',
     '/laser',
     '/shape-layers',
     '/tangram',
@@ -67,6 +68,8 @@ export class PuzzleSuccessPopupComponent {
     '/play/geometric-shapes',
     '/play/seven-segment',
     '/play/faux-words',
+    '/play/segment-phrase',
+    '/play/color-chain',
   ];
 
   private readonly sectionFragmentsByRoute: Record<string, string> = {
@@ -105,6 +108,7 @@ export class PuzzleSuccessPopupComponent {
     'jigsaw-blocks': 'spatial-placement',
     'corner-cube': 'spatial-placement',
     'sliding-puzzle': 'spatial-placement',
+    'knights-tour': 'spatial-placement',
     laser: 'spatial-placement',
     'shape-layers': 'spatial-placement',
     tangram: 'spatial-placement',
@@ -119,6 +123,8 @@ export class PuzzleSuccessPopupComponent {
     'play/geometric-shapes': 'enigmes',
     'play/seven-segment': 'enigmes',
     'play/faux-words': 'enigmes',
+    'play/segment-phrase': 'enigmes',
+    'play/color-chain': 'enigmes',
   };
 
   private readonly router = inject(Router);

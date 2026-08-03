@@ -1,19 +1,10 @@
-import { Injectable } from '@angular/core';
-import { FirebaseApp, FirebaseOptions, getApp, getApps, initializeApp } from 'firebase/app';
-import {
-  Auth,
-  browserSessionPersistence,
-  getAuth,
-  setPersistence,
-  signInAnonymously,
-  signOut,
-} from 'firebase/auth';
+import { Injectable, inject } from '@angular/core';
 import {
   DataSnapshot,
   Database,
+  DatabaseReference,
   child,
   get,
-  getDatabase,
   off,
   onDisconnect,
   onValue,
@@ -25,7 +16,8 @@ import {
 } from 'firebase/database';
 import { Observable } from 'rxjs';
 
-import { environment } from '../../../environments/environment';
+import { FirebaseAuthService } from '../firebase/firebase-auth.service';
+import { FirebaseClientService } from '../firebase/firebase-client.service';
 
 export type MultiplayerRoomStatus = 'waiting' | 'playing' | 'finished';
 
@@ -50,24 +42,12 @@ export interface MultiplayerRoom<TState = unknown> {
 
 @Injectable({ providedIn: 'root' })
 export class FirebaseRoomService {
-  private readonly authSessionKey = 'epique.firebase.authSessionStarted';
-  private app?: FirebaseApp;
-  private auth?: Auth;
+  private readonly firebaseAuth = inject(FirebaseAuthService);
+  private readonly firebaseClient = inject(FirebaseClientService);
   private database?: Database;
 
   get isConfigured(): boolean {
-    const config = environment.firebase;
-
-    return Boolean(
-      config.apiKey &&
-      config.projectId &&
-      config.databaseURL &&
-      config.appId &&
-      !String(config.apiKey).startsWith('YOUR_') &&
-      !String(config.projectId).startsWith('YOUR_') &&
-      !String(config.databaseURL).includes('YOUR_') &&
-      !String(config.appId).startsWith('YOUR_'),
-    );
+    return this.firebaseClient.isConfigured;
   }
 
   async createRoom<TState>(
@@ -119,19 +99,35 @@ export class FirebaseRoomService {
   }
 
   watchRoom<TState>(roomCode: string): Observable<MultiplayerRoom<TState> | null> {
-    const database = this.getDatabase();
-    const roomRef = ref(database, `rooms/${this.normalizeRoomCode(roomCode)}`);
-
     return new Observable((subscriber) => {
-      onValue(
-        roomRef,
-        (snapshot: DataSnapshot) => {
-          subscriber.next(snapshot.exists() ? (snapshot.val() as MultiplayerRoom<TState>) : null);
-        },
-        (error) => subscriber.error(error),
-      );
+      let roomRef: DatabaseReference | undefined;
+      let closed = false;
 
-      return () => off(roomRef);
+      void this.firebaseAuth
+        .ensureAuthenticated()
+        .then(() => {
+          if (closed) {
+            return;
+          }
+
+          roomRef = ref(this.getDatabase(), `rooms/${this.normalizeRoomCode(roomCode)}`);
+          onValue(
+            roomRef,
+            (snapshot: DataSnapshot) => {
+              subscriber.next(snapshot.exists() ? (snapshot.val() as MultiplayerRoom<TState>) : null);
+            },
+            (error) => subscriber.error(error),
+          );
+        })
+        .catch((error: unknown) => subscriber.error(error));
+
+      return () => {
+        closed = true;
+
+        if (roomRef) {
+          off(roomRef);
+        }
+      };
     });
   }
 
@@ -202,17 +198,9 @@ export class FirebaseRoomService {
       );
     }
 
-    if (!this.database) {
-      this.app = this.getFirebaseApp(environment.firebase);
-      this.database = getDatabase(this.app);
-      this.auth = getAuth(this.app);
-    }
+    this.database ??= this.firebaseClient.database;
 
     return this.database;
-  }
-
-  private getFirebaseApp(config: FirebaseOptions): FirebaseApp {
-    return getApps().length ? getApp() : initializeApp(config);
   }
 
   private async createUniqueRoomCode(): Promise<string> {
@@ -243,32 +231,8 @@ export class FirebaseRoomService {
   }
 
   private async getPlayerId(): Promise<string> {
-    this.getDatabase();
-    const auth = this.auth;
-
-    if (!auth) {
-      throw new Error('Firebase Auth is not available.');
-    }
-
-    await setPersistence(auth, browserSessionPersistence);
-
-    const hasTabSession = sessionStorage.getItem(this.authSessionKey);
-    if (!hasTabSession && auth.currentUser) {
-      await signOut(auth);
-    }
-
-    if (!auth.currentUser) {
-      await signInAnonymously(auth);
-    }
-
-    const uid = auth.currentUser?.uid;
-    if (!uid) {
-      throw new Error('Could not start an anonymous Firebase session.');
-    }
-
-    sessionStorage.setItem(this.authSessionKey, uid);
-
-    return uid;
+    const user = await this.firebaseAuth.ensureAuthenticated();
+    return user.uid;
   }
 
   private createPlayer(playerId: string, playerName: string): MultiplayerPlayer {

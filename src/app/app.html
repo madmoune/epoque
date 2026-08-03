@@ -1,3 +1,36 @@
+<div class="account-shell">
+  @if (firebaseAuth.isConfigured) {
+    @if (!firebaseAuth.isReady()) {
+      <span class="account-loading" aria-label="Connexion en cours">…</span>
+    } @else if (firebaseAuth.accountUser(); as user) {
+      <div class="account-signed-in">
+        <span class="account-name" [title]="user.displayName || user.email || 'Compte'">
+          {{ user.displayName || user.email || 'Compte' }}
+        </span>
+        <span class="account-sync-status">
+          {{ userDataSync.status() === 'error' ? 'Synchronisation indisponible' : 'Sauvegardé' }}
+        </span>
+        <button type="button" class="account-button" (click)="signOut()" [disabled]="firebaseAuth.isBusy()">
+          Déconnexion
+        </button>
+      </div>
+    } @else {
+      <button
+        type="button"
+        class="account-button"
+        (click)="signInWithGoogle()"
+        [disabled]="firebaseAuth.isBusy()"
+      >
+        {{ firebaseAuth.isBusy() ? 'Connexion…' : 'Se connecter' }}
+      </button>
+    }
+
+    @if (firebaseAuth.errorMessage(); as errorMessage) {
+      <p class="account-error" role="status">{{ errorMessage }}</p>
+    }
+  }
+</div>
+
 <button
   type="button"
   class="theme-toggle"

@@ -1,0 +1,295 @@
+<main class="page">
+  <a routerLink="/" fragment="spatial-placement" class="back-link">Retour au menu</a>
+
+  <section class="shell">
+    <header class="header">
+      <p class="eyebrow">Problème du Cavalier</p>
+      <h1>{{ mode() === 'word' ? 'Le parcours des lettres' : 'Le parcours classique' }}</h1>
+      @if (mode() === 'word') {
+        <p class="intro">
+          Déplace le cavalier en L sur les cases ouvertes. Le bon parcours révèle un mot de
+          <strong>{{ puzzle()?.normalizedWord?.length ?? '...' }} lettres</strong> tiré de
+          <code>words.txt</code>.
+        </p>
+      } @else {
+        <p class="intro">
+          Visite chaque case de la grille une seule fois en respectant les mouvements du cavalier.
+        </p>
+      }
+    </header>
+
+    <nav class="mode-tabs" aria-label="Modes du problème du cavalier">
+      <button
+        type="button"
+        class="mode-tab"
+        [class.active]="mode() === 'word'"
+        [attr.aria-selected]="mode() === 'word'"
+        (click)="switchMode('word')"
+      >
+        Parcours de lettres
+      </button>
+      <button
+        type="button"
+        class="mode-tab"
+        [class.active]="mode() === 'classic'"
+        [attr.aria-selected]="mode() === 'classic'"
+        (click)="switchMode('classic')"
+      >
+        Cavalier classique
+      </button>
+    </nav>
+
+    @if (isLoading()) {
+      <p class="loading-message">Chargement des mots...</p>
+    } @else if (mode() === 'word') {
+      @if (loadError()) {
+        <p class="error" role="alert">{{ loadError() }}</p>
+      } @else if (puzzle(); as currentPuzzle) {
+        <section class="game-layout">
+          <section class="board-panel" aria-labelledby="knights-tour-board-title">
+            <div class="panel-heading">
+              <div>
+                <p class="panel-kicker">
+                  Grille {{ currentPuzzle.size }} × {{ currentPuzzle.size }}
+                </p>
+                <h2 id="knights-tour-board-title">Trouve le prochain saut</h2>
+              </div>
+              <span class="move-counter"
+                >{{ path().length }} / {{ currentPuzzle.normalizedWord.length }}</span
+              >
+            </div>
+
+            <div
+              class="knight-board"
+              [style.--knight-board-size]="currentPuzzle.size"
+              role="grid"
+              aria-label="Grille du problème du cavalier"
+            >
+              @for (row of currentPuzzle.grid; track $index) {
+                @for (cell of row; track cell.row + ':' + cell.col) {
+                  <button
+                    type="button"
+                    [class]="boardCellClass(cell)"
+                    [disabled]="cell.blocked || isSolved()"
+                    [attr.aria-label]="cellAriaLabel(cell)"
+                    [attr.aria-pressed]="pathIndex(cell) !== null"
+                    [attr.aria-current]="pathIndex(cell) === path().length - 1 ? 'step' : null"
+                    (click)="selectCell(cell)"
+                  >
+                    @if (cell.blocked) {
+                      <span class="blocked-mark" aria-hidden="true">×</span>
+                    } @else {
+                      <span class="cell-letter">{{ cell.letter }}</span>
+                      @if (pathIndex(cell) !== null) {
+                        <span class="step-number" aria-hidden="true">{{
+                          pathIndex(cell)! + 1
+                        }}</span>
+                      }
+                      @if (isWordStart(cell)) {
+                        <span class="start-mark" aria-hidden="true">Départ</span>
+                      }
+                      @if (pathIndex(cell) === path().length - 1 && !isSolved()) {
+                        <span class="knight-token" aria-hidden="true">♞</span>
+                      }
+                    }
+                  </button>
+                }
+              }
+            </div>
+
+            <p class="status" role="status" aria-live="polite">{{ message() }}</p>
+
+            <div class="legend" aria-label="Légende de la grille">
+              <span><i class="legend-swatch current-swatch"></i> Position actuelle</span>
+              <span><i class="legend-swatch legal-swatch"></i> Cases disponibles</span>
+              <span><i class="legend-swatch blocked-swatch">×</i> Case barrée</span>
+            </div>
+          </section>
+
+          <aside class="side-panel">
+            <section class="word-panel" aria-labelledby="current-word-title">
+              <p class="panel-kicker">Mot secret</p>
+              <h2 id="current-word-title">Le parcours en cours</h2>
+
+              <div class="word-slots" aria-label="Lettres trouvées">
+                @for (letter of progressSlots(); track $index) {
+                  <span class="word-slot" [class.filled]="letter !== null">{{
+                    letter ?? '·'
+                  }}</span>
+                }
+              </div>
+
+              <p class="word-readable">
+                <span class="sr-only">Lettres trouvées :</span>{{ currentWord() || 'Aucune' }}
+              </p>
+              <p class="progress-copy">
+                {{ remainingMoveCount() }} mouvement{{
+                  remainingMoveCount() === 1 ? '' : 's'
+                }}
+                restant{{ remainingMoveCount() === 1 ? '' : 's' }}.
+              </p>
+            </section>
+
+            <section class="rules-panel" aria-labelledby="rules-title">
+              <h2 id="rules-title">Règle du cavalier</h2>
+              <p>
+                Un cavalier saute de deux cases dans une direction, puis d’une case à angle droit.
+                Il ne peut pas revenir sur une case visitée ni traverser une case barrée.
+              </p>
+              <p>Clique à nouveau sur la case courante pour retirer le dernier saut.</p>
+            </section>
+
+            <div class="actions">
+              <button
+                type="button"
+                class="secondary-button"
+                (click)="showHint()"
+                [disabled]="isSolved() || remainingMoveCount() === 0"
+              >
+                Indice
+              </button>
+              <button
+                type="button"
+                class="secondary-button"
+                (click)="restartPuzzle()"
+                [disabled]="path().length <= 1 || isSolved()"
+              >
+                Recommencer
+              </button>
+              <button type="button" class="secondary-button" (click)="newPuzzle()">
+                Nouveau parcours
+              </button>
+            </div>
+          </aside>
+        </section>
+
+        @if (isSolved()) {
+          <app-puzzle-success-popup
+            title="Parcours complété!"
+            message="Chaque bon saut a révélé une lettre du mot caché."
+            [answer]="currentPuzzle.word.toLocaleUpperCase('fr-CA')"
+            actionLabel="Nouveau parcours"
+            (action)="newPuzzle()"
+          />
+        }
+      }
+    } @else if (classicLoadError()) {
+      <p class="error" role="alert">{{ classicLoadError() }}</p>
+    } @else if (classicPuzzle(); as currentClassicPuzzle) {
+      <section class="game-layout">
+        <section class="board-panel" aria-labelledby="classic-board-title">
+          <div class="panel-heading">
+            <div>
+              <p class="panel-kicker">
+                Grille classique {{ currentClassicPuzzle.size }} × {{ currentClassicPuzzle.size }}
+              </p>
+              <h2 id="classic-board-title">Visite chaque case</h2>
+            </div>
+            <span class="move-counter"
+              >{{ classicPath().length }} /
+              {{ currentClassicPuzzle.size * currentClassicPuzzle.size }}</span
+            >
+          </div>
+
+          <div
+            class="knight-board"
+            [style.--knight-board-size]="currentClassicPuzzle.size"
+            role="grid"
+            [attr.aria-label]="
+              'Grille classique du problème du cavalier de ' +
+              currentClassicPuzzle.size +
+              ' par ' +
+              currentClassicPuzzle.size
+            "
+          >
+            @for (position of classicBoardPositions(); track position.row + ':' + position.col) {
+              <button
+                type="button"
+                [class]="classicBoardCellClass(position)"
+                [disabled]="classicIsSolved()"
+                [attr.aria-label]="classicCellAriaLabel(position)"
+                [attr.aria-pressed]="classicPathIndex(position) !== null"
+                [attr.aria-current]="
+                  classicPathIndex(position) === classicPath().length - 1 ? 'step' : null
+                "
+                (click)="selectClassicCell(position)"
+              >
+                <span class="cell-letter">
+                  {{ classicPathIndex(position) !== null ? classicPathIndex(position)! + 1 : '' }}
+                </span>
+                @if (classicPathIndex(position) === 0) {
+                  <span class="start-mark" aria-hidden="true">Départ</span>
+                }
+                @if (
+                  classicPathIndex(position) === classicPath().length - 1 && !classicIsSolved()
+                ) {
+                  <span class="knight-token" aria-hidden="true">♞</span>
+                }
+              </button>
+            }
+          </div>
+
+          <p class="status" role="status" aria-live="polite">{{ message() }}</p>
+
+          <div class="legend" aria-label="Légende de la grille">
+            <span><i class="legend-swatch current-swatch"></i> Position actuelle</span>
+            <span><i class="legend-swatch legal-swatch"></i> Cases disponibles</span>
+            <span><i class="legend-swatch visited-swatch"></i> Case visitée</span>
+          </div>
+        </section>
+
+        <aside class="side-panel">
+          <section class="size-panel" aria-labelledby="size-title">
+            <h2 id="size-title">Taille de la grille</h2>
+            <div class="size-options" role="radiogroup" aria-label="Taille de la grille classique">
+              @for (size of classicGridSizes; track size) {
+                <button
+                  type="button"
+                  class="size-button"
+                  [class.active]="classicSize() === size"
+                  [attr.aria-checked]="classicSize() === size"
+                  role="radio"
+                  (click)="selectClassicSize(size)"
+                >
+                  {{ size }} × {{ size }}
+                </button>
+              }
+            </div>
+          </section>
+
+          <div class="actions">
+            <button
+              type="button"
+              class="secondary-button"
+              (click)="showClassicHint()"
+              [disabled]="classicIsSolved() || classicRemainingMoveCount() === 0"
+            >
+              Indice
+            </button>
+            <button
+              type="button"
+              class="secondary-button"
+              (click)="restartClassicPuzzle()"
+              [disabled]="classicPath().length === 0 || classicIsSolved()"
+            >
+              Recommencer
+            </button>
+            <button type="button" class="secondary-button" (click)="newClassicPuzzle()">
+              Nouvelle grille
+            </button>
+          </div>
+        </aside>
+      </section>
+
+      @if (classicIsSolved()) {
+        <app-puzzle-success-popup
+          title="Parcours classique complété!"
+          message="Le cavalier a visité toutes les cases de la grille une seule fois."
+          [answer]="'Grille ' + currentClassicPuzzle.size + ' × ' + currentClassicPuzzle.size"
+          actionLabel="Nouvelle grille"
+          (action)="newClassicPuzzle()"
+        />
+      }
+    }
+  </section>
+</main>

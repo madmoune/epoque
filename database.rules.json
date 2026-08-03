@@ -73,6 +73,20 @@
           }
         }
       }
+    },
+    "users": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid",
+        "localStorage": {
+          ".validate": "newData.hasChildren(['version', 'values']) && newData.child('version').isNumber() && newData.child('version').val() === 1 && newData.child('values').exists()",
+          "values": {
+            "$key": {
+              ".validate": "$key.matches(/^epique-[A-Za-z0-9_-]+$/) && newData.isString() && newData.val().length <= 250000"
+            }
+          }
+        }
+      }
     }
   }
 }

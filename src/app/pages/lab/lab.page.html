@@ -331,12 +331,16 @@
                   figure.displayMode === 'navigation' || figure.displayMode === 'clock-letters'
                 "
                 [class.word-split-card]="figure.displayMode === 'word-split'"
+                [class.segment-phrase-card]="figure.displayMode === 'segment-phrase'"
+                [class.color-chain-card]="figure.displayMode === 'color-chain'"
               >
                 <div
                   class="figure-visual"
                   [class.seven-segment-visual]="figure.displayMode === 'seven-segment'"
                   [class.navigation-visual]="figure.displayMode === 'navigation'"
                   [class.word-split-visual]="figure.displayMode === 'word-split'"
+                  [class.segment-phrase-visual-container]="figure.displayMode === 'segment-phrase'"
+                  [class.color-chain-visual-container]="figure.displayMode === 'color-chain'"
                 >
                   @if (figure.displayMode === 'navigation') {
                     <img
@@ -447,9 +451,104 @@
                       }
                     </div>
                   }
+                  @if (figure.displayMode === 'segment-phrase') {
+                    <div
+                      class="segment-phrase-visual"
+                    >
+                      <div
+                        class="segment-phrase-words"
+                        role="img"
+                        [attr.aria-label]="'Définition : ' + (figure.segmentPhraseDefinition ?? '')"
+                      >
+                        @for (word of figure.segmentPhraseWords ?? []; track word.id) {
+                          <div
+                            class="segment-phrase-word"
+                            [attr.aria-label]="'Mot de ' + word.letters.length + ' lettres'"
+                          >
+                            <svg
+                              class="segment-phrase-word-svg"
+                              [attr.viewBox]="word.viewBox"
+                              [attr.width]="word.width"
+                              [attr.height]="word.height"
+                              aria-hidden="true"
+                            >
+                              @for (letter of word.letters; track letter.id) {
+                                @for (part of segmentPhraseParts(letter); track part.id) {
+                                  <line
+                                    class="seven-segment segment-phrase-segment"
+                                    [class.lit]="part.lit"
+                                    [attr.x1]="part.x1"
+                                    [attr.y1]="part.y1"
+                                    [attr.x2]="part.x2"
+                                    [attr.y2]="part.y2"
+                                  />
+                                }
+                              }
+                            </svg>
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  }
+                  @if (figure.displayMode === 'color-chain') {
+                    <div class="color-chain-visual">
+                      <div
+                        class="color-chain-start-letter"
+                        aria-label="Lettre de départ"
+                      >
+                        <strong [style.color]="figure.colorChainStartColor">
+                          {{ figure.colorChainStartLetter }}
+                        </strong>
+                        <span class="color-chain-answer-mask" aria-hidden="true">
+                          @for (hint of colorChainAnswerHintsFor(figure); track $index) {
+                            <span [class.revealed]="hint.revealed" [style.color]="hint.color">
+                              {{ hint.letter }}
+                            </span>
+                          }
+                        </span>
+                      </div>
+                      <div
+                        class="color-chain-grid"
+                        role="grid"
+                        aria-label="Grille 3 par 3 de couleurs"
+                      >
+                        @for (cell of figure.colorChainCells ?? []; track cell.id) {
+                          <div
+                            class="color-chain-cell"
+                            role="gridcell"
+                            [style.background]="cell.backgroundColor"
+                            [style.color]="cell.textColor"
+                            [attr.title]="
+                              'Fond : ' + cell.backgroundLabel + ' · Lettre : ' + cell.textLabel
+                            "
+                            [attr.aria-label]="
+                              'Lettre ' +
+                              cell.letter +
+                              ', fond ' +
+                              cell.backgroundLabel +
+                              ', écrite en ' +
+                              cell.textLabel
+                            "
+                          >
+                            <span>{{ cell.letter }}</span>
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  }
                   <svg
-                    [hidden]="figure.displayMode === 'word-split'"
-                    [style.display]="figure.displayMode === 'word-split' ? 'none' : ''"
+                    [hidden]="
+                      figure.displayMode === 'word-split' ||
+                      figure.displayMode === 'segment-phrase' ||
+                      figure.displayMode === 'color-chain'
+                    "
+                    [style.display]="
+                      figure.displayMode === 'word-split' ||
+                      figure.displayMode === 'segment-phrase' ||
+                      figure.displayMode === 'color-chain'
+                        ? 'none'
+                        : ''
+                    "
                     [attr.viewBox]="figure.viewBox"
                     [class.seven-segment-svg]="figure.displayMode === 'seven-segment'"
                     [class.navigation-svg]="figure.displayMode === 'navigation'"
@@ -543,7 +642,10 @@
                     }
                   </svg>
                 </div>
-                <strong [class.navigation-code]="figure.displayMode === 'navigation'">
+                <strong
+                  [hidden]="figure.displayMode === 'segment-phrase'"
+                  [class.navigation-code]="figure.displayMode === 'navigation'"
+                >
                   {{ figure.code }}
                 </strong>
               </article>
@@ -559,12 +661,32 @@
                 instance().challengeFigure.displayMode === 'clock-letters'
               "
               [class.word-split-card]="instance().challengeFigure.displayMode === 'word-split'"
-              [style.grid-template-columns]="
-                instance().challengeFigure.displayMode === 'word-split' ? 'minmax(0, 1fr)' : ''
+              [class.segment-phrase-card]="
+                instance().challengeFigure.displayMode === 'segment-phrase'
               "
-              [style.border]="instance().challengeFigure.displayMode === 'word-split' ? 'none' : ''"
+              [class.color-chain-card]="
+                instance().challengeFigure.displayMode === 'color-chain'
+              "
+              [style.grid-template-columns]="
+                instance().challengeFigure.displayMode === 'word-split' ||
+                instance().challengeFigure.displayMode === 'segment-phrase' ||
+                instance().challengeFigure.displayMode === 'color-chain'
+                  ? 'minmax(0, 1fr)'
+                  : ''
+              "
+              [style.border]="
+                instance().challengeFigure.displayMode === 'word-split' ||
+                instance().challengeFigure.displayMode === 'segment-phrase' ||
+                instance().challengeFigure.displayMode === 'color-chain'
+                  ? 'none'
+                  : ''
+              "
               [style.background]="
-                instance().challengeFigure.displayMode === 'word-split' ? 'transparent' : ''
+                instance().challengeFigure.displayMode === 'word-split' ||
+                instance().challengeFigure.displayMode === 'segment-phrase' ||
+                instance().challengeFigure.displayMode === 'color-chain'
+                  ? 'transparent'
+                  : ''
               "
               [style.padding]="instance().challengeFigure.displayMode === 'word-split' ? '0' : ''"
             >
@@ -575,6 +697,12 @@
                 "
                 [class.navigation-visual]="instance().challengeFigure.displayMode === 'navigation'"
                 [class.word-split-visual]="instance().challengeFigure.displayMode === 'word-split'"
+                [class.segment-phrase-visual-container]="
+                  instance().challengeFigure.displayMode === 'segment-phrase'
+                "
+                [class.color-chain-visual-container]="
+                  instance().challengeFigure.displayMode === 'color-chain'
+                "
               >
                 @if (instance().challengeFigure.displayMode === 'navigation') {
                   <img
@@ -729,10 +857,139 @@
                     }
                   </div>
                 }
+                @if (instance().challengeFigure.displayMode === 'segment-phrase') {
+                  <div class="segment-phrase-visual">
+                    <div
+                      class="segment-phrase-words"
+                      role="img"
+                      [attr.aria-label]="
+                        'Définition : ' + (instance().challengeFigure.segmentPhraseDefinition ?? '')
+                      "
+                    >
+                      @for (
+                        word of instance().challengeFigure.segmentPhraseWords ?? [];
+                        track word.id;
+                        let wordIndex = $index
+                      ) {
+                        <div
+                          class="segment-phrase-word"
+                          [attr.aria-label]="'Mot de ' + word.letters.length + ' lettres'"
+                        >
+                          <svg
+                            class="segment-phrase-word-svg"
+                            [attr.viewBox]="word.viewBox"
+                            [attr.width]="word.width"
+                            [attr.height]="word.height"
+                            aria-hidden="true"
+                          >
+                            @for (letter of word.letters; track letter.id) {
+                              @for (part of segmentPhraseParts(letter); track part.id) {
+                                  <line
+                                    class="seven-segment segment-phrase-segment"
+                                    [class.lit]="part.lit"
+                                    [class.hint-lit]="
+                                      segmentPhraseWordIsRevealed(
+                                        instance().challengeFigure,
+                                        wordIndex
+                                      ) && part.missing
+                                    "
+                                    [attr.x1]="part.x1"
+                                  [attr.y1]="part.y1"
+                                  [attr.x2]="part.x2"
+                                  [attr.y2]="part.y2"
+                                />
+                              }
+                            }
+                          </svg>
+                        </div>
+                      }
+                    </div>
+                    <div class="segment-phrase-visual-actions">
+                      <button
+                        type="button"
+                        class="hint-button"
+                        (click)="revealSegmentPhraseHint()"
+                        [disabled]="!canRevealSegmentPhraseHint()"
+                      >
+                        Indice
+                      </button>
+                    </div>
+                  </div>
+                }
+                @if (instance().challengeFigure.displayMode === 'color-chain') {
+                  <div class="color-chain-visual">
+                    <div
+                      class="color-chain-start-letter"
+                      aria-label="Lettre de départ"
+                    >
+                      <strong [style.color]="instance().challengeFigure.colorChainStartColor">
+                        {{ instance().challengeFigure.colorChainStartLetter }}
+                      </strong>
+                      <span class="color-chain-answer-mask" aria-hidden="true">
+                        @for (
+                          hint of colorChainAnswerHintsFor(instance().challengeFigure);
+                          track $index
+                        ) {
+                          <span [class.revealed]="hint.revealed" [style.color]="hint.color">
+                            {{ hint.letter }}
+                          </span>
+                        }
+                      </span>
+                    </div>
+                    <div
+                      class="color-chain-grid"
+                      role="grid"
+                      aria-label="Grille 3 par 3 de couleurs"
+                    >
+                      @for (
+                        cell of instance().challengeFigure.colorChainCells ?? [];
+                        track cell.id
+                      ) {
+                        <div
+                          class="color-chain-cell"
+                          role="gridcell"
+                          [style.background]="cell.backgroundColor"
+                          [style.color]="cell.textColor"
+                          [attr.title]="
+                            'Fond : ' + cell.backgroundLabel + ' · Lettre : ' + cell.textLabel
+                          "
+                          [attr.aria-label]="
+                            'Lettre ' +
+                            cell.letter +
+                            ', fond ' +
+                            cell.backgroundLabel +
+                            ', écrite en ' +
+                            cell.textLabel
+                          "
+                        >
+                          <span>{{ cell.letter }}</span>
+                        </div>
+                      }
+                    </div>
+                    <div class="color-chain-visual-actions">
+                      <button
+                        type="button"
+                        class="hint-button"
+                        (click)="revealColorChainHint()"
+                        [disabled]="!canRevealColorChainHint()"
+                      >
+                        Indice
+                      </button>
+                    </div>
+                  </div>
+                }
                 <svg
-                  [hidden]="instance().challengeFigure.displayMode === 'word-split'"
+                  [hidden]="
+                    instance().challengeFigure.displayMode === 'word-split' ||
+                    instance().challengeFigure.displayMode === 'segment-phrase' ||
+                    instance().challengeFigure.displayMode === 'color-chain'
+                  "
                   [style.display]="
-                    instance().challengeFigure.displayMode === 'word-split' ? 'none' : ''
+                    instance().challengeFigure.displayMode === 'word-split' ||
+                    instance().challengeFigure.displayMode === 'segment-phrase' ||
+                    instance().challengeFigure.displayMode === 'color-chain'
+                      ? 'none'
+                      : ''
                   "
                   [attr.viewBox]="instance().challengeFigure.viewBox"
                   [class.seven-segment-svg]="
@@ -826,7 +1083,12 @@
                 </svg>
               </div>
               <strong
-                [hidden]="instance().challengeFigure.displayMode === 'word-split'"
+                [hidden]="
+                  !challengeSolutionIsShown() &&
+                  (instance().challengeFigure.displayMode === 'word-split' ||
+                    instance().challengeFigure.displayMode === 'segment-phrase' ||
+                    instance().challengeFigure.displayMode === 'color-chain')
+                "
                 [class.navigation-code]="instance().challengeFigure.displayMode === 'navigation'"
               >
                 {{ challengeSolution() }}
@@ -907,9 +1169,11 @@
               }
             </article>
           </div>
-          <div class="actions example-actions">
-            <button type="button" (click)="randomizeSeed()">Régénérer</button>
-          </div>
+          @if (!isPlayPage()) {
+            <div class="actions example-actions">
+              <button type="button" (click)="randomizeSeed()">Régénérer</button>
+            </div>
+          }
         </div>
       </section>
     </section>

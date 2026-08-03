@@ -8,8 +8,17 @@ import {
   CLOCK_LETTER_FALLBACK_WORDS,
 } from '../../puzzles/puzzlehunt/ClockLetters/clock-letters.data';
 import { FAUX_WORD_DEFINITIONS, FauxWordDefinition } from './puzzle-types/faux-words.puzzle-type';
+import {
+  SEGMENT_PHRASE_DEFINITIONS,
+  SegmentPhraseDefinition,
+} from './puzzle-types/segment-phrase.puzzle-type';
+import {
+  COLOR_CHAIN_CHALLENGE_WORD,
+  COLOR_CHAIN_WORDS,
+} from './puzzle-types/color-chain.puzzle-type';
 import { PuzzlePlayHistoryService } from '../../puzzle-play-history.service';
 import { PuzzleAnswerComponent } from '../../puzzles/shared/puzzle-answer';
+import { AppStorageService } from '../../shared/storage/app-storage.service';
 
 type SegmentKind = 'horizontal' | 'vertical' | 'slash' | 'backslash';
 type FigureSide = 'top' | 'right' | 'bottom' | 'left';
@@ -51,6 +60,43 @@ type SevenSegmentDisplay = {
   height: number;
   segments: boolean[];
   missing?: boolean;
+};
+
+type SegmentPhraseLetter = SevenSegmentDisplay & {
+  missingSegments: boolean[];
+};
+
+type SegmentPhrasePart = SevenSegmentPart & {
+  missing: boolean;
+};
+
+type SegmentPhraseWord = {
+  id: string;
+  viewBox: string;
+  width: number;
+  height: number;
+  letters: SegmentPhraseLetter[];
+};
+
+type ColorChainColor = {
+  value: string;
+  label: string;
+};
+
+type ColorChainCell = {
+  id: string;
+  position: number;
+  letter: string;
+  backgroundColor: string;
+  backgroundLabel: string;
+  textColor: string;
+  textLabel: string;
+};
+
+type ColorChainAnswerHint = {
+  letter: string;
+  color?: string;
+  revealed: boolean;
 };
 
 type FigureTextLine = {
@@ -98,12 +144,25 @@ type PuzzleExampleFigure = {
   notes?: FigureTextLine[];
   markers: FigureMarker[];
   code: string;
-  displayMode?: 'standard' | 'seven-segment' | 'navigation' | 'clock-letters' | 'word-split';
+  displayMode?:
+    | 'standard'
+    | 'seven-segment'
+    | 'navigation'
+    | 'clock-letters'
+    | 'word-split'
+    | 'segment-phrase'
+    | 'color-chain';
   imageSrc?: string;
   clue?: string;
   clockLetters?: ClockLetterFigure[];
   wordSplitEntries?: FauxWordDefinition[];
   wordSplitShowAnswers?: boolean;
+  segmentPhraseDefinition?: string;
+  segmentPhraseWords?: SegmentPhraseWord[];
+  colorChainStartLetter?: string;
+  colorChainStartColor?: string;
+  colorChainAnswerColors?: string[];
+  colorChainCells?: ColorChainCell[];
 };
 
 type ClockLetterFigure = {
@@ -145,6 +204,43 @@ type PuzzleSortMode =
   | 'status-asc'
   | 'status-desc';
 
+const SEGMENT_PHRASE_LETTER_MASKS: Record<string, boolean[]> = {
+  // Ordre : haut, droite-haut, droite-bas, bas, gauche-bas, gauche-haut, milieu.
+  // Seules les lettres lisibles sur un affichage à sept segments sont utilisées.
+  A: [true, true, true, false, true, true, true],
+  B: [false, false, true, true, true, true, true],
+  C: [true, false, false, true, true, true, false],
+  D: [false, true, true, true, true, false, true],
+  E: [true, false, false, true, true, true, true],
+  F: [true, false, false, false, true, true, true],
+  G: [true, false, true, true, true, true, true],
+  H: [false, true, true, false, true, true, true],
+  I: [false, true, true, false, false, false, false],
+  J: [false, true, true, true, false, false, false],
+  L: [false, false, false, true, true, true, false],
+  O: [true, true, true, true, true, true, false],
+  P: [true, true, false, false, true, true, true],
+  S: [true, false, true, true, false, true, true],
+  U: [false, true, true, true, true, true, false],
+};
+
+const COLOR_CHAIN_COLORS: ColorChainColor[] = [
+  { value: '#ef4444', label: 'rouge' },
+  { value: '#2563eb', label: 'bleu' },
+  { value: '#eab308', label: 'jaune' },
+  { value: '#16a34a', label: 'vert' },
+  { value: '#9333ea', label: 'violet' },
+  { value: '#06b6d4', label: 'cyan' },
+  { value: '#db2777', label: 'magenta' },
+  { value: '#f97316', label: 'orange' },
+  { value: '#65a30d', label: 'lime' },
+];
+
+const COLOR_CHAIN_TERMINAL_COLOR: ColorChainColor = {
+  value: '#334155',
+  label: 'ardoise',
+};
+
 @Component({
   selector: 'app-lab-page',
   imports: [RouterLink, PuzzleAnswerComponent],
@@ -154,6 +250,7 @@ type PuzzleSortMode =
 export class LabPage {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly storage = inject(AppStorageService);
   private readonly selectedTypeStorageKey = 'epique-lab-selected-type';
   private readonly selectedVariantStorageKey = 'epique-lab-selected-variant';
   private readonly typeViewModeStorageKey = 'epique-lab-type-view-mode';
@@ -224,10 +321,42 @@ export class LabPage {
   private readonly challengeFeedbackState = signal<ExampleFeedback | undefined>(undefined);
   private readonly challengePartialMessageState = signal('');
   private readonly wordSplitHintCount = signal(0);
+  private readonly segmentPhraseHintCount = signal(0);
+  private readonly colorChainHintCount = signal(0);
   protected readonly editingTypeName = signal(false);
   protected readonly editingVariantName = signal(false);
 
   constructor() {
+    this.storage.changes$.subscribe((change) => {
+      if (change.source !== 'remote') {
+        return;
+      }
+
+      switch (change.key) {
+        case this.typeViewModeStorageKey:
+          this.typeViewMode.set(this.readTypeViewMode());
+          break;
+        case this.typeNameFilterStorageKey:
+          this.typeNameFilter.set(this.readTypeNameFilter());
+          break;
+        case this.typeStatusFilterStorageKey:
+          this.typeStatusFilter.set(this.readTypeStatusFilter());
+          break;
+        case this.puzzleSortModeStorageKey:
+          this.puzzleSortMode.set(this.readPuzzleSortMode());
+          break;
+        case this.selectedTypeStorageKey: {
+          const nextTypeId = this.readStoredTypeId();
+          this.selectedTypeId.set(nextTypeId);
+          this.selectedVariantId.set(this.readStoredVariantId(nextTypeId));
+          break;
+        }
+        case this.selectedVariantStorageKey:
+          this.selectedVariantId.set(this.readStoredVariantId(this.selectedTypeId()));
+          break;
+      }
+    });
+
     void this.loadPersistedStatuses();
     void this.loadClockWords();
   }
@@ -266,7 +395,7 @@ export class LabPage {
     this.typeViewMode.set(mode);
 
     try {
-      globalThis.localStorage?.setItem(this.typeViewModeStorageKey, mode);
+      this.storage.set(this.typeViewModeStorageKey, mode);
     } catch {
       // The selected view still applies for the current page when storage is unavailable.
     }
@@ -277,7 +406,7 @@ export class LabPage {
     this.typeNameFilter.set(filter);
 
     try {
-      globalThis.localStorage?.setItem(this.typeNameFilterStorageKey, filter);
+      this.storage.set(this.typeNameFilterStorageKey, filter);
     } catch {
       // Le filtre continue de fonctionner pour la session courante.
     }
@@ -290,7 +419,7 @@ export class LabPage {
       this.typeStatusFilter.set(status);
 
       try {
-        globalThis.localStorage?.setItem(this.typeStatusFilterStorageKey, status);
+        this.storage.set(this.typeStatusFilterStorageKey, status);
       } catch {
         // Le filtre continue de fonctionner pour la session courante.
       }
@@ -307,7 +436,7 @@ export class LabPage {
     this.puzzleSortMode.set(mode);
 
     try {
-      globalThis.localStorage?.setItem(this.puzzleSortModeStorageKey, mode);
+      this.storage.set(this.puzzleSortModeStorageKey, mode);
     } catch {
       // The selected sort still applies for the current page when storage is unavailable.
     }
@@ -355,7 +484,9 @@ export class LabPage {
     return (
       this.selectedType().id === 'navigation' ||
       this.selectedType().id === 'clock-letters' ||
-      this.selectedType().id === 'faux-words'
+      this.selectedType().id === 'faux-words' ||
+      this.selectedType().id === 'segment-phrase' ||
+      this.selectedType().id === 'color-chain'
     );
   }
 
@@ -379,6 +510,48 @@ export class LabPage {
     }
 
     this.wordSplitHintCount.update((count) => count + 1);
+  }
+
+  protected segmentPhraseWordIsRevealed(figure: PuzzleExampleFigure, index: number): boolean {
+    return figure.example?.id === 'challenge' && index < this.segmentPhraseHintCount();
+  }
+
+  protected canRevealSegmentPhraseHint(): boolean {
+    const words = this.instance().challengeFigure.segmentPhraseWords ?? [];
+
+    return this.segmentPhraseHintCount() < words.length;
+  }
+
+  protected revealSegmentPhraseHint(): void {
+    if (!this.canRevealSegmentPhraseHint()) {
+      return;
+    }
+
+    this.segmentPhraseHintCount.update((count) => count + 1);
+  }
+
+  protected colorChainAnswerHintsFor(figure: PuzzleExampleFigure): ColorChainAnswerHint[] {
+    const remainingAnswer = [...figure.code.slice(1)];
+    const remainingColors = figure.colorChainAnswerColors?.slice(1) ?? [];
+    const revealedCount = figure.example?.id === 'challenge' ? this.colorChainHintCount() : 0;
+
+    return remainingAnswer.map((letter, index) => ({
+      letter: index < revealedCount ? letter : '?',
+      color: index < revealedCount ? remainingColors[index] : undefined,
+      revealed: index < revealedCount,
+    }));
+  }
+
+  protected canRevealColorChainHint(): boolean {
+    return this.colorChainHintCount() < Math.max(this.instance().solution.length - 1, 0);
+  }
+
+  protected revealColorChainHint(): void {
+    if (!this.canRevealColorChainHint()) {
+      return;
+    }
+
+    this.colorChainHintCount.update((count) => count + 1);
   }
 
   protected checkChallenge(): void {
@@ -447,6 +620,10 @@ export class LabPage {
     return this.challengeSolutionShown()
       ? this.instance().solution
       : '?'.repeat(this.instance().solution.length);
+  }
+
+  protected challengeSolutionIsShown(): boolean {
+    return this.challengeSolutionShown();
   }
 
   protected revealChallengeSolution(): void {
@@ -971,7 +1148,9 @@ export class LabPage {
       !variant.id.startsWith('3-') &&
       variant.id !== 'navigation-main' &&
       variant.id !== 'clock-letters-main' &&
-      variant.id !== 'faux-words-main';
+      variant.id !== 'faux-words-main' &&
+      variant.id !== 'segment-phrase-main' &&
+      variant.id !== 'color-chain-main';
     const digitOrder = shouldShuffleCode ? this.shuffle([0, 1, 2, 3], random) : [0, 1, 2, 3];
     const sharedSegmentConfiguration =
       variant.id === '3-1-broken-segment'
@@ -1068,6 +1247,12 @@ export class LabPage {
     if (variantId === 'faux-words-main') {
       return this.createFauxWordsFigure(example);
     }
+    if (variantId === 'segment-phrase-main') {
+      return this.createSegmentPhraseFigure(random, example);
+    }
+    if (variantId === 'color-chain-main') {
+      return this.createColorChainFigure(random, example);
+    }
     if (variantId.startsWith('3-')) {
       return this.createSevenSegmentFigure(
         random,
@@ -1154,6 +1339,214 @@ export class LabPage {
       wordSplitEntries: FAUX_WORD_DEFINITIONS,
       wordSplitShowAnswers: example.id !== 'challenge',
     };
+  }
+
+  private createSegmentPhraseFigure(
+    random: SeededRandom,
+    example: PuzzleExample,
+  ): PuzzleExampleFigure {
+    const definition: SegmentPhraseDefinition =
+      SEGMENT_PHRASE_DEFINITIONS.find((candidate) =>
+        example.id.endsWith(`-${candidate.id}`),
+      ) ?? this.pick(SEGMENT_PHRASE_DEFINITIONS, random);
+    const words = definition.definition.split(/\s+/).filter(Boolean);
+    const segmentPhraseWords = words.map((word, wordIndex) => {
+      const letters = [...this.normalizeChallengeAnswer(word)];
+      const fullMasks = letters.map((letter) => this.segmentPhraseLetterMask(letter));
+      const missingMasks = this.segmentPhraseMissingMasks(
+        fullMasks,
+        this.segmentPhraseLetterMask(definition.answer[wordIndex] ?? 'E'),
+        random,
+      );
+      const letterWidth = 18;
+      const letterGap = 22;
+      const wordHeight = 30;
+      const wordWidth = letters.length * letterGap + 4;
+
+      return {
+        id: `segment-phrase-${example.id}-word-${wordIndex}`,
+        viewBox: `0 0 ${wordWidth} 36`,
+        width: wordWidth,
+        height: 36,
+        letters: letters.map((_, letterIndex) => ({
+          id: `segment-phrase-${example.id}-word-${wordIndex}-letter-${letterIndex}`,
+          x: 4 + letterIndex * letterGap,
+          y: 3,
+          width: letterWidth,
+          height: wordHeight,
+          segments: fullMasks[letterIndex].map(
+            (lit, segmentIndex) => lit && !missingMasks[letterIndex][segmentIndex],
+          ),
+          missingSegments: fullMasks[letterIndex].map(
+            (lit, segmentIndex) => lit && missingMasks[letterIndex][segmentIndex],
+          ),
+        })),
+      } satisfies SegmentPhraseWord;
+    });
+
+    return {
+      id: `example-${example.id}`,
+      example,
+      viewBox: '0 0 1 1',
+      frame: { x: 0, y: 0, width: 1, height: 1 },
+      gridSize: 1,
+      segments: [],
+      shapes: [],
+      markers: [],
+      code: definition.answer,
+      displayMode: 'segment-phrase',
+      segmentPhraseDefinition: definition.definition,
+      segmentPhraseWords,
+    };
+  }
+
+  private createColorChainFigure(
+    random: SeededRandom,
+    example: PuzzleExample,
+  ): PuzzleExampleFigure {
+    const word =
+      example.id === 'challenge'
+        ? COLOR_CHAIN_CHALLENGE_WORD
+        : this.pick([...COLOR_CHAIN_WORDS], random);
+    const gridCellCount = 9;
+    const positions = this.shuffle(
+      Array.from({ length: gridCellCount }, (_, position) => position),
+      random,
+    );
+    const pathPositions = positions.slice(0, word.length);
+    const decoyLetters =
+      example.id === 'challenge'
+        ? ['R']
+        : [...'RAMEURKAYAKSPORT'].filter((letter) => !word.includes(letter));
+    const decoyBackgroundColors = [
+      COLOR_CHAIN_COLORS[0],
+      COLOR_CHAIN_COLORS[7],
+      COLOR_CHAIN_COLORS[8],
+    ].slice(0, gridCellCount - word.length);
+    const decoyTextColors = COLOR_CHAIN_COLORS.slice(
+      word.length,
+      word.length + gridCellCount - word.length,
+    );
+    const pathCells: ColorChainCell[] = [...word].map((letter, index) => {
+      const textColor = COLOR_CHAIN_COLORS[index % COLOR_CHAIN_COLORS.length];
+      const nextColor =
+        index + 1 < word.length
+          ? COLOR_CHAIN_COLORS[(index + 1) % COLOR_CHAIN_COLORS.length]
+          : COLOR_CHAIN_TERMINAL_COLOR;
+
+      return {
+        id: `color-chain-${example.id}-path-${index}`,
+        position: pathPositions[index],
+        letter,
+        backgroundColor: nextColor.value,
+        backgroundLabel: nextColor.label,
+        textColor: textColor.value,
+        textLabel: textColor.label,
+      };
+    });
+    const decoyCells: ColorChainCell[] = positions.slice(word.length).map((position, index) => {
+      const backgroundColor = decoyBackgroundColors[index];
+      const textColor = decoyTextColors[index];
+
+      return {
+        id: `color-chain-${example.id}-decoy-${index}`,
+        position,
+        letter: decoyLetters[index % decoyLetters.length],
+        backgroundColor: backgroundColor.value,
+        backgroundLabel: backgroundColor.label,
+        textColor: textColor.value,
+        textLabel: textColor.label,
+      };
+    });
+
+    return {
+      id: `example-${example.id}`,
+      example,
+      viewBox: '0 0 1 1',
+      frame: { x: 0, y: 0, width: 1, height: 1 },
+      gridSize: 3,
+      segments: [],
+      shapes: [],
+      markers: [],
+      code: word,
+      displayMode: 'color-chain',
+      colorChainStartLetter: word[0],
+      colorChainStartColor: pathCells[0]?.textColor,
+      colorChainAnswerColors: pathCells.map((cell) => cell.textColor),
+      colorChainCells: [...pathCells, ...decoyCells].sort(
+        (first, second) => first.position - second.position,
+      ),
+    };
+  }
+
+  private segmentPhraseLetterMask(letter: string): boolean[] {
+    return [
+      ...(SEGMENT_PHRASE_LETTER_MASKS[letter] ?? SEGMENT_PHRASE_LETTER_MASKS['E']),
+    ];
+  }
+
+  private segmentPhraseMissingMasks(
+    fullMasks: boolean[][],
+    targetMask: boolean[],
+    random: SeededRandom,
+  ): boolean[][] {
+    const missingMasks = fullMasks.map((mask) =>
+      Array.from({ length: mask.length }, () => false),
+    );
+    const maxMissingSegmentsPerLetter = 1;
+    const minimumVisibleSegments = 3;
+    const targetSegments = targetMask
+      .map((isLit, segmentIndex) => (isLit ? segmentIndex : -1))
+      .filter((segmentIndex): segmentIndex is number => segmentIndex >= 0)
+      .sort(
+        (first, second) =>
+          fullMasks.filter((mask) => mask[first]).length -
+          fullMasks.filter((mask) => mask[second]).length,
+      );
+
+    for (const segmentIndex of targetSegments) {
+      const candidates = fullMasks
+        .map((mask, letterIndex) => ({ letterIndex, mask }))
+        .filter(({ mask }) => mask[segmentIndex]);
+
+      if (candidates.length === 0) {
+        continue;
+      }
+
+      const remainingSegments = ({ letterIndex, mask }: (typeof candidates)[number]): number =>
+        this.countLitSegments(mask) - this.countLitSegments(missingMasks[letterIndex]);
+      const missingSegmentCount = ({ letterIndex }: (typeof candidates)[number]): number =>
+        this.countLitSegments(missingMasks[letterIndex]);
+      const groupedReadableCandidates = candidates.filter(
+        (candidate) =>
+          missingSegmentCount(candidate) < maxMissingSegmentsPerLetter &&
+          remainingSegments(candidate) >= minimumVisibleSegments,
+      );
+      const readableCandidates = candidates.filter(
+        (candidate) => remainingSegments(candidate) >= minimumVisibleSegments,
+      );
+      const availableCandidates = groupedReadableCandidates.length
+        ? groupedReadableCandidates
+        : readableCandidates.length
+          ? readableCandidates
+          : candidates;
+      const leastDamaged = Math.min(...availableCandidates.map(missingSegmentCount));
+      const leastDamagedCandidates = availableCandidates.filter(
+        (candidate) => missingSegmentCount(candidate) === leastDamaged,
+      );
+      const mostReadable = Math.max(...leastDamagedCandidates.map(remainingSegments));
+      const bestCandidates = leastDamagedCandidates.filter(
+        (candidate) => remainingSegments(candidate) === mostReadable,
+      );
+      const selected = this.pick(bestCandidates, random);
+      missingMasks[selected.letterIndex][segmentIndex] = true;
+    }
+
+    return missingMasks;
+  }
+
+  private countLitSegments(segments: boolean[]): number {
+    return segments.filter(Boolean).length;
   }
 
   private clockHands(time: string, id: string): PuzzleSegment[] {
@@ -1329,6 +1722,76 @@ export class LabPage {
     ];
 
     return parts.map((part, index) => ({ ...part, lit: display.segments[index] ?? false }));
+  }
+
+  protected segmentPhraseParts(display: SegmentPhraseLetter): SegmentPhrasePart[] {
+    const { x, y, width, height } = display;
+    const middle = y + height / 2;
+    const inset = 2;
+    const parts: PuzzleSegment[] = [
+      {
+        id: `${display.id}-top`,
+        kind: 'horizontal',
+        x1: x + inset,
+        y1: y + inset,
+        x2: x + width - inset,
+        y2: y + inset,
+      },
+      {
+        id: `${display.id}-upper-right`,
+        kind: 'vertical',
+        x1: x + width - inset,
+        y1: y + inset,
+        x2: x + width - inset,
+        y2: middle - inset,
+      },
+      {
+        id: `${display.id}-lower-right`,
+        kind: 'vertical',
+        x1: x + width - inset,
+        y1: middle + inset,
+        x2: x + width - inset,
+        y2: y + height - inset,
+      },
+      {
+        id: `${display.id}-bottom`,
+        kind: 'horizontal',
+        x1: x + inset,
+        y1: y + height - inset,
+        x2: x + width - inset,
+        y2: y + height - inset,
+      },
+      {
+        id: `${display.id}-lower-left`,
+        kind: 'vertical',
+        x1: x + inset,
+        y1: middle + inset,
+        x2: x + inset,
+        y2: y + height - inset,
+      },
+      {
+        id: `${display.id}-upper-left`,
+        kind: 'vertical',
+        x1: x + inset,
+        y1: y + inset,
+        x2: x + inset,
+        y2: middle - inset,
+      },
+      {
+        id: `${display.id}-middle`,
+        kind: 'horizontal',
+        x1: x + inset,
+        y1: middle,
+        x2: x + width - inset,
+        y2: middle,
+      },
+    ];
+
+    return parts.map((part, index) => ({
+      ...part,
+      lit: display.segments[index] ?? false,
+      missing: display.missingSegments[index] ?? false,
+    }));
   }
 
   protected gridCoordinates(gridSize: number): number[] {
@@ -3563,7 +4026,7 @@ export class LabPage {
 
   private readPuzzleSortMode(): PuzzleSortMode {
     try {
-      const storedMode = globalThis.localStorage?.getItem(this.puzzleSortModeStorageKey);
+      const storedMode = this.storage.get(this.puzzleSortModeStorageKey);
       return this.isPuzzleSortMode(storedMode) ? storedMode : 'name-asc';
     } catch {
       return 'name-asc';
@@ -3587,7 +4050,7 @@ export class LabPage {
     const fallback = LAB_PUZZLE_TYPES[0].id;
 
     try {
-      const storedTypeId = globalThis.localStorage?.getItem(this.selectedTypeStorageKey);
+      const storedTypeId = this.storage.get(this.selectedTypeStorageKey);
 
       return LAB_PUZZLE_TYPES.some((type) => type.id === storedTypeId)
         ? (storedTypeId as string)
@@ -3599,7 +4062,7 @@ export class LabPage {
 
   private readTypeViewMode(): TypeViewMode {
     try {
-      return globalThis.localStorage?.getItem(this.typeViewModeStorageKey) === 'lines'
+      return this.storage.get(this.typeViewModeStorageKey) === 'lines'
         ? 'lines'
         : 'cards';
     } catch {
@@ -3609,7 +4072,7 @@ export class LabPage {
 
   private readTypeNameFilter(): string {
     try {
-      return globalThis.localStorage?.getItem(this.typeNameFilterStorageKey) ?? '';
+      return this.storage.get(this.typeNameFilterStorageKey) ?? '';
     } catch {
       return '';
     }
@@ -3617,7 +4080,7 @@ export class LabPage {
 
   private readTypeStatusFilter(): ApprovalState | 'all' {
     try {
-      const storedStatus = globalThis.localStorage?.getItem(this.typeStatusFilterStorageKey);
+      const storedStatus = this.storage.get(this.typeStatusFilterStorageKey);
       if (storedStatus === 'all') {
         return 'all';
       }
@@ -3642,7 +4105,7 @@ export class LabPage {
     const fallback = type.variants[0].id;
 
     try {
-      const storedVariantId = globalThis.localStorage?.getItem(this.selectedVariantStorageKey);
+      const storedVariantId = this.storage.get(this.selectedVariantStorageKey);
 
       return type.variants.some((variant) => variant.id === storedVariantId)
         ? (storedVariantId as string)
@@ -3654,8 +4117,8 @@ export class LabPage {
 
   private saveSelection(typeId: string, variantId: string): void {
     try {
-      globalThis.localStorage?.setItem(this.selectedTypeStorageKey, typeId);
-      globalThis.localStorage?.setItem(this.selectedVariantStorageKey, variantId);
+      this.storage.set(this.selectedTypeStorageKey, typeId);
+      this.storage.set(this.selectedVariantStorageKey, variantId);
     } catch {
       // The selection still applies for the current page when storage is unavailable.
     }
@@ -3667,6 +4130,8 @@ export class LabPage {
     this.challengePartialMessageState.set('');
     this.challengeFeedbackState.set(undefined);
     this.wordSplitHintCount.set(0);
+    this.segmentPhraseHintCount.set(0);
+    this.colorChainHintCount.set(0);
   }
 
   private createSeed(): string {

@@ -17,6 +17,11 @@
                 Défaut
             </button>
 
+            <button type="button" class="secondary-button compact-button" (click)="randomizeLetterOrder()"
+                [disabled]="isCorrect()">
+                Mélanger
+            </button>
+
             <button type="button" class="secondary-button compact-button"
                 [class.active]="letterDisplayMode() === 'alphabetical'" (click)="setAlphabeticalOrder()">
                 A-Z

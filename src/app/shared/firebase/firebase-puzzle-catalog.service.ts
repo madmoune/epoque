@@ -1,15 +1,8 @@
-import { Injectable } from '@angular/core';
-import { FirebaseApp, FirebaseOptions, getApp, getApps, initializeApp } from 'firebase/app';
-import {
-  Auth,
-  browserSessionPersistence,
-  getAuth,
-  setPersistence,
-  signInAnonymously,
-} from 'firebase/auth';
-import { Database, get, getDatabase, ref, serverTimestamp, update } from 'firebase/database';
+import { Injectable, inject } from '@angular/core';
+import { Database, get, ref, serverTimestamp, update } from 'firebase/database';
 
-import { environment } from '../../../environments/environment';
+import { FirebaseAuthService } from './firebase-auth.service';
+import { FirebaseClientService } from './firebase-client.service';
 
 export type PuzzleCatalogApprovalState = 'approved' | 'pending' | 'deleted';
 
@@ -55,24 +48,12 @@ const MAX_COMMENT_LENGTH = 1000;
 
 @Injectable({ providedIn: 'root' })
 export class FirebasePuzzleCatalogService {
-  private readonly authSessionKey = 'epique.firebase.authSessionStarted';
-  private app?: FirebaseApp;
-  private auth?: Auth;
+  private readonly firebaseAuth = inject(FirebaseAuthService);
+  private readonly firebaseClient = inject(FirebaseClientService);
   private database?: Database;
 
   get isConfigured(): boolean {
-    const config = environment.firebase;
-
-    return Boolean(
-      config.apiKey &&
-        config.projectId &&
-        config.databaseURL &&
-        config.appId &&
-        !String(config.apiKey).startsWith('YOUR_') &&
-        !String(config.projectId).startsWith('YOUR_') &&
-        !String(config.databaseURL).includes('YOUR_') &&
-        !String(config.appId).startsWith('YOUR_'),
-    );
+    return this.firebaseClient.isConfigured;
   }
 
   async loadStatuses(): Promise<PuzzleCatalogStatusOverrides> {
@@ -198,40 +179,10 @@ export class FirebasePuzzleCatalogService {
       );
     }
 
-    if (!this.database) {
-      this.app = this.getFirebaseApp(environment.firebase);
-      this.database = getDatabase(this.app);
-      this.auth = getAuth(this.app);
-    }
-
-    await this.ensureAuthenticated();
+    this.database ??= this.firebaseClient.database;
+    await this.firebaseAuth.ensureAuthenticated();
 
     return this.database;
-  }
-
-  private async ensureAuthenticated(): Promise<void> {
-    const auth = this.auth;
-
-    if (!auth) {
-      throw new Error('Firebase Auth n’est pas disponible.');
-    }
-
-    await setPersistence(auth, browserSessionPersistence);
-
-    if (!auth.currentUser) {
-      await signInAnonymously(auth);
-    }
-
-    const uid = auth.currentUser?.uid;
-    if (!uid) {
-      throw new Error('Impossible de démarrer la session Firebase.');
-    }
-
-    sessionStorage.setItem(this.authSessionKey, uid);
-  }
-
-  private getFirebaseApp(config: FirebaseOptions): FirebaseApp {
-    return getApps().length ? getApp() : initializeApp(config);
   }
 
   private parseStatuses(catalog: StoredPuzzleCatalog | null): PuzzleCatalogStatusOverrides {

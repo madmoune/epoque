@@ -198,6 +198,26 @@ export class AnagramsPage {
         this.clearLetterDrag();
     }
 
+    protected randomizeLetterOrder(): void {
+        if (this.isCorrect() || !this.scrambledLetters()) {
+            return;
+        }
+
+        const wasDragMode = this.letterInteractionMode() === 'drag';
+        const randomizedLetters = this.anagramService.scrambleWord(this.scrambledLetters());
+
+        this.clearPlacementAnimation();
+        this.letterInteractionMode.set('typing');
+        this.letterDisplayMode.set('default');
+        this.letterLayoutMode.set('line');
+        this.clearLetterDrag();
+        this.scrambledLetters.set(randomizedLetters);
+
+        if (wasDragMode) {
+            this.answerInput.set(randomizedLetters);
+        }
+    }
+
     protected startLetterPointerDrag(index: number, event: PointerEvent): void {
         if (
             this.letterInteractionMode() !== 'drag' ||

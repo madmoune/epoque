@@ -7,6 +7,7 @@ import {
   FirebasePuzzleCatalogService,
   PuzzleCatalogApprovalState,
 } from '../../shared/firebase/firebase-puzzle-catalog.service';
+import { AppStorageService } from '../../shared/storage/app-storage.service';
 
 type PuzzleCard = {
   title: string;
@@ -41,6 +42,7 @@ type HomeSortMode = 'default' | 'oldest';
 export class HomePage {
   private readonly sortModeStorageKey = 'epique-home-sort-mode';
   private readonly router = inject(Router);
+  private readonly storage = inject(AppStorageService);
   private readonly playHistory = inject(PuzzlePlayHistoryService);
   private readonly playlistService = inject(PuzzlePlaylistService);
   private readonly firebaseCatalog = inject(FirebasePuzzleCatalogService);
@@ -92,6 +94,12 @@ export class HomePage {
   });
 
   constructor() {
+    this.storage.changes$.subscribe((change) => {
+      if (change.source === 'remote' && change.key === this.sortModeStorageKey) {
+        this.sortMode.set(this.readSortMode());
+      }
+    });
+
     void this.loadApprovedLabPuzzles();
   }
 
@@ -349,6 +357,12 @@ export class HomePage {
             'Glisse les 15 pièces pour remettre les nombres en ordre ou reconstruire une image.',
           route: '/sliding-puzzle',
           tag: 'Glisse',
+        },
+        {
+          title: 'Problème du Cavalier',
+          description: 'Enchaîne les sauts du cavalier pour révéler un mot caché.',
+          route: '/knights-tour',
+          tag: 'Cavalier',
         },
         {
           title: 'Superposition',
@@ -640,7 +654,7 @@ export class HomePage {
 
   private readSortMode(): HomeSortMode {
     try {
-      const storedSortMode = globalThis.localStorage?.getItem(this.sortModeStorageKey);
+      const storedSortMode = this.storage.get(this.sortModeStorageKey);
 
       return storedSortMode === 'oldest' ? 'oldest' : 'default';
     } catch {
@@ -650,7 +664,7 @@ export class HomePage {
 
   private writeSortMode(sortMode: HomeSortMode): void {
     try {
-      globalThis.localStorage?.setItem(this.sortModeStorageKey, sortMode);
+      this.storage.set(this.sortModeStorageKey, sortMode);
     } catch {
       // The selected order still applies for the current page when storage is unavailable.
     }

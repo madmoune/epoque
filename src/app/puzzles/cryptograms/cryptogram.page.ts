@@ -19,6 +19,7 @@ import {
   CustomKeyboardKey,
 } from '../shared/custom-keyboard/custom-keyboard.component';
 import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
+import { AppStorageService } from '../../shared/storage/app-storage.service';
 
 @Component({
   selector: 'app-cryptograms-page',
@@ -35,6 +36,7 @@ export class CryptogramsPage implements AfterViewInit {
 
   private readonly cryptogramService = inject(CryptogramService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly storage = inject(AppStorageService);
   private readonly fillOccurrencesStorageKey = 'epique-cryptogram-fill-occurrences';
 
   protected readonly isLoading = signal(true);
@@ -109,6 +111,12 @@ export class CryptogramsPage implements AfterViewInit {
   });
 
   constructor() {
+    this.storage.changes$.subscribe((change) => {
+      if (change.source === 'remote' && change.key === this.fillOccurrencesStorageKey) {
+        this.fillOccurrencesAutomatically.set(this.readFillOccurrencesPreference());
+      }
+    });
+
     void this.loadPuzzle();
   }
 
@@ -191,7 +199,7 @@ export class CryptogramsPage implements AfterViewInit {
       this.fillOccurrencesAutomatically.set(checkbox.checked);
 
       try {
-        globalThis.localStorage?.setItem(this.fillOccurrencesStorageKey, String(checkbox.checked));
+        this.storage.set(this.fillOccurrencesStorageKey, String(checkbox.checked));
       } catch {
         // Local storage can be unavailable in private or restricted browsing contexts.
       }
@@ -380,7 +388,7 @@ export class CryptogramsPage implements AfterViewInit {
 
   private readFillOccurrencesPreference(): boolean {
     try {
-      return globalThis.localStorage?.getItem(this.fillOccurrencesStorageKey) === 'true';
+      return this.storage.get(this.fillOccurrencesStorageKey) === 'true';
     } catch {
       return false;
     }

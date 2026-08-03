@@ -1,4 +1,5 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
+import { AppStorageService } from './shared/storage/app-storage.service';
 
 export type PuzzlePlaylist = {
   id: string;
@@ -17,7 +18,16 @@ export type PlaylistProgress = {
 })
 export class PuzzlePlaylistService {
   private readonly storageKey = 'epique-puzzle-playlists';
+  private readonly storage = inject(AppStorageService);
   readonly playlists = signal<PuzzlePlaylist[]>(this.readPlaylists());
+
+  constructor() {
+    this.storage.changes$.subscribe((change) => {
+      if (change.source === 'remote' && change.key === this.storageKey) {
+        this.playlists.set(this.readPlaylists());
+      }
+    });
+  }
 
   create(name: string): PuzzlePlaylist {
     const playlist: PuzzlePlaylist = {
@@ -162,7 +172,7 @@ export class PuzzlePlaylistService {
 
   private readPlaylists(): PuzzlePlaylist[] {
     try {
-      const stored = globalThis.localStorage?.getItem(this.storageKey);
+      const stored = this.storage.get(this.storageKey);
       const parsed: unknown = stored ? JSON.parse(stored) : [];
 
       if (!Array.isArray(parsed)) {
@@ -181,7 +191,7 @@ export class PuzzlePlaylistService {
 
   private writePlaylists(playlists: PuzzlePlaylist[]): void {
     try {
-      globalThis.localStorage?.setItem(this.storageKey, JSON.stringify(playlists));
+      this.storage.set(this.storageKey, JSON.stringify(playlists));
     } catch {
       // Les playlists restent disponibles pendant la session si le stockage est indisponible.
     }

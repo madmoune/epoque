@@ -2,6 +2,9 @@ import { DOCUMENT } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { PuzzlePlayHistoryService } from './puzzle-play-history.service';
+import { FirebaseAuthService } from './shared/firebase/firebase-auth.service';
+import { FirebaseUserDataSyncService } from './shared/firebase/firebase-user-data-sync.service';
+import { AppStorageService } from './shared/storage/app-storage.service';
 
 type Theme = 'dark' | 'light';
 type ThemeTransitionDocument = Document & {
@@ -16,6 +19,9 @@ type ThemeTransitionDocument = Document & {
 })
 export class App {
   private readonly document = inject(DOCUMENT);
+  private readonly storage = inject(AppStorageService);
+  protected readonly firebaseAuth = inject(FirebaseAuthService);
+  protected readonly userDataSync = inject(FirebaseUserDataSyncService);
 
   constructor() {
     inject(PuzzlePlayHistoryService);
@@ -32,7 +38,7 @@ export class App {
       this.document.documentElement.dataset['theme'] = nextTheme;
 
       try {
-        globalThis.localStorage?.setItem('epique-theme', nextTheme);
+        this.storage.set('epique-theme', nextTheme);
       } catch {
         // The selected theme still applies when browser storage is unavailable.
       }
@@ -48,5 +54,13 @@ export class App {
         this.document.documentElement.classList.remove('theme-transition-fallback');
       }, 320);
     }
+  }
+
+  protected signInWithGoogle(): void {
+    void this.firebaseAuth.signInWithGoogle();
+  }
+
+  protected signOut(): void {
+    void this.firebaseAuth.signOut();
   }
 }

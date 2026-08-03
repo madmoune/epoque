@@ -48,6 +48,12 @@ This project has a lightweight Firebase Realtime Database room service for multi
 
 The puzzle laboratory stores type and variant states under `puzzleCatalog/types`. The laboratory signs in anonymously before reading or saving these states, so anonymous authentication must be enabled in Firebase Authentication.
 
+### Optional account sync
+
+The application can also sign in with Google from the `Se connecter` button. Enable the Google provider in Firebase Authentication and add the local/deployed domains to the authorized domains list. Once connected, the application synchronizes the `epique-*` local data under `users/<uid>/localStorage`: playlists, play dates, solved games, theme, and preferences. Without an account, the local-only mode remains active.
+
+Deploy `database.rules.json` after adding the account rules so each user can only read and write their own synchronized data.
+
 The current rules are intended for early prototypes with shareable room codes. Tighten them before using public player data or launching a public game.
 
 ## Running unit tests
