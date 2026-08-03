@@ -1,25 +1,102 @@
-.account-shell {
+.quick-menu {
   position: fixed;
   z-index: 200;
   top: max(0.75rem, env(safe-area-inset-top));
-  right: calc(max(0.75rem, env(safe-area-inset-right)) + 3.5rem);
-  display: flex;
-  align-items: flex-start;
-  max-width: min(22rem, calc(100vw - 5.25rem));
+  right: max(0.75rem, env(safe-area-inset-right));
 }
 
+.quick-menu-toggle {
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  place-items: center;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  background: var(--surface-raised);
+  color: var(--accent);
+  box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 28%);
+  cursor: pointer;
+  list-style: none;
+  touch-action: manipulation;
+
+  &::-webkit-details-marker {
+    display: none;
+  }
+
+  span {
+    font-size: 1.1rem;
+    line-height: 1;
+  }
+
+  &:hover,
+  &:focus-visible {
+    border-color: var(--accent);
+  }
+
+  &:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--accent) 35%, transparent);
+    outline-offset: 2px;
+  }
+}
+
+.quick-menu[open] .quick-menu-toggle {
+  border-color: var(--accent);
+  border-radius: 0.8rem;
+}
+
+.quick-menu-panel {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  display: grid;
+  gap: 0.8rem;
+  width: min(18rem, calc(100vw - 1.5rem));
+  padding: 0.9rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.85rem;
+  background: var(--surface);
+  box-shadow: 0 0.75rem 2rem rgb(0 0 0 / 30%);
+}
+
+.quick-menu-title,
+.quick-menu-label {
+  margin: 0;
+  color: var(--muted-strong);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.quick-menu-title {
+  color: var(--accent);
+  font-size: 0.7rem;
+}
+
+.quick-menu-section {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.theme-button,
 .account-button,
 .account-loading,
 .account-signed-in {
-  min-height: 2.75rem;
+  min-height: 2.65rem;
   border: 1px solid var(--border-strong);
-  border-radius: 999px;
+  border-radius: 0.65rem;
   background: var(--surface-raised);
   color: var(--text);
-  box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 28%);
+  box-shadow: 0 0.35rem 1rem rgb(0 0 0 / 14%);
 }
 
+.theme-button,
 .account-button {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   padding: 0.5rem 0.9rem;
   color: var(--accent);
   font: inherit;
@@ -45,21 +122,24 @@
 
 .account-loading {
   display: grid;
-  width: 2.75rem;
   place-items: center;
   color: var(--muted);
 }
 
 .account-signed-in {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  padding: 0.3rem 0.35rem 0.3rem 0.75rem;
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.6rem;
+}
+
+.account-info {
+  display: grid;
+  gap: 0.2rem;
 }
 
 .account-name {
   overflow: hidden;
-  max-width: 8rem;
+  max-width: 100%;
   color: var(--text);
   font-size: 0.78rem;
   font-weight: 700;
@@ -74,11 +154,7 @@
 }
 
 .account-error {
-  position: absolute;
-  top: calc(100% + 0.45rem);
-  right: 0;
-  width: max-content;
-  max-width: min(22rem, calc(100vw - 1.5rem));
+  width: auto;
   margin: 0;
   padding: 0.5rem 0.7rem;
   border: 1px solid color-mix(in srgb, var(--accent) 55%, var(--border));
@@ -89,54 +165,8 @@
   box-shadow: 0 0.5rem 1.25rem rgb(0 0 0 / 24%);
 }
 
-.theme-toggle {
-  position: fixed;
-  z-index: 200;
-  top: max(0.75rem, env(safe-area-inset-top));
-  right: max(0.75rem, env(safe-area-inset-right));
-  display: grid;
-  place-items: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  padding: 0;
-  border: 1px solid var(--border-strong);
-  border-radius: 50%;
-  background: var(--surface-raised);
-  color: var(--accent);
-  box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 28%);
-  cursor: pointer;
-  touch-action: manipulation;
-
-  span {
-    font-size: 1.15rem;
-    line-height: 1;
-  }
-
-  &:hover {
-    border-color: var(--accent);
-  }
-
-  &:focus-visible {
-    outline: 3px solid color-mix(in srgb, var(--accent) 35%, transparent);
-    outline-offset: 2px;
-  }
-}
-
 @media (max-width: 44rem) {
-  .account-shell {
-    max-width: calc(100vw - 5.25rem);
-  }
-
-  .account-signed-in {
-    gap: 0.35rem;
-  }
-
-  .account-name,
-  .account-sync-status {
-    display: none;
-  }
-
-  .account-signed-in {
-    padding-left: 0.35rem;
+  .quick-menu-panel {
+    width: min(17rem, calc(100vw - 1.5rem));
   }
 }

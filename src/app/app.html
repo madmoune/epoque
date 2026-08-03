@@ -1,44 +1,60 @@
-<div class="account-shell">
-  @if (firebaseAuth.isConfigured) {
-    @if (!firebaseAuth.isReady()) {
-      <span class="account-loading" aria-label="Connexion en cours">…</span>
-    } @else if (firebaseAuth.accountUser(); as user) {
-      <div class="account-signed-in">
-        <span class="account-name" [title]="user.displayName || user.email || 'Compte'">
-          {{ user.displayName || user.email || 'Compte' }}
-        </span>
-        <span class="account-sync-status">
-          {{ userDataSync.status() === 'error' ? 'Synchronisation indisponible' : 'Sauvegardé' }}
-        </span>
-        <button type="button" class="account-button" (click)="signOut()" [disabled]="firebaseAuth.isBusy()">
-          Déconnexion
-        </button>
-      </div>
-    } @else {
+<details class="quick-menu">
+  <summary class="quick-menu-toggle" aria-label="Ouvrir le menu des options" title="Options">
+    <span aria-hidden="true">☰</span>
+  </summary>
+
+  <div class="quick-menu-panel">
+    <p class="quick-menu-title">Options</p>
+
+    <div class="quick-menu-section theme-section">
+      <span class="quick-menu-label">Apparence</span>
       <button
         type="button"
-        class="account-button"
-        (click)="signInWithGoogle()"
-        [disabled]="firebaseAuth.isBusy()"
+        class="theme-button"
+        (click)="toggleTheme()"
+        [attr.aria-label]="theme() === 'dark' ? 'Activer le thème clair' : 'Activer le thème sombre'"
       >
-        {{ firebaseAuth.isBusy() ? 'Connexion…' : 'Se connecter' }}
+        <span aria-hidden="true">{{ theme() === 'dark' ? '☀' : '☾' }}</span>
+        <span>{{ theme() === 'dark' ? 'Mode clair' : 'Mode sombre' }}</span>
       </button>
-    }
+    </div>
 
-    @if (firebaseAuth.errorMessage(); as errorMessage) {
-      <p class="account-error" role="status">{{ errorMessage }}</p>
-    }
-  }
-</div>
+    @if (firebaseAuth.isConfigured) {
+      <div class="quick-menu-section account-shell">
+        <span class="quick-menu-label">Compte</span>
+        @if (!firebaseAuth.isReady()) {
+          <span class="account-loading" aria-label="Connexion en cours">…</span>
+        } @else if (firebaseAuth.accountUser(); as user) {
+          <div class="account-signed-in">
+            <div class="account-info">
+              <span class="account-name" [title]="user.displayName || user.email || 'Compte'">
+                {{ user.displayName || user.email || 'Compte' }}
+              </span>
+              <span class="account-sync-status">
+                {{ userDataSync.status() === 'error' ? 'Synchronisation indisponible' : 'Sauvegardé' }}
+              </span>
+            </div>
+            <button type="button" class="account-button" (click)="signOut()" [disabled]="firebaseAuth.isBusy()">
+              Déconnexion
+            </button>
+          </div>
+        } @else {
+          <button
+            type="button"
+            class="account-button"
+            (click)="signInWithGoogle()"
+            [disabled]="firebaseAuth.isBusy()"
+          >
+            {{ firebaseAuth.isBusy() ? 'Connexion…' : 'Se connecter avec Google' }}
+          </button>
+        }
 
-<button
-  type="button"
-  class="theme-toggle"
-  (click)="toggleTheme()"
-  [attr.aria-label]="theme() === 'dark' ? 'Activer le thème clair' : 'Activer le thème sombre'"
-  [attr.title]="theme() === 'dark' ? 'Thème clair' : 'Thème sombre'"
->
-  <span aria-hidden="true">{{ theme() === 'dark' ? '☀' : '☾' }}</span>
-</button>
+        @if (firebaseAuth.errorMessage(); as errorMessage) {
+          <p class="account-error" role="status">{{ errorMessage }}</p>
+        }
+      </div>
+    }
+  </div>
+</details>
 
 <router-outlet />
