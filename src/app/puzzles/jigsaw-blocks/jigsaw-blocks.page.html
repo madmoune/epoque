@@ -60,6 +60,11 @@
             <aside class="tile-tray" aria-label="Pièces de chemin disponibles">
                 <h2>Pièces</h2>
 
+                <button type="button" class="secondary-button rotate-button" (click)="rotateSelectedTile()"
+                    [disabled]="!selectedTile()">
+                    Pivoter
+                </button>
+
                 <div class="tile-list">
                     @for (tile of unplacedTiles(); track tile.id) {
                     <button type="button" class="tile-button" [class.selected]="selectedTileId() === tile.id"
@@ -79,10 +84,6 @@
         </section>
 
         <div class="actions">
-            <button type="button" class="secondary-button" (click)="rotateSelectedTile()" [disabled]="!selectedTile()">
-                Pivoter
-            </button>
-
             <button type="button" class="secondary-button" (click)="placeHintTile()"
                 [disabled]="isSolved() || unplacedTiles().length === 0">
                 Indice

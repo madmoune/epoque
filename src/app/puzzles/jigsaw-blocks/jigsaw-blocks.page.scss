@@ -166,6 +166,11 @@ h1 {
     gap: 0.65rem;
 }
 
+.rotate-button {
+    width: 100%;
+    margin-bottom: 0.875rem;
+}
+
 .tile-button {
     display: grid;
     place-items: center;
@@ -365,6 +370,10 @@ button {
         gap: 0.35rem;
         overflow: visible;
         padding-bottom: 0;
+    }
+
+    .rotate-button {
+        margin-bottom: 0.5rem;
     }
 
     .tile-button {

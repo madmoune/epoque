@@ -2,7 +2,7 @@
   display: none;
 }
 
-@media (max-width: 700px), (hover: none) and (pointer: coarse) {
+@media (max-width: 64rem), (hover: none) and (pointer: coarse) {
   :host.keyboard-visible {
     display: block;
     min-height: 11rem;
@@ -17,7 +17,7 @@
 
     position: fixed;
     left: 50%;
-    bottom: max(0.45rem, env(safe-area-inset-bottom));
+    bottom: calc(0.45rem + env(safe-area-inset-bottom));
     z-index: 60;
     display: grid;
     gap: 0.32rem;

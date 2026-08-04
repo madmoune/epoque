@@ -26,14 +26,14 @@ export class CustomKeyboardComponent {
 
   constructor() {
     effect(() => {
-      if (!this.visible()) return;
+      if (!this.keyboardVisible) return;
       window.setTimeout(() => this.keepActiveElementAboveKeyboard(), 0);
     });
   }
 
   @HostBinding('class.keyboard-visible')
   protected get keyboardVisible(): boolean {
-    return this.visible();
+    return this.visible() && !this.disabled();
   }
 
   @HostBinding('class.roomy-keyboard')
@@ -59,19 +59,21 @@ export class CustomKeyboardComponent {
   }
 
   protected pressKey(key: CustomKeyboardKey): void {
+    if (!this.keyboardVisible) return;
+
     this.keyPress.emit(key);
     window.setTimeout(() => this.keepActiveElementAboveKeyboard(), 0);
   }
 
   @HostListener('document:focusin')
   protected handleFocusIn(): void {
-    if (!this.visible()) return;
+    if (!this.keyboardVisible) return;
     window.setTimeout(() => this.keepActiveElementAboveKeyboard(), 0);
   }
 
   @HostListener('window:resize')
   protected handleResize(): void {
-    if (!this.visible()) return;
+    if (!this.keyboardVisible) return;
     window.setTimeout(() => this.keepActiveElementAboveKeyboard(), 0);
   }
 

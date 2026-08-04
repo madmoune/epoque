@@ -1350,14 +1350,21 @@ export class LabPage {
         example.id.endsWith(`-${candidate.id}`),
       ) ?? this.pick(SEGMENT_PHRASE_DEFINITIONS, random);
     const words = definition.definition.split(/\s+/).filter(Boolean);
+    const answerIndexByWord = new Map(
+      definition.answerWordIndexes.map((wordIndex, answerIndex) => [wordIndex, answerIndex]),
+    );
     const segmentPhraseWords = words.map((word, wordIndex) => {
       const letters = [...this.normalizeChallengeAnswer(word)];
       const fullMasks = letters.map((letter) => this.segmentPhraseLetterMask(letter));
-      const missingMasks = this.segmentPhraseMissingMasks(
-        fullMasks,
-        this.segmentPhraseLetterMask(definition.answer[wordIndex] ?? 'E'),
-        random,
-      );
+      const answerIndex = answerIndexByWord.get(wordIndex);
+      const missingMasks =
+        answerIndex === undefined
+          ? fullMasks.map((mask) => mask.map(() => false))
+          : this.segmentPhraseMissingMasks(
+              fullMasks,
+              this.segmentPhraseLetterMask(definition.answer[answerIndex] ?? 'E'),
+              random,
+            );
       const letterWidth = 18;
       const letterGap = 22;
       const wordHeight = 30;
