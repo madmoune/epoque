@@ -1,6 +1,6 @@
 .page {
   --calcudoku-cage-border: #103f45;
-  --calcudoku-grid-line: #147d70;
+  --calcudoku-grid-line: #b55a32;
   --calcudoku-cell-bg: #fff;
   --calcudoku-panel-bg: #f7fbfb;
   --calcudoku-label: #205b61;
@@ -166,7 +166,7 @@ button:disabled {
 @media (prefers-color-scheme: dark) {
   .page {
     --calcudoku-cage-border: #8ebfc4;
-    --calcudoku-grid-line: #62c6b1;
+    --calcudoku-grid-line: #dc7a46;
     --calcudoku-cell-bg: #12211e;
     --calcudoku-panel-bg: #10221f;
     --calcudoku-label: #b7edf3;
