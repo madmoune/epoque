@@ -9,6 +9,19 @@
         Change une seule lettre à la fois et atteins la cible avec le moins de changements possible.
         Chaque étape doit former un mot français valide.
       </p>
+      <div class="word-length-selector" role="group" aria-label="Longueur des mots">
+        <span>Longueur</span>
+        @for (length of wordLengthOptions; track length) {
+          <button
+            type="button"
+            [class.selected]="selectedLength() === length"
+            [attr.aria-pressed]="selectedLength() === length"
+            (click)="setWordLength(length)"
+          >
+            {{ length }} lettres
+          </button>
+        }
+      </div>
     </header>
 
     @if (isLoading()) {
@@ -24,7 +37,7 @@
           </div>
           <div class="challenge-arrow" aria-hidden="true">
             <span>→</span>
-            <small>{{ currentPuzzle.minimumMoves }} changements</small>
+            <small>{{ currentPuzzle.letterCount }} lettres · {{ currentPuzzle.minimumMoves }} changements</small>
           </div>
           <div class="endpoint target-endpoint">
             <span>Objectif</span>

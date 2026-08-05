@@ -13,7 +13,12 @@ import {
   CustomKeyboardKey,
 } from '../shared/custom-keyboard/custom-keyboard.component';
 import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
-import { WordLadderPuzzle, WordLadderService } from './word-ladder.service';
+import {
+  WORD_LADDER_LENGTHS,
+  WordLadderLength,
+  WordLadderPuzzle,
+  WordLadderService,
+} from './word-ladder.service';
 
 type WordLadderFeedback = {
   tone: 'error' | 'hint';
@@ -36,6 +41,8 @@ export class WordLadderPage {
   protected readonly isLoading = signal(true);
   protected readonly loadError = signal<string | null>(null);
   protected readonly puzzle = signal<WordLadderPuzzle | null>(null);
+  protected readonly wordLengthOptions = WORD_LADDER_LENGTHS;
+  protected readonly selectedLength = signal<WordLadderLength>(4);
   protected readonly ladder = signal<string[]>([]);
   protected readonly answerInput = signal('');
   protected readonly feedback = signal<WordLadderFeedback | null>(null);
@@ -109,7 +116,7 @@ export class WordLadderPage {
   }
 
   protected updateAnswer(value: string): void {
-    const maximumLength = this.puzzle()?.letterCount ?? 5;
+    const maximumLength = this.puzzle()?.letterCount ?? this.selectedLength();
     const letters = [...value.replace(/[^\p{Letter}]/gu, '')].slice(0, maximumLength).join('');
 
     this.answerInput.set(letters.toLocaleUpperCase('fr-CA'));
@@ -328,8 +335,9 @@ export class WordLadderPage {
 
   protected newPuzzle(): void {
     try {
-      const nextPuzzle = this.wordLadderService.createPuzzle();
+      const nextPuzzle = this.wordLadderService.createPuzzle(this.selectedLength());
 
+      this.loadError.set(null);
       this.puzzle.set(nextPuzzle);
       this.ladder.set([nextPuzzle.start]);
       this.answerInput.set('');
@@ -339,6 +347,18 @@ export class WordLadderPage {
       this.focusInput();
     } catch {
       this.loadError.set('Impossible de créer une nouvelle échelle de mots.');
+    }
+  }
+
+  protected setWordLength(length: WordLadderLength): void {
+    if (this.selectedLength() === length) {
+      return;
+    }
+
+    this.selectedLength.set(length);
+
+    if (!this.isLoading() && !this.loadError()) {
+      this.newPuzzle();
     }
   }
 

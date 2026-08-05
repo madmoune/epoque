@@ -2,10 +2,13 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
+export const WORD_LADDER_LENGTHS = [4, 5] as const;
+export type WordLadderLength = (typeof WORD_LADDER_LENGTHS)[number];
+
 export type WordLadderPuzzle = {
   start: string;
   target: string;
-  letterCount: number;
+  letterCount: WordLadderLength;
   minimumMoves: number;
 };
 
@@ -14,6 +17,7 @@ export type WordLadderPuzzle = {
 })
 export class WordLadderService {
   private readonly http = inject(HttpClient);
+  private readonly supportedWordLengths = WORD_LADDER_LENGTHS;
   private readonly minimumMoves = 3;
   private readonly maximumMoves = 7;
   private readonly maximumGenerationAttempts = 400;
@@ -29,28 +33,36 @@ export class WordLadderService {
       return;
     }
 
-    const text = await firstValueFrom(
-      this.http.get('word-ladder.txt', {
-        responseType: 'text',
+    const wordLists = await Promise.all(
+      this.supportedWordLengths.map(async (length) => {
+        const text = await firstValueFrom(
+          this.http.get(`words-${length}.txt`, {
+            responseType: 'text',
+          }),
+        );
+
+        return text
+          .split(/\r?\n/)
+          .map((word) => word.trim())
+          .filter(Boolean);
       }),
     );
 
-    this.initializeWords(
-      text
-        .split(/\r?\n/)
-        .map((word) => word.trim())
-        .filter(Boolean),
-    );
+    this.initializeWords(wordLists.flat());
   }
 
-  createPuzzle(): WordLadderPuzzle {
+  createPuzzle(requestedLength?: WordLadderLength): WordLadderPuzzle {
     if (this.wordsByKey.size === 0) {
       throw new Error('Word ladder words have not been loaded yet.');
     }
 
     for (const preferredOnly of [true, false]) {
       for (const ignoreRecentPuzzles of [false, true]) {
-        const puzzle = this.tryCreatePuzzle(ignoreRecentPuzzles, preferredOnly);
+        const puzzle = this.tryCreatePuzzle(
+          ignoreRecentPuzzles,
+          preferredOnly,
+          requestedLength,
+        );
 
         if (puzzle) {
           return puzzle;
@@ -69,14 +81,22 @@ export class WordLadderService {
     const firstKey = this.normalize(first);
     const secondKey = this.normalize(second);
 
-    if (firstKey.length !== secondKey.length || firstKey === secondKey) {
+    const firstLetters = [...firstKey];
+    const secondLetters = [...secondKey];
+
+    if (
+      !this.wordsByKey.has(firstKey) ||
+      !this.wordsByKey.has(secondKey) ||
+      firstLetters.length !== secondLetters.length ||
+      firstKey === secondKey
+    ) {
       return false;
     }
 
     let differenceCount = 0;
 
-    for (let index = 0; index < firstKey.length; index += 1) {
-      if (firstKey[index] !== secondKey[index]) {
+    for (let index = 0; index < firstLetters.length; index += 1) {
+      if (firstLetters[index] !== secondLetters[index]) {
         differenceCount += 1;
       }
 
@@ -164,24 +184,26 @@ export class WordLadderService {
     for (const word of words) {
       const wordKey = this.normalize(word);
 
-      if (![4, 5].includes(wordKey.length) || wordsByKey.has(wordKey)) {
+      if (
+        !this.supportedWordLengths.includes([...wordKey].length as WordLadderLength) ||
+        wordsByKey.has(wordKey)
+      ) {
         continue;
       }
 
-      wordsByKey.set(wordKey, word.toLocaleLowerCase('fr-CA'));
+      wordsByKey.set(wordKey, word.normalize('NFC').toLocaleLowerCase('fr-CA'));
     }
 
     if (wordsByKey.size === 0) {
       throw new Error('The word ladder list is empty.');
     }
 
-    const wordKeysByLength = new Map<number, string[]>([
-      [4, []],
-      [5, []],
-    ]);
+    const wordKeysByLength = new Map<number, string[]>(
+      this.supportedWordLengths.map((length) => [length, []]),
+    );
 
     for (const wordKey of wordsByKey.keys()) {
-      wordKeysByLength.get(wordKey.length)?.push(wordKey);
+      wordKeysByLength.get([...wordKey].length)?.push(wordKey);
     }
 
     const neighborSets = new Map<string, Set<string>>();
@@ -190,8 +212,12 @@ export class WordLadderService {
     for (const wordKey of wordsByKey.keys()) {
       neighborSets.set(wordKey, new Set());
 
-      for (let index = 0; index < wordKey.length; index += 1) {
-        const pattern = `${wordKey.length}:${wordKey.slice(0, index)}*${wordKey.slice(index + 1)}`;
+      const letters = [...wordKey];
+
+      for (let index = 0; index < letters.length; index += 1) {
+        const pattern = `${letters.length}:${letters.slice(0, index).join('')}*${letters
+          .slice(index + 1)
+          .join('')}`;
         const bucket = patternBuckets.get(pattern) ?? [];
 
         bucket.push(wordKey);
@@ -221,10 +247,12 @@ export class WordLadderService {
   private tryCreatePuzzle(
     ignoreRecentPuzzles: boolean,
     preferredOnly: boolean,
+    requestedLength?: WordLadderLength,
   ): WordLadderPuzzle | null {
-    const availableLengths = [...this.wordKeysByLength]
-      .filter(([, wordKeys]) => wordKeys.length > 0)
-      .map(([length]) => length);
+    const availableLengths = (requestedLength
+      ? [requestedLength]
+      : this.supportedWordLengths
+    ).filter((length) => (this.wordKeysByLength.get(length)?.length ?? 0) > 0);
 
     for (let attempt = 0; attempt < this.maximumGenerationAttempts; attempt += 1) {
       const letterCount = this.randomItem(availableLengths);
@@ -273,7 +301,7 @@ export class WordLadderService {
     return null;
   }
 
-  private moveCountPreferences(letterCount: number, preferredOnly: boolean): number[] {
+  private moveCountPreferences(letterCount: WordLadderLength, preferredOnly: boolean): number[] {
     const preferredMoveCount = letterCount === 4 ? 3 : 4;
 
     if (preferredOnly) {

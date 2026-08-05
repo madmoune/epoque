@@ -53,6 +53,32 @@ h1 {
   line-height: 1.45;
 }
 
+.word-length-selector {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 850;
+
+  button {
+    min-height: 2.35rem;
+    padding: 0.45rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface-soft);
+    color: var(--text);
+    font-size: 0.78rem;
+  }
+
+  button.selected {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--accent-contrast);
+  }
+}
+
 .game-panel {
   display: grid;
   gap: 1rem;
@@ -347,6 +373,10 @@ button {
 
   h1 {
     font-size: 1.85rem;
+  }
+
+  .word-length-selector {
+    justify-content: center;
   }
 
   .challenge-summary {

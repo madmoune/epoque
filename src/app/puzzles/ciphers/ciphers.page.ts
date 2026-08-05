@@ -16,7 +16,7 @@ import {
   CustomKeyboardKey,
 } from '../shared/custom-keyboard/custom-keyboard.component';
 import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
-import { CipherPuzzle, CipherType, CiphersService } from './ciphers.service';
+import { CipherPuzzle, CipherType, CiphersService, NatoMode } from './ciphers.service';
 
 @Component({
   selector: 'app-ciphers-page',
@@ -35,6 +35,7 @@ export class CiphersPage implements OnDestroy {
   private readonly ciphersService = inject(CiphersService);
 
   protected readonly selectedCipher = signal<CipherType>('caesar');
+  protected readonly natoMode = signal<NatoMode>('letter-to-code');
   protected readonly puzzle = signal<CipherPuzzle | null>(null);
   protected readonly answerInput = signal('');
   protected readonly answerLetters = signal<string[]>([]);
@@ -85,6 +86,16 @@ export class CiphersPage implements OnDestroy {
     () =>
       this.ciphersService.cipherOptions.find((option) => option.type === this.selectedCipher())?.label ??
       'Cipher',
+  );
+
+  protected readonly isNatoLetterMode = computed(
+    () => this.selectedCipher() === 'nato' && this.natoMode() === 'letter-to-code',
+  );
+
+  protected readonly introText = computed(() =>
+    this.isNatoLetterMode()
+      ? 'Trouve le mot-code de l’alphabet radio NATO correspondant à la lettre affichée.'
+      : 'Retrouve le mot de la liste après transformation par un cipher simple.',
   );
 
   protected readonly cipherLegend = computed(() => this.ciphersService.legendFor(this.selectedCipher()));
@@ -139,6 +150,10 @@ export class CiphersPage implements OnDestroy {
       }
 
       this.selectedCipher.set(nextCipher);
+      if (nextCipher === 'nato') {
+        this.natoMode.set('letter-to-code');
+        this.letterByLetter.set(false);
+      }
 
       if (!this.isLoading() && !this.loadError()) {
         this.nextPuzzle();
@@ -150,6 +165,16 @@ export class CiphersPage implements OnDestroy {
 
   protected updateAnswer(value: string): void {
     this.answerInput.set(value);
+  }
+
+  protected setNatoMode(mode: NatoMode): void {
+    if (this.natoMode() === mode) return;
+
+    this.natoMode.set(mode);
+    if (mode === 'letter-to-code') {
+      this.letterByLetter.set(false);
+    }
+    this.nextPuzzle();
   }
 
   protected updateAnswerFromEvent(event: Event): void {
@@ -303,7 +328,7 @@ export class CiphersPage implements OnDestroy {
 
   protected nextPuzzle(): void {
     this.clearLetterReveal();
-    const nextPuzzle = this.ciphersService.createPuzzle(this.selectedCipher());
+    const nextPuzzle = this.ciphersService.createPuzzle(this.selectedCipher(), this.natoMode());
     this.puzzle.set(nextPuzzle);
     this.answerInput.set('');
     this.answerLetters.set(Array.from({ length: nextPuzzle.normalizedAnswer.length }, () => ''));
@@ -413,7 +438,9 @@ export class CiphersPage implements OnDestroy {
   }
 
   private partialWordHint(puzzle: CipherPuzzle): string {
-    const answer = puzzle.answer;
+    const answer = this.isNatoLetterMode()
+      ? puzzle.answer.replace(/[^\p{Letter}]/gu, '')
+      : puzzle.answer;
     const revealedLength = Math.min(this.hintLevel(), answer.length);
 
     return answer

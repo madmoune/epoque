@@ -23,7 +23,15 @@ type ZebraPuzzle = {
 
 type GridMark = 'unknown' | 'yes' | 'no';
 
-type ZebraClueType = 'same' | 'notSame' | 'position' | 'notPosition' | 'adjacentRight';
+type ZebraClueType =
+  | 'same'
+  | 'notSame'
+  | 'position'
+  | 'notPosition'
+  | 'adjacentRight'
+  | 'adjacent'
+  | 'leftOf'
+  | 'oneBetween';
 
 type ZebraClue =
   | {
@@ -63,15 +71,45 @@ type ZebraClue =
       rightCategoryId: string;
       rightValue: string;
       text: string;
+    }
+  | {
+      type: 'adjacent';
+      firstCategoryId: string;
+      firstValue: string;
+      secondCategoryId: string;
+      secondValue: string;
+      text: string;
+    }
+  | {
+      type: 'oneBetween';
+      firstCategoryId: string;
+      firstValue: string;
+      secondCategoryId: string;
+      secondValue: string;
+      text: string;
+    }
+  | {
+      type: 'leftOf';
+      leftCategoryId: string;
+      leftValue: string;
+      rightCategoryId: string;
+      rightValue: string;
+      text: string;
     };
 
 const ZEBRA_CLUE_PROFILES: ZebraClueType[][] = [
   ['position', 'same', 'adjacentRight'],
+  ['notPosition', 'notSame', 'adjacent'],
+  ['position', 'notSame', 'leftOf'],
+  ['notPosition', 'same', 'oneBetween'],
+  ['position', 'notPosition', 'adjacent'],
+  ['same', 'notSame', 'leftOf'],
+  ['position', 'same', 'oneBetween'],
   ['notPosition', 'notSame', 'adjacentRight'],
-  ['position', 'notSame', 'adjacentRight'],
-  ['notPosition', 'same', 'adjacentRight'],
-  ['position', 'notPosition', 'same'],
-  ['same', 'notSame', 'adjacentRight'],
+  ['same', 'adjacent', 'leftOf'],
+  ['notSame', 'adjacentRight', 'oneBetween'],
+  ['position', 'adjacent', 'oneBetween'],
+  ['notPosition', 'leftOf', 'oneBetween'],
 ];
 
 const ZEBRA_PUZZLES: Record<ZebraLevel, ZebraPuzzle> = {
@@ -266,9 +304,20 @@ export class ZebraPage {
   }
 
   protected showHint(): void {
-    const hintRelation = this.trueRelations().find(
+    const unresolvedRelations = this.trueRelations().filter(
       (relation) => this.relationMark(relation) !== 'yes',
     );
+    const directlyExplainedRelations = unresolvedRelations.filter((relation) =>
+      this.puzzle().logicalClues?.some((clue) => this.clueImpliesAssociation(clue, relation)),
+    );
+    const hintRelation =
+      unresolvedRelations.length > 0
+        ? this.randomItem(
+            directlyExplainedRelations.length > 0
+              ? directlyExplainedRelations
+              : unresolvedRelations,
+          )
+        : undefined;
 
     if (!hintRelation) {
       this.hintMessage.set('Toutes les associations nécessaires sont déjà déduites.');
@@ -303,8 +352,14 @@ export class ZebraPage {
 
         if (implied && this.matchesAssociation(relation, implied)) {
           const sharedValue = this.sharedValueText(first, second);
+          const firstAssociation = this.associationText(first);
+          const secondAssociation = this.associationText(second);
 
-          return `Déduction : ${this.associationText(relation)}. Pourquoi : on sait déjà que ${this.associationText(first)} et ${this.associationText(second)}. Ces deux associations ont ${sharedValue} en commun; les deux valeurs restantes doivent donc être associées. Une valeur ne peut avoir qu’une seule association dans chaque catégorie.`;
+          return this.randomItem([
+            `Déduction : ${this.associationText(relation)}. Pourquoi : on sait déjà que ${firstAssociation} et ${secondAssociation}. Ces deux associations ont ${sharedValue} en commun; les deux valeurs restantes doivent donc être associées.`,
+            `Déduction : ${this.associationText(relation)}. En reliant les deux associations connues grâce à ${sharedValue}, on obtient cette nouvelle association.`,
+            `Déduction : ${this.associationText(relation)}. ${this.capitalize(sharedValue)} apparaît dans les deux relations déjà confirmées; les deux valeurs restantes vont donc ensemble.`,
+          ]);
         }
       }
     }
@@ -321,7 +376,14 @@ export class ZebraPage {
     );
 
     if (secondAlternatives.length === relation.secondCategory.values.length - 1) {
-      return `Déduction : ${this.associationText(relation)}. Pourquoi : toutes les autres valeurs de ${relation.secondCategory.label.toLowerCase()} sont déjà impossibles pour ${relation.firstCategory.label.toLowerCase()} « ${relation.firstValue} ».`;
+      const firstSubject = `${relation.firstCategory.label.toLowerCase()} « ${relation.firstValue} »`;
+      const secondCategory = relation.secondCategory.label.toLowerCase();
+
+      return this.randomItem([
+        `Déduction : ${this.associationText(relation)}. Pourquoi : toutes les autres valeurs de ${secondCategory} sont déjà impossibles pour ${firstSubject}.`,
+        `Déduction : ${this.associationText(relation)}. C’est la seule possibilité de ${secondCategory} qui reste pour ${firstSubject}.`,
+        `Déduction : ${this.associationText(relation)}. Les autres choix de ${secondCategory} ayant été éliminés, cette association est forcée.`,
+      ]);
     }
 
     const firstAlternatives = relation.firstCategory.values.filter(
@@ -336,7 +398,14 @@ export class ZebraPage {
     );
 
     if (firstAlternatives.length === relation.firstCategory.values.length - 1) {
-      return `Déduction : ${this.associationText(relation)}. Pourquoi : toutes les autres valeurs de ${relation.firstCategory.label.toLowerCase()} sont déjà impossibles pour ${relation.secondCategory.label.toLowerCase()} « ${relation.secondValue} ».`;
+      const firstCategory = relation.firstCategory.label.toLowerCase();
+      const secondSubject = `${relation.secondCategory.label.toLowerCase()} « ${relation.secondValue} »`;
+
+      return this.randomItem([
+        `Déduction : ${this.associationText(relation)}. Pourquoi : toutes les autres valeurs de ${firstCategory} sont déjà impossibles pour ${secondSubject}.`,
+        `Déduction : ${this.associationText(relation)}. C’est la seule possibilité de ${firstCategory} encore disponible pour ${secondSubject}.`,
+        `Déduction : ${this.associationText(relation)}. Les autres choix de ${firstCategory} sont exclus; cette association est donc nécessaire.`,
+      ]);
     }
 
     const directClue = this.puzzle().logicalClues?.find((clue) =>
@@ -344,7 +413,13 @@ export class ZebraPage {
     );
 
     if (directClue) {
-      return `Déduction : ${this.associationText(relation)}. Pourquoi : l’indice « ${this.formatClue(directClue.text)} » donne directement cette association.`;
+      const clueText = this.formatClue(directClue.text);
+
+      return this.randomItem([
+        `Déduction : ${this.associationText(relation)}. Pourquoi : l’indice « ${clueText} » donne directement cette association.`,
+        `Déduction : ${this.associationText(relation)}. Il suffit ici d’appliquer l’indice « ${clueText} » comme une association directe.`,
+        `Déduction : ${this.associationText(relation)}. L’énoncé « ${clueText} » permet de la placer sans étape intermédiaire.`,
+      ]);
     }
 
     return `Déduction : ${this.associationText(relation)}. Pourquoi : ${this.explainExistingContext(relation)}`;
@@ -973,24 +1048,50 @@ export class ZebraPage {
     const variants: Record<string, string[][]> = {
       person: [
         ['Nora', 'Omar', 'Lina'],
+        ['Jade', 'Milo', 'Sara'],
+        ['Émile', 'Léa', 'Noé'],
         ['Hugo', 'Maya', 'Noé', 'Zoé'],
+        ['Anaïs', 'Félix', 'Iris', 'Noam'],
+        ['Chloé', 'Élias', 'Maël', 'Nina'],
         ['Inès', 'Malik', 'Romy', 'Sacha', 'Yanis'],
+        ['Adam', 'Éva', 'Lou', 'Marius', 'Nina'],
+        ['Amine', 'Cléo', 'Liam', 'Rose', 'Théo'],
       ],
       color: [
         ['Orange', 'Violette', 'Rose'],
+        ['Beige', 'Mauve', 'Turquoise'],
+        ['Brune', 'Crème', 'Indigo'],
         ['Orange', 'Violette', 'Rose', 'Noire'],
+        ['Beige', 'Mauve', 'Turquoise', 'Brune'],
+        ['Crème', 'Indigo', 'Dorée', 'Argentée'],
         ['Orange', 'Violette', 'Rose', 'Noire', 'Grise'],
+        ['Beige', 'Mauve', 'Turquoise', 'Brune', 'Crème'],
+        ['Indigo', 'Dorée', 'Argentée', 'Corail', 'Grise'],
       ],
       pet: [
         ['Renard', 'Tortue', 'Aigle'],
+        ['Lapin', 'Hamster', 'Canari'],
+        ['Chat', 'Chien', 'Poisson'],
         ['Renard', 'Tortue', 'Aigle', 'Souris'],
+        ['Lapin', 'Hamster', 'Canari', 'Poisson'],
+        ['Chat', 'Chien', 'Perroquet', 'Tortue'],
         ['Renard', 'Tortue', 'Aigle', 'Souris', 'Panda'],
+        ['Chat', 'Chien', 'Lapin', 'Poisson', 'Perroquet'],
+        ['Canari', 'Hamster', 'Hérisson', 'Panda', 'Tortue'],
       ],
       hobby: [
         ['Randonnée', 'Musique', 'Natation', 'Lecture'],
+        ['Cinéma', 'Danse', 'Photo', 'Yoga'],
+        ['Cuisine', 'Dessin', 'Course', 'Jardinage'],
         ['Randonnée', 'Musique', 'Natation', 'Lecture', 'Cuisine'],
+        ['Cinéma', 'Danse', 'Photo', 'Yoga', 'Dessin'],
+        ['Course', 'Jardinage', 'Lecture', 'Musique', 'Peinture'],
       ],
-      drink: [['Infusion', 'Limonade', 'Cacao', 'Eau', 'Lait']],
+      drink: [
+        ['Infusion', 'Limonade', 'Cacao', 'Eau', 'Lait'],
+        ['Tisane', 'Jus', 'Chocolat', 'Eau', 'Café'],
+        ['Thé', 'Limonade', 'Cacao', 'Lait', 'Eau'],
+      ],
     };
     const alternatives = (variants[category.id] ?? []).filter(
       (values) => values.length === category.values.length,
@@ -1067,6 +1168,8 @@ export class ZebraPage {
         `${value} habite ${houseText}.`,
         `${this.capitalize(houseText)} est habitée par ${value}.`,
         `${value} vit ${houseText}.`,
+        `C’est ${value} qui occupe ${houseText}.`,
+        `On trouve ${value} dans ${houseText}.`,
       ]);
     }
 
@@ -1077,6 +1180,8 @@ export class ZebraPage {
         `${this.houseLabel(house, true)} est ${color}.`,
         `La couleur ${color} correspond à ${houseText}.`,
         `${houseText} a la couleur ${color}.`,
+        `${houseText} est peinte en ${color}.`,
+        `C’est ${houseText} qui porte la couleur ${color}.`,
       ]);
     }
 
@@ -1087,6 +1192,8 @@ export class ZebraPage {
         `${this.capitalize(pet)} vit dans ${houseText}.`,
         `${this.capitalize(pet)} se trouve dans ${houseText}.`,
         `${this.capitalize(houseText)} abrite ${pet}.`,
+        `L’animal de ${houseText} est ${pet}.`,
+        `On trouve ${pet} dans ${houseText}.`,
       ]);
     }
 
@@ -1097,16 +1204,21 @@ export class ZebraPage {
         `On boit ${drink} dans ${houseText}.`,
         `Dans ${houseText}, on sert ${drink}.`,
         `La boisson de ${houseText} est ${drink}.`,
+        `${houseText} est celle où l’on boit ${drink}.`,
+        `La personne de ${houseText} choisit ${drink}.`,
       ]);
     }
 
     if (category.id === 'hobby') {
       const hobby = this.displayValue(value);
+      const hobbyWithArticle = this.hobbyWithArticle(value);
 
       return this.randomItem([
-        `${hobby} est le loisir de ${houseText}.`,
-        `Dans ${houseText}, on pratique ${hobby}.`,
+        `${this.capitalize(hobbyWithArticle)} est le loisir de ${houseText}.`,
+        `Dans ${houseText}, le loisir choisi est ${hobbyWithArticle}.`,
         `Le loisir de ${houseText} est ${hobby}.`,
+        `${houseText} est associée au loisir ${hobby}.`,
+        `La personne de ${houseText} préfère ${hobbyWithArticle}.`,
       ]);
     }
 
@@ -1115,7 +1227,7 @@ export class ZebraPage {
 
   private withArticle(value: string): string {
     const normalizedValue = this.displayValue(value);
-    const feminineValues = new Set(['souris']);
+    const feminineValues = new Set(['souris', 'tortue']);
 
     if (/^[aeiou]/.test(normalizedValue)) {
       return `l'${normalizedValue}`;
@@ -1154,6 +1266,25 @@ export class ZebraPage {
     };
 
     return values[value] ?? value.toLowerCase();
+  }
+
+  private hobbyWithArticle(value: string): string {
+    const hobby = this.displayValue(value);
+    const feminineHobbies = new Set([
+      'course',
+      'cuisine',
+      'danse',
+      'lecture',
+      'musique',
+      'natation',
+      'peinture',
+      'photo',
+      'randonnée',
+    ]);
+
+    if (hobby === 'échecs') return 'les échecs';
+    if (/^[aeiouyéèêëàâäîïôöùûü]/.test(hobby)) return `l'${hobby}`;
+    return `${feminineHobbies.has(hobby) ? 'la' : 'le'} ${hobby}`;
   }
 
   private capitalize(value: string): string {
@@ -1217,6 +1348,15 @@ export class ZebraPage {
     const clueKeys = new Set<string>();
     const houseCategory = categories[0];
     const nonHouseCategories = categories.slice(1);
+    const sampleCategoryPairs = (): [ZebraCategory, ZebraCategory][] =>
+      this.shuffle(
+        nonHouseCategories.flatMap((firstCategory) =>
+          nonHouseCategories.map(
+            (secondCategory) =>
+              [firstCategory, secondCategory] as [ZebraCategory, ZebraCategory],
+          ),
+        ),
+      ).slice(0, Math.max(4, nonHouseCategories.length));
 
     const addClue = (clue: ZebraClue): void => {
       const key = this.clueKey(clue);
@@ -1321,6 +1461,70 @@ export class ZebraPage {
           });
         }
       }
+
+      for (const [firstCategory, secondCategory] of sampleCategoryPairs()) {
+        addClue({
+          type: 'adjacent',
+          firstCategoryId: firstCategory.id,
+          firstValue: leftRow[firstCategory.id],
+          secondCategoryId: secondCategory.id,
+          secondValue: rightRow[secondCategory.id],
+          text: this.describeNeighborClue(
+            firstCategory,
+            leftRow[firstCategory.id],
+            secondCategory,
+            rightRow[secondCategory.id],
+          ),
+        });
+      }
+    }
+
+    for (let firstHouseIndex = 0; firstHouseIndex < solution.length - 1; firstHouseIndex += 1) {
+      for (
+        let secondHouseIndex = firstHouseIndex + 1;
+        secondHouseIndex < solution.length;
+        secondHouseIndex += 1
+      ) {
+        const leftRow = solution[firstHouseIndex];
+        const rightRow = solution[secondHouseIndex];
+
+        for (const [leftCategory, rightCategory] of sampleCategoryPairs()) {
+          addClue({
+            type: 'leftOf',
+            leftCategoryId: leftCategory.id,
+            leftValue: leftRow[leftCategory.id],
+            rightCategoryId: rightCategory.id,
+            rightValue: rightRow[rightCategory.id],
+            text: this.describeLeftOfClue(
+              leftCategory,
+              leftRow[leftCategory.id],
+              rightCategory,
+              rightRow[rightCategory.id],
+            ),
+          });
+        }
+      }
+    }
+
+    for (let firstHouseIndex = 0; firstHouseIndex < solution.length - 2; firstHouseIndex += 1) {
+      const firstRow = solution[firstHouseIndex];
+      const secondRow = solution[firstHouseIndex + 2];
+
+      for (const [firstCategory, secondCategory] of sampleCategoryPairs()) {
+        addClue({
+          type: 'oneBetween',
+          firstCategoryId: firstCategory.id,
+          firstValue: firstRow[firstCategory.id],
+          secondCategoryId: secondCategory.id,
+          secondValue: secondRow[secondCategory.id],
+          text: this.describeOneBetweenClue(
+            firstCategory,
+            firstRow[firstCategory.id],
+            secondCategory,
+            secondRow[secondCategory.id],
+          ),
+        });
+      }
     }
 
     return this.shuffle(clues);
@@ -1363,6 +1567,8 @@ export class ZebraPage {
       return this.randomItem([
         `${firstValue} ${attribute}.`,
         `On sait que ${firstValue} ${attribute}.`,
+        `L’indice à retenir est que ${firstValue} ${attribute}.`,
+        `${firstValue} est précisément la personne qui ${attribute}.`,
       ]);
     }
 
@@ -1372,6 +1578,8 @@ export class ZebraPage {
       return this.randomItem([
         `${secondValue} ${attribute}.`,
         `On sait que ${secondValue} ${attribute}.`,
+        `L’indice à retenir est que ${secondValue} ${attribute}.`,
+        `${secondValue} est précisément la personne qui ${attribute}.`,
       ]);
     }
 
@@ -1384,6 +1592,8 @@ export class ZebraPage {
       `${firstDescription} est associée à ${secondDescription}.`,
       `${firstDescription} va avec ${secondDescription}.`,
       `La bonne association est ${this.lowerFirst(firstDescription)} avec ${secondDescription}.`,
+      `${firstDescription} correspond à ${secondDescription}.`,
+      `${firstDescription} et ${secondDescription} décrivent la même maison.`,
     ]);
   }
 
@@ -1399,6 +1609,8 @@ export class ZebraPage {
       return this.randomItem([
         `${firstValue} ${negativeAttribute}.`,
         `On sait que ${firstValue} ${negativeAttribute}.`,
+        `Il est certain que ${firstValue} ${negativeAttribute}.`,
+        `L’association entre ${firstValue} et ${this.lowerFirst(this.describeValue(secondCategory, secondValue))} est exclue.`,
       ]);
     }
 
@@ -1408,6 +1620,8 @@ export class ZebraPage {
       return this.randomItem([
         `${secondValue} ${negativeAttribute}.`,
         `On sait que ${secondValue} ${negativeAttribute}.`,
+        `Il est certain que ${secondValue} ${negativeAttribute}.`,
+        `L’association entre ${secondValue} et ${this.lowerFirst(this.describeValue(firstCategory, firstValue))} est exclue.`,
       ]);
     }
 
@@ -1420,6 +1634,8 @@ export class ZebraPage {
       `${firstDescription} n'est pas associée à ${secondDescription}.`,
       `${firstDescription} ne va pas avec ${secondDescription}.`,
       `Il ne faut pas associer ${this.lowerFirst(firstDescription)} à ${secondDescription}.`,
+      `${firstDescription} et ${secondDescription} appartiennent à deux maisons différentes.`,
+      `L’association entre ${this.lowerFirst(firstDescription)} et ${secondDescription} est impossible.`,
     ]);
   }
 
@@ -1437,6 +1653,62 @@ export class ZebraPage {
       `${leftDescription} se trouve immédiatement à gauche de ${rightDescription}.`,
       `${rightDescription} est immédiatement à droite de ${leftDescription}.`,
       `${leftDescription} précède directement ${rightDescription}.`,
+      `En allant de gauche à droite, ${leftDescription} vient juste avant ${rightDescription}.`,
+      `${leftDescription} et ${rightDescription} occupent deux maisons consécutives, dans cet ordre.`,
+    ]);
+  }
+
+  private describeNeighborClue(
+    firstCategory: ZebraCategory,
+    firstValue: string,
+    secondCategory: ZebraCategory,
+    secondValue: string,
+  ): string {
+    const firstDescription = this.describeValue(firstCategory, firstValue);
+    const secondDescription = this.describeValue(secondCategory, secondValue);
+
+    return this.randomItem([
+      `${firstDescription} se trouve à côté de ${secondDescription}.`,
+      `${firstDescription} et ${secondDescription} occupent deux maisons voisines.`,
+      `${firstDescription} et ${secondDescription} correspondent à deux maisons côte à côte.`,
+      `Les positions de ${this.lowerFirst(firstDescription)} et de ${this.lowerFirst(secondDescription)} sont côte à côte.`,
+      `${firstDescription} et ${secondDescription} occupent des positions consécutives, sans indication du côté.`,
+    ]);
+  }
+
+  private describeLeftOfClue(
+    leftCategory: ZebraCategory,
+    leftValue: string,
+    rightCategory: ZebraCategory,
+    rightValue: string,
+  ): string {
+    const leftDescription = this.describeValue(leftCategory, leftValue);
+    const rightDescription = this.describeValue(rightCategory, rightValue);
+
+    return this.randomItem([
+      `${leftDescription} se trouve quelque part à gauche de ${rightDescription}.`,
+      `${rightDescription} se trouve plus à droite que ${leftDescription}.`,
+      `En allant de gauche à droite, on rencontre ${this.lowerFirst(leftDescription)} avant ${this.lowerFirst(rightDescription)}.`,
+      `${leftDescription} précède ${rightDescription}, mais pas nécessairement juste à côté.`,
+      `La position de ${this.lowerFirst(leftDescription)} est à gauche de celle de ${this.lowerFirst(rightDescription)}.`,
+    ]);
+  }
+
+  private describeOneBetweenClue(
+    firstCategory: ZebraCategory,
+    firstValue: string,
+    secondCategory: ZebraCategory,
+    secondValue: string,
+  ): string {
+    const firstDescription = this.lowerFirst(this.describeValue(firstCategory, firstValue));
+    const secondDescription = this.lowerFirst(this.describeValue(secondCategory, secondValue));
+
+    return this.randomItem([
+      `Une maison se trouve exactement entre ${firstDescription} et ${secondDescription}.`,
+      `Une seule maison sépare ${firstDescription} de ${secondDescription}.`,
+      `Il y a exactement une maison entre ${firstDescription} et ${secondDescription}.`,
+      `Les positions de ${firstDescription} et ${secondDescription} diffèrent de deux cases.`,
+      `${this.capitalize(firstDescription)} et ${secondDescription} occupent des positions espacées de deux cases.`,
     ]);
   }
 
@@ -1454,7 +1726,7 @@ export class ZebraPage {
     }
 
     if (category.id === 'hobby') {
-      return `a ${this.displayValue(value)} comme loisir`;
+      return `a ${this.hobbyWithArticle(value)} comme loisir`;
     }
 
     return `est associé à ${this.displayValue(value)}`;
@@ -1474,7 +1746,7 @@ export class ZebraPage {
     }
 
     if (category.id === 'hobby') {
-      return `n'a pas ${this.displayValue(value)} comme loisir`;
+      return `n'a pas ${this.hobbyWithArticle(value)} comme loisir`;
     }
 
     return `n'est pas associé à ${this.displayValue(value)}`;
@@ -1523,11 +1795,14 @@ export class ZebraPage {
 
     if (category.id === 'hobby') {
       const hobby = this.displayValue(value);
+      const hobbyWithArticle = this.hobbyWithArticle(value);
 
       return this.randomItem([
-        `${hobby} n'est pas le loisir de ${houseText}.`,
-        `Dans ${houseText}, on ne pratique pas ${hobby}.`,
+        `${this.capitalize(hobbyWithArticle)} n'est pas le loisir de ${houseText}.`,
+        `Dans ${houseText}, le loisir choisi n'est pas ${hobbyWithArticle}.`,
         `Le loisir de ${houseText} n'est pas ${hobby}.`,
+        `${houseText} n’est pas associée au loisir ${hobby}.`,
+        `La personne de ${houseText} n'a pas ${hobbyWithArticle} comme loisir.`,
       ]);
     }
 
@@ -1626,12 +1901,28 @@ export class ZebraPage {
         : firstHouseIndex !== secondHouseIndex;
     }
 
+    if (clue.type === 'adjacent' || clue.type === 'oneBetween') {
+      const firstHouseIndex = assignments[clue.firstCategoryId]?.[clue.firstValue];
+      const secondHouseIndex = assignments[clue.secondCategoryId]?.[clue.secondValue];
+
+      if (firstHouseIndex === undefined || secondHouseIndex === undefined) {
+        return allowUnknown;
+      }
+
+      const expectedDistance = clue.type === 'adjacent' ? 1 : 2;
+      return Math.abs(firstHouseIndex - secondHouseIndex) === expectedDistance;
+    }
+
     const leftHouseIndex = assignments[clue.leftCategoryId]?.[clue.leftValue];
     const rightHouseIndex = assignments[clue.rightCategoryId]?.[clue.rightValue];
 
-    return leftHouseIndex === undefined || rightHouseIndex === undefined
-      ? allowUnknown
-      : leftHouseIndex + 1 === rightHouseIndex;
+    if (leftHouseIndex === undefined || rightHouseIndex === undefined) {
+      return allowUnknown;
+    }
+
+    return clue.type === 'adjacentRight'
+      ? leftHouseIndex + 1 === rightHouseIndex
+      : leftHouseIndex < rightHouseIndex;
   }
 
   private permutations<T>(values: T[]): T[][] {

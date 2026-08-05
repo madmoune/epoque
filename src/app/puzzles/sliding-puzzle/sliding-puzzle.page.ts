@@ -20,9 +20,14 @@ export class SlidingPuzzlePage {
   protected readonly hasStarted = signal(false);
   protected readonly imageUrl = signal('');
   protected readonly tileImageUrls = signal<string[]>([]);
+  private readonly imageTileSignatures = signal<string[]>([]);
+  private imageSignatureRequest = 0;
   protected readonly isSolved = computed(
-    () =>
-      this.hasStarted() && this.board().every((tile, index) => tile === this.solvedBoard[index]),
+    () => {
+      if (!this.hasStarted()) return false;
+      if (this.mode() === 'image') return this.imageBoardMatchesSolution();
+      return this.board().every((tile, index) => tile === this.solvedBoard[index]);
+    },
   );
 
   constructor() {
@@ -40,6 +45,10 @@ export class SlidingPuzzlePage {
       const artwork = this.createRandomArtwork();
       this.imageUrl.set(artwork.fullImage);
       this.tileImageUrls.set(artwork.tileImages);
+      this.refreshImageTileSignatures(artwork.tileImages);
+    } else {
+      this.imageSignatureRequest += 1;
+      this.imageTileSignatures.set([]);
     }
 
     const board = [...this.solvedBoard];
@@ -102,6 +111,60 @@ export class SlidingPuzzlePage {
     if (column > 0) result.push(index - 1);
     if (column < this.size - 1) result.push(index + 1);
     return result;
+  }
+
+  private imageBoardMatchesSolution(): boolean {
+    const signatures = this.imageTileSignatures();
+    if (signatures.length !== this.solvedBoard.length - 1) return false;
+
+    return this.board().every((tile, index) => {
+      if (index === this.solvedBoard.length - 1) return tile === 0;
+      return tile > 0 && signatures[tile - 1] === signatures[index];
+    });
+  }
+
+  private refreshImageTileSignatures(tileImages: string[]): void {
+    const request = ++this.imageSignatureRequest;
+    this.imageTileSignatures.set([]);
+
+    void Promise.all(tileImages.map((tileImage) => this.createImageTileSignature(tileImage)))
+      .then((signatures) => {
+        if (request === this.imageSignatureRequest) {
+          this.imageTileSignatures.set(signatures);
+        }
+      })
+      .catch(() => {
+        if (request === this.imageSignatureRequest) {
+          this.imageTileSignatures.set([]);
+        }
+      });
+  }
+
+  private createImageTileSignature(tileImage: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      if (typeof Image === 'undefined' || typeof document === 'undefined') {
+        reject(new Error('Le navigateur ne permet pas de lire les morceaux image.'));
+        return;
+      }
+
+      const image = new Image();
+      image.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 100;
+        canvas.height = 100;
+        const context = canvas.getContext('2d', { willReadFrequently: true });
+        if (!context) {
+          reject(new Error('Impossible de créer la signature du morceau image.'));
+          return;
+        }
+
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        resolve(Array.from(context.getImageData(0, 0, canvas.width, canvas.height).data).join(','));
+      };
+      image.onerror = () => reject(new Error('Impossible de charger un morceau image.'));
+      image.src = tileImage;
+    });
   }
 
   private createRandomArtwork(): { fullImage: string; tileImages: string[] } {

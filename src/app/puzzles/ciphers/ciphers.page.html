@@ -5,7 +5,7 @@
     <header class="header">
       <p class="eyebrow">Ciphers</p>
       <h1>{{ selectedCipherLabel() }}</h1>
-      <p class="intro">Retrouve le mot de la liste après transformation par un cipher simple.</p>
+      <p class="intro">{{ introText() }}</p>
     </header>
 
     @if (isLoading()) {
@@ -14,6 +14,27 @@
       <p class="error">{{ loadError() }}</p>
     } @else if (puzzle(); as currentPuzzle) {
       <section class="puzzle-area" [class.keyboard-open]="keyboardVisible()">
+        @if (selectedCipher() === 'nato') {
+          <div class="nato-mode-switch" role="group" aria-label="Mode NATO">
+            <button
+              type="button"
+              class="input-mode-button"
+              [class.active]="natoMode() === 'letter-to-code'"
+              (click)="setNatoMode('letter-to-code')"
+            >
+              Lettre → code
+            </button>
+            <button
+              type="button"
+              class="input-mode-button"
+              [class.active]="natoMode() === 'decode-word'"
+              (click)="setNatoMode('decode-word')"
+            >
+              Décoder un mot
+            </button>
+          </div>
+        }
+
         <p class="cipher-note">{{ currentPuzzle.note }}</p>
 
         @if (selectedCipher() === 'caesar' && currentPuzzle.caesarShift !== null) {
@@ -30,9 +51,14 @@
           [class.braille-word]="selectedCipher() === 'braille'"
           [class.semaphore-word]="selectedCipher() === 'semaphore'"
           [class.nato-word]="selectedCipher() === 'nato'"
+          [class.nato-letter-prompt]="isNatoLetterMode()"
         >
           @for (token of currentPuzzle.encoded; track $index; let tokenIndex = $index) {
-            @if (selectedCipher() === 'pigpen') {
+            @if (isNatoLetterMode()) {
+              <span class="encoded-token nato-letter-token" [attr.aria-label]="'Lettre ' + token">
+                {{ token }}
+              </span>
+            } @else if (selectedCipher() === 'pigpen') {
               <button
                 type="button"
                 class="encoded-token pigpen-tile"
@@ -182,27 +208,29 @@
           </details>
         }
 
-        <div class="answer-mode" role="group" aria-label="Mode de saisie">
-          <span class="answer-mode-label">Réponse</span>
-          <button
-            type="button"
-            class="input-mode-button"
-            [class.active]="!letterByLetter()"
-            (click)="letterByLetter() && toggleInputMode()"
-          >
-            Mot complet
-          </button>
-          <button
-            type="button"
-            class="input-mode-button"
-            [class.active]="letterByLetter()"
-            (click)="!letterByLetter() && toggleInputMode()"
-          >
-            Lettre par lettre
-          </button>
-        </div>
+        @if (!isNatoLetterMode()) {
+          <div class="answer-mode" role="group" aria-label="Mode de saisie">
+            <span class="answer-mode-label">Réponse</span>
+            <button
+              type="button"
+              class="input-mode-button"
+              [class.active]="!letterByLetter()"
+              (click)="letterByLetter() && toggleInputMode()"
+            >
+              Mot complet
+            </button>
+            <button
+              type="button"
+              class="input-mode-button"
+              [class.active]="letterByLetter()"
+              (click)="!letterByLetter() && toggleInputMode()"
+            >
+              Lettre par lettre
+            </button>
+          </div>
+        }
 
-        @if (letterByLetter()) {
+        @if (letterByLetter() && !isNatoLetterMode()) {
           <div class="letter-answer-group" role="group" aria-label="Réponse lettre par lettre">
             @for (letter of answerLetters(); track $index) {
               <input
@@ -224,7 +252,7 @@
           </div>
         } @else {
           <label class="answer-group">
-            <span>Mot original</span>
+            <span>{{ isNatoLetterMode() ? 'Code NATO' : 'Mot original' }}</span>
             <input
               #answerField
               class="answer-input"
@@ -253,7 +281,9 @@
           <button type="button" class="secondary-button" (click)="showHint()" [disabled]="hintLevel() >= maxHintLevel() || isCorrect()">
             Indice
           </button>
-          <button type="button" class="secondary-button" (click)="nextPuzzle()">Nouveau mot</button>
+          <button type="button" class="secondary-button" (click)="nextPuzzle()">
+            {{ isNatoLetterMode() ? 'Nouvelle lettre' : 'Nouveau mot' }}
+          </button>
         </div>
 
         @if (hintText()) {
@@ -262,10 +292,12 @@
 
         @if (isCorrect()) {
           <app-puzzle-success-popup
-            title="Mot trouvé!"
-            message="Le mot codé a été décodé."
+            [title]="isNatoLetterMode() ? 'Code trouvé!' : 'Mot trouvé!'"
+            [message]="isNatoLetterMode()
+              ? 'La lettre ' + currentPuzzle.encoded[0] + ' correspond à ' + currentPuzzle.answer + '.'
+              : 'Le mot codé a été décodé.'"
             [answer]="currentPuzzle.answer"
-            actionLabel="Nouveau mot"
+            [actionLabel]="isNatoLetterMode() ? 'Nouvelle lettre' : 'Nouveau mot'"
             (action)="nextPuzzle()"
           />
         }

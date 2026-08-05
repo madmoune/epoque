@@ -14,6 +14,8 @@ export type CipherType =
   | 'semaphore'
   | 'nato';
 
+export type NatoMode = 'letter-to-code' | 'decode-word';
+
 export type CipherPuzzle = {
   answer: string;
   normalizedAnswer: string;
@@ -74,7 +76,11 @@ export class CiphersService {
       });
   }
 
-  createPuzzle(cipher: CipherType): CipherPuzzle {
+  createPuzzle(cipher: CipherType, natoMode: NatoMode = 'letter-to-code'): CipherPuzzle {
+    if (cipher === 'nato' && natoMode === 'letter-to-code') {
+      return this.createNatoCodePuzzle();
+    }
+
     if (this.words.length === 0) {
       throw new Error('Cipher words have not been loaded yet.');
     }
@@ -89,13 +95,13 @@ export class CiphersService {
       normalizedAnswer,
       cipher,
       encoded: this.encode(normalizedAnswer, cipher, caesarShift === null ? 0 : -caesarShift),
-      note: this.noteFor(cipher),
+      note: this.noteFor(cipher, natoMode),
       caesarShift,
     };
   }
 
   isCorrectAnswer(input: string, answer: string): boolean {
-    return this.normalize(input) === answer;
+    return this.normalizeComparableAnswer(input) === this.normalizeComparableAnswer(answer);
   }
 
   legendFor(cipher: CipherType): CipherLegendItem[] {
@@ -192,7 +198,25 @@ export class CiphersService {
     }));
   }
 
-  private noteFor(cipher: CipherType): string {
+  private createNatoCodePuzzle(): CipherPuzzle {
+    const letter = this.randomWords.pick(Object.keys(this.natoWords), (value) => `nato-code:${value}`);
+    const answer = this.natoWords[letter];
+
+    return {
+      answer,
+      normalizedAnswer: this.normalizeComparableAnswer(answer),
+      cipher: 'nato',
+      encoded: [letter.toUpperCase()],
+      note: 'Écris le mot-code NATO correspondant à la lettre affichée.',
+      caesarShift: null,
+    };
+  }
+
+  private normalizeComparableAnswer(value: string): string {
+    return this.normalize(value).replace(/[^a-z0-9]/g, '');
+  }
+
+  private noteFor(cipher: CipherType, natoMode: NatoMode): string {
     if (cipher === 'caesar') return 'Chaque lettre est décalée dans l’alphabet.';
     if (cipher === 'pigpen') return 'Chaque lettre est remplacée par un symbole de la grille Pigpen.';
     if (cipher === 'a1z26') return 'A=1, B=2, C=3, jusqu’à Z=26.';
@@ -201,7 +225,9 @@ export class CiphersService {
     if (cipher === 'atbash') return 'Alphabet inverse : A devient Z, B devient Y, et ainsi de suite.';
     if (cipher === 'tap-code') return 'Chaque code indique la ligne et la colonne dans une grille 5 x 5. I et J partagent la même case.';
     if (cipher === 'semaphore') return 'Chaque lettre est montrée par deux positions de drapeaux.';
-    return 'Chaque lettre est remplacée par son mot de l’alphabet radio NATO.';
+    return natoMode === 'letter-to-code'
+      ? 'Écris le mot-code NATO correspondant à la lettre affichée.'
+      : 'Chaque lettre est remplacée par son mot de l’alphabet radio NATO.';
   }
 
   private readonly morseCodes: Record<string, string> = {

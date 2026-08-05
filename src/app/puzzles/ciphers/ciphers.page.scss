@@ -328,6 +328,21 @@ button:disabled {
   font-size: 1rem;
 }
 
+.encoded-word.nato-letter-prompt > .nato-letter-token {
+  min-width: 5.5rem;
+  min-height: 5.5rem;
+  border-color: #9f7ab0;
+  background: linear-gradient(145deg, #fff, #f3eafb);
+  color: #351441;
+  font-size: 3rem;
+  cursor: default;
+}
+
+.encoded-word.nato-letter-prompt > .nato-letter-token:hover {
+  border-color: #9f7ab0;
+  outline: 0;
+}
+
 .semaphore-symbol {
   position: relative;
   display: block;
@@ -701,13 +716,21 @@ button:disabled {
   overflow-wrap: anywhere;
 }
 
-.answer-mode {
+.answer-mode,
+.nato-mode-switch {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: 0.45rem;
   width: min(100%, 32rem);
+}
+
+.nato-mode-switch {
+  padding: 0.25rem;
+  border: 1px solid #eadcf0;
+  border-radius: 0.75rem;
+  background: #fff;
 }
 
 .answer-mode-label {
@@ -794,7 +817,7 @@ input.correct {
     padding: 0.35rem;
   }
 
-  .puzzle-area.keyboard-open .encoded-word.nato-word > .encoded-token {
+  .puzzle-area.keyboard-open .encoded-word.nato-word:not(.nato-letter-prompt) > .encoded-token {
     min-width: 2.98rem;
     padding-inline: 0.1rem;
     font-size: 0.56rem;
@@ -818,6 +841,12 @@ input.correct {
     min-width: 2.25rem;
     min-height: 2.25rem;
     font-size: 1.1rem;
+  }
+
+  .encoded-word.nato-letter-prompt > .nato-letter-token {
+    min-width: 4.75rem;
+    min-height: 4.75rem;
+    font-size: 2.6rem;
   }
 
   .answer-mode {

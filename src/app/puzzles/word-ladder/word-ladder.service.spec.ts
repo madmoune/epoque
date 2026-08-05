@@ -27,9 +27,37 @@ describe('WordLadderService', () => {
     expect(service.sameWord('CÔTE', 'cote')).toBe(true);
     expect(service.areNeighbors('chat', 'char')).toBe(true);
     expect(service.areNeighbors('chat', 'cher')).toBe(false);
+    expect(service.areNeighbors('chat', 'chaz')).toBe(false);
   });
 
-  it('prefers three moves for four-letter words', () => {
+  it('keeps supported word lengths and compares Unicode letters by position', () => {
+    const service = createService(['chat', 'chats', 'char', 'côte', 'note']);
+
+    expect(service.resolveWord('chats')).toBe('chats');
+    expect(service.areNeighbors('côte', 'note')).toBe(true);
+    expect(service.areNeighbors('chat', 'chats')).toBe(false);
+    expect(service.areNeighbors('chat', 'cher')).toBe(false);
+  });
+
+  it('creates a puzzle with the requested five-letter length', () => {
+    const service = createService(['acide', 'aride', 'bride', 'brode', 'broie']);
+
+    vi.spyOn(Math, 'random').mockReturnValue(0);
+
+    const puzzle = service.createPuzzle(5);
+    const path = service.findShortestPath(puzzle.start, puzzle.target);
+
+    expect(puzzle).toEqual({
+      start: 'acide',
+      target: 'broie',
+      letterCount: 5,
+      minimumMoves: 4,
+    });
+    expect(path).not.toBeNull();
+    expect((path?.length ?? 1) - 1).toBe(puzzle.minimumMoves);
+  });
+
+  it('prefers three moves for the four-letter list', () => {
     const service = createService(['pain', 'main', 'mais', 'mats', 'mots']);
 
     vi.spyOn(Math, 'random').mockReturnValue(0);
@@ -46,29 +74,12 @@ describe('WordLadderService', () => {
     expect(path).not.toBeNull();
     expect((path?.length ?? 1) - 1).toBe(puzzle.minimumMoves);
   });
-
-  it('prefers four moves for five-letter words', () => {
-    const service = createService(['acide', 'aride', 'bride', 'brode', 'broie']);
-
-    vi.spyOn(Math, 'random').mockReturnValue(0);
-
-    const puzzle = service.createPuzzle();
-    const path = service.findShortestPath(puzzle.start, puzzle.target);
-
-    expect(puzzle).toEqual({
-      start: 'acide',
-      target: 'broie',
-      letterCount: 5,
-      minimumMoves: 4,
-    });
-    expect(path).not.toBeNull();
-    expect((path?.length ?? 1) - 1).toBe(puzzle.minimumMoves);
-  });
 });
 
 function createService(words: string[]): WordLadderService {
   const service = Object.create(WordLadderService.prototype) as any;
 
+  service.supportedWordLengths = [4, 5];
   service.minimumMoves = 3;
   service.maximumMoves = 7;
   service.maximumGenerationAttempts = 400;
