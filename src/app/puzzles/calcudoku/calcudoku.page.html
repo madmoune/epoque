@@ -29,6 +29,8 @@
             <div
               [class]="cellClass(cell)"
               [class.active-cell]="isActiveCell(row, col)"
+              [class.first-row]="row === 0"
+              [class.first-column]="col === 0"
               [attr.data-cage]="cell.cage"
             >
               <span class="cage-label">{{ cageLabel(cell) }}</span>

@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, HostListener, inject, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { PuzzlePlayHistoryService } from './puzzle-play-history.service';
 import { FirebaseAuthService } from './shared/firebase/firebase-auth.service';
@@ -30,6 +30,21 @@ export class App {
   protected readonly theme = signal<Theme>(
     this.document.documentElement.dataset['theme'] === 'light' ? 'light' : 'dark',
   );
+
+  @HostListener('document:pointerdown', ['$event'])
+  protected closeQuickMenuOnOutsideClick(event: PointerEvent): void {
+    if (!(event.target instanceof Element)) {
+      return;
+    }
+
+    const quickMenu = this.document.querySelector<HTMLDetailsElement>('.quick-menu');
+
+    if (!quickMenu?.open || quickMenu.contains(event.target)) {
+      return;
+    }
+
+    quickMenu.open = false;
+  }
 
   protected toggleTheme(): void {
     const nextTheme: Theme = this.theme() === 'dark' ? 'light' : 'dark';

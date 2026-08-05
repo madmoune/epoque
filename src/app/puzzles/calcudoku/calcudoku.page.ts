@@ -199,19 +199,11 @@ export class CalcudokuPage {
       classes.push('hinted');
     }
 
-    if (this.neighborCage(cell.row - 1, cell.col) !== cell.cage) {
+    if (cell.row > 0 && this.neighborCage(cell.row - 1, cell.col) !== cell.cage) {
       classes.push('cage-top');
     }
 
-    if (this.neighborCage(cell.row, cell.col + 1) !== cell.cage) {
-      classes.push('cage-right');
-    }
-
-    if (this.neighborCage(cell.row + 1, cell.col) !== cell.cage) {
-      classes.push('cage-bottom');
-    }
-
-    if (this.neighborCage(cell.row, cell.col - 1) !== cell.cage) {
+    if (cell.col > 0 && this.neighborCage(cell.row, cell.col - 1) !== cell.cage) {
       classes.push('cage-left');
     }
 

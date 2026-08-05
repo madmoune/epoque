@@ -66,27 +66,30 @@ h1 {
   grid-template-columns: repeat(5, minmax(3.8rem, 5.4rem));
   gap: 0;
   border: 4px solid var(--calcudoku-cage-border);
+  border-radius: 0.35rem;
   background: var(--calcudoku-cage-border);
+  overflow: hidden;
 }
 
 .cell {
   position: relative;
   aspect-ratio: 1;
   box-sizing: border-box;
-  border: 1px solid var(--calcudoku-grid-line);
+  border-top: 1px solid var(--calcudoku-grid-line);
+  border-left: 1px solid var(--calcudoku-grid-line);
   background: var(--calcudoku-cell-bg);
+}
+
+.cell.first-row {
+  border-top: 0;
+}
+
+.cell.first-column {
+  border-left: 0;
 }
 
 .cell.cage-top {
   border-top: 4px solid var(--calcudoku-cage-border);
-}
-
-.cell.cage-right {
-  border-right: 4px solid var(--calcudoku-cage-border);
-}
-
-.cell.cage-bottom {
-  border-bottom: 4px solid var(--calcudoku-cage-border);
 }
 
 .cell.cage-left {
@@ -163,25 +166,23 @@ button:disabled {
   font-weight: 900;
 }
 
-@media (prefers-color-scheme: dark) {
-  .page {
-    --calcudoku-cage-border: #8ebfc4;
-    --calcudoku-grid-line: #dc7a46;
-    --calcudoku-cell-bg: #12211e;
-    --calcudoku-panel-bg: #10221f;
-    --calcudoku-label: #b7edf3;
-    --calcudoku-input: #f4fffd;
-    --calcudoku-hint-bg: #173d3b;
-  }
+:host-context(html[data-theme='dark']) .page {
+  --calcudoku-cage-border: #8ebfc4;
+  --calcudoku-grid-line: #dc7a46;
+  --calcudoku-cell-bg: #12211e;
+  --calcudoku-panel-bg: #10221f;
+  --calcudoku-label: #b7edf3;
+  --calcudoku-input: #f4fffd;
+  --calcudoku-hint-bg: #173d3b;
+}
 
-  .card {
-    border-color: #33514d;
-    background: #14221f;
-  }
+:host-context(html[data-theme='dark']) .card {
+  border-color: #33514d;
+  background: #14221f;
+}
 
-  .puzzle-area {
-    border-color: #33514d;
-  }
+:host-context(html[data-theme='dark']) .puzzle-area {
+  border-color: #33514d;
 }
 
 @media (max-width: 600px) {
