@@ -314,6 +314,18 @@ export class HomePage {
           tag: 'Logique',
         },
         {
+          title: 'Balance logique',
+          description: 'Compare des pierres colorées et déduis leur poids.',
+          route: '/weight-deduction',
+          tag: 'Pesées',
+        },
+        {
+          title: 'Poids suspendus',
+          description: 'Équilibre les leviers et retrouve les poids accrochés aux branches.',
+          route: '/hanging-weights',
+          tag: 'Leviers',
+        },
+        {
           title: 'Mastermind',
           description: 'Devine une suite de formes et de couleurs.',
           route: '/mastermind',

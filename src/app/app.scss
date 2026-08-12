@@ -147,6 +147,15 @@
   white-space: nowrap;
 }
 
+.account-email {
+  overflow: hidden;
+  max-width: 100%;
+  color: var(--muted);
+  font-size: 0.7rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .account-sync-status {
   color: var(--muted);
   font-size: 0.7rem;

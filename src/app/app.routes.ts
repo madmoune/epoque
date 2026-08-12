@@ -115,6 +115,16 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'weight-deduction',
+    loadComponent: () =>
+      import('./puzzles/weight-deduction/weight-deduction.page').then((m) => m.WeightDeductionPage),
+  },
+  {
+    path: 'hanging-weights',
+    loadComponent: () =>
+      import('./puzzles/hanging-weights/hanging-weights.page').then((m) => m.HangingWeightsPage),
+  },
+  {
     path: 'sequences',
     loadComponent: () => import('./puzzles/sequences/sequences.page').then((m) => m.SequencesPage),
   },

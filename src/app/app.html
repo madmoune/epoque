@@ -27,9 +27,15 @@
         } @else if (firebaseAuth.accountUser(); as user) {
           <div class="account-signed-in">
             <div class="account-info">
-              <span class="account-name" [title]="user.displayName || user.email || 'Compte'">
-                {{ user.displayName || user.email || 'Compte' }}
+              <span
+                class="account-name"
+                [title]="firebaseAuth.accountDisplayName() || user.email || 'Compte'"
+              >
+                {{ firebaseAuth.accountDisplayName() || user.email || 'Compte' }}
               </span>
+              @if (firebaseAuth.accountDisplayName() && user.email) {
+                <span class="account-email" [title]="user.email">{{ user.email }}</span>
+              }
               <span class="account-sync-status">
                 {{ userDataSync.status() === 'error' ? 'Synchronisation indisponible' : 'Sauvegardé' }}
               </span>

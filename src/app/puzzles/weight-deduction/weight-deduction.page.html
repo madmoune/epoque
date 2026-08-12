@@ -1,0 +1,338 @@
+<main class="page">
+  <a routerLink="/" fragment="deduction-logique" class="back-link">Retour au menu</a>
+
+  <section class="shell">
+    <header class="header">
+      <p class="eyebrow">Déduction et comparaisons</p>
+      <h1>Balance logique</h1>
+      <p class="intro">
+        Glisse les pièces sur les deux plateaux : la balance réagit aussitôt. Indique le poids de
+        chaque pièce.
+      </p>
+    </header>
+
+    @if (generationError(); as error) {
+      <p class="error" role="alert">{{ error }}</p>
+      <button type="button" class="primary-button retry-button" (click)="newPuzzle()">
+        Réessayer
+      </button>
+    } @else {
+      <section class="experiment-panel" aria-labelledby="experiment-title">
+        <div class="section-heading">
+          <div>
+            <h2 id="experiment-title">Construis une pesée</h2>
+          </div>
+          <span class="instruction-pill"><span aria-hidden="true">↕</span> Glisser-déposer</span>
+        </div>
+
+        <div class="workspace">
+          <aside
+            #pieceTray
+            class="piece-tray"
+            [class.drop-target]="isDropTarget('tray')"
+            tabindex="0"
+            role="region"
+            aria-label="Réserve de pièces. Dépose ici une pièce pour la retirer de la balance."
+            (click)="placeSelected('tray')"
+            (keydown)="handleDropZoneKey($event, 'tray')"
+          >
+            <header class="tray-heading">
+              <div>
+                <p class="panel-kicker">Réserve</p>
+                <h3>Pièces disponibles</h3>
+              </div>
+              <span>{{ trayPieces().length }} couleurs</span>
+            </header>
+
+            <p class="tray-help">
+              Chaque couleur reste disponible ici. Glisse une pierre sur un plateau pour l’utiliser
+              autant de fois que nécessaire.
+            </p>
+
+            <div class="piece-list">
+              @for (piece of trayPieces(); track piece.id) {
+                <div class="piece-with-answer">
+                  <button
+                    type="button"
+                    class="weight-piece tray-piece"
+                    [class.selected]="isSelected(piece.id)"
+                    [class.dragging-source]="isDragging(piece.id)"
+                    [class.tray-drop-before]="isTrayDropBefore(piece.id)"
+                    [attr.data-piece-id]="piece.id"
+                    [attr.aria-pressed]="isSelected(piece.id)"
+                    [attr.aria-label]="pieceAriaLabel(piece)"
+                    (pointerdown)="startPieceDrag(piece.id, $event)"
+                    (click)="$event.stopPropagation()"
+                    (keydown)="handlePieceKey($event, piece.id)"
+                  >
+                    @if (piece.token.kind === 'stone') {
+                      <span
+                        class="stone-shape"
+                        [style.--stone-color]="stoneForId(piece.token.stoneId).color"
+                        aria-hidden="true"
+                      >
+                        {{ stoneInitial(piece.token.stoneId) }}
+                      </span>
+                    }
+                    <span class="piece-name">{{ pieceName(piece) }}</span>
+                  </button>
+                  @if (piece.token.kind === 'stone') {
+                    <select
+                      class="piece-weight-select"
+                      [value]="answerFor(piece.id)"
+                      [disabled]="isSolved() || isHinted(piece.id)"
+                      [attr.aria-label]="'Poids de la pierre ' + pieceName(piece)"
+                      (click)="$event.stopPropagation()"
+                      (change)="updateAnswer(piece.id, $event)"
+                    >
+                      <option value="">?</option>
+                      @for (weight of puzzle().allowedWeights; track weight) {
+                        <option [value]="weight" [disabled]="isWeightUsedByOther(weight, piece.id)">
+                          {{ weight }}
+                        </option>
+                      }
+                    </select>
+                  }
+                </div>
+              } @empty {
+                <p class="empty-tray">Toutes les pièces sont sur la balance.</p>
+              }
+            </div>
+
+            @if (selectedPieceId()) {
+              <p class="selection-help">Pièce sélectionnée : touche un plateau pour la déplacer.</p>
+            }
+          </aside>
+
+          <section class="balance-panel" aria-label="Balance">
+            <div
+              class="balance-machine"
+              [class.left-heavier]="currentResult() === 'left-heavier'"
+              [class.right-heavier]="currentResult() === 'right-heavier'"
+              [class.balanced]="currentResult() === 'balanced'"
+            >
+              <span class="balance-beam" aria-hidden="true"></span>
+
+              <div
+                #leftPan
+                class="pan-unit left-pan"
+                [class.drop-target]="isDropTarget('left')"
+                tabindex="0"
+                role="region"
+                aria-label="Plateau gauche"
+                (click)="placeSelected('left')"
+                (keydown)="handleDropZoneKey($event, 'left')"
+              >
+                <span class="pan-side-label">Gauche</span>
+                <div class="pan-load">
+                  @for (piece of leftPieces(); track piece.id) {
+                    <div class="piece-with-answer pan-piece-wrapper">
+                      <button
+                        type="button"
+                        class="weight-piece pan-piece"
+                        [class.selected]="isSelected(piece.id)"
+                        [class.dragging-source]="isDragging(piece.id)"
+                        [attr.aria-pressed]="isSelected(piece.id)"
+                        [attr.aria-label]="pieceAriaLabel(piece)"
+                        (pointerdown)="startPieceDrag(piece.id, $event)"
+                        (click)="$event.stopPropagation()"
+                        (keydown)="handlePieceKey($event, piece.id)"
+                      >
+                        @if (piece.token.kind === 'stone') {
+                          <span
+                            class="stone-shape"
+                            [style.--stone-color]="stoneForId(piece.token.stoneId).color"
+                            aria-hidden="true"
+                          >
+                            {{ stoneInitial(piece.token.stoneId) }}
+                          </span>
+                        }
+                      </button>
+                      @if (piece.token.kind === 'stone') {
+                        <select
+                          class="piece-weight-select"
+                          [value]="answerFor(piece.id)"
+                          [disabled]="isSolved() || isHinted(piece.id)"
+                          [attr.aria-label]="'Poids de la pierre ' + pieceName(piece)"
+                          (click)="$event.stopPropagation()"
+                          (change)="updateAnswer(piece.id, $event)"
+                        >
+                          <option value="">?</option>
+                          @for (weight of puzzle().allowedWeights; track weight) {
+                            <option
+                              [value]="weight"
+                              [disabled]="isWeightUsedByOther(weight, piece.id)"
+                            >
+                              {{ weight }}
+                            </option>
+                          }
+                        </select>
+                      }
+                      <button
+                        type="button"
+                        class="remove-piece-button"
+                        [disabled]="isSolved()"
+                        [attr.aria-label]="'Retirer la pierre ' + pieceName(piece)"
+                        (click)="$event.stopPropagation(); removePiece(piece.id)"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  } @empty {
+                    <span class="pan-placeholder"><b>+</b> Dépose ici</span>
+                  }
+                </div>
+                <span class="pan-bowl" aria-hidden="true"></span>
+              </div>
+
+              <div class="balance-center" aria-hidden="true">
+                <span class="balance-pivot"></span>
+                <span class="balance-post"></span>
+                <span class="balance-foot"></span>
+              </div>
+
+              <div
+                #rightPan
+                class="pan-unit right-pan"
+                [class.drop-target]="isDropTarget('right')"
+                tabindex="0"
+                role="region"
+                aria-label="Plateau droit"
+                (click)="placeSelected('right')"
+                (keydown)="handleDropZoneKey($event, 'right')"
+              >
+                <span class="pan-side-label">Droite</span>
+                <div class="pan-load">
+                  @for (piece of rightPieces(); track piece.id) {
+                    <div class="piece-with-answer pan-piece-wrapper">
+                      <button
+                        type="button"
+                        class="weight-piece pan-piece"
+                        [class.selected]="isSelected(piece.id)"
+                        [class.dragging-source]="isDragging(piece.id)"
+                        [attr.aria-pressed]="isSelected(piece.id)"
+                        [attr.aria-label]="pieceAriaLabel(piece)"
+                        (pointerdown)="startPieceDrag(piece.id, $event)"
+                        (click)="$event.stopPropagation()"
+                        (keydown)="handlePieceKey($event, piece.id)"
+                      >
+                        @if (piece.token.kind === 'stone') {
+                          <span
+                            class="stone-shape"
+                            [style.--stone-color]="stoneForId(piece.token.stoneId).color"
+                            aria-hidden="true"
+                          >
+                            {{ stoneInitial(piece.token.stoneId) }}
+                          </span>
+                        }
+                      </button>
+                      @if (piece.token.kind === 'stone') {
+                        <select
+                          class="piece-weight-select"
+                          [value]="answerFor(piece.id)"
+                          [disabled]="isSolved() || isHinted(piece.id)"
+                          [attr.aria-label]="'Poids de la pierre ' + pieceName(piece)"
+                          (click)="$event.stopPropagation()"
+                          (change)="updateAnswer(piece.id, $event)"
+                        >
+                          <option value="">?</option>
+                          @for (weight of puzzle().allowedWeights; track weight) {
+                            <option
+                              [value]="weight"
+                              [disabled]="isWeightUsedByOther(weight, piece.id)"
+                            >
+                              {{ weight }}
+                            </option>
+                          }
+                        </select>
+                      }
+                      <button
+                        type="button"
+                        class="remove-piece-button"
+                        [disabled]="isSolved()"
+                        [attr.aria-label]="'Retirer la pierre ' + pieceName(piece)"
+                        (click)="$event.stopPropagation(); removePiece(piece.id)"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  } @empty {
+                    <span class="pan-placeholder"><b>+</b> Dépose ici</span>
+                  }
+                </div>
+                <span class="pan-bowl" aria-hidden="true"></span>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="answer-actions">
+          <div class="feedback-zone" aria-live="polite">
+            @if (feedback(); as currentFeedback) {
+              <p
+                class="feedback"
+                [class.feedback-error]="currentFeedback.tone === 'error'"
+                [class.feedback-hint]="currentFeedback.tone === 'hint'"
+              >
+                {{ currentFeedback.text }}
+              </p>
+            }
+          </div>
+
+          <div class="actions">
+            <button
+              type="button"
+              class="secondary-button"
+              (click)="showHint()"
+              [disabled]="isSolved() || !hasAvailableHint()"
+            >
+              Indice
+            </button>
+            <button
+              type="button"
+              class="secondary-button"
+              (click)="resetPuzzle()"
+              [disabled]="isSolved()"
+            >
+              Recommencer
+            </button>
+            <button type="button" class="secondary-button" (click)="newPuzzle()">
+              Nouvelle énigme
+            </button>
+          </div>
+        </div>
+
+        @if (dragState(); as drag) {
+          @if (drag.moved && draggedPiece(); as piece) {
+            <span
+              class="floating-piece"
+              [class.over-target]="!!drag.over"
+              [style.left.px]="drag.clientX"
+              [style.top.px]="drag.clientY"
+              aria-hidden="true"
+            >
+              @if (piece.token.kind === 'stone') {
+                <span
+                  class="stone-shape"
+                  [style.--stone-color]="stoneForId(piece.token.stoneId).color"
+                >
+                  {{ stoneInitial(piece.token.stoneId) }}
+                </span>
+              }
+            </span>
+          }
+        }
+      </section>
+
+      @if (isSolved()) {
+        <app-puzzle-success-popup
+          title="Poids déduits!"
+          message="Toutes tes pesées concordent avec ton attribution."
+          [answer]="successAnswer()"
+          actionLabel="Nouvelle énigme"
+          (action)="newPuzzle()"
+        />
+      }
+    }
+  </section>
+</main>

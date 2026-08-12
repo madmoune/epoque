@@ -251,8 +251,9 @@ h1 {
 }
 
 .visited {
-  border-color: color-mix(in srgb, var(--focus) 75%, var(--border));
-  background: color-mix(in srgb, var(--focus) 18%, var(--surface-raised));
+  border: 2px solid color-mix(in srgb, var(--focus) 85%, var(--border));
+  background: color-mix(in srgb, var(--focus) 30%, var(--surface-raised));
+  box-shadow: inset 0 0 0 0.12rem color-mix(in srgb, var(--focus) 18%, transparent);
 }
 
 .current {
@@ -267,19 +268,67 @@ h1 {
 
 .legal-next {
   z-index: 2;
-  border: 2px solid var(--focus);
-  background: color-mix(in srgb, var(--focus) 22%, var(--surface-raised));
+  border: 2px dashed var(--focus);
+  background: color-mix(in srgb, var(--focus) 14%, var(--surface-raised));
   box-shadow:
-    0 0 0 0.16rem color-mix(in srgb, var(--focus) 32%, transparent),
-    0 0 0.8rem color-mix(in srgb, var(--focus) 22%, transparent);
+    inset 0 0 0 0.1rem color-mix(in srgb, var(--focus) 22%, transparent),
+    0 0 0 0.16rem color-mix(in srgb, var(--focus) 30%, transparent);
+}
+
+.legal-next::after,
+.visited:not(.current)::after {
+  position: absolute;
+  right: 0.16rem;
+  bottom: 0.14rem;
+  display: grid;
+  width: clamp(0.62rem, 3vw, 0.95rem);
+  height: clamp(0.62rem, 3vw, 0.95rem);
+  place-items: center;
+  border-radius: 50%;
+  font-size: clamp(0.42rem, 2vw, 0.62rem);
+  font-weight: 950;
+  line-height: 1;
+}
+
+.legal-next::after {
+  background: var(--focus);
+  color: var(--surface-raised);
+  content: '•';
+}
+
+.visited:not(.current)::after {
+  background: color-mix(in srgb, var(--focus) 70%, var(--surface-raised));
+  color: var(--text);
+  content: '✓';
 }
 
 .hinted {
-  z-index: 1;
-  border-color: #d7a438;
-  background: color-mix(in srgb, #d7a438 28%, var(--surface-raised));
-  box-shadow: 0 0 0 0.22rem color-mix(in srgb, #d7a438 35%, transparent);
+  z-index: 4;
+  border: 2px solid #f4cc73;
+  background: color-mix(in srgb, #d7a438 38%, var(--surface-raised));
+  box-shadow:
+    inset 0 0 0 0.1rem color-mix(in srgb, #f4cc73 32%, transparent),
+    0 0 0 0.24rem color-mix(in srgb, #d7a438 42%, transparent),
+    0 0 1rem color-mix(in srgb, #d7a438 32%, transparent);
   animation: knight-hint-pulse 900ms ease-in-out infinite alternate;
+}
+
+.hinted::before {
+  position: absolute;
+  top: 0.12rem;
+  right: 0.12rem;
+  display: grid;
+  width: clamp(0.72rem, 3.5vw, 1.05rem);
+  height: clamp(0.72rem, 3.5vw, 1.05rem);
+  place-items: center;
+  border: 1px solid #d7a438;
+  border-radius: 50%;
+  background: #f4cc73;
+  color: #342309;
+  content: '?';
+  font-size: clamp(0.48rem, 2.2vw, 0.7rem);
+  font-weight: 950;
+  line-height: 1;
 }
 
 .step-number,
@@ -360,13 +409,21 @@ h1 {
 }
 
 .legal-swatch {
-  border: 2px solid var(--focus);
+  border: 2px dashed var(--focus);
   box-shadow: 0 0 0 0.14rem color-mix(in srgb, var(--focus) 25%, transparent);
 }
 
 .visited-swatch {
+  border-width: 2px;
   border-color: color-mix(in srgb, var(--focus) 75%, var(--border));
   background: color-mix(in srgb, var(--focus) 18%, var(--surface-raised));
+}
+
+.hinted-swatch {
+  border-color: #d7a438;
+  background: #f4cc73;
+  color: #342309;
+  font-size: 0.72rem;
 }
 
 .blocked-swatch {
@@ -560,9 +617,22 @@ h1 {
     padding: 0.3rem;
   }
 
-  .step-number,
   .start-mark {
     display: none;
+  }
+
+  .step-number {
+    top: 0.16rem;
+    left: 0.2rem;
+    color: var(--text);
+    font-size: 0.56rem;
+    text-shadow: 0 1px 0 color-mix(in srgb, var(--surface-raised) 75%, transparent);
+  }
+
+  .legal-next::after,
+  .visited:not(.current)::after {
+    right: 0.12rem;
+    bottom: 0.1rem;
   }
 
   .side-panel {

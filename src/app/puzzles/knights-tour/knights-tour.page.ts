@@ -426,6 +426,12 @@ export class KnightsTourPage {
       details.push('position actuelle');
     }
 
+    const hint = this.hintedPosition();
+
+    if (hint && this.samePosition(hint, cell)) {
+      details.push('indice');
+    }
+
     if (!isStart && this.legalNextKeys().has(this.cellKey(cell))) {
       details.push('mouvement possible');
     }
@@ -448,6 +454,12 @@ export class KnightsTourPage {
 
     if (pathIndex === this.classicPath().length - 1) {
       details.push('position actuelle');
+    }
+
+    const hint = this.classicHintedPosition();
+
+    if (hint && this.samePosition(hint, position)) {
+      details.push('indice');
     }
 
     if (this.classicPath().length === 0) {

@@ -1,0 +1,289 @@
+<main class="page">
+  <a routerLink="/" fragment="spatial-placement" class="back-link">Retour au menu</a>
+
+  <section class="shell">
+    <header class="hero">
+      <p class="eyebrow">Casse-tête d’équilibre</p>
+      <h1>Balance Stack</h1>
+      <p class="intro">
+        Assemble les blocs en une seule tour continue sans la faire basculer. Les pièces doivent
+        rester collées entre elles et une seule construction respecte toutes les règles.
+      </p>
+    </header>
+
+    <nav class="difficulty-tabs" aria-label="Difficulté">
+      @for (difficulty of difficulties; track difficulty.id) {
+        <button
+          type="button"
+          class="difficulty-tab"
+          [class.active]="selectedDifficulty() === difficulty.id"
+          [attr.aria-pressed]="selectedDifficulty() === difficulty.id"
+          (click)="selectDifficulty(difficulty.id)"
+        >
+          <strong>{{ difficulty.title }}</strong>
+          <span>{{ difficulty.pieceCount }} pièces</span>
+        </button>
+      }
+    </nav>
+
+    <div class="rule-strip">
+      <p>
+        <span class="rule-icon" aria-hidden="true">●</span>
+        <span class="rule-copy"
+          ><strong>Colle les blocs</strong><span>chaque pièce touche la tour.</span></span
+        >
+      </p>
+      <p>
+        <span class="rule-icon" aria-hidden="true">↻</span>
+        <span class="rule-copy"
+          ><strong>Tourne et glisse</strong><span>clic droit pour pivoter.</span></span
+        >
+      </p>
+      <p>
+        <span class="rule-icon" aria-hidden="true">⚖</span>
+        <span class="rule-copy"
+          ><strong>Garde l’équilibre</strong><span>à chaque étape.</span></span
+        >
+      </p>
+    </div>
+
+    @if (generationError()) {
+      <section class="error-panel" role="alert">
+        <p>{{ generationError() }}</p>
+        <button type="button" (click)="newPuzzle()">Réessayer</button>
+      </section>
+    } @else {
+      <section class="game-panel">
+        <div class="section-heading">
+          <div>
+            <p class="panel-kicker">Défi en cours</p>
+            <h2>Construis la tour</h2>
+          </div>
+          <strong class="progress-pill">
+            {{ currentPieceIndex() }} / {{ puzzle().pieces.length }} pièces
+          </strong>
+        </div>
+
+        <ol class="piece-queue" aria-label="Ordre des pièces">
+          @for (piece of puzzle().pieces; track piece.id; let index = $index) {
+            <li
+              class="queue-piece"
+              [class.placed]="pieceState(index) === 'placed'"
+              [class.current]="pieceState(index) === 'current'"
+              [attr.aria-current]="pieceState(index) === 'current' ? 'step' : null"
+              [attr.aria-label]="
+                index +
+                1 +
+                '. ' +
+                piece.label +
+                ', ' +
+                (pieceState(index) === 'placed'
+                  ? 'placée'
+                  : pieceState(index) === 'current'
+                    ? 'à jouer'
+                    : 'à venir')
+              "
+            >
+              <span class="queue-number">{{ index + 1 }}</span>
+              <span
+                class="mini-shape"
+                [style.--mini-columns]="miniatureWidth(piece)"
+                [style.--mini-rows]="miniatureHeight(piece)"
+                [style.--piece-color]="piece.color"
+                aria-hidden="true"
+              >
+                @for (cell of miniatureCells(piece); track cell.x + '-' + cell.y) {
+                  <i
+                    [style.grid-column]="cell.x + 1"
+                    [style.grid-row]="miniatureRow(piece, cell)"
+                  ></i>
+                }
+              </span>
+              @if (pieceState(index) === 'placed') {
+                <span class="queue-check" aria-hidden="true">✓</span>
+              }
+            </li>
+          }
+        </ol>
+
+        <div class="workspace">
+          <aside class="piece-dock">
+            @if (currentPiece(); as piece) {
+              <div class="dock-heading">
+                <div>
+                  <p class="panel-kicker">Pièce {{ currentPieceIndex() + 1 }}</p>
+                  <h2>{{ piece.label }}</h2>
+                </div>
+                <span class="grab-label"><span aria-hidden="true">↕</span> À saisir</span>
+              </div>
+
+              <div class="grab-pad" [class.dragging]="!!dragState()">
+                <button
+                  #dragPiece
+                  type="button"
+                  class="draggable-piece"
+                  [class.dragging]="!!dragState()"
+                  [style.--piece-columns]="currentShapeWidth()"
+                  [style.--piece-rows]="currentShapeHeight()"
+                  [style.--piece-color]="piece.color"
+                  [attr.aria-label]="
+                    'Pièce ' +
+                    piece.label +
+                    ' à glisser. Clic droit pour pivoter, ou utilise les flèches puis Entrée.'
+                  "
+                  (pointerdown)="startPieceDrag($event)"
+                  (contextmenu)="handlePieceContextMenu($event)"
+                  (keydown)="handlePieceKeyboard($event)"
+                >
+                  @for (cell of currentOrientation(); track cell.x + '-' + cell.y) {
+                    <i
+                      [style.grid-column]="cell.x + 1"
+                      [style.grid-row]="currentMiniatureRow(cell)"
+                    ></i>
+                  }
+                </button>
+                <p><strong>Trouve un appui</strong><span>Clic droit pour pivoter la pièce.</span></p>
+              </div>
+
+              <button
+                type="button"
+                class="rotate-button"
+                [disabled]="!!dragState()"
+                (click)="rotatePiece()"
+              >
+                <span aria-hidden="true">↻</span> Tourner avant de glisser
+              </button>
+            } @else {
+              <div class="finished-card">
+                <span aria-hidden="true">✓</span>
+                <strong>Tour terminée</strong>
+              </div>
+            }
+          </aside>
+
+          <section
+            class="tower-panel"
+            [class.drag-over]="dragOverBoard()"
+            [class.drop-unsafe]="previewIsUnsafe()"
+            [class.rejected]="rejectedPreview()"
+          >
+            <div
+              class="drop-status"
+              [class.active]="showPlacementPreview()"
+              [class.valid]="previewIsValid()"
+              [class.invalid]="showPlacementPreview() && !previewIsValid()"
+              aria-live="polite"
+            >
+              <span aria-hidden="true">
+                {{ previewIsValid() ? '✓' : showPlacementPreview() ? '!' : '↓' }}
+              </span>
+              <strong>{{ placementStatus() }}</strong>
+            </div>
+
+            <p class="panel-kicker">Chaque bloc doit rester collé à la tour</p>
+
+            <div class="tower-stage">
+              <div class="tower-rig" [style.--tower-tilt]="towerTilt() + 'deg'">
+                <div
+                  #stackBoard
+                  class="stack-board"
+                  [style.--columns]="puzzle().width"
+                  [style.--rows]="puzzle().height"
+                  [attr.aria-label]="boardAriaLabel()"
+                  role="img"
+                >
+                  @for (row of boardRows(); track row) {
+                    @for (column of boardColumns(); track column) {
+                      @let placed = placedCellAt(column, row);
+                      @let preview = previewCellAt(column, row);
+                      <span
+                        class="stack-cell"
+                        [class.filled]="!!placed"
+                        [class.preview]="!placed && !!preview"
+                        [class.preview-unsafe]="
+                          !placed && !!preview && (previewIsUnsafe() || rejectedPreview())
+                        "
+                        [style.--piece-color]="placed?.color ?? preview?.color ?? 'transparent'"
+                        aria-hidden="true"
+                      ></span>
+                    }
+                  }
+                </div>
+                <div class="balance-beam" aria-hidden="true"></div>
+              </div>
+              <div class="rocker" aria-hidden="true"></div>
+              <div class="rocker-foot" aria-hidden="true"></div>
+            </div>
+
+            <div class="balance-meter" [class.unsafe]="previewIsUnsafe() || rejectedPreview()">
+              <div class="meter-heading">
+                <strong>{{ balanceLabel() }}</strong>
+                <span>Zone stable</span>
+              </div>
+              <div class="meter-track" aria-hidden="true">
+                <span class="safe-zone"></span>
+                <span class="center-mark"></span>
+                <span class="weight-marker" [style.left.%]="balanceMarkerPercent()"></span>
+              </div>
+            </div>
+
+            <div class="feedback-zone" aria-live="polite">
+              @if (feedback(); as currentFeedback) {
+                <p
+                  class="feedback"
+                  [class.feedback-error]="currentFeedback.tone === 'error'"
+                  [class.feedback-hint]="currentFeedback.tone === 'hint'"
+                >
+                  {{ currentFeedback.text }}
+                </p>
+              }
+            </div>
+          </section>
+        </div>
+
+        <div class="secondary-actions">
+          <button type="button" (click)="undoLastPiece()" [disabled]="!canUndo()">
+            Retirer la dernière
+          </button>
+          <button type="button" (click)="showHint()" [disabled]="isSolved()">Indice</button>
+          <button type="button" (click)="resetPuzzle()" [disabled]="!canUndo()">Recommencer</button>
+          <button type="button" (click)="newPuzzle()">Nouvelle tour</button>
+        </div>
+
+        @if (dragState(); as drag) {
+          @if (currentPiece(); as piece) {
+            <span
+              class="floating-piece"
+              [class.over-board]="drag.overBoard"
+              [class.unsafe]="drag.overBoard && previewIsUnsafe()"
+              [style.left.px]="drag.clientX"
+              [style.top.px]="drag.clientY"
+              [style.--drag-cell-size.px]="drag.cellSize"
+              [style.--piece-columns]="currentShapeWidth()"
+              [style.--piece-rows]="currentShapeHeight()"
+              [style.--piece-color]="piece.color"
+              aria-hidden="true"
+            >
+              @for (cell of currentOrientation(); track cell.x + '-' + cell.y) {
+                <i
+                  [style.grid-column]="cell.x + 1"
+                  [style.grid-row]="currentMiniatureRow(cell)"
+                ></i>
+              }
+            </span>
+          }
+        }
+      </section>
+
+      @if (isSolved()) {
+        <app-puzzle-success-popup
+          title="Tour équilibrée!"
+          message="Tous les blocs sont reliés et le centre de gravité est parfaitement centré."
+          [answer]="successAnswer()"
+          actionLabel="Nouvelle tour"
+          (action)="newPuzzle()"
+        />
+      }
+    }
+  </section>
+</main>

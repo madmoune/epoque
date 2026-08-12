@@ -22,6 +22,7 @@ export class FirebaseAuthService {
   private readonly readyState = signal(false);
   private readonly busyState = signal(false);
   private readonly errorState = signal('');
+  private readonly profileVersion = signal(0);
   private readonly initialization: Promise<void>;
   private auth?: Auth;
 
@@ -29,6 +30,16 @@ export class FirebaseAuthService {
   readonly accountUser = computed(() => {
     const user = this.userState();
     return user && !user.isAnonymous ? user : null;
+  });
+  readonly accountDisplayName = computed(() => {
+    this.profileVersion();
+    const user = this.accountUser();
+
+    return (
+      user?.displayName ||
+      user?.providerData.find((provider) => provider.displayName)?.displayName ||
+      null
+    );
   });
   readonly isReady = this.readyState.asReadonly();
   readonly isBusy = this.busyState.asReadonly();
@@ -90,8 +101,10 @@ export class FirebaseAuthService {
         ? await this.linkAnonymousUser(currentUser, auth, provider)
         : await signInWithPopup(auth, provider);
 
-      this.userState.set(result.user);
-      return result.user;
+      const signedInUser = await this.refreshUserProfile(result.user);
+
+      this.userState.set(signedInUser);
+      return signedInUser;
     } catch (error) {
       this.errorState.set(this.describeAuthError(error));
       return null;
@@ -137,7 +150,13 @@ export class FirebaseAuthService {
         auth.authStateReady(),
         new Promise<void>((resolve) => globalThis.setTimeout(resolve, 5000)),
       ]);
-      this.userState.set(auth.currentUser);
+      const currentUser = auth.currentUser;
+      const refreshedUser =
+        currentUser && !currentUser.isAnonymous
+          ? await this.refreshUserProfile(currentUser)
+          : currentUser;
+
+      this.userState.set(refreshedUser);
       this.readyState.set(true);
     } catch (error) {
       this.readyState.set(true);
@@ -148,6 +167,18 @@ export class FirebaseAuthService {
   private getAuth(): Auth {
     this.auth ??= this.firebaseClient.auth;
     return this.auth;
+  }
+
+  private async refreshUserProfile(user: User): Promise<User> {
+    try {
+      await user.reload();
+    } catch {
+      // Keep the cached profile when Firebase cannot refresh it.
+    } finally {
+      this.profileVersion.update((version) => version + 1);
+    }
+
+    return this.getAuth().currentUser ?? user;
   }
 
   private async linkAnonymousUser(

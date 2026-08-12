@@ -1,0 +1,198 @@
+<main class="page">
+  <a routerLink="/" fragment="deduction-logique" class="back-link">Retour au menu</a>
+
+  <section class="shell">
+    <header class="header">
+      <p class="eyebrow">Leviers et déduction</p>
+      <h1>Poids suspendus</h1>
+      <p class="intro">Déduis les poids inconnus grâce à l’équilibre de chaque branche.</p>
+    </header>
+
+    @if (generationError(); as error) {
+      <p class="error" role="alert">{{ error }}</p>
+      <button type="button" class="primary-button retry-button" (click)="newPuzzle()">
+        Réessayer
+      </button>
+    } @else {
+      <section class="mobile-panel" aria-labelledby="mobile-title">
+        <div class="section-heading">
+          <div>
+            <p class="panel-kicker">Mobile en équilibre</p>
+            <h2 id="mobile-title">Retrouve les poids inconnus</h2>
+          </div>
+        </div>
+
+        <figure class="mobile-figure">
+          <div class="mobile-canvas">
+            <svg
+              class="mobile-diagram"
+              [attr.viewBox]="'0 0 ' + layout().width + ' ' + layout().height"
+              preserveAspectRatio="xMidYMin meet"
+              role="img"
+              aria-labelledby="diagram-title diagram-description"
+            >
+              <title id="diagram-title">Mobile de poids suspendus en équilibre</title>
+              <desc id="diagram-description">
+                Chaque petit trait sur une barre représente une unité. Un poids est donné et les
+                autres possèdent un champ pour inscrire leur valeur.
+              </desc>
+
+              <line
+                class="ceiling-line"
+                x1="46"
+                [attr.y1]="layout().ceilingY"
+                [attr.x2]="layout().width - 46"
+                [attr.y2]="layout().ceilingY"
+              />
+              <line
+                class="hanger-line"
+                [attr.x1]="layout().rootX"
+                [attr.y1]="layout().ceilingY"
+                [attr.x2]="layout().rootX"
+                [attr.y2]="layout().rootBarY"
+              />
+
+              @for (connector of layout().connectors; track connector.id) {
+                <line
+                  class="hanger-line"
+                  [attr.x1]="connector.x"
+                  [attr.y1]="connector.top"
+                  [attr.x2]="connector.x"
+                  [attr.y2]="connector.bottom"
+                />
+              }
+
+              @for (bar of layout().bars; track bar.id) {
+                <g class="mobile-bar">
+                  <line
+                    class="bar-line"
+                    [attr.x1]="bar.leftX"
+                    [attr.y1]="bar.y"
+                    [attr.x2]="bar.rightX"
+                    [attr.y2]="bar.y"
+                  />
+                  @for (marker of bar.unitMarkers; track marker.id) {
+                    <line
+                      class="unit-marker"
+                      [attr.x1]="marker.x"
+                      [attr.y1]="bar.y - 8"
+                      [attr.x2]="marker.x"
+                      [attr.y2]="bar.y + 8"
+                    />
+                  }
+                  <circle class="pivot-dot" [attr.cx]="bar.pivotX" [attr.cy]="bar.y" r="7" />
+                </g>
+              }
+            </svg>
+
+            <div class="diagram-weight-editors" aria-label="Poids suspendus">
+              @for (node of layout().weights; track node.weightId) {
+                @let weight = weightForId(node.weightId);
+
+                @if (weight.known) {
+                  <div
+                    class="diagram-weight-editor known-node"
+                    [style.left.%]="(node.x / layout().width) * 100"
+                    [style.top.%]="(node.y / layout().height) * 100"
+                    [attr.aria-label]="diagramWeightLabel(node.weightId)"
+                    role="img"
+                  >
+                    <span
+                      class="diagram-weight-symbol"
+                      [style.--weight-color]="weight.color"
+                      aria-hidden="true"
+                    >
+                      {{ weight.label }}
+                    </span>
+                    <span class="diagram-equals" aria-hidden="true">=</span>
+                    <strong>{{ puzzle().solution[weight.id] }}</strong>
+                    <small>kg</small>
+                  </div>
+                } @else {
+                  <label
+                    class="diagram-weight-editor unknown-node"
+                    [class.hinted-node]="isHinted(weight.id)"
+                    [class.completed-node]="!!answerFor(weight.id)"
+                    [style.left.%]="(node.x / layout().width) * 100"
+                    [style.top.%]="(node.y / layout().height) * 100"
+                    [attr.for]="'hanging-answer-' + weight.id"
+                  >
+                    <span
+                      class="diagram-weight-symbol"
+                      [style.--weight-color]="weight.color"
+                      aria-hidden="true"
+                    >
+                      {{ weight.label }}
+                    </span>
+                    <span class="diagram-equals" aria-hidden="true">=</span>
+                    <input
+                      [id]="'hanging-answer-' + weight.id"
+                      type="number"
+                      min="1"
+                      max="99"
+                      step="1"
+                      inputmode="numeric"
+                      autocomplete="off"
+                      placeholder="?"
+                      [value]="answerFor(weight.id)"
+                      [disabled]="isSolved() || isHinted(weight.id)"
+                      [attr.aria-label]="'Poids ' + weight.label + ' en kilogrammes'"
+                      (input)="updateAnswer(weight.id, $event)"
+                    />
+                    <small>kg</small>
+                  </label>
+                }
+              }
+            </div>
+          </div>
+        </figure>
+      </section>
+
+      <div class="answer-tools" aria-label="Actions">
+        <div class="feedback-zone" aria-live="polite">
+          @if (feedback(); as currentFeedback) {
+            <p
+              class="feedback"
+              [class.feedback-error]="currentFeedback.tone === 'error'"
+              [class.feedback-hint]="currentFeedback.tone === 'hint'"
+            >
+              {{ currentFeedback.text }}
+            </p>
+          }
+        </div>
+
+        <div class="actions">
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="showHint()"
+            [disabled]="isSolved() || !hasAvailableHint()"
+          >
+            Indice
+          </button>
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="resetPuzzle()"
+            [disabled]="isSolved()"
+          >
+            Recommencer
+          </button>
+          <button type="button" class="secondary-button" (click)="newPuzzle()">
+            Nouveau mobile
+          </button>
+        </div>
+      </div>
+
+      @if (isSolved()) {
+        <app-puzzle-success-popup
+          title="Mobile équilibré!"
+          message="Tous les poids respectent les distances de chaque branche."
+          [answer]="successAnswer()"
+          actionLabel="Nouveau mobile"
+          (action)="newPuzzle()"
+        />
+      }
+    }
+  </section>
+</main>
