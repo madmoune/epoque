@@ -203,8 +203,12 @@ export class AnagramsPage {
             return;
         }
 
-        const wasDragMode = this.letterInteractionMode() === 'drag';
-        const randomizedLetters = this.anagramService.scrambleWord(this.scrambledLetters());
+        const currentLetters = this.scrambledLetters();
+        const shouldSyncAnswer =
+            this.letterInteractionMode() === 'drag' ||
+            this.answerInput() === '' ||
+            this.answerInput() === currentLetters;
+        const randomizedLetters = this.anagramService.scrambleWord(currentLetters);
 
         this.clearPlacementAnimation();
         this.letterInteractionMode.set('typing');
@@ -213,7 +217,7 @@ export class AnagramsPage {
         this.clearLetterDrag();
         this.scrambledLetters.set(randomizedLetters);
 
-        if (wasDragMode) {
+        if (shouldSyncAnswer) {
             this.answerInput.set(randomizedLetters);
         }
     }

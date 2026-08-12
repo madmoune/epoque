@@ -23,4 +23,42 @@ describe('ShapeLayersPage', () => {
     expect(isInsideAccent(0.1, -0.1)).toBe(false);
     expect(isInsideAccent(-0.1, -0.4)).toBe(false);
   });
+
+  it('moves a selected piece up and down in the stack', () => {
+    const placedPieces = page.solution().slice(0, 3).map((piece: any) => ({ ...piece }));
+    page.pieces.set(placedPieces);
+    page.selectPiece(placedPieces[0].id);
+
+    page.changeLayer(1);
+
+    expect(page.pieces().map((piece: any) => piece.id)).toEqual([
+      placedPieces[1].id,
+      placedPieces[0].id,
+      placedPieces[2].id,
+    ]);
+    expect(page.selectedPieceId()).toBe(placedPieces[0].id);
+    expect(page.canChangeLayer(-1)).toBe(true);
+
+    page.changeLayer(-1);
+
+    expect(page.pieces().map((piece: any) => piece.id)).toEqual([
+      placedPieces[0].id,
+      placedPieces[1].id,
+      placedPieces[2].id,
+    ]);
+  });
+
+  it('disables layer movement at the ends of the stack', () => {
+    const placedPieces = page.solution().slice(0, 2).map((piece: any) => ({ ...piece }));
+    page.pieces.set(placedPieces);
+    page.selectPiece(placedPieces[0].id);
+
+    expect(page.canChangeLayer(-1)).toBe(false);
+    expect(page.canChangeLayer(1)).toBe(true);
+
+    page.selectPiece(placedPieces[1].id);
+
+    expect(page.canChangeLayer(1)).toBe(false);
+    expect(page.canChangeLayer(-1)).toBe(true);
+  });
 });

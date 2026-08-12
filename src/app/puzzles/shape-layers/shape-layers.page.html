@@ -47,6 +47,34 @@
             </button>
           }
         </div>
+        @if (pieces().length > 0) {
+          <span class="tray-label stack-label">Ordre de la pile (du bas vers le haut)</span>
+          <ol class="layer-list" aria-label="Ordre des pièces dans la pile">
+            @for (piece of pieces(); track piece.id; let index = $index) {
+              <li>
+                <button type="button" class="layer-choice" [class.selected]="selectedPieceId() === piece.id"
+                  (click)="selectPiece(piece.id)"
+                  [attr.aria-label]="'Sélectionner le ' + shapeLabel(piece) + ', couche ' + (index + 1)">
+                  <span class="layer-number">{{ index + 1 }}</span>
+                  <span [class]="choiceClass(piece)"
+                    [style.--choice-color]="piece.color"
+                    [style.--piece-background]="piece.backgroundColor ?? 'transparent'"
+                    [style.--piece-accent]="piece.accentColor ?? 'transparent'"
+                    aria-hidden="true"></span>
+                  <span>{{ shapeLabel(piece) }}</span>
+                </button>
+              </li>
+            }
+          </ol>
+          <div class="layer-actions" aria-label="Modifier l'ordre des pièces">
+            <button type="button" (click)="changeLayer(1)" [disabled]="!canChangeLayer(1)">
+              &#8593; Monter
+            </button>
+            <button type="button" (click)="changeLayer(-1)" [disabled]="!canChangeLayer(-1)">
+              &#8595; Descendre
+            </button>
+          </div>
+        }
         <button type="button" (click)="rotateSelected()" [disabled]="!selectedPieceId()">↻ Tourner</button>
         <button type="button" class="hint-button" (click)="showHint()" [disabled]="!hasAvailableHint()">
           Indice

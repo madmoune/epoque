@@ -42,6 +42,10 @@ export class ShapeLayersPage {
     const pieces = this.pieces();
     return this.solution().some((piece, index) => !this.isPieceInSolutionPosition(pieces[index], piece));
   });
+  protected readonly selectedLayerIndex = computed(() => {
+    const id = this.selectedPieceId();
+    return id ? this.pieces().findIndex((piece) => piece.id === id) : -1;
+  });
 
   constructor() {
     this.newPuzzle();
@@ -168,14 +172,20 @@ export class ShapeLayersPage {
   }
 
   protected changeLayer(direction: -1 | 1): void {
-    const id = this.selectedPieceId();
+    if (!this.canChangeLayer(direction)) return;
+
     const pieces = [...this.pieces()];
-    const index = pieces.findIndex((piece) => piece.id === id);
+    const index = this.selectedLayerIndex();
     const nextIndex = index + direction;
-    if (index < 0 || nextIndex < 0 || nextIndex >= pieces.length || this.isSolved()) return;
     [pieces[index], pieces[nextIndex]] = [pieces[nextIndex], pieces[index]];
     this.pieces.set(pieces);
     this.moves.update((value) => value + 1);
+  }
+
+  protected canChangeLayer(direction: -1 | 1): boolean {
+    const index = this.selectedLayerIndex();
+    const nextIndex = index + direction;
+    return !this.isSolved() && index >= 0 && nextIndex >= 0 && nextIndex < this.pieces().length;
   }
 
   protected showHint(): void {

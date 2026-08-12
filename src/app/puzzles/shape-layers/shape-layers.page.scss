@@ -30,6 +30,14 @@ h2 { margin: 0 0 .65rem; color: var(--muted); font-size: .9rem; text-align: cent
 .piece-count { color: var(--muted); font-size: .78rem; }
 .tray-label { color: var(--muted); font-size: .75rem; font-weight: 800; }
 .piece-picker { display: flex; flex-wrap: wrap; gap: .4rem; padding-bottom: .45rem; }
+.stack-label { margin-top: .35rem; }
+.layer-list { display: grid; gap: .35rem; max-height: 10rem; margin: 0; padding: 0; overflow-y: auto; list-style: none; }
+.layer-choice { display: flex; align-items: center; gap: .55rem; width: 100%; min-height: 2.35rem !important; padding: .4rem .55rem !important; text-align: left; }
+.layer-choice .choice-shape { flex: 0 0 2.35rem; }
+.layer-choice > span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.controls .layer-choice.selected { outline: 3px solid var(--focus); outline-offset: 2px; }
+.layer-number { display: grid; flex: 0 0 1.35rem; place-items: center; width: 1.35rem; height: 1.35rem; border-radius: 50%; background: var(--border-strong); color: var(--text); font-size: .75rem; font-weight: 800; }
+.layer-actions { display: grid; grid-template-columns: 1fr 1fr; gap: .45rem; }
 .controls .piece-choice { position: relative; display: grid; place-items: center; width: 3.1rem; min-height: 3.1rem; padding: .35rem; border-radius: .55rem; background: var(--surface-soft) !important; }
 .controls .piece-choice.selected { outline: 3px solid var(--focus); outline-offset: 2px; }
 .controls .piece-choice.placed::after { position: absolute; right: .15rem; bottom: .05rem; display: grid; place-items: center; width: 1rem; height: 1rem; border-radius: 50%; background: var(--focus); color: var(--surface); content: '✓'; font-size: .65rem; font-weight: 900; }
@@ -67,7 +75,7 @@ h2 { margin: 0 0 .65rem; color: var(--muted); font-size: .9rem; text-align: cent
   .shape-board { border-radius: .65rem; }
   .controls { grid-column: 1 / -1; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .45rem; padding: .7rem; }
   .controls p { margin: 0; }
-  .controls p, .piece-count, .tray-label, .piece-picker, .new-area { grid-column: 1 / -1; }
+  .controls p, .piece-count, .tray-label, .piece-picker, .layer-list, .layer-actions, .new-area { grid-column: 1 / -1; }
   .piece-picker { justify-content: center; gap: .32rem; padding-bottom: .2rem; }
   .controls .piece-choice { width: 2.75rem; min-height: 2.75rem; padding: .25rem; }
   .choice-shape { width: 2.05rem; height: 2.05rem; }

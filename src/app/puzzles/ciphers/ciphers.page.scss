@@ -817,6 +817,17 @@ input.correct {
     padding: 0.35rem;
   }
 
+  .puzzle-area.keyboard-open.braille-puzzle .cipher-workspace {
+    position: static;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .puzzle-area.keyboard-open.braille-puzzle .encoded-word {
+    max-height: none;
+    overflow: visible;
+  }
+
   .puzzle-area.keyboard-open .encoded-word.nato-word:not(.nato-letter-prompt) > .encoded-token {
     min-width: 2.98rem;
     padding-inline: 0.1rem;

@@ -13,7 +13,11 @@
     } @else if (loadError()) {
       <p class="error">{{ loadError() }}</p>
     } @else if (puzzle(); as currentPuzzle) {
-      <section class="puzzle-area" [class.keyboard-open]="keyboardVisible()">
+      <section
+        class="puzzle-area"
+        [class.keyboard-open]="keyboardVisible()"
+        [class.braille-puzzle]="selectedCipher() === 'braille'"
+      >
         @if (selectedCipher() === 'nato') {
           <div class="nato-mode-switch" role="group" aria-label="Mode NATO">
             <button
