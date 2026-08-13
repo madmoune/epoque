@@ -1,5 +1,9 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, HostListener, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import {
+  CustomKeyboardComponent,
+  CustomKeyboardKey,
+} from '../shared/custom-keyboard/custom-keyboard.component';
 import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
 import {
   HangingWeight,
@@ -58,7 +62,7 @@ type HangingMobileLayout = {
 
 @Component({
   selector: 'app-hanging-weights-page',
-  imports: [RouterLink, PuzzleSuccessPopupComponent],
+  imports: [RouterLink, PuzzleSuccessPopupComponent, CustomKeyboardComponent],
   templateUrl: './hanging-weights.page.html',
   styleUrl: './hanging-weights.page.scss',
 })
@@ -69,6 +73,13 @@ export class HangingWeightsPage {
     this.hangingWeightsService.createPuzzle(),
   );
   protected readonly answers = signal<Record<string, string>>({});
+  protected readonly activeAnswerWeightId = signal<string | null>(null);
+  protected readonly numberKeyboardRows: CustomKeyboardKey[][] = [
+    ['1', '2', '3'],
+    ['4', '5', '6'],
+    ['7', '8', '9'],
+    ['clear', '0', 'backspace'],
+  ];
   protected readonly hintedWeightIds = signal<Set<string>>(new Set());
   protected readonly feedback = signal<HangingWeightFeedback | null>(null);
   protected readonly isSolved = signal(false);
@@ -95,11 +106,75 @@ export class HangingWeightsPage {
       return;
     }
 
-    const value = event.target instanceof HTMLInputElement ? event.target.value : '';
+    const value =
+      event.target instanceof HTMLInputElement ? this.normalizeAnswer(event.target.value) : '';
 
     this.answers.update((answers) => ({ ...answers, [weightId]: value }));
     this.feedback.set(null);
     this.validateAnswers();
+  }
+
+  protected activateAnswerInput(weightId: string, event: Event): void {
+    if (this.isSolved() || this.hintedWeightIds().has(weightId)) {
+      return;
+    }
+
+    if (!this.unknownWeights().some((weight) => weight.id === weightId)) {
+      return;
+    }
+
+    this.activeAnswerWeightId.set(weightId);
+
+    if (event.target instanceof HTMLInputElement) {
+      event.target.select();
+    }
+  }
+
+  protected handleKeyboardKey(key: CustomKeyboardKey): void {
+    const weightId = this.activeAnswerWeightId();
+
+    if (!weightId || this.isSolved() || this.hintedWeightIds().has(weightId)) {
+      return;
+    }
+
+    const currentValue = this.answerFor(weightId);
+    let nextValue: string;
+
+    if (key === 'backspace') {
+      nextValue = currentValue.slice(0, -1);
+    } else if (key === 'clear') {
+      nextValue = '';
+    } else if (key === 'space') {
+      return;
+    } else if (/^\d$/.test(key)) {
+      nextValue = this.normalizeAnswer(`${currentValue}${key}`);
+    } else {
+      return;
+    }
+
+    this.answers.update((answers) => ({ ...answers, [weightId]: nextValue }));
+    this.feedback.set(null);
+    this.validateAnswers();
+  }
+
+  @HostListener('document:pointerdown', ['$event'])
+  protected hideKeyboardWhenClickingAway(event: PointerEvent): void {
+    const target = event.target;
+
+    if (!(target instanceof Element)) {
+      return;
+    }
+
+    if (
+      target.closest('.unknown-node input') ||
+      target.closest('button') ||
+      target.closest('app-custom-keyboard') ||
+      target.closest('app-puzzle-success-popup')
+    ) {
+      return;
+    }
+
+    this.activeAnswerWeightId.set(null);
   }
 
   protected answerFor(weightId: string): string {
@@ -135,6 +210,7 @@ export class HangingWeightsPage {
 
     this.feedback.set(null);
     this.isSolved.set(true);
+    this.activeAnswerWeightId.set(null);
   }
 
   protected showHint(): void {
@@ -156,6 +232,7 @@ export class HangingWeightsPage {
     const value = this.puzzle().solution[hintWeight.id];
 
     this.answers.update((answers) => ({ ...answers, [hintWeight.id]: String(value) }));
+    this.activeAnswerWeightId.set(null);
     this.hintedWeightIds.update((weightIds) => new Set([...weightIds, hintWeight.id]));
     this.feedback.set({
       tone: 'hint',
@@ -166,6 +243,7 @@ export class HangingWeightsPage {
 
   protected resetPuzzle(): void {
     this.answers.set({});
+    this.activeAnswerWeightId.set(null);
     this.hintedWeightIds.set(new Set());
     this.feedback.set(null);
     this.isSolved.set(false);
@@ -201,6 +279,10 @@ export class HangingWeightsPage {
 
   protected isHinted(weightId: string): boolean {
     return this.hintedWeightIds().has(weightId);
+  }
+
+  private normalizeAnswer(value: string): string {
+    return value.replace(/\D/g, '').slice(0, 2);
   }
 }
 

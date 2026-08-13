@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 
 export type CustomKeyboardKey = string | 'backspace' | 'clear' | 'space';
+type CustomKeyboardScrollBehavior = 'center' | 'minimal';
 
 @Component({
   selector: 'app-custom-keyboard',
@@ -22,6 +23,7 @@ export class CustomKeyboardComponent {
   readonly rows = input.required<CustomKeyboardKey[][]>();
   readonly disabled = input(false);
   readonly visible = input(true);
+  readonly scrollBehavior = input<CustomKeyboardScrollBehavior>('center');
   readonly keyPress = output<CustomKeyboardKey>();
 
   constructor() {
@@ -94,10 +96,17 @@ export class CustomKeyboardComponent {
 
     if (visibleHeight <= 0) return;
 
-    const targetTop = visibleTop + Math.max(0, (visibleHeight - activeRect.height) / 2);
     let scrollDelta = 0;
 
-    if (activeRect.bottom > visibleBottom || activeRect.top < visibleTop) {
+    if (this.scrollBehavior() === 'minimal') {
+      if (activeRect.bottom > visibleBottom) {
+        scrollDelta = activeRect.bottom - visibleBottom;
+      } else if (activeRect.top < visibleTop) {
+        scrollDelta = activeRect.top - visibleTop;
+      }
+    } else if (activeRect.bottom > visibleBottom || activeRect.top < visibleTop) {
+      const targetTop = visibleTop + Math.max(0, (visibleHeight - activeRect.height) / 2);
+
       scrollDelta = activeRect.top - targetTop;
     }
 

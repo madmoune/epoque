@@ -127,16 +127,16 @@
                     <span class="diagram-equals" aria-hidden="true">=</span>
                     <input
                       [id]="'hanging-answer-' + weight.id"
-                      type="number"
-                      min="1"
-                      max="99"
-                      step="1"
-                      inputmode="numeric"
+                      type="text"
+                      inputmode="none"
+                      maxlength="2"
                       autocomplete="off"
                       placeholder="?"
                       [value]="answerFor(weight.id)"
                       [disabled]="isSolved() || isHinted(weight.id)"
                       [attr.aria-label]="'Poids ' + weight.label + ' en kilogrammes'"
+                      (focus)="activateAnswerInput(weight.id, $event)"
+                      (click)="$event.stopPropagation()"
                       (input)="updateAnswer(weight.id, $event)"
                     />
                     <small>kg</small>
@@ -147,6 +147,14 @@
           </div>
         </figure>
       </section>
+
+      <app-custom-keyboard
+        [rows]="numberKeyboardRows"
+        [visible]="activeAnswerWeightId() !== null"
+        [disabled]="isSolved()"
+        [scrollBehavior]="'minimal'"
+        (keyPress)="handleKeyboardKey($event)"
+      />
 
       <div class="answer-tools" aria-label="Actions">
         <div class="feedback-zone" aria-live="polite">

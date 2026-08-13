@@ -41,9 +41,14 @@ type SnapCandidate = Point & {
   distance: number;
 };
 
+type SilhouetteFamily = 'compact' | 'elongated' | 'solid' | 'concave';
+
 type ScoredSilhouette = {
   placements: PlacedPiece[];
   score: number;
+  signature: string;
+  aspectRatio: number;
+  concavityRatio: number;
 };
 
 type Edge = {
@@ -63,6 +68,16 @@ export class TangramPage {
   private readonly magneticSnapDistance = 4;
   private readonly longTangramUnit = 20 * Math.SQRT2;
   private readonly shortTangramUnit = 10 * Math.SQRT2;
+  private readonly silhouetteFamilies: readonly SilhouetteFamily[] = [
+    'compact',
+    'elongated',
+    'solid',
+    'concave',
+  ];
+  private readonly recentSilhouetteSignatures: string[] = [];
+  private nextSilhouetteFamilyIndex = Math.floor(
+    Math.random() * this.silhouetteFamilies.length,
+  );
   private dragAnimationFrame: number | null = null;
   private pendingDragPoint: Point | null = null;
 
@@ -821,9 +836,9 @@ export class TangramPage {
   }
 
   private generateSilhouette(): PlacedPiece[] {
-    const candidates: ScoredSilhouette[] = [];
+    const candidatesBySignature = new Map<string, ScoredSilhouette>();
 
-    for (let attempt = 0; attempt < 180; attempt += 1) {
+    for (let attempt = 0; attempt < 240; attempt += 1) {
       const firstPiece = this.randomItem(this.pieces);
       const firstPlacement: PlacedPiece = {
         pieceId: firstPiece.id,
@@ -842,26 +857,82 @@ export class TangramPage {
 
       const centered = this.centerSilhouette(generated);
       if (centered) {
-        candidates.push({
+        const metrics = this.silhouetteMetrics(centered);
+        const signature = this.silhouetteSignature(centered);
+        const candidate: ScoredSilhouette = {
           placements: centered,
           score: this.silhouetteDifficulty(centered),
-        });
+          signature,
+          ...metrics,
+        };
+        const matchingCandidate = candidatesBySignature.get(signature);
+
+        if (!matchingCandidate || candidate.score > matchingCandidate.score) {
+          candidatesBySignature.set(signature, candidate);
+        }
       }
     }
 
+    const candidates = [...candidatesBySignature.values()];
+
     if (candidates.length > 0) {
-      candidates.sort((first, second) => second.score - first.score);
-      const hardCandidates = candidates.slice(
-        0,
-        Math.max(1, Math.ceil(candidates.length * 0.12)),
+      const family = this.nextSilhouetteFamily();
+      const familyCandidates = candidates.filter((candidate) =>
+        this.matchesSilhouetteFamily(candidate, family),
       );
-      return this.randomItem(hardCandidates).placements;
+      const freshFamilyCandidates = familyCandidates.filter(
+        (candidate) =>
+          !this.recentSilhouetteSignatures.includes(candidate.signature),
+      );
+      const freshCandidates = candidates.filter(
+        (candidate) =>
+          !this.recentSilhouetteSignatures.includes(candidate.signature),
+      );
+      const candidatePool =
+        freshFamilyCandidates.length > 0
+          ? freshFamilyCandidates
+          : freshCandidates.length > 0
+            ? freshCandidates
+            : familyCandidates.length > 0
+              ? familyCandidates
+              : candidates;
+      const rankedCandidates = [...candidatePool].sort((first, second) => {
+        const noveltyDifference =
+          this.silhouetteNovelty(second.signature) -
+          this.silhouetteNovelty(first.signature);
+
+        return noveltyDifference || second.score - first.score;
+      });
+      const variedCandidates = rankedCandidates.slice(
+        0,
+        Math.min(12, Math.max(1, Math.ceil(rankedCandidates.length * 0.4))),
+      );
+      const selected = this.randomItem(variedCandidates);
+
+      this.rememberSilhouette(selected.signature);
+      return selected.placements;
     }
 
-    return this.centerSilhouette(this.fallbackSilhouette()) ?? [];
+    const fallback = this.centerSilhouette(this.fallbackSilhouette()) ?? [];
+    if (fallback.length > 0) {
+      this.rememberSilhouette(this.silhouetteSignature(fallback));
+    }
+    return fallback;
   }
 
   private silhouetteDifficulty(placements: PlacedPiece[]): number {
+    const { concavityRatio } = this.silhouetteMetrics(placements);
+    const rotationVariety = new Set(
+      placements.map((placement) => placement.rotation),
+    ).size;
+
+    return concavityRatio * 100 + rotationVariety;
+  }
+
+  private silhouetteMetrics(placements: PlacedPiece[]): {
+    aspectRatio: number;
+    concavityRatio: number;
+  } {
     const polygons = placements.map((placement) =>
       this.transformedVertices(
         this.getDefinition(placement.pieceId),
@@ -877,13 +948,144 @@ export class TangramPage {
       0,
     );
     const hullArea = this.polygonArea(hull);
-    const concavity = Math.max(0, hullArea - pieceArea);
-    const exposedEdgeCount = this.exposedEdges(placements).length;
-    const rotationVariety = new Set(
-      placements.map((placement) => placement.rotation),
-    ).size;
+    const minX = Math.min(...vertices.map((point) => point.x));
+    const maxX = Math.max(...vertices.map((point) => point.x));
+    const minY = Math.min(...vertices.map((point) => point.y));
+    const maxY = Math.max(...vertices.map((point) => point.y));
+    const width = maxX - minX;
+    const height = maxY - minY;
 
-    return concavity * 4 + exposedEdgeCount * 1.5 + rotationVariety;
+    return {
+      aspectRatio:
+        Math.max(width, height) / Math.max(0.0001, Math.min(width, height)),
+      concavityRatio:
+        hullArea > 0 ? Math.max(0, hullArea - pieceArea) / hullArea : 0,
+    };
+  }
+
+  private nextSilhouetteFamily(): SilhouetteFamily {
+    const family =
+      this.silhouetteFamilies[
+        this.nextSilhouetteFamilyIndex % this.silhouetteFamilies.length
+      ];
+    this.nextSilhouetteFamilyIndex += 1;
+    return family;
+  }
+
+  private matchesSilhouetteFamily(
+    candidate: ScoredSilhouette,
+    family: SilhouetteFamily,
+  ): boolean {
+    switch (family) {
+      case 'compact':
+        return candidate.aspectRatio <= 1.21;
+      case 'elongated':
+        return candidate.aspectRatio >= 1.74;
+      case 'solid':
+        return candidate.concavityRatio <= 0.28;
+      case 'concave':
+        return candidate.concavityRatio >= 0.37;
+    }
+  }
+
+  private silhouetteSignature(placements: PlacedPiece[]): string {
+    const polygons = placements.map((placement) =>
+      this.transformedVertices(
+        this.getDefinition(placement.pieceId),
+        placement.x,
+        placement.y,
+        placement.rotation,
+      ),
+    );
+    const transforms: Array<(point: Point) => Point> = [
+      (point) => ({ x: point.x, y: point.y }),
+      (point) => ({ x: -point.y, y: point.x }),
+      (point) => ({ x: -point.x, y: -point.y }),
+      (point) => ({ x: point.y, y: -point.x }),
+      (point) => ({ x: -point.x, y: point.y }),
+      (point) => ({ x: -point.y, y: -point.x }),
+      (point) => ({ x: point.x, y: -point.y }),
+      (point) => ({ x: point.y, y: point.x }),
+    ];
+
+    return transforms
+      .map((transform) => this.normalizedSilhouetteMask(polygons, transform))
+      .sort()[0];
+  }
+
+  private normalizedSilhouetteMask(
+    polygons: Point[][],
+    transform: (point: Point) => Point,
+  ): string {
+    const resolution = 18;
+    const padding = 1;
+    const transformedPolygons = polygons.map((polygon) =>
+      polygon.map(transform),
+    );
+    const vertices = transformedPolygons.flat();
+    const minX = Math.min(...vertices.map((point) => point.x));
+    const maxX = Math.max(...vertices.map((point) => point.x));
+    const minY = Math.min(...vertices.map((point) => point.y));
+    const maxY = Math.max(...vertices.map((point) => point.y));
+    const width = maxX - minX;
+    const height = maxY - minY;
+    const scale = (resolution - padding * 2) / Math.max(0.0001, width, height);
+    const offsetX = (resolution - width * scale) / 2 - minX * scale;
+    const offsetY = (resolution - height * scale) / 2 - minY * scale;
+    const normalizedPolygons = transformedPolygons.map((polygon) =>
+      polygon.map((point) => ({
+        x: Math.round((point.x * scale + offsetX) * 1_000_000) / 1_000_000,
+        y: Math.round((point.y * scale + offsetY) * 1_000_000) / 1_000_000,
+      })),
+    );
+    let mask = '';
+
+    for (let row = 0; row < resolution; row += 1) {
+      for (let column = 0; column < resolution; column += 1) {
+        const point = { x: column + 0.5, y: row + 0.5 };
+        mask += normalizedPolygons.some((polygon) =>
+          this.pointInsidePolygon(point, polygon),
+        )
+          ? '1'
+          : '0';
+      }
+    }
+
+    return mask;
+  }
+
+  private silhouetteNovelty(signature: string): number {
+    if (this.recentSilhouetteSignatures.length === 0) {
+      return 1;
+    }
+
+    return Math.min(
+      ...this.recentSilhouetteSignatures.map((recentSignature) =>
+        this.silhouetteDistance(signature, recentSignature),
+      ),
+    );
+  }
+
+  private silhouetteDistance(first: string, second: string): number {
+    let intersection = 0;
+    let union = 0;
+
+    for (let index = 0; index < first.length; index += 1) {
+      const firstFilled = first[index] === '1';
+      const secondFilled = second[index] === '1';
+
+      if (firstFilled || secondFilled) union += 1;
+      if (firstFilled && secondFilled) intersection += 1;
+    }
+
+    return union > 0 ? 1 - intersection / union : 0;
+  }
+
+  private rememberSilhouette(signature: string): void {
+    this.recentSilhouetteSignatures.push(signature);
+    if (this.recentSilhouetteSignatures.length > 6) {
+      this.recentSilhouetteSignatures.shift();
+    }
   }
 
   private convexHull(points: Point[]): Point[] {

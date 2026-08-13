@@ -13,6 +13,7 @@
 }
 
 .shell {
+  box-sizing: border-box;
   display: grid;
   gap: 1.35rem;
   padding: clamp(1rem, 3vw, 1.6rem);
@@ -82,6 +83,7 @@ h1 {
 .game-panel {
   display: grid;
   gap: 1rem;
+  min-width: 0;
 }
 
 .challenge-summary {
@@ -280,8 +282,11 @@ h1 {
 }
 
 .word-entry {
+  box-sizing: border-box;
   display: grid;
   gap: 0.45rem;
+  max-width: 100%;
+  min-width: 0;
   width: min(100%, 35rem);
   margin: 0 auto;
   padding: 0.85rem;
@@ -383,16 +388,46 @@ button {
     display: none;
   }
 
+  .game-panel.keyboard-open .challenge-summary {
+    position: sticky;
+    z-index: 5;
+    top: calc(3.25rem + env(safe-area-inset-top));
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-self: start;
+    gap: 0.35rem;
+    padding: 0.3rem;
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    background: var(--surface);
+    box-shadow: 0 0.45rem 1rem rgb(0 0 0 / 24%);
+  }
+
+  .game-panel.keyboard-open .endpoint {
+    gap: 0.15rem;
+    padding: 0.45rem 0.35rem;
+
+    span {
+      font-size: 0.58rem;
+    }
+
+    strong {
+      font-size: 1.1rem;
+      letter-spacing: 0.08em;
+    }
+  }
+
   .challenge-arrow {
+    min-width: 2.2rem;
     min-height: 2rem;
 
     span {
-      transform: rotate(90deg);
+      font-size: 1.25rem;
+      transform: none;
     }
 
     small {
-      position: absolute;
-      margin-left: 5rem;
+      display: none;
     }
   }
 

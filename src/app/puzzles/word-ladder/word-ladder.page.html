@@ -29,7 +29,10 @@
     } @else if (loadError()) {
       <p class="error">{{ loadError() }}</p>
     } @else if (puzzle(); as currentPuzzle) {
-      <section class="game-panel">
+      <section
+        class="game-panel"
+        [class.keyboard-open]="keyboardVisible() && !isSolved() && remainingMoves() > 0"
+      >
         <div class="challenge-summary" aria-label="Départ et objectif">
           <div class="endpoint start-endpoint">
             <span>Départ</span>
@@ -145,6 +148,7 @@
           [rows]="letterKeyboardRows"
           [visible]="keyboardVisible() && !isSolved() && remainingMoves() > 0"
           [disabled]="isSolved() || remainingMoves() === 0"
+          [scrollBehavior]="'minimal'"
           (keyPress)="handleKeyboardKey($event)"
         />
 
