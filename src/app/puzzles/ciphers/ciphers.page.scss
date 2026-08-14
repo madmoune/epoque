@@ -801,31 +801,19 @@ input.correct {
 
 @media (max-width: 64rem), (hover: none) and (pointer: coarse) {
   .puzzle-area.keyboard-open .cipher-workspace {
-    position: sticky;
-    top: 0.45rem;
-    max-height: calc(100dvh - 12.5rem - env(safe-area-inset-bottom));
+    position: static;
+    max-height: none;
     box-sizing: border-box;
-    overflow: auto;
+    overflow: visible;
     padding: 0.55rem;
     background: var(--surface-raised);
     gap: 0.55rem;
   }
 
   .puzzle-area.keyboard-open .encoded-word {
-    max-height: 8.5rem;
-    overflow: auto;
+    max-height: none;
+    overflow: visible;
     padding: 0.35rem;
-  }
-
-  .puzzle-area.keyboard-open.braille-puzzle .cipher-workspace {
-    position: static;
-    max-height: none;
-    overflow: visible;
-  }
-
-  .puzzle-area.keyboard-open.braille-puzzle .encoded-word {
-    max-height: none;
-    overflow: visible;
   }
 
   .puzzle-area.keyboard-open .encoded-word.nato-word:not(.nato-letter-prompt) > .encoded-token {
