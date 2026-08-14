@@ -333,6 +333,7 @@
                 [class.word-split-card]="figure.displayMode === 'word-split'"
                 [class.segment-phrase-card]="figure.displayMode === 'segment-phrase'"
                 [class.color-chain-card]="figure.displayMode === 'color-chain'"
+                [class.hidden-color-card]="figure.displayMode === 'hidden-colors'"
               >
                 <div
                   class="figure-visual"
@@ -341,6 +342,7 @@
                   [class.word-split-visual]="figure.displayMode === 'word-split'"
                   [class.segment-phrase-visual-container]="figure.displayMode === 'segment-phrase'"
                   [class.color-chain-visual-container]="figure.displayMode === 'color-chain'"
+                  [class.hidden-color-visual-container]="figure.displayMode === 'hidden-colors'"
                 >
                   @if (figure.displayMode === 'navigation') {
                     <img
@@ -536,16 +538,56 @@
                       </div>
                     </div>
                   }
+                  @if (figure.displayMode === 'hidden-colors') {
+                    <div class="hidden-color-visual" aria-label="Définitions et réponses à compléter">
+                      @for (entry of figure.hiddenColorEntries ?? []; track entry.id) {
+                        <div class="hidden-color-entry">
+                          <p class="hidden-color-definition">{{ entry.definition }}</p>
+                          <div class="hidden-color-response" aria-label="Réponse à compléter">
+                            @for (slot of entry.slots; track slot.id) {
+                              @if (slot.kind === 'color') {
+                                <span
+                                  class="hidden-color-triangle"
+                                  [class.points-left]="slot.direction === 'left'"
+                                  [class.points-right]="slot.direction === 'right'"
+                                  [class.light-triangle]="slot.colorLabel === 'blanc'"
+                                  [style.background]="slot.colorHex"
+                                  [attr.aria-label]="
+                                    'Couleur ' + slot.colorLabel + ', à écrire vers la ' +
+                                    (slot.direction === 'left' ? 'gauche' : 'droite')
+                                  "
+                                  [title]="
+                                    slot.color +
+                                    ' — écrire vers la ' +
+                                    (slot.direction === 'left' ? 'gauche' : 'droite')
+                                  "
+                                ></span>
+                              } @else {
+                                <span
+                                  class="hidden-color-example-letter"
+                                  [class.hidden-color-extraction-example]="slot.extraction"
+                                >
+                                  {{ slot.letter }}
+                                </span>
+                              }
+                            }
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  }
                   <svg
                     [hidden]="
                       figure.displayMode === 'word-split' ||
                       figure.displayMode === 'segment-phrase' ||
-                      figure.displayMode === 'color-chain'
+                      figure.displayMode === 'color-chain' ||
+                      figure.displayMode === 'hidden-colors'
                     "
                     [style.display]="
                       figure.displayMode === 'word-split' ||
                       figure.displayMode === 'segment-phrase' ||
-                      figure.displayMode === 'color-chain'
+                      figure.displayMode === 'color-chain' ||
+                      figure.displayMode === 'hidden-colors'
                         ? 'none'
                         : ''
                     "
@@ -667,24 +709,30 @@
               [class.color-chain-card]="
                 instance().challengeFigure.displayMode === 'color-chain'
               "
+              [class.hidden-color-card]="
+                instance().challengeFigure.displayMode === 'hidden-colors'
+              "
               [style.grid-template-columns]="
                 instance().challengeFigure.displayMode === 'word-split' ||
                 instance().challengeFigure.displayMode === 'segment-phrase' ||
-                instance().challengeFigure.displayMode === 'color-chain'
+                instance().challengeFigure.displayMode === 'color-chain' ||
+                instance().challengeFigure.displayMode === 'hidden-colors'
                   ? 'minmax(0, 1fr)'
                   : ''
               "
               [style.border]="
                 instance().challengeFigure.displayMode === 'word-split' ||
                 instance().challengeFigure.displayMode === 'segment-phrase' ||
-                instance().challengeFigure.displayMode === 'color-chain'
+                instance().challengeFigure.displayMode === 'color-chain' ||
+                instance().challengeFigure.displayMode === 'hidden-colors'
                   ? 'none'
                   : ''
               "
               [style.background]="
                 instance().challengeFigure.displayMode === 'word-split' ||
                 instance().challengeFigure.displayMode === 'segment-phrase' ||
-                instance().challengeFigure.displayMode === 'color-chain'
+                instance().challengeFigure.displayMode === 'color-chain' ||
+                instance().challengeFigure.displayMode === 'hidden-colors'
                   ? 'transparent'
                   : ''
               "
@@ -702,6 +750,9 @@
                 "
                 [class.color-chain-visual-container]="
                   instance().challengeFigure.displayMode === 'color-chain'
+                "
+                [class.hidden-color-visual-container]="
+                  instance().challengeFigure.displayMode === 'hidden-colors'
                 "
               >
                 @if (instance().challengeFigure.displayMode === 'navigation') {
@@ -978,16 +1029,69 @@
                     </div>
                   </div>
                 }
+                @if (instance().challengeFigure.displayMode === 'hidden-colors') {
+                  <div
+                    class="hidden-color-visual"
+                    aria-label="Définitions et réponses à compléter"
+                  >
+                    @for (
+                      entry of instance().challengeFigure.hiddenColorEntries ?? [];
+                      track entry.id
+                    ) {
+                      <div class="hidden-color-entry">
+                        <p class="hidden-color-definition">{{ entry.definition }}</p>
+                        <div class="hidden-color-response" aria-label="Réponse à compléter">
+                          @for (slot of entry.slots; track slot.id) {
+                            @if (slot.kind === 'color') {
+                              <span
+                                class="hidden-color-triangle"
+                                [class.points-left]="slot.direction === 'left'"
+                                [class.points-right]="slot.direction === 'right'"
+                                [class.light-triangle]="slot.colorLabel === 'blanc'"
+                                [style.background]="slot.colorHex"
+                                [attr.aria-label]="
+                                  'Couleur ' + slot.colorLabel + ', à écrire vers la ' +
+                                  (slot.direction === 'left' ? 'gauche' : 'droite')
+                                "
+                                [title]="
+                                  slot.color +
+                                  ' — écrire vers la ' +
+                                  (slot.direction === 'left' ? 'gauche' : 'droite')
+                                "
+                              ></span>
+                            } @else {
+                              <input
+                                class="hidden-color-letter"
+                                [class.hidden-color-extraction]="slot.extraction"
+                                type="text"
+                                inputmode="text"
+                                maxlength="1"
+                                autocomplete="off"
+                                [attr.aria-label]="
+                                  slot.extraction ? 'Lettre extraite' : 'Lettre ' + (slot.index + 1)
+                                "
+                                [value]="hiddenColorLetter(entry.id, slot.index)"
+                                (input)="setHiddenColorLetter(entry.id, slot.index, $event)"
+                              />
+                            }
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
                 <svg
                   [hidden]="
                     instance().challengeFigure.displayMode === 'word-split' ||
                     instance().challengeFigure.displayMode === 'segment-phrase' ||
-                    instance().challengeFigure.displayMode === 'color-chain'
+                    instance().challengeFigure.displayMode === 'color-chain' ||
+                    instance().challengeFigure.displayMode === 'hidden-colors'
                   "
                   [style.display]="
                     instance().challengeFigure.displayMode === 'word-split' ||
                     instance().challengeFigure.displayMode === 'segment-phrase' ||
-                    instance().challengeFigure.displayMode === 'color-chain'
+                    instance().challengeFigure.displayMode === 'color-chain' ||
+                    instance().challengeFigure.displayMode === 'hidden-colors'
                       ? 'none'
                       : ''
                   "
@@ -1087,7 +1191,8 @@
                   !challengeSolutionIsShown() &&
                   (instance().challengeFigure.displayMode === 'word-split' ||
                     instance().challengeFigure.displayMode === 'segment-phrase' ||
-                    instance().challengeFigure.displayMode === 'color-chain')
+                    instance().challengeFigure.displayMode === 'color-chain' ||
+                    instance().challengeFigure.displayMode === 'hidden-colors')
                 "
                 [class.navigation-code]="instance().challengeFigure.displayMode === 'navigation'"
               >

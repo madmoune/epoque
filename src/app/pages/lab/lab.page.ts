@@ -16,6 +16,11 @@ import {
   COLOR_CHAIN_CHALLENGE_WORD,
   COLOR_CHAIN_WORDS,
 } from './puzzle-types/color-chain.puzzle-type';
+import {
+  HIDDEN_COLOR_DEFINITIONS,
+  HiddenColorDefinition,
+  HiddenColorDirection,
+} from './puzzle-types/hidden-colors.puzzle-type';
 import { PuzzlePlayHistoryService } from '../../puzzle-play-history.service';
 import { PuzzleAnswerComponent } from '../../puzzles/shared/puzzle-answer';
 import { AppStorageService } from '../../shared/storage/app-storage.service';
@@ -99,6 +104,27 @@ type ColorChainAnswerHint = {
   revealed: boolean;
 };
 
+type HiddenColorSlot =
+  | {
+      id: string;
+      kind: 'letter';
+      index: number;
+      letter: string;
+      extraction: boolean;
+    }
+  | {
+      id: string;
+      kind: 'color';
+      color: string;
+      colorLabel: string;
+      colorHex: string;
+      direction: HiddenColorDirection;
+    };
+
+type HiddenColorEntry = HiddenColorDefinition & {
+  slots: HiddenColorSlot[];
+};
+
 type FigureTextLine = {
   id: string;
   x: number;
@@ -151,7 +177,8 @@ type PuzzleExampleFigure = {
     | 'clock-letters'
     | 'word-split'
     | 'segment-phrase'
-    | 'color-chain';
+    | 'color-chain'
+    | 'hidden-colors';
   imageSrc?: string;
   clue?: string;
   clockLetters?: ClockLetterFigure[];
@@ -163,6 +190,7 @@ type PuzzleExampleFigure = {
   colorChainStartColor?: string;
   colorChainAnswerColors?: string[];
   colorChainCells?: ColorChainCell[];
+  hiddenColorEntries?: HiddenColorEntry[];
 };
 
 type ClockLetterFigure = {
@@ -323,6 +351,7 @@ export class LabPage {
   private readonly wordSplitHintCount = signal(0);
   private readonly segmentPhraseHintCount = signal(0);
   private readonly colorChainHintCount = signal(0);
+  private readonly hiddenColorLettersState = signal<Record<string, string[]>>({});
   protected readonly editingTypeName = signal(false);
   protected readonly editingVariantName = signal(false);
 
@@ -486,7 +515,8 @@ export class LabPage {
       this.selectedType().id === 'clock-letters' ||
       this.selectedType().id === 'faux-words' ||
       this.selectedType().id === 'segment-phrase' ||
-      this.selectedType().id === 'color-chain'
+      this.selectedType().id === 'color-chain' ||
+      this.selectedType().id === 'hidden-colors'
     );
   }
 
@@ -552,6 +582,32 @@ export class LabPage {
     }
 
     this.colorChainHintCount.update((count) => count + 1);
+  }
+
+  protected hiddenColorLetter(entryId: string, index: number): string {
+    return this.hiddenColorLettersState()[entryId]?.[index] ?? '';
+  }
+
+  protected setHiddenColorLetter(entryId: string, index: number, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const value = this.normalizeChallengeAnswer(input.value).slice(0, 1);
+    input.value = value;
+
+    this.hiddenColorLettersState.update((entries) => {
+      const nextLetters = [...(entries[entryId] ?? [])];
+      nextLetters[index] = value;
+
+      return {
+        ...entries,
+        [entryId]: nextLetters,
+      };
+    });
+  }
+
+  protected hiddenColorExtractionAnswer(figure: PuzzleExampleFigure): string {
+    return (figure.hiddenColorEntries ?? [])
+      .map((entry) => this.hiddenColorLetter(entry.id, entry.extractedSlotIndex) || '?')
+      .join('');
   }
 
   protected checkChallenge(): void {
@@ -1150,7 +1206,8 @@ export class LabPage {
       variant.id !== 'clock-letters-main' &&
       variant.id !== 'faux-words-main' &&
       variant.id !== 'segment-phrase-main' &&
-      variant.id !== 'color-chain-main';
+      variant.id !== 'color-chain-main' &&
+      variant.id !== 'hidden-colors-main';
     const digitOrder = shouldShuffleCode ? this.shuffle([0, 1, 2, 3], random) : [0, 1, 2, 3];
     const sharedSegmentConfiguration =
       variant.id === '3-1-broken-segment'
@@ -1252,6 +1309,9 @@ export class LabPage {
     }
     if (variantId === 'color-chain-main') {
       return this.createColorChainFigure(random, example);
+    }
+    if (variantId === 'hidden-colors-main') {
+      return this.createHiddenColorsFigure(example);
     }
     if (variantId.startsWith('3-')) {
       return this.createSevenSegmentFigure(
@@ -1484,6 +1544,64 @@ export class LabPage {
         (first, second) => first.position - second.position,
       ),
     };
+  }
+
+  private createHiddenColorsFigure(example: PuzzleExample): PuzzleExampleFigure {
+    const hiddenColorEntries = HIDDEN_COLOR_DEFINITIONS.map((definition) => ({
+      ...definition,
+      slots: this.hiddenColorSlots(definition, example.id),
+    }));
+
+    return {
+      id: `example-${example.id}`,
+      example,
+      viewBox: '0 0 1 1',
+      frame: { x: 0, y: 0, width: 1, height: 1 },
+      gridSize: 1,
+      segments: [],
+      shapes: [],
+      markers: [],
+      code: 'NATURE',
+      displayMode: 'hidden-colors',
+      hiddenColorEntries,
+    };
+  }
+
+  private hiddenColorSlots(
+    definition: HiddenColorDefinition,
+    figureId: string,
+  ): HiddenColorSlot[] {
+    const slots: HiddenColorSlot[] = [];
+    const colorEnd = definition.colorStart + definition.colorLength;
+    let letterIndex = 0;
+
+    for (let answerIndex = 0; answerIndex < definition.answer.length; answerIndex += 1) {
+      if (answerIndex === definition.colorStart) {
+        slots.push({
+          id: `hidden-color-${figureId}-${definition.id}-color`,
+          kind: 'color',
+          color: definition.color,
+          colorLabel: definition.colorLabel,
+          colorHex: definition.colorHex,
+          direction: definition.direction,
+        });
+      }
+
+      if (answerIndex >= definition.colorStart && answerIndex < colorEnd) {
+        continue;
+      }
+
+      slots.push({
+        id: `hidden-color-${figureId}-${definition.id}-letter-${letterIndex}`,
+        kind: 'letter',
+        index: letterIndex,
+        letter: definition.answer[answerIndex],
+        extraction: letterIndex === definition.extractedSlotIndex,
+      });
+      letterIndex += 1;
+    }
+
+    return slots;
   }
 
   private segmentPhraseLetterMask(letter: string): boolean[] {
@@ -4139,6 +4257,7 @@ export class LabPage {
     this.wordSplitHintCount.set(0);
     this.segmentPhraseHintCount.set(0);
     this.colorChainHintCount.set(0);
+    this.hiddenColorLettersState.set({});
   }
 
   private createSeed(): string {

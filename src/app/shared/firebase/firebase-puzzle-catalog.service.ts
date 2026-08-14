@@ -125,7 +125,7 @@ export class FirebasePuzzleCatalogService {
       id: typeId,
       updatedAt: serverTimestamp(),
       [`variants/${variantId}/id`]: variantId,
-      [`variants/${variantId}/description`]: description || null,
+      [`variants/${variantId}/description`]: description,
       [`variants/${variantId}/updatedAt`]: serverTimestamp(),
     });
   }
@@ -229,7 +229,7 @@ export class FirebasePuzzleCatalogService {
           variantStates[typeId] ??= {};
           variantStates[typeId][variantId] = variant.state;
         }
-        if (this.isDescription(variant.description)) {
+        if (this.isVariantDescription(variant.description)) {
           variantDescriptions[typeId] ??= {};
           variantDescriptions[typeId][variantId] = variant.description;
         }
@@ -269,6 +269,14 @@ export class FirebasePuzzleCatalogService {
 
   private isDescription(value: unknown): value is string {
     return this.isComment(value);
+  }
+
+  private isVariantDescription(value: unknown): value is string {
+    return (
+      typeof value === 'string' &&
+      value.length <= MAX_COMMENT_LENGTH &&
+      (value.length === 0 || value.trim().length > 0)
+    );
   }
 
   private isName(value: unknown): value is string {

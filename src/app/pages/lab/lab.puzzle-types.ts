@@ -7,6 +7,7 @@ import { ClockLettersPuzzleType } from './puzzle-types/clock-letters.puzzle-type
 import { FauxWordsPuzzleType } from './puzzle-types/faux-words.puzzle-type';
 import { SegmentPhrasePuzzleType } from './puzzle-types/segment-phrase.puzzle-type';
 import { ColorChainPuzzleType } from './puzzle-types/color-chain.puzzle-type';
+import { HiddenColorsPuzzleType } from './puzzle-types/hidden-colors.puzzle-type';
 
 export const LAB_PUZZLE_TYPES: PuzzleType[] = [
   new CountBySymbolPuzzleType(),
@@ -17,4 +18,5 @@ export const LAB_PUZZLE_TYPES: PuzzleType[] = [
   new FauxWordsPuzzleType(),
   new SegmentPhrasePuzzleType(),
   new ColorChainPuzzleType(),
+  new HiddenColorsPuzzleType(),
 ];
