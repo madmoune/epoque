@@ -75,7 +75,14 @@
             </button>
           </div>
         }
-        <button type="button" (click)="rotateSelected()" [disabled]="!selectedPieceId()">↻ Tourner</button>
+        <button
+          type="button"
+          class="rotate-button"
+          (click)="rotateSelected()"
+          [disabled]="!selectedPieceId()"
+        >
+          ↻ Tourner
+        </button>
         <button type="button" class="hint-button" (click)="showHint()" [disabled]="!hasAvailableHint()">
           Indice
         </button>

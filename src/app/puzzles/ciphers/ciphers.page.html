@@ -277,6 +277,7 @@
           [rows]="letterKeyboardRows"
           [visible]="keyboardVisible()"
           [disabled]="isCorrect()"
+          [scrollBehavior]="'minimal'"
           (keyPress)="handleKeyboardKey($event)"
         />
 

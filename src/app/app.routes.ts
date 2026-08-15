@@ -99,6 +99,10 @@ export const routes: Routes = [
     loadComponent: () => import('./puzzles/laser/laser.page').then((m) => m.LaserPage),
   },
   {
+    path: 'tiges',
+    loadComponent: () => import('./puzzles/tiges/tiges.page').then((m) => m.TigesPage),
+  },
+  {
     path: 'shape-layers',
     loadComponent: () =>
       import('./puzzles/shape-layers/shape-layers.page').then((m) => m.ShapeLayersPage),

@@ -395,6 +395,12 @@ export class HomePage {
           tag: 'Réflexion',
         },
         {
+          title: 'Traverse',
+          description: 'Assemble les bonnes tiges pour franchir l’eau et atteindre la cible.',
+          route: '/tiges',
+          tag: 'Chaîne',
+        },
+        {
           title: 'Rush Hour',
           description: 'Déplace les véhicules dans une grille 6×6 pour libérer la voiture rouge.',
           route: '/rush-hour',

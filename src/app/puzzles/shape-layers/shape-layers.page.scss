@@ -80,5 +80,12 @@ h2 { margin: 0 0 .65rem; color: var(--muted); font-size: .9rem; text-align: cent
   .controls .piece-choice { width: 2.75rem; min-height: 2.75rem; padding: .25rem; }
   .choice-shape { width: 2.05rem; height: 2.05rem; }
   .controls button { min-height: 2.5rem; padding: .5rem; font-size: .84rem; }
+  .controls .rotate-button { order: 1; grid-column: 1 / -1; }
+  .controls .tray-label,
+  .controls .piece-picker,
+  .controls .layer-list,
+  .controls .layer-actions,
+  .controls .hint-button,
+  .controls .new-area { order: 2; }
   .new-area { margin-top: .35rem; padding-top: .65rem; }
 }
