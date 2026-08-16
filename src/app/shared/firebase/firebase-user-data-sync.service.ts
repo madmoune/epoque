@@ -1,6 +1,6 @@
 import { Injectable, effect, inject, signal } from '@angular/core';
 import { User } from 'firebase/auth';
-import { DataSnapshot, get, onValue, ref, serverTimestamp, set } from 'firebase/database';
+import { DataSnapshot, get, onValue, ref, serverTimestamp, update } from 'firebase/database';
 
 import { FirebaseAuthService } from './firebase-auth.service';
 import { FirebaseClientService } from './firebase-client.service';
@@ -24,6 +24,7 @@ export class FirebaseUserDataSyncService {
   private activeGeneration = 0;
   private stopRemoteListener?: () => void;
   private uploadTimer?: ReturnType<typeof setTimeout>;
+  private readonly pendingLocalChanges = new Map<string, string | null>();
   private isHydrating = false;
 
   readonly status = this.statusState.asReadonly();
@@ -35,7 +36,13 @@ export class FirebaseUserDataSyncService {
     });
 
     this.storage.changes$.subscribe((change) => {
-      if (change.source === 'local') {
+      if (change.source !== 'local' || !this.activeUid || !change.key.startsWith('epique-')) {
+        return;
+      }
+
+      this.pendingLocalChanges.set(change.key, change.value);
+
+      if (!this.isHydrating) {
         this.scheduleUpload();
       }
     });
@@ -45,7 +52,15 @@ export class FirebaseUserDataSyncService {
     const generation = ++this.activeGeneration;
     this.stopRemoteListener?.();
     this.stopRemoteListener = undefined;
+
+    if (this.uploadTimer) {
+      clearTimeout(this.uploadTimer);
+      this.uploadTimer = undefined;
+    }
+
+    this.pendingLocalChanges.clear();
     this.activeUid = user && !user.isAnonymous ? user.uid : null;
+    this.isHydrating = Boolean(this.activeUid);
     this.statusState.set(this.activeUid ? 'syncing' : 'idle');
 
     if (!this.activeUid) {
@@ -65,17 +80,31 @@ export class FirebaseUserDataSyncService {
 
       const remoteValues = this.parseRemoteValues(snapshot);
       const mergedValues = this.mergeInitialValues(remoteValues, this.storage.snapshot());
+      const initialChanges = this.valuesDifferentFrom(remoteValues, mergedValues);
       this.storage.replace(mergedValues);
       this.applyTheme(mergedValues['epique-theme']);
 
-      if (!this.valuesEqual(remoteValues, mergedValues)) {
-        await this.writeValues(uid, mergedValues);
+      for (const [key, value] of Object.entries(initialChanges)) {
+        if (!this.pendingLocalChanges.has(key)) {
+          this.pendingLocalChanges.set(key, value);
+        }
+      }
+
+      if (Object.keys(initialChanges).length > 0) {
+        await this.writeValueChanges(uid, initialChanges);
+
+        for (const [key, value] of Object.entries(initialChanges)) {
+          if (this.pendingLocalChanges.get(key) === value) {
+            this.pendingLocalChanges.delete(key);
+          }
+        }
       }
 
       if (generation !== this.activeGeneration || this.activeUid !== uid) {
         return;
       }
 
+      this.isHydrating = false;
       this.stopRemoteListener = onValue(userDataRef, (nextSnapshot) => {
         if (this.activeUid !== uid || this.isHydrating) {
           return;
@@ -96,6 +125,10 @@ export class FirebaseUserDataSyncService {
     } finally {
       if (generation === this.activeGeneration) {
         this.isHydrating = false;
+
+        if (this.pendingLocalChanges.size > 0) {
+          this.scheduleUpload();
+        }
       }
     }
   }
@@ -122,26 +155,51 @@ export class FirebaseUserDataSyncService {
       return;
     }
 
+    const changes = new Map(this.pendingLocalChanges);
+    this.pendingLocalChanges.clear();
+
+    if (changes.size === 0) {
+      return;
+    }
+
     try {
       this.statusState.set('syncing');
-      await this.writeValues(uid, this.storage.snapshot());
+      await this.writeValueChanges(uid, Object.fromEntries(changes));
 
       if (this.activeUid === uid) {
         this.statusState.set('synced');
       }
     } catch {
       if (this.activeUid === uid) {
+        for (const [key, value] of changes) {
+          if (!this.pendingLocalChanges.has(key)) {
+            this.pendingLocalChanges.set(key, value);
+          }
+        }
+
         this.statusState.set('error');
+      }
+    } finally {
+      if (this.activeUid === uid && this.pendingLocalChanges.size > 0 && !this.uploadTimer) {
+        this.scheduleUpload();
       }
     }
   }
 
-  private async writeValues(uid: string, values: Record<string, string>): Promise<void> {
-    await set(ref(this.firebaseClient.database, this.userDataPath(uid)), {
+  private async writeValueChanges(
+    uid: string,
+    changes: Record<string, string | null>,
+  ): Promise<void> {
+    const updates: Record<string, unknown> = {
       version: 1,
       updatedAt: serverTimestamp(),
-      values,
-    });
+    };
+
+    for (const [key, value] of Object.entries(changes)) {
+      updates[`values/${key}`] = value;
+    }
+
+    await update(ref(this.firebaseClient.database, this.userDataPath(uid)), updates);
   }
 
   private userDataPath(uid: string): string {
@@ -172,8 +230,11 @@ export class FirebaseUserDataSyncService {
     remoteValues: Record<string, string>,
     localValues: Record<string, string>,
   ): Record<string, string> {
-    const merged = { ...remoteValues, ...localValues };
-    const mergedPlaylists = this.mergeArraysById(remoteValues[PLAYLISTS_KEY], localValues[PLAYLISTS_KEY]);
+    const merged = { ...localValues, ...remoteValues };
+    const mergedPlaylists = this.mergeArraysById(
+      remoteValues[PLAYLISTS_KEY],
+      localValues[PLAYLISTS_KEY],
+    );
 
     if (mergedPlaylists) {
       merged[PLAYLISTS_KEY] = mergedPlaylists;
@@ -200,7 +261,19 @@ export class FirebaseUserDataSyncService {
     return merged;
   }
 
-  private mergeArraysById(remoteValue: string | undefined, localValue: string | undefined): string | null {
+  private valuesDifferentFrom(
+    source: Record<string, string>,
+    target: Record<string, string>,
+  ): Record<string, string> {
+    return Object.fromEntries(
+      Object.entries(target).filter(([key, value]) => source[key] !== value),
+    );
+  }
+
+  private mergeArraysById(
+    remoteValue: string | undefined,
+    localValue: string | undefined,
+  ): string | null {
     const remote = this.parseArrayWithIds(remoteValue);
     const local = this.parseArrayWithIds(localValue);
 
@@ -214,14 +287,23 @@ export class FirebaseUserDataSyncService {
       byId.set(item['id'] as string, item);
     }
 
+    if (remoteValue !== undefined && remote?.length === 0) {
+      return JSON.stringify([]);
+    }
+
     for (const item of local ?? []) {
-      byId.set(item['id'] as string, item);
+      if (!byId.has(item['id'] as string)) {
+        byId.set(item['id'] as string, item);
+      }
     }
 
     return JSON.stringify([...byId.values()]);
   }
 
-  private mergeNumberRecords(remoteValue: string | undefined, localValue: string | undefined): string | null {
+  private mergeNumberRecords(
+    remoteValue: string | undefined,
+    localValue: string | undefined,
+  ): string | null {
     const remote = this.parseRecord(remoteValue);
     const local = this.parseRecord(localValue);
 
@@ -240,7 +322,10 @@ export class FirebaseUserDataSyncService {
     return JSON.stringify(merged);
   }
 
-  private mergeBooleanRecords(remoteValue: string | undefined, localValue: string | undefined): string | null {
+  private mergeBooleanRecords(
+    remoteValue: string | undefined,
+    localValue: string | undefined,
+  ): string | null {
     const remote = this.parseRecord(remoteValue);
     const local = this.parseRecord(localValue);
 
