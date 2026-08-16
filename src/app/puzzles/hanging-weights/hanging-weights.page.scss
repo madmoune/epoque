@@ -249,6 +249,32 @@ h2 {
   }
 }
 
+.diagram-weight-editor.unknown-node {
+  width: clamp(4.1rem, 14.5%, 7.4rem);
+  grid-template-columns: 1.15rem 0.55rem minmax(1.6rem, 1fr) 0.45rem;
+  gap: 0.06rem;
+
+  .diagram-weight-symbol {
+    width: 1.15rem;
+    height: 1.15rem;
+    font-size: 0.64rem;
+  }
+
+  .diagram-equals {
+    font-size: 0.6rem;
+  }
+
+  input {
+    min-width: 2rem;
+    height: 2.15rem;
+    font-size: 0.82rem;
+  }
+
+  small {
+    font-size: 0.48rem;
+  }
+}
+
 .diagram-weight-symbol {
   display: grid;
   width: 1.55rem;
@@ -396,6 +422,27 @@ h2 {
 
     &.known-node {
       width: min(3.35rem, 17%);
+    }
+  }
+
+  .diagram-weight-editor.unknown-node {
+    width: min(3.35rem, 17%);
+    grid-template-columns: 0.9rem 0.3rem minmax(0, 1fr);
+
+    .diagram-weight-symbol {
+      width: 0.9rem;
+      height: 0.9rem;
+      font-size: 0.52rem;
+    }
+
+    .diagram-equals {
+      font-size: 0.5rem;
+    }
+
+    input {
+      min-width: 0;
+      height: 1.55rem;
+      font-size: 0.7rem;
     }
   }
 
