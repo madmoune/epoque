@@ -53,7 +53,7 @@ export class ShapeLayersPage {
 
   protected newPuzzle(): void {
     const pool = this.createPiecePool();
-    const usedCount = 6 + Math.floor(Math.random() * 3);
+    const usedCount = 6;
     const backedPieces = pool.filter((piece) => piece.backgroundColor);
     const transparentPieces = pool.filter((piece) => !piece.backgroundColor).sort(() => Math.random() - 0.5);
     const backedPiece = backedPieces[Math.floor(Math.random() * backedPieces.length)];

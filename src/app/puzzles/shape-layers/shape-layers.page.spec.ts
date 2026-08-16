@@ -15,6 +15,10 @@ describe('ShapeLayersPage', () => {
     expect(page.isSolved()).toBe(true);
   });
 
+  it('generates exactly six pieces per composition', () => {
+    expect(page.solution()).toHaveLength(6);
+  });
+
   it('matches the diagonal accent triangle used by the board', () => {
     const isInsideAccent = (x: number, y: number): boolean =>
       page.isInsideAccent('diagonal', x, y);
