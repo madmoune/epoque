@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
 
@@ -57,10 +57,17 @@ type LaserTrace = {
   imports: [RouterLink, PuzzleSuccessPopupComponent],
   templateUrl: './laser.page.html',
   styleUrl: './laser.page.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LaserPage {
   protected readonly puzzle = signal<LaserPuzzle>(this.createPuzzle());
   protected readonly mirrorClicks = signal<MirrorClicks>({});
+  protected readonly mirrorsByPosition = computed(
+    () =>
+      new Map(
+        this.puzzle().mirrors.map((mirror) => [this.positionKey(mirror.row, mirror.col), mirror]),
+      ),
+  );
   protected readonly boardCells = computed(() =>
     Array.from({ length: this.puzzle().rows * this.puzzle().cols }, (_, index) => ({
       row: Math.floor(index / this.puzzle().cols),
@@ -68,6 +75,14 @@ export class LaserPage {
     })),
   );
   protected readonly trace = computed(() => this.traceLaser());
+  protected readonly tracePath = computed(() =>
+    this.trace()
+      .segments.map(
+        (segment) =>
+          `M ${segment.x1} ${segment.y1} L ${segment.x2} ${segment.y2}`,
+      )
+      .join(' '),
+  );
   protected readonly isSolved = computed(
     () => this.trace().reachedTarget && this.mirrorsMatchSolution(),
   );
@@ -144,7 +159,7 @@ export class LaserPage {
   }
 
   protected mirrorAt(row: number, col: number): Mirror | undefined {
-    return this.puzzle().mirrors.find((mirror) => mirror.row === row && mirror.col === col);
+    return this.mirrorsByPosition().get(this.positionKey(row, col));
   }
 
   protected controlLocked(mirrorId: number): boolean {
@@ -257,28 +272,7 @@ export class LaserPage {
   }
 
   private createMirrorControls(mirrorCount: number): MirrorControl[] {
-    const mirrorIds = Array.from({ length: mirrorCount }, (_, index) => index);
-
-    for (let attempt = 0; attempt < 500; attempt += 1) {
-      const controls = mirrorIds.map((mirrorId) => {
-        const linkedMirrors = this.shuffle(
-          mirrorIds.filter((candidate) => candidate !== mirrorId),
-        ).slice(0, 1);
-
-        return {
-          mirrorId,
-          effects: [mirrorId, ...linkedMirrors].map((affectedMirrorId) => ({
-            mirrorId: affectedMirrorId,
-          })),
-        };
-      });
-
-      if (this.isInvertibleControlMatrix(controls, mirrorCount)) {
-        return controls;
-      }
-    }
-
-    const shuffledIds = this.shuffle(mirrorIds);
+    const shuffledIds = this.shuffle(Array.from({ length: mirrorCount }, (_, index) => index));
     const cycleLengths = mirrorCount % 2 === 0 ? [3, mirrorCount - 3] : [mirrorCount];
     const fallbackControls: MirrorControl[] = [];
     let cycleStart = 0;
@@ -298,6 +292,7 @@ export class LaserPage {
       cycleStart += cycleLength;
     }
 
+    // Odd-length cycles make the control matrix invertible modulo three.
     return fallbackControls.sort((first, second) => first.mirrorId - second.mirrorId);
   }
 

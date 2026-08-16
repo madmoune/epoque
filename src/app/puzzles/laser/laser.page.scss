@@ -212,6 +212,7 @@ h1 {
   stroke: #ff4e55;
   stroke-width: 0.14;
   stroke-linecap: round;
+  fill: none;
   filter: drop-shadow(0 0 0.18rem rgb(255 78 85 / 95%));
 }
 
@@ -447,6 +448,10 @@ h1 {
 
   .hint {
     grid-column: 1 / -1;
+  }
+
+  .laser-segment {
+    filter: none;
   }
 }
 

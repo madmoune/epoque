@@ -45,15 +45,7 @@
             preserveAspectRatio="none"
             aria-hidden="true"
           >
-            @for (segment of trace().segments; track $index) {
-              <line
-                class="laser-segment"
-                [attr.x1]="segment.x1"
-                [attr.y1]="segment.y1"
-                [attr.x2]="segment.x2"
-                [attr.y2]="segment.y2"
-              />
-            }
+            <path class="laser-segment" [attr.d]="tracePath()" />
           </svg>
 
           <span
