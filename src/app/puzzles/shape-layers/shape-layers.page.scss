@@ -5,7 +5,7 @@
 .eyebrow { margin: 0 0 .35rem; color: var(--accent); text-transform: uppercase; letter-spacing: .1em; font-size: .8rem; font-weight: 800; }
 h1 { margin: 0; color: var(--text); }
 .instructions { max-width: 38rem; margin: .75rem auto 1.75rem; color: var(--muted); }
-.game-layout { display: grid; grid-template-columns: minmax(13rem, 18rem) minmax(13rem, 18rem) 14rem; justify-content: center; gap: 1rem; align-items: start; }
+.game-layout { display: grid; grid-template-columns: minmax(13rem, 18rem) minmax(13rem, 18rem) 14rem; justify-content: center; gap: .55rem; align-items: start; }
 .target-panel, .workspace-panel { width: 100%; }
 h2 { margin: 0 0 .65rem; color: var(--muted); font-size: .9rem; text-align: center; }
 .shape-board { position: relative; width: 100%; aspect-ratio: 1; border: 2px solid var(--border-strong); border-radius: 1rem; background: var(--surface-raised); overflow: hidden; }
