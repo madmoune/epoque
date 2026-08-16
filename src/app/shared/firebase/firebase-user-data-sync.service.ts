@@ -277,27 +277,14 @@ export class FirebaseUserDataSyncService {
     const remote = this.parseArrayWithIds(remoteValue);
     const local = this.parseArrayWithIds(localValue);
 
-    if (!remote && !local) {
-      return null;
+    if (remote) {
+      // Once the account has a remote playlist list, it is the source of truth.
+      // Local-only entries may be stale data from another device and must not be
+      // reintroduced into Firebase during the next upload.
+      return JSON.stringify(remote);
     }
 
-    const byId = new Map<string, Record<string, unknown>>();
-
-    for (const item of remote ?? []) {
-      byId.set(item['id'] as string, item);
-    }
-
-    if (remoteValue !== undefined && remote?.length === 0) {
-      return JSON.stringify([]);
-    }
-
-    for (const item of local ?? []) {
-      if (!byId.has(item['id'] as string)) {
-        byId.set(item['id'] as string, item);
-      }
-    }
-
-    return JSON.stringify([...byId.values()]);
+    return local ? JSON.stringify(local) : null;
   }
 
   private mergeNumberRecords(
