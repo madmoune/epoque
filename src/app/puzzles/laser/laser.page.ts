@@ -76,12 +76,7 @@ export class LaserPage {
   );
   protected readonly trace = computed(() => this.traceLaser());
   protected readonly tracePath = computed(() =>
-    this.trace()
-      .segments.map(
-        (segment) =>
-          `M ${segment.x1} ${segment.y1} L ${segment.x2} ${segment.y2}`,
-      )
-      .join(' '),
+    this.createTracePath(this.trace().segments),
   );
   protected readonly isSolved = computed(
     () => this.trace().reachedTarget && this.mirrorsMatchSolution(),
@@ -355,6 +350,31 @@ export class LaserPage {
 
   private traceLaser(): LaserTrace {
     return this.tracePuzzle(this.puzzle());
+  }
+
+  private createTracePath(segments: LaserSegment[]): string {
+    const compactSegments: LaserSegment[] = [];
+
+    for (const segment of segments) {
+      const previous = compactSegments[compactSegments.length - 1];
+
+      if (
+        previous &&
+        previous.x2 === segment.x1 &&
+        previous.y2 === segment.y1 &&
+        ((previous.x1 === previous.x2 && segment.x1 === segment.x2) ||
+          (previous.y1 === previous.y2 && segment.y1 === segment.y2))
+      ) {
+        previous.x2 = segment.x2;
+        previous.y2 = segment.y2;
+      } else {
+        compactSegments.push({ ...segment });
+      }
+    }
+
+    return compactSegments
+      .map((segment) => `M ${segment.x1} ${segment.y1} L ${segment.x2} ${segment.y2}`)
+      .join(' ');
   }
 
   private tracePuzzle(puzzle: LaserPuzzle): LaserTrace {
