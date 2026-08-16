@@ -105,6 +105,8 @@ h2 {
 
 .mobile-canvas {
   position: relative;
+  width: min(100%, 86vh);
+  margin-inline: auto;
   min-width: 0;
   overflow: hidden;
   border: 1px solid var(--border);
