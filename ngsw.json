@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1786902212316,
+  "timestamp": 1786902373570,
   "index": "/epoque/index.html",
   "assetGroups": [
     {
@@ -67,7 +67,7 @@
         "/epoque/chunk-ZQNKZMFU.js",
         "/epoque/favicon.ico",
         "/epoque/index.html",
-        "/epoque/main-EFTUUKKC.js",
+        "/epoque/main-6YKWIK7K.js",
         "/epoque/manifest.webmanifest",
         "/epoque/styles-ET5RGQNR.css",
         "/epoque/worker-ZA2F6HJO.js"
@@ -152,8 +152,8 @@
     "/epoque/chunk-ZOPC5AIQ.js": "004d01c9507d2761d9a59b2f987164d64ce294c2",
     "/epoque/chunk-ZQNKZMFU.js": "fff2e9bfcc93a810cdc880f512db9e7286860ee6",
     "/epoque/favicon.ico": "9c39f434fe1261f68c5e3eefdf734630d99c5670",
-    "/epoque/index.html": "29aee722870739a614448286ab2bbe831a8240cb",
-    "/epoque/main-EFTUUKKC.js": "45780d78b36e10ff056bc0bd6b8e022415fab2ec",
+    "/epoque/index.html": "e6cb8b9fa6471ac45da95104fa6a1ed4353d2c63",
+    "/epoque/main-6YKWIK7K.js": "62b936e27e3d71d75fdbd75744026af23bf0a743",
     "/epoque/manifest.webmanifest": "799ed34a76256b4f80340db28fc9909ec60dc91b",
     "/epoque/mid-mid-sentences.txt": "3b74a040d02251e40ba71bca148bbc3a432cf3b2",
     "/epoque/mid-sentences.txt": "c77f515fb03e09a31c666826b9b0605f05fe8ea2",
