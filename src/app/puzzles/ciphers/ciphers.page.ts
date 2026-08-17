@@ -39,7 +39,7 @@ export class CiphersPage implements OnDestroy {
   protected readonly puzzle = signal<CipherPuzzle | null>(null);
   protected readonly answerInput = signal('');
   protected readonly answerLetters = signal<string[]>([]);
-  protected readonly letterByLetter = signal(false);
+  protected readonly letterByLetter = signal(true);
   protected readonly activeLetterIndex = signal(0);
   protected readonly revealedLetterIndex = signal<number | null>(null);
   protected readonly hintLevel = signal(0);

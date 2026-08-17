@@ -76,6 +76,23 @@ describe('WeightDeductionPage', () => {
     expect(page.trayPieces()).toHaveLength(page.puzzle().stones.length);
   });
 
+  it('empties one pan without clearing the other one', () => {
+    const injector = Injector.create({ providers: [WeightDeductionService] });
+    const page = runInInjectionContext(injector, () => new WeightDeductionPage()) as any;
+    const [leftPiece, rightPiece] = page.trayPieces();
+
+    page.selectPiece(leftPiece.id);
+    page.placeSelected('left');
+    page.selectPiece(rightPiece.id);
+    page.placeSelected('right');
+
+    page.clearPan('left');
+
+    expect(page.leftPieces()).toHaveLength(0);
+    expect(page.rightPieces()).toHaveLength(1);
+    expect(page.trayPieces()).toHaveLength(page.puzzle().stones.length);
+  });
+
   it('keeps one reserve stone per color and reuses it infinitely', () => {
     const service = new WeightDeductionService();
     const injector = Injector.create({

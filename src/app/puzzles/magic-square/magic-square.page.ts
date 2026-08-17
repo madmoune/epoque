@@ -332,7 +332,7 @@ export class MagicSquarePage {
     const transformed = this.transformSquare(BASE_SQUARE).map((row) =>
       row.map((value) => value + offset),
     );
-    const givenCount = Math.random() < 0.35 ? 2 : 3;
+    const givenCount = this.randomInt(1, 3);
     const givenPositions = new Set(this.createGivenPositions(givenCount));
     const cells = transformed.map((row, rowIndex) =>
       row.map((value, colIndex) => ({

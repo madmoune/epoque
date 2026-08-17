@@ -78,6 +78,7 @@ export class TangramPage {
   private nextSilhouetteFamilyIndex = Math.floor(
     Math.random() * this.silhouetteFamilies.length,
   );
+  private nextLargeTrianglesSeparated = Math.random() < 0.5;
   private dragAnimationFrame: number | null = null;
   private pendingDragPoint: Point | null = null;
 
@@ -859,16 +860,18 @@ export class TangramPage {
       if (centered) {
         const metrics = this.silhouetteMetrics(centered);
         const signature = this.silhouetteSignature(centered);
+        const largeTrianglesAreAdjacent = this.largeTrianglesAreAdjacent(centered);
         const candidate: ScoredSilhouette = {
           placements: centered,
           score: this.silhouetteDifficulty(centered),
           signature,
           ...metrics,
         };
-        const matchingCandidate = candidatesBySignature.get(signature);
+        const candidateKey = `${signature}|${largeTrianglesAreAdjacent ? 'adjacent' : 'separated'}`;
+        const matchingCandidate = candidatesBySignature.get(candidateKey);
 
         if (!matchingCandidate || candidate.score > matchingCandidate.score) {
-          candidatesBySignature.set(signature, candidate);
+          candidatesBySignature.set(candidateKey, candidate);
         }
       }
     }
@@ -877,25 +880,32 @@ export class TangramPage {
 
     if (candidates.length > 0) {
       const family = this.nextSilhouetteFamily();
-      const familyCandidates = candidates.filter((candidate) =>
+      const layoutCandidates = candidates.filter(
+        (candidate) =>
+          this.largeTrianglesAreAdjacent(candidate.placements) !==
+          this.nextLargeTrianglesSeparated,
+      );
+      const preferredLayoutCandidates =
+        layoutCandidates.length > 0 ? layoutCandidates : candidates;
+      const familyCandidates = preferredLayoutCandidates.filter((candidate) =>
         this.matchesSilhouetteFamily(candidate, family),
       );
       const freshFamilyCandidates = familyCandidates.filter(
         (candidate) =>
           !this.recentSilhouetteSignatures.includes(candidate.signature),
       );
-      const freshCandidates = candidates.filter(
+      const freshLayoutCandidates = preferredLayoutCandidates.filter(
         (candidate) =>
           !this.recentSilhouetteSignatures.includes(candidate.signature),
       );
       const candidatePool =
         freshFamilyCandidates.length > 0
           ? freshFamilyCandidates
-          : freshCandidates.length > 0
-            ? freshCandidates
+          : freshLayoutCandidates.length > 0
+            ? freshLayoutCandidates
             : familyCandidates.length > 0
               ? familyCandidates
-              : candidates;
+              : preferredLayoutCandidates;
       const rankedCandidates = [...candidatePool].sort((first, second) => {
         const noveltyDifference =
           this.silhouetteNovelty(second.signature) -
@@ -910,6 +920,7 @@ export class TangramPage {
       const selected = this.randomItem(variedCandidates);
 
       this.rememberSilhouette(selected.signature);
+      this.nextLargeTrianglesSeparated = !this.nextLargeTrianglesSeparated;
       return selected.placements;
     }
 
@@ -917,6 +928,7 @@ export class TangramPage {
     if (fallback.length > 0) {
       this.rememberSilhouette(this.silhouetteSignature(fallback));
     }
+    this.nextLargeTrianglesSeparated = !this.nextLargeTrianglesSeparated;
     return fallback;
   }
 
@@ -927,6 +939,42 @@ export class TangramPage {
     ).size;
 
     return concavityRatio * 100 + rotationVariety;
+  }
+
+  private largeTrianglesAreAdjacent(placements: PlacedPiece[]): boolean {
+    const largeTriangles = placements.filter(
+      (placement) =>
+        placement.pieceId === 'large-blue' ||
+        placement.pieceId === 'large-coral',
+    );
+
+    if (largeTriangles.length !== 2) {
+      return false;
+    }
+
+    const [first, second] = largeTriangles;
+    const firstEdges = this.edgesOf(
+      this.transformedVertices(
+        this.getDefinition(first.pieceId),
+        first.x,
+        first.y,
+        first.rotation,
+      ),
+    );
+    const secondEdges = this.edgesOf(
+      this.transformedVertices(
+        this.getDefinition(second.pieceId),
+        second.x,
+        second.y,
+        second.rotation,
+      ),
+    );
+
+    return firstEdges.some((firstEdge) =>
+      secondEdges.some(
+        (secondEdge) => this.edgeOverlapLength(firstEdge, secondEdge) > 0.001,
+      ),
+    );
   }
 
   private silhouetteMetrics(placements: PlacedPiece[]): {
@@ -1161,41 +1209,26 @@ export class TangramPage {
 
         for (const targetEdge of exposedEdges) {
           for (const movingEdge of movingEdges) {
-            if (!this.sameLength(targetEdge, movingEdge)) {
-              continue;
-            }
+            for (const offset of this.edgeJoinOffsets(targetEdge, movingEdge)) {
+              const candidate: PlacedPiece = {
+                pieceId: piece.id,
+                x: offset.x,
+                y: offset.y,
+                rotation,
+              };
 
-            const movingVector = {
-              x: movingEdge.end.x - movingEdge.start.x,
-              y: movingEdge.end.y - movingEdge.start.y,
-            };
-            const targetVector = {
-              x: targetEdge.start.x - targetEdge.end.x,
-              y: targetEdge.start.y - targetEdge.end.y,
-            };
+              if (!this.validSilhouettePlacement(candidate, placed, targetEdge)) {
+                continue;
+              }
 
-            if (!this.samePoint(movingVector, targetVector)) {
-              continue;
-            }
+              const result = this.buildSilhouette(
+                [...placed, candidate],
+                otherPieces,
+              );
 
-            const candidate: PlacedPiece = {
-              pieceId: piece.id,
-              x: targetEdge.end.x - movingEdge.start.x,
-              y: targetEdge.end.y - movingEdge.start.y,
-              rotation,
-            };
-
-            if (!this.validSilhouettePlacement(candidate, placed, targetEdge)) {
-              continue;
-            }
-
-            const result = this.buildSilhouette(
-              [...placed, candidate],
-              otherPieces,
-            );
-
-            if (result) {
-              return result;
+              if (result) {
+                return result;
+              }
             }
           }
         }
@@ -1242,21 +1275,69 @@ export class TangramPage {
       ),
     );
 
-    let sharedFullEdges = 0;
+    let sharedBoundaryLength = 0;
 
     for (const candidateEdge of candidateEdges) {
       for (const placedEdge of placedEdges) {
-        if (this.sameEdge(candidateEdge, placedEdge)) {
-          sharedFullEdges += 1;
-        } else if (this.edgesOverlapInLength(candidateEdge, placedEdge)) {
-          return false;
-        }
+        sharedBoundaryLength += this.edgeOverlapLength(candidateEdge, placedEdge);
       }
     }
 
     return (
-      sharedFullEdges === 1 &&
-      placedEdges.some((edge) => this.sameEdge(edge, joinedEdge))
+      sharedBoundaryLength > 0.001 &&
+      candidateEdges.some(
+        (edge) => this.edgeOverlapLength(edge, joinedEdge) > 0.001,
+      )
+    );
+  }
+
+  private edgeJoinOffsets(targetEdge: Edge, movingEdge: Edge): Point[] {
+    const targetVector = {
+      x: targetEdge.end.x - targetEdge.start.x,
+      y: targetEdge.end.y - targetEdge.start.y,
+    };
+    const movingVector = {
+      x: movingEdge.end.x - movingEdge.start.x,
+      y: movingEdge.end.y - movingEdge.start.y,
+    };
+    const targetLength = this.edgeLength(targetEdge);
+    const movingLength = this.edgeLength(movingEdge);
+
+    if (targetLength < 0.001 || movingLength < 0.001) {
+      return [];
+    }
+
+    const targetUnit = {
+      x: targetVector.x / targetLength,
+      y: targetVector.y / targetLength,
+    };
+    const movingUnit = {
+      x: movingVector.x / movingLength,
+      y: movingVector.y / movingLength,
+    };
+
+    if (
+      Math.hypot(targetUnit.x + movingUnit.x, targetUnit.y + movingUnit.y) >
+      0.02
+    ) {
+      return [];
+    }
+
+    const offsets = [
+      {
+        x: targetEdge.start.x - movingEdge.end.x,
+        y: targetEdge.start.y - movingEdge.end.y,
+      },
+      {
+        x: targetEdge.end.x - movingEdge.start.x,
+        y: targetEdge.end.y - movingEdge.start.y,
+      },
+    ];
+
+    return offsets.filter(
+      (offset, index) =>
+        offsets.findIndex((candidate) => this.samePoint(candidate, offset)) ===
+        index,
     );
   }
 
@@ -1306,6 +1387,10 @@ export class TangramPage {
   }
 
   private edgesOverlapInLength(first: Edge, second: Edge): boolean {
+    return this.edgeOverlapLength(first, second) > 0.001;
+  }
+
+  private edgeOverlapLength(first: Edge, second: Edge): number {
     const firstVector = {
       x: first.end.x - first.start.x,
       y: first.end.y - first.start.y,
@@ -1314,33 +1399,43 @@ export class TangramPage {
       x: second.end.x - second.start.x,
       y: second.end.y - second.start.y,
     };
-    const cross =
-      firstVector.x * secondVector.y - firstVector.y * secondVector.x;
+    const firstLength = Math.hypot(firstVector.x, firstVector.y);
+    const secondLength = Math.hypot(secondVector.x, secondVector.y);
+
+    if (firstLength < 0.001 || secondLength < 0.001) {
+      return 0;
+    }
+
+    const firstUnit = {
+      x: firstVector.x / firstLength,
+      y: firstVector.y / firstLength,
+    };
+    const secondUnit = {
+      x: secondVector.x / secondLength,
+      y: secondVector.y / secondLength,
+    };
+    const cross = firstUnit.x * secondUnit.y - firstUnit.y * secondUnit.x;
     const offset = {
       x: second.start.x - first.start.x,
       y: second.start.y - first.start.y,
     };
-    const offsetCross = firstVector.x * offset.y - firstVector.y * offset.x;
+    const offsetCross = firstUnit.x * offset.y - firstUnit.y * offset.x;
 
-    if (Math.abs(cross) > 0.02 || Math.abs(offsetCross) > 0.02) {
-      return false;
+    if (Math.abs(cross) > 0.001 || Math.abs(offsetCross) > 0.02) {
+      return 0;
     }
 
-    const lengthSquared =
-      firstVector.x * firstVector.x + firstVector.y * firstVector.y;
-    const start =
-      (offset.x * firstVector.x + offset.y * firstVector.y) / lengthSquared;
+    const secondStart = offset.x * firstUnit.x + offset.y * firstUnit.y;
     const endOffset = {
       x: second.end.x - first.start.x,
       y: second.end.y - first.start.y,
     };
-    const end =
-      (endOffset.x * firstVector.x + endOffset.y * firstVector.y) /
-      lengthSquared;
+    const secondEnd = endOffset.x * firstUnit.x + endOffset.y * firstUnit.y;
     const overlap =
-      Math.min(1, Math.max(start, end)) - Math.max(0, Math.min(start, end));
+      Math.min(firstLength, Math.max(secondStart, secondEnd)) -
+      Math.max(0, Math.min(secondStart, secondEnd));
 
-    return overlap > 0.001;
+    return Math.max(0, overlap);
   }
 
   private centerSilhouette(placements: PlacedPiece[]): PlacedPiece[] | null {

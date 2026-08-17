@@ -6,6 +6,23 @@
       Entraîne ta logique, ta mémoire, ton sens spatial et ta résolution de problèmes.
     </p>
 
+    <div class="game-search" role="search">
+      <label for="game-search-input">Rechercher un jeu par nom</label>
+      <div class="game-search-row">
+        <input
+          id="game-search-input"
+          type="search"
+          placeholder="Ex. Tangram"
+          autocomplete="off"
+          [value]="searchQuery()"
+          (input)="setSearchQuery($event)"
+        />
+        @if (searchQuery()) {
+          <button type="button" class="search-clear-button" (click)="clearSearch()">Effacer</button>
+        }
+      </div>
+    </div>
+
     <div class="sort-controls" aria-label="Ordre d'affichage des jeux">
       <button
         type="button"
@@ -244,52 +261,56 @@
   }
 
   <section class="category-list" aria-label="Catégories de puzzles">
-    @for (category of categories(); track category.title) {
-      <section class="category-card" [attr.id]="category.id">
-        <div class="category-header">
-          <h2>{{ category.title }}</h2>
-          <p>{{ category.description }}</p>
-          @if (category.id === 'ciphers') {
-            <a class="category-reference-link" routerLink="/ciphers/cheatsheet">
-              Consulter la cheatsheet des légendes
-            </a>
-          }
-        </div>
-
-        @if (category.puzzles.length > 0) {
-          <div class="puzzle-grid">
-            @for (puzzle of category.puzzles; track puzzle.route) {
-              <a
-                class="puzzle-card"
-                [class.needs-completion]="puzzle.needsCompletion"
-                [routerLink]="puzzle.route"
-              >
-                @if (puzzle.tag) {
-                  <span class="puzzle-tag">{{ puzzle.tag }}</span>
-                }
-
-                <span class="puzzle-main">
-                  <h3>{{ puzzle.title }}</h3>
-                  @if (category.showSolvedStatus) {
-                    <span [class]="'solve-status ' + solvedStatusClass(puzzle.route)">
-                      {{ solvedStatusText(puzzle.route) }}
-                    </span>
-                  } @else {
-                    <span class="last-played">{{ lastPlayedText(puzzle.route) }}</span>
-                  }
-                </span>
-                <p>{{ puzzle.description }}</p>
-
-                <span class="play-link">Jouer -></span>
+    @if (visibleCategories().length > 0) {
+      @for (category of visibleCategories(); track category.title) {
+        <section class="category-card" [attr.id]="category.id">
+          <div class="category-header">
+            <h2>{{ category.title }}</h2>
+            <p>{{ category.description }}</p>
+            @if (category.id === 'ciphers') {
+              <a class="category-reference-link" routerLink="/ciphers/cheatsheet">
+                Consulter la cheatsheet des légendes
               </a>
             }
           </div>
-        } @else {
-          <div class="empty-category">
-            {{ category.emptyText }}
-          </div>
-        }
-      </section>
+
+          @if (category.puzzles.length > 0) {
+            <div class="puzzle-grid">
+              @for (puzzle of category.puzzles; track puzzle.route) {
+                <a
+                  class="puzzle-card"
+                  [class.needs-completion]="puzzle.needsCompletion"
+                  [routerLink]="puzzle.route"
+                >
+                  @if (puzzle.tag) {
+                    <span class="puzzle-tag">{{ puzzle.tag }}</span>
+                  }
+
+                  <span class="puzzle-main">
+                    <h3>{{ puzzle.title }}</h3>
+                    @if (category.showSolvedStatus) {
+                      <span [class]="'solve-status ' + solvedStatusClass(puzzle.route)">
+                        {{ solvedStatusText(puzzle.route) }}
+                      </span>
+                    } @else {
+                      <span class="last-played">{{ lastPlayedText(puzzle.route) }}</span>
+                    }
+                  </span>
+                  <p>{{ puzzle.description }}</p>
+
+                  <span class="play-link">Jouer -></span>
+                </a>
+              }
+            </div>
+          } @else {
+            <div class="empty-category">
+              {{ category.emptyText }}
+            </div>
+          }
+        </section>
+      }
+    } @else {
+      <p class="empty-search" role="status">Aucun jeu ne correspond à « {{ searchQuery() }} ».</p>
     }
   </section>
 </main>

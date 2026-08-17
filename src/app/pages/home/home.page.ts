@@ -54,6 +54,7 @@ export class HomePage {
   private readonly labTypeStates = signal<Record<string, PuzzleCatalogApprovalState>>({});
 
   readonly sortMode = signal<HomeSortMode>(this.readSortMode());
+  readonly searchQuery = signal('');
   readonly playlists = this.playlistService.playlists;
   readonly newPlaylistName = signal('');
   readonly editingPlaylistId = signal<string | null>(null);
@@ -95,6 +96,22 @@ export class HomePage {
           ? [...category.puzzles].sort((first, second) => this.compareByOldestPlayed(first, second))
           : category.puzzles,
     }));
+  });
+  readonly visibleCategories = computed<PuzzleCategory[]>(() => {
+    const query = this.normalizeSearch(this.searchQuery());
+
+    if (!query) {
+      return this.categories();
+    }
+
+    return this.categories()
+      .map((category) => ({
+        ...category,
+        puzzles: category.puzzles.filter((puzzle) =>
+          this.normalizeSearch(puzzle.title).includes(query),
+        ),
+      }))
+      .filter((category) => category.puzzles.length > 0);
   });
 
   constructor() {
@@ -465,6 +482,14 @@ export class HomePage {
     this.writeSortMode(sortMode);
   }
 
+  setSearchQuery(event: Event): void {
+    this.searchQuery.set((event.target as HTMLInputElement).value);
+  }
+
+  clearSearch(): void {
+    this.searchQuery.set('');
+  }
+
   setNewPlaylistName(event: Event): void {
     this.newPlaylistName.set((event.target as HTMLInputElement).value);
   }
@@ -688,5 +713,13 @@ export class HomePage {
     } catch {
       // The selected order still applies for the current page when storage is unavailable.
     }
+  }
+
+  private normalizeSearch(value: string): string {
+    return value
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLocaleLowerCase('fr-CA')
+      .trim();
   }
 }

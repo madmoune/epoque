@@ -5,7 +5,13 @@
     <header class="header">
       <p class="eyebrow">Leviers et déduction</p>
       <h1>Poids suspendus</h1>
-      <p class="intro">Déduis les poids inconnus grâce à l’équilibre de chaque branche.</p>
+      <p class="intro">
+        @if (isPlacementMode()) {
+          Place les poids disponibles au bon endroit pour reconstituer un mobile en équilibre.
+        } @else {
+          Déduis les poids inconnus grâce à l’équilibre de chaque branche.
+        }
+      </p>
     </header>
 
     @if (generationError(); as error) {
@@ -18,9 +24,22 @@
         <div class="section-heading">
           <div>
             <p class="panel-kicker">Mobile en équilibre</p>
-            <h2 id="mobile-title">Retrouve les poids inconnus</h2>
+            <h2 id="mobile-title">
+              @if (isPlacementMode()) {
+                Replace tous les poids
+              } @else {
+                Retrouve les poids inconnus
+              }
+            </h2>
           </div>
         </div>
+
+        @if (isPlacementMode()) {
+          <p class="placement-instructions">
+            Sélectionne un poids dans la réserve, puis touche un emplacement vide. Tu peux aussi les
+            glisser directement sur le mobile.
+          </p>
+        }
 
         <figure class="mobile-figure">
           <div class="mobile-canvas">
@@ -33,8 +52,12 @@
             >
               <title id="diagram-title">Mobile de poids suspendus en équilibre</title>
               <desc id="diagram-description">
-                Chaque petit trait sur une barre représente une unité. Un poids est donné et les
-                autres possèdent un champ pour inscrire leur valeur.
+                Chaque petit trait sur une barre représente une unité.
+                @if (isPlacementMode()) {
+                  Les emplacements sont vides : place les poids disponibles au bon endroit.
+                } @else {
+                  Un poids est donné et les autres possèdent un champ pour inscrire leur valeur.
+                }
               </desc>
 
               <line
@@ -86,66 +109,155 @@
             </svg>
 
             <div class="diagram-weight-editors" aria-label="Poids suspendus">
-              @for (node of layout().weights; track node.weightId) {
-                @let weight = weightForId(node.weightId);
+              @if (isPlacementMode()) {
+                @for (node of layout().weights; track node.weightId) {
+                  @let placedWeightId = placedWeightIdFor(node.weightId);
 
-                @if (weight.known) {
-                  <div
-                    class="diagram-weight-editor known-node"
+                  <button
+                    type="button"
+                    class="weight-placement-slot"
+                    [class.occupied]="!!placedWeightId"
+                    [class.selected]="!!placedWeightId && isPlacementSelected(placedWeightId)"
+                    [class.dragging-source]="
+                      !!placedWeightId && isPlacementDragging(placedWeightId)
+                    "
+                    [class.drop-target]="isPlacementDropTarget(node.weightId)"
                     [style.left.%]="(node.x / layout().width) * 100"
                     [style.top.%]="(node.y / layout().height) * 100"
-                    [attr.aria-label]="diagramWeightLabel(node.weightId)"
-                    role="img"
+                    [attr.aria-label]="placementSlotAriaLabel(node.weightId)"
+                    [attr.aria-pressed]="!!placedWeightId && isPlacementSelected(placedWeightId)"
+                    [attr.data-hanging-slot]="node.weightId"
+                    (pointerdown)="startPlacementSlotDrag(node.weightId, $event)"
+                    (keydown)="handlePlacementSlotKey($event, node.weightId)"
                   >
-                    <span
-                      class="diagram-weight-symbol"
-                      [style.--weight-color]="weight.color"
-                      aria-hidden="true"
+                    @if (placedWeightId; as weightId) {
+                      @let weight = weightForId(weightId);
+                      <span
+                        class="diagram-weight-symbol"
+                        [style.--weight-color]="weight.color"
+                        aria-hidden="true"
+                      >
+                        {{ weight.label }}
+                      </span>
+                      <span class="diagram-equals" aria-hidden="true">=</span>
+                      <strong>{{ puzzle().solution[weight.id] }}</strong>
+                      <small>kg</small>
+                    } @else {
+                      <span class="placement-slot-plus" aria-hidden="true">+</span>
+                      <span class="placement-slot-label">Place ici</span>
+                    }
+                  </button>
+                }
+              } @else {
+                @for (node of layout().weights; track node.weightId) {
+                  @let weight = weightForId(node.weightId);
+
+                  @if (weight.known) {
+                    <div
+                      class="diagram-weight-editor known-node"
+                      [style.left.%]="(node.x / layout().width) * 100"
+                      [style.top.%]="(node.y / layout().height) * 100"
+                      [attr.aria-label]="diagramWeightLabel(node.weightId)"
+                      role="img"
                     >
-                      {{ weight.label }}
-                    </span>
-                    <span class="diagram-equals" aria-hidden="true">=</span>
-                    <strong>{{ puzzle().solution[weight.id] }}</strong>
-                    <small>kg</small>
-                  </div>
-                } @else {
-                  <label
-                    class="diagram-weight-editor unknown-node"
-                    [class.hinted-node]="isHinted(weight.id)"
-                    [class.completed-node]="!!answerFor(weight.id)"
-                    [style.left.%]="(node.x / layout().width) * 100"
-                    [style.top.%]="(node.y / layout().height) * 100"
-                    [attr.for]="'hanging-answer-' + weight.id"
-                  >
-                    <span
-                      class="diagram-weight-symbol"
-                      [style.--weight-color]="weight.color"
-                      aria-hidden="true"
+                      <span
+                        class="diagram-weight-symbol"
+                        [style.--weight-color]="weight.color"
+                        aria-hidden="true"
+                      >
+                        {{ weight.label }}
+                      </span>
+                      <span class="diagram-equals" aria-hidden="true">=</span>
+                      <strong>{{ puzzle().solution[weight.id] }}</strong>
+                      <small>kg</small>
+                    </div>
+                  } @else {
+                    <label
+                      class="diagram-weight-editor unknown-node"
+                      [class.hinted-node]="isHinted(weight.id)"
+                      [class.completed-node]="!!answerFor(weight.id)"
+                      [style.left.%]="(node.x / layout().width) * 100"
+                      [style.top.%]="(node.y / layout().height) * 100"
+                      [attr.for]="'hanging-answer-' + weight.id"
                     >
-                      {{ weight.label }}
-                    </span>
-                    <span class="diagram-equals" aria-hidden="true">=</span>
-                    <input
-                      [id]="'hanging-answer-' + weight.id"
-                      type="text"
-                      inputmode="none"
-                      maxlength="2"
-                      autocomplete="off"
-                      placeholder="?"
-                      [value]="answerFor(weight.id)"
-                      [disabled]="isSolved() || isHinted(weight.id)"
-                      [attr.aria-label]="'Poids ' + weight.label + ' en kilogrammes'"
-                      (focus)="activateAnswerInput(weight.id, $event)"
-                      (click)="$event.stopPropagation()"
-                      (input)="updateAnswer(weight.id, $event)"
-                    />
-                    <small>kg</small>
-                  </label>
+                      <span
+                        class="diagram-weight-symbol"
+                        [style.--weight-color]="weight.color"
+                        aria-hidden="true"
+                      >
+                        {{ weight.label }}
+                      </span>
+                      <span class="diagram-equals" aria-hidden="true">=</span>
+                      <input
+                        [id]="'hanging-answer-' + weight.id"
+                        type="text"
+                        inputmode="none"
+                        maxlength="2"
+                        autocomplete="off"
+                        placeholder="?"
+                        [value]="answerFor(weight.id)"
+                        [disabled]="isSolved() || isHinted(weight.id)"
+                        [attr.aria-label]="'Poids ' + weight.label + ' en kilogrammes'"
+                        (focus)="activateAnswerInput(weight.id, $event)"
+                        (click)="$event.stopPropagation()"
+                        (input)="updateAnswer(weight.id, $event)"
+                      />
+                      <small>kg</small>
+                    </label>
+                  }
                 }
               }
             </div>
           </div>
         </figure>
+
+        @if (isPlacementMode()) {
+          <section class="placement-tray" aria-labelledby="placement-tray-title">
+            <div class="placement-tray-heading">
+              <div>
+                <p class="panel-kicker">Réserve</p>
+                <h3 id="placement-tray-title">Poids disponibles</h3>
+              </div>
+              <span>{{ placementCount() }}/{{ puzzle().weights.length }} placés</span>
+            </div>
+            <p class="placement-tray-help">
+              Chaque poids affiche sa valeur. Utilise l’équilibre des barres pour retrouver sa
+              place.
+            </p>
+            <div class="available-weight-list">
+              @for (weight of availablePlacementWeights(); track weight.id) {
+                <button
+                  type="button"
+                  class="available-weight"
+                  [class.selected]="isPlacementSelected(weight.id)"
+                  [class.dragging-source]="isPlacementDragging(weight.id)"
+                  [attr.aria-label]="
+                    'Poids ' +
+                    weight.label +
+                    ', ' +
+                    puzzle().solution[weight.id] +
+                    ' kilogrammes. Sélectionne-le pour le placer.'
+                  "
+                  [attr.aria-pressed]="isPlacementSelected(weight.id)"
+                  (pointerdown)="startPlacementWeightDrag(weight.id, null, $event)"
+                  (keydown)="handlePlacementWeightKey($event, weight.id)"
+                >
+                  <span
+                    class="diagram-weight-symbol"
+                    [style.--weight-color]="weight.color"
+                    aria-hidden="true"
+                  >
+                    {{ weight.label }}
+                  </span>
+                  <strong>{{ puzzle().solution[weight.id] }}</strong>
+                  <small>kg</small>
+                </button>
+              } @empty {
+                <p class="placement-tray-complete">Tous les poids sont sur le mobile.</p>
+              }
+            </div>
+          </section>
+        }
       </section>
 
       <app-custom-keyboard

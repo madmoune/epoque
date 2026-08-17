@@ -89,6 +89,19 @@ describe('TangramPage interactions', () => {
     expect(new Set(signatures).size).toBe(signatures.length);
   });
 
+  it('varies whether the two large triangles are adjacent', () => {
+    const adjacencyStates: boolean[] = [];
+
+    for (let index = 0; index < 4; index += 1) {
+      if (index > 0) page.newPuzzle();
+
+      adjacencyStates.push(page.largeTrianglesAreAdjacent(page.targetPieces()));
+    }
+
+    expect(adjacencyStates).toContain(true);
+    expect(adjacencyStates).toContain(false);
+  });
+
   it('recognizes a rotated silhouette as the same visible shape', () => {
     const silhouette = page.targetPieces();
     const rotatedSilhouette = silhouette.map((piece: any) => ({

@@ -18,6 +18,16 @@ type HangingWeightFeedback = {
   text: string;
 };
 
+type PlacementDragState = {
+  pointerId: number;
+  weightId: string;
+  sourceSlotId: string | null;
+  startX: number;
+  startY: number;
+  moved: boolean;
+  overSlotId: string | null;
+};
+
 type MobileBarLayout = {
   id: string;
   pivotX: number;
@@ -68,6 +78,7 @@ type HangingMobileLayout = {
 })
 export class HangingWeightsPage {
   private readonly hangingWeightsService = inject(HangingWeightsService);
+  private placementDragCaptureTarget: HTMLElement | null = null;
 
   protected readonly puzzle = signal<HangingWeightPuzzle>(
     this.hangingWeightsService.createPuzzle(),
@@ -84,8 +95,21 @@ export class HangingWeightsPage {
   protected readonly feedback = signal<HangingWeightFeedback | null>(null);
   protected readonly isSolved = signal(false);
   protected readonly generationError = signal<string | null>(null);
+  protected readonly selectedPlacementWeightId = signal<string | null>(null);
+  protected readonly placementDragState = signal<PlacementDragState | null>(null);
+  protected readonly placements = signal<Record<string, string>>({});
 
   protected readonly layout = computed(() => createHangingMobileLayout(this.puzzle().root));
+  protected readonly isPlacementMode = computed(() => this.puzzle().mode === 'placement');
+  protected readonly availablePlacementWeights = computed(() => {
+    const placedWeightIds = new Set(Object.values(this.placements()));
+
+    return this.puzzle().weights.filter((weight) => !placedWeightIds.has(weight.id));
+  });
+  protected readonly placementCount = computed(() => Object.keys(this.placements()).length);
+  protected readonly allPlaced = computed(() =>
+    this.layout().weights.every((slot) => !!this.placements()[slot.weightId]),
+  );
   protected readonly unknownWeights = computed(() =>
     this.puzzle().weights.filter((weight) => !weight.known),
   );
@@ -93,7 +117,9 @@ export class HangingWeightsPage {
     this.unknownWeights().every((weight) => this.answerFor(weight.id) !== ''),
   );
   protected readonly hasAvailableHint = computed(() =>
-    this.unknownWeights().some((weight) => !this.hintedWeightIds().has(weight.id)),
+    (this.isPlacementMode() ? this.puzzle().weights : this.unknownWeights()).some(
+      (weight) => !this.hintedWeightIds().has(weight.id),
+    ),
   );
   protected readonly successAnswer = computed(() =>
     this.puzzle()
@@ -112,6 +138,175 @@ export class HangingWeightsPage {
     this.answers.update((answers) => ({ ...answers, [weightId]: value }));
     this.feedback.set(null);
     this.validateAnswers();
+  }
+
+  protected startPlacementWeightDrag(
+    weightId: string,
+    sourceSlotId: string | null,
+    event: PointerEvent,
+  ): void {
+    if (
+      !this.isPlacementMode() ||
+      this.isSolved() ||
+      this.isHinted(weightId) ||
+      (event.pointerType === 'mouse' && event.button !== 0)
+    ) {
+      return;
+    }
+
+    if (!this.puzzle().weights.some((weight) => weight.id === weightId)) {
+      return;
+    }
+
+    event.preventDefault();
+    const target = event.currentTarget;
+
+    if (target instanceof HTMLElement) {
+      target.focus({ preventScroll: true });
+      target.setPointerCapture?.(event.pointerId);
+      this.placementDragCaptureTarget = target;
+    }
+
+    this.placementDragState.set({
+      pointerId: event.pointerId,
+      weightId,
+      sourceSlotId,
+      startX: event.clientX,
+      startY: event.clientY,
+      moved: false,
+      overSlotId: sourceSlotId,
+    });
+  }
+
+  protected startPlacementSlotDrag(slotId: string, event: PointerEvent): void {
+    const placedWeightId = this.placedWeightIdFor(slotId);
+
+    if (placedWeightId) {
+      this.startPlacementWeightDrag(placedWeightId, slotId, event);
+      return;
+    }
+
+    if (this.selectedPlacementWeightId() && !this.isSolved()) {
+      event.preventDefault();
+      this.placeSelectedPlacementWeight(slotId);
+    }
+  }
+
+  @HostListener('document:pointermove', ['$event'])
+  protected trackPlacementDrag(event: PointerEvent): void {
+    const drag = this.placementDragState();
+
+    if (!drag || drag.pointerId !== event.pointerId) {
+      return;
+    }
+
+    event.preventDefault();
+    const moved =
+      drag.moved || Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) >= 5;
+
+    this.placementDragState.set({
+      ...drag,
+      moved,
+      overSlotId: moved ? this.placementSlotAt(event.clientX, event.clientY) : drag.overSlotId,
+    });
+  }
+
+  @HostListener('document:pointerup', ['$event'])
+  protected finishPlacementDrag(event: PointerEvent): void {
+    const drag = this.placementDragState();
+
+    if (!drag || drag.pointerId !== event.pointerId) {
+      return;
+    }
+
+    event.preventDefault();
+    const moved =
+      drag.moved || Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) >= 5;
+    const targetSlotId = moved ? this.placementSlotAt(event.clientX, event.clientY) : null;
+
+    this.releasePlacementDragCapture(event.pointerId);
+    this.placementDragState.set(null);
+
+    if (!moved) {
+      if (drag.sourceSlotId) {
+        this.handlePlacementSlotSelection(drag.sourceSlotId);
+      } else {
+        this.selectPlacementWeight(drag.weightId);
+      }
+      return;
+    }
+
+    this.movePlacement(drag.weightId, targetSlotId);
+  }
+
+  @HostListener('document:pointercancel', ['$event'])
+  protected cancelPlacementDrag(event: PointerEvent): void {
+    const drag = this.placementDragState();
+
+    if (!drag || drag.pointerId !== event.pointerId) {
+      return;
+    }
+
+    this.releasePlacementDragCapture(event.pointerId);
+    this.placementDragState.set(null);
+  }
+
+  protected handlePlacementWeightKey(event: KeyboardEvent, weightId: string): void {
+    if (event.key !== 'Enter' && event.key !== ' ') {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    this.selectPlacementWeight(weightId);
+  }
+
+  protected handlePlacementSlotKey(event: KeyboardEvent, slotId: string): void {
+    if (event.key !== 'Enter' && event.key !== ' ') {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    this.handlePlacementSlotSelection(slotId);
+  }
+
+  protected placeSelectedPlacementWeight(slotId: string): void {
+    const weightId = this.selectedPlacementWeightId();
+
+    if (weightId) {
+      this.movePlacement(weightId, slotId);
+    }
+  }
+
+  protected placedWeightIdFor(slotId: string): string | null {
+    return this.placements()[slotId] ?? null;
+  }
+
+  protected isPlacementSelected(weightId: string): boolean {
+    return this.selectedPlacementWeightId() === weightId;
+  }
+
+  protected isPlacementDragging(weightId: string): boolean {
+    return this.placementDragState()?.weightId === weightId;
+  }
+
+  protected isPlacementDropTarget(slotId: string): boolean {
+    const drag = this.placementDragState();
+
+    return !!drag?.moved && drag.overSlotId === slotId;
+  }
+
+  protected placementSlotAriaLabel(slotId: string): string {
+    const weightId = this.placedWeightIdFor(slotId);
+
+    if (!weightId) {
+      return 'Emplacement vide. Choisis un poids puis active cet emplacement pour le placer.';
+    }
+
+    const weight = this.weightForId(weightId);
+
+    return `Emplacement occupé par le poids ${weight.label}, ${this.puzzle().solution[weight.id]} kilogrammes. Sélectionne-le pour le déplacer.`;
   }
 
   protected activateAnswerInput(weightId: string, event: Event): void {
@@ -181,6 +376,184 @@ export class HangingWeightsPage {
     return this.answers()[weightId] ?? '';
   }
 
+  private selectPlacementWeight(weightId: string): void {
+    if (this.isSolved() || this.isHinted(weightId)) {
+      return;
+    }
+
+    this.selectedPlacementWeightId.update((selectedWeightId) =>
+      selectedWeightId === weightId ? null : weightId,
+    );
+    this.feedback.set(null);
+  }
+
+  private handlePlacementSlotSelection(slotId: string): void {
+    if (this.isSolved()) {
+      return;
+    }
+
+    const placedWeightId = this.placedWeightIdFor(slotId);
+    const selectedWeightId = this.selectedPlacementWeightId();
+
+    if (!selectedWeightId) {
+      if (placedWeightId) {
+        this.selectPlacementWeight(placedWeightId);
+      }
+      return;
+    }
+
+    if (selectedWeightId === placedWeightId) {
+      this.selectedPlacementWeightId.set(null);
+      return;
+    }
+
+    this.movePlacement(selectedWeightId, slotId);
+  }
+
+  private movePlacement(weightId: string, targetSlotId: string | null): void {
+    if (this.isSolved() || !this.isPlacementMode() || this.isHinted(weightId)) {
+      return;
+    }
+
+    const currentPlacements = this.placements();
+    const sourceSlotId =
+      Object.entries(currentPlacements).find(
+        ([, placedWeightId]) => placedWeightId === weightId,
+      )?.[0] ?? null;
+
+    if (sourceSlotId === targetSlotId) {
+      this.selectedPlacementWeightId.set(null);
+      return;
+    }
+
+    const targetWeightId = targetSlotId ? currentPlacements[targetSlotId] : undefined;
+
+    if (targetSlotId && this.isHinted(targetSlotId)) {
+      this.feedback.set({
+        tone: 'hint',
+        text: 'Cet emplacement est fixé par un indice.',
+      });
+      return;
+    }
+
+    if (targetWeightId && this.isHinted(targetWeightId)) {
+      this.feedback.set({
+        tone: 'hint',
+        text: 'Ce poids est fixé par un indice.',
+      });
+      return;
+    }
+
+    const nextPlacements = { ...currentPlacements };
+
+    if (sourceSlotId) {
+      delete nextPlacements[sourceSlotId];
+    }
+
+    if (targetSlotId) {
+      if (targetWeightId && sourceSlotId) {
+        nextPlacements[sourceSlotId] = targetWeightId;
+      }
+
+      nextPlacements[targetSlotId] = weightId;
+    }
+
+    this.placements.set(nextPlacements);
+    this.selectedPlacementWeightId.set(null);
+    this.feedback.set(null);
+    this.validatePlacement();
+  }
+
+  private validatePlacement(): void {
+    if (!this.allPlaced()) {
+      this.feedback.set(null);
+      return;
+    }
+
+    const placementSolution = Object.fromEntries(
+      this.layout().weights.map((slot) => {
+        const placedWeightId = this.placements()[slot.weightId];
+
+        return [slot.weightId, this.puzzle().solution[placedWeightId]];
+      }),
+    );
+    const isCorrect = this.hangingWeightsService.isPuzzleBalanced({
+      ...this.puzzle(),
+      solution: placementSolution,
+    });
+
+    if (!isCorrect) {
+      this.feedback.set({
+        tone: 'error',
+        text: 'Le mobile ne serait pas équilibré avec cette disposition. Échange les poids qui ne sont pas au bon endroit.',
+      });
+      return;
+    }
+
+    this.feedback.set(null);
+    this.isSolved.set(true);
+    this.selectedPlacementWeightId.set(null);
+  }
+
+  private showPlacementHint(): void {
+    const placements = this.placements();
+    const hintSlot = this.layout().weights.find((slot) => {
+      const placedWeightId = placements[slot.weightId];
+
+      return (
+        !this.isHinted(slot.weightId) &&
+        placedWeightId !== slot.weightId &&
+        !this.isHinted(placedWeightId ?? '')
+      );
+    });
+
+    if (!hintSlot) {
+      return;
+    }
+
+    const correctWeightId = hintSlot.weightId;
+    const currentSlotId = Object.entries(placements).find(
+      ([, placedWeightId]) => placedWeightId === correctWeightId,
+    )?.[0];
+    const nextPlacements = { ...placements };
+
+    if (currentSlotId) {
+      delete nextPlacements[currentSlotId];
+    }
+
+    delete nextPlacements[hintSlot.weightId];
+    nextPlacements[hintSlot.weightId] = correctWeightId;
+
+    this.placements.set(nextPlacements);
+    this.selectedPlacementWeightId.set(null);
+    this.hintedWeightIds.update((weightIds) => new Set([...weightIds, correctWeightId]));
+    this.validatePlacement();
+
+    if (!this.isSolved()) {
+      const weight = this.weightForId(correctWeightId);
+
+      this.feedback.set({
+        tone: 'hint',
+        text: `Indice : le poids ${weight.label} (${this.puzzle().solution[weight.id]} kg) doit être placé ici.`,
+      });
+    }
+  }
+
+  private placementSlotAt(clientX: number, clientY: number): string | null {
+    const element = document.elementFromPoint(clientX, clientY);
+    const slot = element?.closest('[data-hanging-slot]');
+
+    return slot?.getAttribute('data-hanging-slot') ?? null;
+  }
+
+  private releasePlacementDragCapture(pointerId: number): void {
+    if (this.placementDragCaptureTarget?.hasPointerCapture?.(pointerId)) {
+      this.placementDragCaptureTarget.releasePointerCapture(pointerId);
+    }
+
+    this.placementDragCaptureTarget = null;
+  }
+
   private validateAnswers(): void {
     if (!this.allAnswered()) {
       return;
@@ -218,6 +591,11 @@ export class HangingWeightsPage {
       return;
     }
 
+    if (this.isPlacementMode()) {
+      this.showPlacementHint();
+      return;
+    }
+
     const hintWeight =
       this.unknownWeights().find(
         (weight) =>
@@ -245,6 +623,9 @@ export class HangingWeightsPage {
     this.answers.set({});
     this.activeAnswerWeightId.set(null);
     this.hintedWeightIds.set(new Set());
+    this.selectedPlacementWeightId.set(null);
+    this.placementDragState.set(null);
+    this.placements.set({});
     this.feedback.set(null);
     this.isSolved.set(false);
   }

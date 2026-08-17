@@ -385,6 +385,43 @@ h3 {
   text-transform: uppercase;
 }
 
+.pan-heading {
+  position: relative;
+  display: grid;
+  min-height: 1.55rem;
+  place-items: center;
+}
+
+.clear-pan-button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  min-height: 1.55rem;
+  padding: 0.18rem 0.35rem;
+  border: 1px solid var(--border);
+  border-radius: 0.4rem;
+  background: var(--surface-raised);
+  color: var(--muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.58rem;
+  font-weight: 850;
+  touch-action: manipulation;
+
+  &:hover:not(:disabled),
+  &:focus-visible:not(:disabled) {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--accent-contrast);
+    outline: none;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.38;
+  }
+}
+
 .pan-piece-wrapper {
   position: relative;
   padding: 0 0.15rem;

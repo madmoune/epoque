@@ -69,4 +69,22 @@ describe('HomePage playlist category controls', () => {
 
     expect(playlistService.find(playlist.id)).toBeUndefined();
   });
+
+  it('filters the home game cards by name without hiding playlist options', () => {
+    const fixture = TestBed.createComponent(HomePage);
+    const page = fixture.componentInstance;
+
+    page.searchQuery.set('carre magique');
+
+    expect(
+      page
+        .visibleCategories()
+        .flatMap((category) => category.puzzles.map((puzzle) => puzzle.title)),
+    ).toEqual(['Carré magique']);
+    expect(page.playlistPuzzleOptions().some((puzzle) => puzzle.title === 'Tangram')).toBe(true);
+
+    page.clearSearch();
+
+    expect(page.visibleCategories().length).toBe(page.categories().length);
+  });
 });

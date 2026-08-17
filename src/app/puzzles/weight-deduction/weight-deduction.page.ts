@@ -270,6 +270,15 @@ export class WeightDeductionPage {
     this.selectedPieceId.set(null);
   }
 
+  protected clearPan(location: 'left' | 'right'): void {
+    if (this.isSolved()) {
+      return;
+    }
+
+    this.pieces.update((pieces) => pieces.filter((piece) => piece.location !== location));
+    this.selectedPieceId.set(null);
+  }
+
   protected removePiece(pieceId: string): void {
     if (this.isSolved()) {
       return;

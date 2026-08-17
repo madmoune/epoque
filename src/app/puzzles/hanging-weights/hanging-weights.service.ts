@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 
 export type HangingWeightDifficultyId = 'discovery' | 'classic' | 'cascade';
+export type HangingWeightMode = 'values' | 'placement';
 
 export type HangingWeightNode = HangingWeightLeafNode | HangingWeightBranchNode;
 
@@ -27,6 +28,7 @@ export type HangingWeight = {
 
 export type HangingWeightPuzzle = {
   difficultyId: HangingWeightDifficultyId;
+  mode: HangingWeightMode;
   title: string;
   description: string;
   root: HangingWeightBranchNode;
@@ -202,12 +204,18 @@ const WEIGHT_PALETTE = [
   { label: 'G', color: '#39945e' },
 ] as const;
 
+const PLACEMENT_MODE_CHANCE = 0.35;
+
 @Injectable({ providedIn: 'root' })
 export class HangingWeightsService {
-  createPuzzle(difficultyId?: HangingWeightDifficultyId): HangingWeightPuzzle {
+  createPuzzle(
+    difficultyId?: HangingWeightDifficultyId,
+    mode?: HangingWeightMode,
+  ): HangingWeightPuzzle {
     const config = difficultyId
       ? this.difficultyConfig(difficultyId)
       : this.randomItem(DIFFICULTY_CONFIGS);
+    const puzzleMode = mode ?? (Math.random() < PLACEMENT_MODE_CHANCE ? 'placement' : 'values');
 
     for (let attempt = 0; attempt < 500; attempt += 1) {
       const shape = this.randomItem(config.shapes);
@@ -255,6 +263,7 @@ export class HangingWeightsService {
       }));
       const puzzle: HangingWeightPuzzle = {
         difficultyId: config.id,
+        mode: puzzleMode,
         title: config.title,
         description: config.description,
         root,

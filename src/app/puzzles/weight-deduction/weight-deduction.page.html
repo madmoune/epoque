@@ -123,7 +123,18 @@
                 (click)="placeSelected('left')"
                 (keydown)="handleDropZoneKey($event, 'left')"
               >
-                <span class="pan-side-label">Gauche</span>
+                <div class="pan-heading">
+                  <span class="pan-side-label">Gauche</span>
+                  <button
+                    type="button"
+                    class="clear-pan-button"
+                    [disabled]="isSolved() || leftPieces().length === 0"
+                    aria-label="Vider le plateau gauche"
+                    (click)="$event.stopPropagation(); clearPan('left')"
+                  >
+                    Vider
+                  </button>
+                </div>
                 <div class="pan-load">
                   @for (piece of leftPieces(); track piece.id) {
                     <div class="piece-with-answer pan-piece-wrapper">
@@ -201,7 +212,18 @@
                 (click)="placeSelected('right')"
                 (keydown)="handleDropZoneKey($event, 'right')"
               >
-                <span class="pan-side-label">Droite</span>
+                <div class="pan-heading">
+                  <span class="pan-side-label">Droite</span>
+                  <button
+                    type="button"
+                    class="clear-pan-button"
+                    [disabled]="isSolved() || rightPieces().length === 0"
+                    aria-label="Vider le plateau droit"
+                    (click)="$event.stopPropagation(); clearPan('right')"
+                  >
+                    Vider
+                  </button>
+                </div>
                 <div class="pan-load">
                   @for (piece of rightPieces(); track piece.id) {
                     <div class="piece-with-answer pan-piece-wrapper">

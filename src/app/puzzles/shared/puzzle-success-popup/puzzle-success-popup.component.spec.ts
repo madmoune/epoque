@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { PuzzlePlaylistService } from '../../../puzzle-playlist.service';
 import { PuzzleSuccessPopupComponent } from './puzzle-success-popup.component';
 
@@ -78,5 +79,35 @@ describe('PuzzleSuccessPopupComponent', () => {
       'Jeu suivant',
       'Retour au menu',
     ]);
+  });
+
+  it('uses the replay action when Enter is pressed from a playlist', () => {
+    const router = TestBed.inject(Router);
+    const playlistService = TestBed.inject(PuzzlePlaylistService);
+    const urlSpy = vi.spyOn(router, 'url', 'get');
+    const progressSpy = vi.spyOn(playlistService, 'progressFromUrl');
+    const navigateSpy = vi.spyOn(router, 'navigateByUrl');
+
+    urlSpy.mockReturnValue('/count-is-good?from=playlist&playlist=validation&playlistIndex=0');
+    progressSpy.mockReturnValue({
+      playlist: {
+        id: 'validation',
+        name: 'Validation',
+        routes: ['/count-is-good', '/mental-arithmetic'],
+      },
+      index: 0,
+      order: [0, 1],
+      nextRoute: '/mental-arithmetic?from=playlist&playlist=validation&playlistIndex=1',
+    });
+
+    const fixture = TestBed.createComponent(PuzzleSuccessPopupComponent);
+    fixture.componentInstance.title = 'Cible atteinte!';
+    const actionSpy = vi.spyOn(fixture.componentInstance.action, 'emit');
+    fixture.detectChanges();
+
+    (fixture.componentInstance as any).handleEnter(new KeyboardEvent('keydown', { key: 'Enter' }));
+
+    expect(actionSpy).toHaveBeenCalledOnce();
+    expect(navigateSpy).not.toHaveBeenCalled();
   });
 });

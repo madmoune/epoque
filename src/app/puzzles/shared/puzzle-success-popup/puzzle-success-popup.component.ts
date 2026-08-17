@@ -250,6 +250,6 @@ export class PuzzleSuccessPopupComponent implements OnInit {
     }
 
     event.preventDefault();
-    this.handlePrimaryAction();
+    this.action.emit();
   }
 }
