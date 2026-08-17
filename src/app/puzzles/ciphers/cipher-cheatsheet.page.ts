@@ -1,6 +1,11 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { CipherLegendItem, CipherType, CiphersService } from './ciphers.service';
+import {
+  CipherLegendItem,
+  CipherTransformStep,
+  CipherType,
+  CiphersService,
+} from './ciphers.service';
 
 type CheatsheetSection = {
   id: CipherType;
@@ -8,6 +13,13 @@ type CheatsheetSection = {
   description: string;
   route: string;
 };
+
+type TransformStep = CipherTransformStep & {
+  id: number;
+  caesarShift: number;
+};
+
+type CheatsheetView = 'legends' | 'transformer';
 
 @Component({
   selector: 'app-cipher-cheatsheet-page',
@@ -74,6 +86,23 @@ export class CipherCheatsheetPage {
       route: '/ciphers/tap-code',
     },
   ];
+
+  protected readonly transformInput = signal('');
+  protected readonly transformSteps = signal<TransformStep[]>([]);
+  protected readonly transformStages = computed(() => {
+    let current = this.transformInput();
+
+    return this.transformSteps().map((step) => {
+      current = this.ciphersService.transformText(current, [step]);
+      return {
+        id: step.id,
+        type: step.type,
+        value: current,
+      };
+    });
+  });
+  protected readonly activeView = signal<CheatsheetView>('legends');
+  private nextTransformStepId = 1;
 
   protected readonly alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
   protected readonly caesarShiftedAlphabet = 'BCDEFGHIJKLMNOPQRSTUVWXYZA'.split('');
@@ -148,5 +177,61 @@ export class CipherCheatsheetPage {
       .map((position) => position.trim())
       .filter(Boolean)
       .map((position) => `position-${position}`);
+  }
+
+  protected updateTransformInput(event: Event): void {
+    if (event.target instanceof HTMLTextAreaElement) {
+      this.transformInput.set(event.target.value);
+    }
+  }
+
+  protected setActiveView(view: CheatsheetView): void {
+    this.activeView.set(view);
+  }
+
+  protected addTransformStep(type: CipherType): void {
+    this.transformSteps.update((steps) => [
+      ...steps,
+      {
+        id: this.nextTransformStepId++,
+        type,
+        caesarShift: 1,
+      },
+    ]);
+  }
+
+  protected removeTransformStep(id: number): void {
+    this.transformSteps.update((steps) => steps.filter((step) => step.id !== id));
+  }
+
+  protected moveTransformStep(id: number, direction: -1 | 1): void {
+    this.transformSteps.update((steps) => {
+      const index = steps.findIndex((step) => step.id === id);
+      const nextIndex = index + direction;
+
+      if (index < 0 || nextIndex < 0 || nextIndex >= steps.length) {
+        return steps;
+      }
+
+      const nextSteps = [...steps];
+      [nextSteps[index], nextSteps[nextIndex]] = [nextSteps[nextIndex], nextSteps[index]];
+      return nextSteps;
+    });
+  }
+
+  protected updateCaesarShift(id: number, event: Event): void {
+    if (!(event.target instanceof HTMLInputElement)) return;
+
+    const value = Number(event.target.value);
+    if (!Number.isFinite(value)) return;
+
+    const caesarShift = Math.max(-25, Math.min(25, Math.trunc(value)));
+    this.transformSteps.update((steps) =>
+      steps.map((step) => (step.id === id ? { ...step, caesarShift } : step)),
+    );
+  }
+
+  protected cipherLabel(type: CipherType): string {
+    return this.ciphers.find((cipher) => cipher.id === type)?.title ?? type;
   }
 }

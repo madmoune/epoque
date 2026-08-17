@@ -7,9 +7,16 @@ export type PuzzlePlaylist = {
   routes: string[];
 };
 
+export type PlaylistProgressSnapshot = {
+  index: number;
+  order: number[];
+  routes: string[];
+};
+
 export type PlaylistProgress = {
   playlist: PuzzlePlaylist;
   index: number;
+  order: number[];
   nextRoute: string | null;
 };
 
@@ -18,13 +25,23 @@ export type PlaylistProgress = {
 })
 export class PuzzlePlaylistService {
   private readonly storageKey = 'epique-puzzle-playlists';
+  private readonly progressStorageKey = 'epique-puzzle-playlist-progress';
   private readonly storage = inject(AppStorageService);
   readonly playlists = signal<PuzzlePlaylist[]>(this.readPlaylists());
+  readonly progress = signal<Record<string, PlaylistProgressSnapshot>>(this.readProgress());
 
   constructor() {
     this.storage.changes$.subscribe((change) => {
-      if (change.source === 'remote' && change.key === this.storageKey) {
+      if (change.source !== 'remote') {
+        return;
+      }
+
+      if (change.key === this.storageKey) {
         this.playlists.set(this.readPlaylists());
+      }
+
+      if (change.key === this.progressStorageKey) {
+        this.progress.set(this.readProgress());
       }
     });
   }
@@ -41,6 +58,7 @@ export class PuzzlePlaylistService {
   }
 
   update(id: string, changes: Partial<Pick<PuzzlePlaylist, 'name' | 'routes'>>): void {
+    const currentPlaylist = this.find(id);
     this.setPlaylists(
       this.playlists().map((playlist) =>
         playlist.id === id
@@ -52,10 +70,19 @@ export class PuzzlePlaylistService {
           : playlist,
       ),
     );
+
+    if (
+      currentPlaylist &&
+      changes.routes !== undefined &&
+      !this.arraysEqual(currentPlaylist.routes, changes.routes)
+    ) {
+      this.clearProgress(id);
+    }
   }
 
   remove(id: string): void {
     this.setPlaylists(this.playlists().filter((playlist) => playlist.id !== id));
+    this.clearProgress(id);
   }
 
   find(id: string): PuzzlePlaylist | undefined {
@@ -67,11 +94,33 @@ export class PuzzlePlaylistService {
       return null;
     }
 
+    const savedProgress = randomOrder ? null : this.progressFor(playlist);
+
+    if (savedProgress) {
+      return this.playUrl(playlist, savedProgress.index, savedProgress.order);
+    }
+
     const order = randomOrder
       ? this.createRandomOrder(playlist.routes.length)
       : this.createOrderedOrder(playlist.routes.length);
 
+    this.saveProgress(playlist, 0, order);
+
     return this.playUrl(playlist, 0, order);
+  }
+
+  progressFor(playlist: PuzzlePlaylist): PlaylistProgressSnapshot | null {
+    const savedProgress = this.progress()[playlist.id];
+
+    if (!savedProgress || !this.isProgressForPlaylist(savedProgress, playlist)) {
+      return null;
+    }
+
+    return {
+      index: savedProgress.index,
+      order: [...savedProgress.order],
+      routes: [...savedProgress.routes],
+    };
   }
 
   progressFromUrl(url: string): PlaylistProgress | null {
@@ -101,8 +150,18 @@ export class PuzzlePlaylistService {
     return {
       playlist,
       index,
+      order,
       nextRoute: index + 1 < order.length ? this.playUrl(playlist, index + 1, order) : null,
     };
+  }
+
+  complete(progress: PlaylistProgress): void {
+    if (progress.nextRoute) {
+      this.saveProgress(progress.playlist, progress.index + 1, progress.order);
+      return;
+    }
+
+    this.clearProgress(progress.playlist.id);
   }
 
   private playUrl(playlist: PuzzlePlaylist, index: number, order: number[]): string {
@@ -170,6 +229,50 @@ export class PuzzlePlaylistService {
     this.writePlaylists(playlists);
   }
 
+  private saveProgress(playlist: PuzzlePlaylist, index: number, order: number[]): void {
+    if (!this.isValidOrder(order, playlist.routes.length) || index < 0 || index >= order.length) {
+      return;
+    }
+
+    const existingProgress = this.progressFor(playlist);
+
+    if (
+      existingProgress &&
+      existingProgress.index >= index &&
+      this.arraysEqual(existingProgress.order, order)
+    ) {
+      return;
+    }
+
+    const nextProgress = {
+      ...this.progress(),
+      [playlist.id]: {
+        index,
+        order: [...order],
+        routes: [...playlist.routes],
+      },
+    };
+
+    this.setProgress(nextProgress);
+  }
+
+  private clearProgress(playlistId: string): void {
+    const nextProgress = { ...this.progress() };
+    delete nextProgress[playlistId];
+    this.setProgress(nextProgress);
+  }
+
+  private setProgress(progress: Record<string, PlaylistProgressSnapshot>): void {
+    this.progress.set(progress);
+
+    try {
+      // Keep an empty object in storage so a completion also clears the progress on other devices.
+      this.storage.set(this.progressStorageKey, JSON.stringify(progress));
+    } catch {
+      // Le progrès reste disponible pendant la session si le stockage est indisponible.
+    }
+  }
+
   private readPlaylists(): PuzzlePlaylist[] {
     try {
       const stored = this.storage.get(this.storageKey);
@@ -186,6 +289,23 @@ export class PuzzlePlaylistService {
       }));
     } catch {
       return [];
+    }
+  }
+
+  private readProgress(): Record<string, PlaylistProgressSnapshot> {
+    try {
+      const stored = this.storage.get(this.progressStorageKey);
+      const parsed: unknown = stored ? JSON.parse(stored) : {};
+
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+        return {};
+      }
+
+      return Object.fromEntries(
+        Object.entries(parsed).filter(([, progress]) => this.isProgressSnapshot(progress)),
+      ) as Record<string, PlaylistProgressSnapshot>;
+    } catch {
+      return {};
     }
   }
 
@@ -210,6 +330,53 @@ export class PuzzlePlaylistService {
       Array.isArray(candidate.routes) &&
       candidate.routes.every((route) => typeof route === 'string')
     );
+  }
+
+  private isProgressSnapshot(value: unknown): value is PlaylistProgressSnapshot {
+    if (!value || typeof value !== 'object') {
+      return false;
+    }
+
+    const candidate = value as Partial<PlaylistProgressSnapshot>;
+
+    return (
+      typeof candidate.index === 'number' &&
+      Number.isInteger(candidate.index) &&
+      candidate.index >= 0 &&
+      Array.isArray(candidate.order) &&
+      Array.isArray(candidate.routes) &&
+      candidate.order.length === candidate.routes.length &&
+      candidate.routes.every((route) => typeof route === 'string') &&
+      this.isValidOrder(candidate.order, candidate.routes.length)
+    );
+  }
+
+  private isProgressForPlaylist(
+    progress: PlaylistProgressSnapshot,
+    playlist: PuzzlePlaylist,
+  ): boolean {
+    return (
+      this.arraysEqual(progress.routes, playlist.routes) &&
+      progress.index < progress.order.length &&
+      this.isValidOrder(progress.order, playlist.routes.length)
+    );
+  }
+
+  private isValidOrder(order: readonly number[], length: number): boolean {
+    return (
+      order.length === length &&
+      order.every(
+        (routeIndex, index) =>
+          Number.isInteger(routeIndex) &&
+          routeIndex >= 0 &&
+          routeIndex < length &&
+          order.indexOf(routeIndex) === index,
+      )
+    );
+  }
+
+  private arraysEqual<T>(first: readonly T[], second: readonly T[]): boolean {
+    return first.length === second.length && first.every((value, index) => value === second[index]);
   }
 
   private createId(): string {

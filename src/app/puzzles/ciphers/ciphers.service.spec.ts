@@ -47,4 +47,11 @@ describe('CiphersService NATO modes', () => {
     expect(service.isCorrectAnswer('X-Ray', 'xray')).toBe(true);
     expect(service.isCorrectAnswer('x ray', 'xray')).toBe(true);
   });
+
+  it('applies text transformer steps in order', () => {
+    expect(
+      service.transformText('abc', [{ type: 'caesar', caesarShift: 1 }, { type: 'atbash' }]),
+    ).toBe('YXW');
+    expect(service.transformText('Été', [{ type: 'a1z26' }])).toBe('5 20 5');
+  });
 });

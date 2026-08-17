@@ -4,6 +4,7 @@ import {
   HostListener,
   inject,
   Input,
+  OnInit,
   Output,
   signal,
 } from '@angular/core';
@@ -19,7 +20,7 @@ export type PuzzlePopupTone = 'success' | 'partial';
   templateUrl: './puzzle-success-popup.component.html',
   styleUrl: './puzzle-success-popup.component.scss',
 })
-export class PuzzleSuccessPopupComponent {
+export class PuzzleSuccessPopupComponent implements OnInit {
   private readonly randomPuzzleRoutes = [
     '/anagrams',
     '/cryptograms',
@@ -148,6 +149,20 @@ export class PuzzleSuccessPopupComponent {
 
   @Output() readonly action = new EventEmitter<void>();
 
+  ngOnInit(): void {
+    if (this.tone !== 'success' || !this.cameFromPlaylist) {
+      return;
+    }
+
+    const progress = this.playlistService.progressFromUrl(this.router.url);
+
+    if (progress) {
+      // Save the next item as soon as the current puzzle is solved, even if the
+      // player closes the popup instead of clicking « Jeu suivant ».
+      this.playlistService.complete(progress);
+    }
+  }
+
   protected get menuFragment(): string {
     const route = this.router.url.split(/[?#]/)[0].replace(/^\/+/, '');
 
@@ -187,8 +202,13 @@ export class PuzzleSuccessPopupComponent {
     const progress = this.playlistService.progressFromUrl(this.router.url);
 
     if (progress?.nextRoute) {
+      this.playlistService.complete(progress);
       void this.router.navigateByUrl(progress.nextRoute);
       return;
+    }
+
+    if (progress) {
+      this.playlistService.complete(progress);
     }
 
     void this.router.navigate(['/'], { fragment: 'playlists' });
@@ -230,6 +250,6 @@ export class PuzzleSuccessPopupComponent {
     }
 
     event.preventDefault();
-    this.action.emit();
+    this.handlePrimaryAction();
   }
 }

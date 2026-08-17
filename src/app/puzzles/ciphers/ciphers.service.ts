@@ -35,6 +35,11 @@ export type CipherLegendItem = {
   symbol: string;
 };
 
+export type CipherTransformStep = {
+  type: CipherType;
+  caesarShift?: number;
+};
+
 @Injectable({
   providedIn: 'root',
 })
@@ -72,7 +77,11 @@ export class CiphersService {
       .map((word) => word.trim())
       .filter((word) => {
         const normalizedWord = this.normalize(word);
-        return normalizedWord.length >= 4 && normalizedWord.length <= 12 && /^[a-z]+$/.test(normalizedWord);
+        return (
+          normalizedWord.length >= 4 &&
+          normalizedWord.length <= 12 &&
+          /^[a-z]+$/.test(normalizedWord)
+        );
       });
   }
 
@@ -85,7 +94,10 @@ export class CiphersService {
       throw new Error('Cipher words have not been loaded yet.');
     }
 
-    const wordPool = cipher === 'tap-code' ? this.words.filter((word) => !this.normalize(word).includes('j')) : this.words;
+    const wordPool =
+      cipher === 'tap-code'
+        ? this.words.filter((word) => !this.normalize(word).includes('j'))
+        : this.words;
     const answer = this.randomWords.pick(wordPool, (word) => `${cipher}:${this.normalize(word)}`);
     const normalizedAnswer = this.normalize(answer);
     const caesarShift = cipher === 'caesar' ? this.randomCaesarShift() : null;
@@ -140,6 +152,10 @@ export class CiphersService {
       .toLowerCase();
   }
 
+  transformText(value: string, steps: readonly CipherTransformStep[]): string {
+    return steps.reduce((output, step) => this.transformStep(output, step), value);
+  }
+
   private encode(word: string, cipher: CipherType, shift = 0): string[] {
     if (cipher === 'caesar') {
       return word.split('').map((letter) => this.shiftLetter(letter, shift));
@@ -176,9 +192,79 @@ export class CiphersService {
     return word.split('').map((letter) => this.natoWords[letter] ?? letter);
   }
 
+  private transformStep(value: string, step: CipherTransformStep): string {
+    if (step.type === 'caesar') {
+      const shift = Math.max(-25, Math.min(25, Math.trunc(step.caesarShift ?? 1)));
+      return this.mapLetters(value, (letter) => this.shiftLetter(letter, shift).toUpperCase());
+    }
+
+    if (step.type === 'atbash') {
+      return this.mapLetters(value, (letter) => this.atbashLetter(letter).toUpperCase());
+    }
+
+    if (step.type === 'a1z26') {
+      return this.mapWordTokens(value, (letter) => String(letter.charCodeAt(0) - 96));
+    }
+
+    if (step.type === 'morse') {
+      return this.mapWordTokens(value, (letter) => this.morseCodes[letter] ?? letter);
+    }
+
+    if (step.type === 'tap-code') {
+      return this.mapWordTokens(value, (letter) => this.tapCodeLetters[letter] ?? letter);
+    }
+
+    if (step.type === 'nato') {
+      return this.mapWordTokens(value, (letter) => this.natoWords[letter] ?? letter);
+    }
+
+    if (step.type === 'braille') {
+      return this.mapWordTokens(value, (letter) => this.brailleSymbolFor(letter));
+    }
+
+    if (step.type === 'pigpen') {
+      return this.mapWordTokens(value, (letter) => this.pigpenSymbols[letter] ?? letter);
+    }
+
+    return this.mapWordTokens(value, (letter) => this.semaphoreLetters[letter] ?? letter);
+  }
+
+  private mapLetters(value: string, map: (letter: string) => string): string {
+    return this.removeDiacritics(value).replace(/[a-z]/gi, (letter) => map(letter.toLowerCase()));
+  }
+
+  private mapWordTokens(value: string, map: (letter: string) => string): string {
+    return this.removeDiacritics(value)
+      .split(/(\s+)/)
+      .map((part) => {
+        if (/^\s+$/.test(part)) {
+          return ' / ';
+        }
+
+        return part.replace(/[a-z]+/gi, (word) =>
+          word
+            .toLowerCase()
+            .split('')
+            .map((letter) => map(letter))
+            .join(' '),
+        );
+      })
+      .join('');
+  }
+
+  private removeDiacritics(value: string): string {
+    return value.normalize('NFD').replace(/\p{Diacritic}/gu, '');
+  }
+
+  private brailleSymbolFor(letter: string): string {
+    const dots = this.brailleDotsByLetter[letter] ?? [];
+    const codePoint = dots.reduce((code, dot) => code + 2 ** (dot - 1), 0x2800);
+    return String.fromCodePoint(codePoint);
+  }
+
   private shiftLetter(letter: string, shift: number): string {
     const alphabetIndex = letter.charCodeAt(0) - 97;
-    const shiftedIndex = ((alphabetIndex + shift) % 26 + 26) % 26;
+    const shiftedIndex = (((alphabetIndex + shift) % 26) + 26) % 26;
     return String.fromCharCode(shiftedIndex + 97);
   }
 
@@ -199,7 +285,10 @@ export class CiphersService {
   }
 
   private createNatoCodePuzzle(): CipherPuzzle {
-    const letter = this.randomWords.pick(Object.keys(this.natoWords), (value) => `nato-code:${value}`);
+    const letter = this.randomWords.pick(
+      Object.keys(this.natoWords),
+      (value) => `nato-code:${value}`,
+    );
     const answer = this.natoWords[letter];
 
     return {
@@ -218,12 +307,15 @@ export class CiphersService {
 
   private noteFor(cipher: CipherType, natoMode: NatoMode): string {
     if (cipher === 'caesar') return 'Chaque lettre est décalée dans l’alphabet.';
-    if (cipher === 'pigpen') return 'Chaque lettre est remplacée par un symbole de la grille Pigpen.';
+    if (cipher === 'pigpen')
+      return 'Chaque lettre est remplacée par un symbole de la grille Pigpen.';
     if (cipher === 'a1z26') return 'A=1, B=2, C=3, jusqu’à Z=26.';
     if (cipher === 'morse') return 'Points et traits : une case correspond à une lettre.';
     if (cipher === 'braille') return 'Chaque symbole braille correspond à une lettre de A à Z.';
-    if (cipher === 'atbash') return 'Alphabet inverse : A devient Z, B devient Y, et ainsi de suite.';
-    if (cipher === 'tap-code') return 'Chaque code indique la ligne et la colonne dans une grille 5 x 5. I et J partagent la même case.';
+    if (cipher === 'atbash')
+      return 'Alphabet inverse : A devient Z, B devient Y, et ainsi de suite.';
+    if (cipher === 'tap-code')
+      return 'Chaque code indique la ligne et la colonne dans une grille 5 x 5. I et J partagent la même case.';
     if (cipher === 'semaphore') return 'Chaque lettre est montrée par deux positions de drapeaux.';
     return natoMode === 'letter-to-code'
       ? 'Écris le mot-code NATO correspondant à la lettre affichée.'
@@ -315,6 +407,64 @@ export class CiphersService {
     x: '1,3',
     y: '0,3',
     z: '0,2',
+  };
+
+  private readonly brailleDotsByLetter: Record<string, number[]> = {
+    a: [1],
+    b: [1, 2],
+    c: [1, 4],
+    d: [1, 4, 5],
+    e: [1, 5],
+    f: [1, 2, 4],
+    g: [1, 2, 4, 5],
+    h: [1, 2, 5],
+    i: [2, 4],
+    j: [2, 4, 5],
+    k: [1, 3],
+    l: [1, 2, 3],
+    m: [1, 3, 4],
+    n: [1, 3, 4, 5],
+    o: [1, 3, 5],
+    p: [1, 2, 3, 4],
+    q: [1, 2, 3, 4, 5],
+    r: [1, 2, 3, 5],
+    s: [2, 3, 4],
+    t: [2, 3, 4, 5],
+    u: [1, 3, 6],
+    v: [1, 2, 3, 6],
+    w: [2, 4, 5, 6],
+    x: [1, 3, 4, 6],
+    y: [1, 3, 4, 5, 6],
+    z: [1, 3, 5, 6],
+  };
+
+  private readonly pigpenSymbols: Record<string, string> = {
+    a: '┌',
+    b: '┬',
+    c: '┐',
+    d: '├',
+    e: '┼',
+    f: '┤',
+    g: '└',
+    h: '┴',
+    i: '┘',
+    j: '┌•',
+    k: '┬•',
+    l: '┐•',
+    m: '├•',
+    n: '┼•',
+    o: '┤•',
+    p: '└•',
+    q: '┴•',
+    r: '┘•',
+    s: '⌄',
+    t: '<',
+    u: '>',
+    v: '⌃',
+    w: '⌄•',
+    x: '<•',
+    y: '>•',
+    z: '⌃•',
   };
 
   private readonly natoWords: Record<string, string> = {

@@ -50,7 +50,7 @@ The puzzle laboratory stores type and variant states under `puzzleCatalog/types`
 
 ### Optional account sync
 
-The application can also sign in with Google from the `Se connecter` button. Enable the Google provider in Firebase Authentication and add the local/deployed domains to the authorized domains list. Once connected, the application synchronizes the `epique-*` local data under `users/<uid>/localStorage`: playlists, play dates, solved games, theme, and preferences. Without an account, the local-only mode remains active.
+The application can also sign in with Google from the `Se connecter` button. Enable the Google provider in Firebase Authentication and add the local/deployed domains to the authorized domains list. Once connected, the application synchronizes the `epique-*` local data under `users/<uid>/localStorage`: playlists, playlist progress, play dates, solved games, theme, and preferences. Without an account, the local-only mode remains active.
 
 Deploy `database.rules.json` after adding the account rules so each user can only read and write their own synchronized data.
 

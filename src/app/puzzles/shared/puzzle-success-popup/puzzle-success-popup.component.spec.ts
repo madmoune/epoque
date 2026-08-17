@@ -16,6 +16,7 @@ describe('PuzzleSuccessPopupComponent', () => {
     const playlistService = TestBed.inject(PuzzlePlaylistService);
     const urlSpy = vi.spyOn(router, 'url', 'get');
     const progressSpy = vi.spyOn(playlistService, 'progressFromUrl');
+    const completeSpy = vi.spyOn(playlistService, 'complete');
 
     urlSpy.mockReturnValue('/count-is-good?from=random');
     const randomFixture = TestBed.createComponent(PuzzleSuccessPopupComponent);
@@ -47,6 +48,7 @@ describe('PuzzleSuccessPopupComponent', () => {
         routes: ['/count-is-good', '/mental-arithmetic'],
       },
       index: 0,
+      order: [0, 1],
       nextRoute: '/mental-arithmetic?from=playlist&playlist=validation&playlistIndex=1',
     });
 
@@ -54,6 +56,13 @@ describe('PuzzleSuccessPopupComponent', () => {
     playlistFixture.componentInstance.title = 'Cible atteinte!';
     playlistFixture.componentInstance.actionLabel = 'Nouveau tirage';
     playlistFixture.detectChanges();
+
+    expect(completeSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: 0,
+        order: [0, 1],
+      }),
+    );
 
     const playlistActions = [
       ...playlistFixture.nativeElement.querySelectorAll('.popup-actions > *'),

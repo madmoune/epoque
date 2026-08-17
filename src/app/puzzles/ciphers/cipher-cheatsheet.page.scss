@@ -23,6 +23,7 @@
 }
 
 .hero,
+.transformer-card,
 .legend-card {
   border: 1px solid var(--border);
   border-radius: 1rem;
@@ -60,6 +61,362 @@ h1 {
   color: var(--muted);
   font-size: 1rem;
   line-height: 1.55;
+}
+
+.cheatsheet-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 1rem;
+  padding: 0.25rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--surface);
+}
+
+.cheatsheet-tabs button {
+  flex: 1 1 12rem;
+  min-height: 2.5rem;
+  padding: 0.55rem 0.8rem;
+  border: 1px solid transparent;
+  border-radius: 0.55rem;
+  background: transparent;
+  color: var(--muted-strong);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.cheatsheet-tabs button.active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.cheatsheet-tabs button:hover,
+.cheatsheet-tabs button:focus-visible {
+  border-color: var(--accent);
+}
+
+.cheatsheet-tabs button:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--focus) 35%, transparent);
+  outline-offset: 2px;
+}
+
+.transformer-card {
+  margin-top: 1rem;
+  padding: clamp(1rem, 2.5vw, 1.5rem);
+}
+
+.tool-heading h2 {
+  font-size: clamp(1.35rem, 3vw, 1.9rem);
+}
+
+.tool-heading > p:last-child {
+  max-width: 42rem;
+  margin: 0.55rem 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.transformer-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.transformer-builder,
+.transformer-pipeline {
+  display: grid;
+  align-content: start;
+  gap: 0.9rem;
+  min-width: 0;
+}
+
+.transformer-field {
+  display: grid;
+  gap: 0.4rem;
+  color: var(--muted-strong);
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.transformer-field textarea {
+  width: 100%;
+  min-height: 8rem;
+  box-sizing: border-box;
+  padding: 0.75rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.65rem;
+  background: var(--surface-raised);
+  color: var(--text);
+  font: inherit;
+  line-height: 1.45;
+  resize: vertical;
+}
+
+.transformer-field textarea:focus-visible,
+.shift-field input:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--focus) 35%, transparent);
+  outline-offset: 2px;
+}
+
+.transformer-picker,
+.transformer-pipeline,
+.transformer-output {
+  padding: 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--surface-raised) 78%, var(--accent) 4%);
+}
+
+.transformer-picker h3,
+.transformer-pipeline h3,
+.transformer-output h3 {
+  margin: 0;
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.transformer-cipher-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.65rem;
+}
+
+.transformer-cipher-list button,
+.step-actions button {
+  border: 1px solid var(--border-strong);
+  border-radius: 0.5rem;
+  background: var(--surface-raised);
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 850;
+  touch-action: manipulation;
+}
+
+.transformer-cipher-list button {
+  min-height: 2.2rem;
+  padding: 0.4rem 0.6rem;
+}
+
+.transformer-cipher-list button:hover,
+.transformer-cipher-list button:focus-visible,
+.step-actions button:hover:not(:disabled),
+.step-actions button:focus-visible:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.transformer-cipher-list button:focus-visible,
+.step-actions button:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--focus) 35%, transparent);
+  outline-offset: 2px;
+}
+
+.tool-section-heading {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tool-section-heading > span {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.transformer-steps {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0;
+  margin: 0.65rem 0 0;
+  list-style: none;
+}
+
+.transformer-step {
+  display: grid;
+  grid-template-columns: 1.8rem minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  align-items: center;
+  min-width: 0;
+  padding: 0.5rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 0.55rem;
+  background: var(--surface);
+}
+
+.step-index {
+  display: grid;
+  width: 1.8rem;
+  height: 1.8rem;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-size: 0.8rem;
+  font-weight: 950;
+}
+
+.step-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  min-width: 0;
+  align-items: center;
+}
+
+.step-details > strong {
+  color: var(--text);
+  font-size: 0.86rem;
+}
+
+.shift-field {
+  display: inline-flex;
+  gap: 0.35rem;
+  align-items: center;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.shift-field input {
+  width: 3.6rem;
+  min-height: 2rem;
+  box-sizing: border-box;
+  padding: 0.25rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.42rem;
+  background: var(--surface-raised);
+  color: var(--text);
+  font: inherit;
+  font-weight: 900;
+  text-align: center;
+}
+
+.step-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.step-actions button {
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.step-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
+.step-actions .remove-step {
+  color: var(--accent);
+}
+
+.transformer-empty {
+  margin: 0.65rem 0 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 750;
+}
+
+.transformer-output {
+  margin-top: 1rem;
+}
+
+.transformer-results {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0;
+  margin: 0.65rem 0 0;
+  list-style: none;
+}
+
+.transformer-result-stage {
+  min-width: 0;
+  padding: 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  background: var(--surface);
+}
+
+.transformer-result-stage.final {
+  border-color: var(--accent);
+}
+
+.transformer-stage-heading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.transformer-stage-heading strong {
+  color: var(--text);
+  font-size: 0.82rem;
+}
+
+.stage-index {
+  display: grid;
+  min-width: 1.8rem;
+  height: 1.8rem;
+  box-sizing: border-box;
+  padding: 0 0.25rem;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-size: 0.75rem;
+  font-weight: 950;
+}
+
+.stage-final {
+  margin-left: auto;
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 850;
+}
+
+.transformer-result {
+  min-height: 4.5rem;
+  box-sizing: border-box;
+  margin: 0.65rem 0 0;
+  padding: 0.8rem;
+  overflow-wrap: anywhere;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.6rem;
+  background: var(--surface);
+  color: var(--text);
+  font:
+    0.95rem/1.5 ui-monospace,
+    SFMono-Regular,
+    Consolas,
+    monospace;
+  white-space: pre-wrap;
+}
+
+.transformer-result.empty {
+  color: var(--muted);
+  font-family: inherit;
+  font-style: italic;
+}
+
+.transformer-note {
+  margin: 0.65rem 0 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 750;
+  line-height: 1.4;
 }
 
 .cipher-index {
@@ -533,6 +890,18 @@ h2 {
 
   .legend-card-header {
     gap: 0.65rem;
+  }
+
+  .transformer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .transformer-step {
+    grid-template-columns: 1.8rem minmax(0, 1fr);
+  }
+
+  .step-actions {
+    grid-column: 2;
   }
 
   .play-link {

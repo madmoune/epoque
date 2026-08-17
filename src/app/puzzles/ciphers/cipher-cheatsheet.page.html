@@ -10,181 +10,357 @@
       Toutes les correspondances utiles pour décoder les neuf ciphers du site, regroupées au même
       endroit.
     </p>
-
-    <nav class="cipher-index" aria-label="Légendes disponibles">
-      @for (cipher of ciphers; track cipher.id) {
-        <a [routerLink]="[]" [fragment]="cipher.id">{{ cipher.title }}</a>
-      }
-    </nav>
   </header>
 
-  <section class="legend-list" aria-label="Légendes des ciphers">
-    @for (cipher of ciphers; track cipher.id) {
-      <article class="legend-card" [id]="cipher.id">
-        <header class="legend-card-header">
-          <div>
-            <h2>{{ cipher.title }}</h2>
-          </div>
-          <a class="play-link" [routerLink]="cipher.route">Jouer</a>
-        </header>
-        <p class="legend-description">{{ cipher.description }}</p>
+  <nav class="cheatsheet-tabs" role="tablist" aria-label="Sections de la cheatsheet">
+    <button
+      type="button"
+      role="tab"
+      id="legends-tab"
+      aria-controls="legends-panel"
+      [attr.aria-selected]="activeView() === 'legends'"
+      [class.active]="activeView() === 'legends'"
+      (click)="setActiveView('legends')"
+    >
+      Légendes
+    </button>
+    <button
+      type="button"
+      role="tab"
+      id="transformer-tab"
+      aria-controls="transformer-panel"
+      [attr.aria-selected]="activeView() === 'transformer'"
+      [class.active]="activeView() === 'transformer'"
+      (click)="setActiveView('transformer')"
+    >
+      Transformer du texte
+    </button>
+  </nav>
 
-        @switch (cipher.id) {
-          @case ('caesar') {
-            <div class="alphabet-reference" aria-label="Exemple de décalage César de un">
-              <div class="alphabet-row">
-                <span class="row-label">Alphabet</span>
-                @for (letter of alphabet; track letter) {
-                  <span>{{ letter }}</span>
-                }
-              </div>
-              <div class="alphabet-row accent-row">
-                <span class="row-label">Décalé +1</span>
-                @for (letter of caesarShiftedAlphabet; track letter) {
-                  <span>{{ letter }}</span>
-                }
-              </div>
+  @if (activeView() === 'transformer') {
+    <section
+      id="transformer-panel"
+      class="transformer-card"
+      role="tabpanel"
+      aria-labelledby="transformer-tab"
+    >
+      <header class="tool-heading">
+        <p class="eyebrow">Outil</p>
+        <h2 id="transformer-title">Transformer du texte</h2>
+        <p>
+          Ajoute plusieurs ciphers, puis place-les dans l’ordre où tu veux les appliquer au texte.
+        </p>
+      </header>
+
+      <div class="transformer-grid">
+        <div class="transformer-builder">
+          <label class="transformer-field" for="transformer-source">
+            <span>Texte source</span>
+            <textarea
+              id="transformer-source"
+              rows="4"
+              placeholder="Écris ou colle ton texte ici..."
+              [value]="transformInput()"
+              (input)="updateTransformInput($event)"
+            ></textarea>
+          </label>
+
+          <div class="transformer-picker">
+            <h3>Ajouter un cipher</h3>
+            <div class="transformer-cipher-list">
+              @for (cipher of ciphers; track cipher.id) {
+                <button type="button" (click)="addTransformStep(cipher.id)">
+                  + {{ cipher.title }}
+                </button>
+              }
             </div>
-            <p class="legend-note">
-              Le jeu affiche le décalage à utiliser : avec +1, A devient B; avec −1, A devient Z.
-            </p>
-          }
+          </div>
+        </div>
 
-          @case ('pigpen') {
-            <div class="pigpen-key" aria-label="Légende Pigpen">
-              @for (grid of pigpenSquareKeys; track $index; let gridIndex = $index) {
-                <div class="pigpen-square-key" [class.dotted-key]="gridIndex === 1">
-                  @for (row of grid; track $index) {
-                    @for (letter of row; track letter) {
-                      <span>
-                        {{ letter }}
-                        @if (gridIndex === 1) {
-                          <i aria-hidden="true"></i>
+        <section class="transformer-pipeline" aria-labelledby="pipeline-title">
+          <div class="tool-section-heading">
+            <h3 id="pipeline-title">Ordre d’application</h3>
+            <span
+              >{{ transformSteps().length }} étape{{
+                transformSteps().length === 1 ? '' : 's'
+              }}</span
+            >
+          </div>
+
+          @if (transformSteps().length > 0) {
+            <ol class="transformer-steps">
+              @for (step of transformSteps(); track step.id; let index = $index) {
+                <li class="transformer-step">
+                  <span class="step-index">{{ index + 1 }}</span>
+                  <div class="step-details">
+                    <strong>{{ cipherLabel(step.type) }}</strong>
+                    @if (step.type === 'caesar') {
+                      <label class="shift-field">
+                        <span>Décalage</span>
+                        <input
+                          type="number"
+                          min="-25"
+                          max="25"
+                          step="1"
+                          [value]="step.caesarShift"
+                          (input)="updateCaesarShift(step.id, $event)"
+                        />
+                      </label>
+                    }
+                  </div>
+                  <div class="step-actions">
+                    <button
+                      type="button"
+                      [disabled]="index === 0"
+                      [attr.aria-label]="'Monter ' + cipherLabel(step.type)"
+                      (click)="moveTransformStep(step.id, -1)"
+                    >
+                      ↑
+                    </button>
+                    <button
+                      type="button"
+                      [disabled]="index === transformSteps().length - 1"
+                      [attr.aria-label]="'Descendre ' + cipherLabel(step.type)"
+                      (click)="moveTransformStep(step.id, 1)"
+                    >
+                      ↓
+                    </button>
+                    <button
+                      type="button"
+                      class="remove-step"
+                      [attr.aria-label]="'Retirer ' + cipherLabel(step.type)"
+                      (click)="removeTransformStep(step.id)"
+                    >
+                      ×
+                    </button>
+                  </div>
+                </li>
+              }
+            </ol>
+          } @else {
+            <p class="transformer-empty">Ajoute un cipher pour commencer la transformation.</p>
+          }
+        </section>
+      </div>
+
+      <section class="transformer-output" aria-labelledby="transformer-output-title">
+        <div class="tool-section-heading">
+          <h3 id="transformer-output-title">Résultat</h3>
+          <span>Source → résultat final</span>
+        </div>
+        <ol class="transformer-results" aria-live="polite">
+          <li class="transformer-result-stage">
+            <div class="transformer-stage-heading">
+              <span class="stage-index">0</span>
+              <strong>Texte source</strong>
+            </div>
+            <pre class="transformer-result" [class.empty]="!transformInput()">{{
+              transformInput() || 'Le texte source apparaîtra ici.'
+            }}</pre>
+          </li>
+
+          @for (stage of transformStages(); track stage.id; let index = $index) {
+            <li
+              class="transformer-result-stage"
+              [class.final]="index === transformStages().length - 1"
+            >
+              <div class="transformer-stage-heading">
+                <span class="stage-index">{{ index + 1 }}</span>
+                <strong>Après {{ cipherLabel(stage.type) }}</strong>
+                @if (index === transformStages().length - 1) {
+                  <span class="stage-final">Résultat final</span>
+                }
+              </div>
+              <pre class="transformer-result" [class.empty]="!stage.value">{{
+                stage.value || 'Aucun texte à afficher.'
+              }}</pre>
+            </li>
+          }
+        </ol>
+        <p class="transformer-note">
+          Les accents sont simplifiés automatiquement. Les ciphers visuels utilisent une notation
+          textuelle pour pouvoir être enchaînés.
+        </p>
+      </section>
+    </section>
+  } @else {
+    <section id="legends-panel" role="tabpanel" aria-labelledby="legends-tab">
+      <nav class="cipher-index" aria-label="Légendes disponibles">
+        @for (cipher of ciphers; track cipher.id) {
+          <a [routerLink]="[]" [fragment]="cipher.id">{{ cipher.title }}</a>
+        }
+      </nav>
+
+      <section class="legend-list" aria-label="Légendes des ciphers">
+        @for (cipher of ciphers; track cipher.id) {
+          <article class="legend-card" [id]="cipher.id">
+            <header class="legend-card-header">
+              <div>
+                <h2>{{ cipher.title }}</h2>
+              </div>
+              <a class="play-link" [routerLink]="cipher.route">Jouer</a>
+            </header>
+            <p class="legend-description">{{ cipher.description }}</p>
+
+            @switch (cipher.id) {
+              @case ('caesar') {
+                <div class="alphabet-reference" aria-label="Exemple de décalage César de un">
+                  <div class="alphabet-row">
+                    <span class="row-label">Alphabet</span>
+                    @for (letter of alphabet; track letter) {
+                      <span>{{ letter }}</span>
+                    }
+                  </div>
+                  <div class="alphabet-row accent-row">
+                    <span class="row-label">Décalé +1</span>
+                    @for (letter of caesarShiftedAlphabet; track letter) {
+                      <span>{{ letter }}</span>
+                    }
+                  </div>
+                </div>
+                <p class="legend-note">
+                  Le jeu affiche le décalage à utiliser : avec +1, A devient B; avec −1, A devient
+                  Z.
+                </p>
+              }
+
+              @case ('pigpen') {
+                <div class="pigpen-key" aria-label="Légende Pigpen">
+                  @for (grid of pigpenSquareKeys; track $index; let gridIndex = $index) {
+                    <div class="pigpen-square-key" [class.dotted-key]="gridIndex === 1">
+                      @for (row of grid; track $index) {
+                        @for (letter of row; track letter) {
+                          <span>
+                            {{ letter }}
+                            @if (gridIndex === 1) {
+                              <i aria-hidden="true"></i>
+                            }
+                          </span>
+                        }
+                      }
+                    </div>
+                  }
+
+                  @for (key of pigpenXKeys; track key.top) {
+                    <div class="pigpen-x-key" [class.dotted-key]="key.dotted">
+                      <span class="x-letter top">{{ key.top }}</span>
+                      <span class="x-letter right">{{ key.right }}</span>
+                      <span class="x-letter bottom">{{ key.bottom }}</span>
+                      <span class="x-letter left">{{ key.left }}</span>
+                      @if (key.dotted) {
+                        <i class="x-dot top" aria-hidden="true"></i>
+                        <i class="x-dot right" aria-hidden="true"></i>
+                        <i class="x-dot bottom" aria-hidden="true"></i>
+                        <i class="x-dot left" aria-hidden="true"></i>
+                      }
+                    </div>
+                  }
+                </div>
+                <p class="legend-note">Les points distinguent les lettres de la deuxième série.</p>
+              }
+
+              @case ('a1z26') {
+                <div class="letter-grid number-grid" aria-label="Légende A1Z26">
+                  @for (item of a1z26Legend; track item.letter) {
+                    <span class="legend-item">
+                      <strong>{{ item.letter }}</strong>
+                      <span>{{ item.symbol }}</span>
+                    </span>
+                  }
+                </div>
+              }
+
+              @case ('morse') {
+                <div class="letter-grid" aria-label="Légende Morse">
+                  @for (item of morseLegend; track item.letter) {
+                    <span class="legend-item">
+                      <strong>{{ item.letter }}</strong>
+                      <span class="code-symbol">{{ item.symbol }}</span>
+                    </span>
+                  }
+                </div>
+              }
+
+              @case ('braille') {
+                <div class="letter-grid braille-grid" aria-label="Légende Braille">
+                  @for (letter of alphabet; track letter) {
+                    <span class="legend-item">
+                      <strong>{{ letter }}</strong>
+                      <span class="braille-cell" [attr.aria-label]="'Braille ' + letter">
+                        @for (dot of [1, 4, 2, 5, 3, 6]; track dot) {
+                          <span
+                            class="braille-dot"
+                            [class.active]="isBrailleDotActive(letter, dot)"
+                          ></span>
                         }
                       </span>
-                    }
+                    </span>
                   }
                 </div>
               }
 
-              @for (key of pigpenXKeys; track key.top) {
-                <div class="pigpen-x-key" [class.dotted-key]="key.dotted">
-                  <span class="x-letter top">{{ key.top }}</span>
-                  <span class="x-letter right">{{ key.right }}</span>
-                  <span class="x-letter bottom">{{ key.bottom }}</span>
-                  <span class="x-letter left">{{ key.left }}</span>
-                  @if (key.dotted) {
-                    <i class="x-dot top" aria-hidden="true"></i>
-                    <i class="x-dot right" aria-hidden="true"></i>
-                    <i class="x-dot bottom" aria-hidden="true"></i>
-                    <i class="x-dot left" aria-hidden="true"></i>
+              @case ('atbash') {
+                <div class="alphabet-reference" aria-label="Correspondance Atbash">
+                  <div class="alphabet-row">
+                    <span class="row-label">Original</span>
+                    @for (letter of alphabet; track letter) {
+                      <span>{{ letter }}</span>
+                    }
+                  </div>
+                  <div class="alphabet-row accent-row">
+                    <span class="row-label">Atbash</span>
+                    @for (letter of atbashAlphabet; track $index) {
+                      <span>{{ letter }}</span>
+                    }
+                  </div>
+                </div>
+              }
+
+              @case ('tap-code') {
+                <div class="tap-code-table" aria-label="Légende Tap code">
+                  <span class="tap-code-corner"></span>
+                  @for (column of [1, 2, 3, 4, 5]; track column) {
+                    <span class="tap-code-header">{{ column }}</span>
+                  }
+                  @for (row of tapCodeGrid; track $index; let rowIndex = $index) {
+                    <span class="tap-code-header">{{ rowIndex + 1 }}</span>
+                    @for (letter of row; track letter) {
+                      <span class="tap-code-cell">{{ letter }}</span>
+                    }
+                  }
+                </div>
+                <p class="legend-note">I et J partagent la case 2-4.</p>
+              }
+
+              @case ('semaphore') {
+                <div class="letter-grid semaphore-grid" aria-label="Légende Sémaphore">
+                  @for (item of semaphoreLegend; track item.letter) {
+                    <span class="legend-item">
+                      <strong>{{ item.letter }}</strong>
+                      <span class="semaphore-symbol" [attr.aria-label]="'Sémaphore ' + item.letter">
+                        @for (armClass of semaphoreArmClasses(item.symbol); track armClass) {
+                          <span class="semaphore-arm {{ armClass }}"></span>
+                        }
+                      </span>
+                    </span>
                   }
                 </div>
               }
-            </div>
-            <p class="legend-note">Les points distinguent les lettres de la deuxième série.</p>
-          }
 
-          @case ('a1z26') {
-            <div class="letter-grid number-grid" aria-label="Légende A1Z26">
-              @for (item of a1z26Legend; track item.letter) {
-                <span class="legend-item">
-                  <strong>{{ item.letter }}</strong>
-                  <span>{{ item.symbol }}</span>
-                </span>
+              @case ('nato') {
+                <div class="letter-grid nato-grid" aria-label="Légende NATO">
+                  @for (item of natoLegend; track item.letter) {
+                    <span class="legend-item">
+                      <strong>{{ item.letter }}</strong>
+                      <span>{{ item.symbol }}</span>
+                    </span>
+                  }
+                </div>
               }
-            </div>
-          }
-
-          @case ('morse') {
-            <div class="letter-grid" aria-label="Légende Morse">
-              @for (item of morseLegend; track item.letter) {
-                <span class="legend-item">
-                  <strong>{{ item.letter }}</strong>
-                  <span class="code-symbol">{{ item.symbol }}</span>
-                </span>
-              }
-            </div>
-          }
-
-          @case ('braille') {
-            <div class="letter-grid braille-grid" aria-label="Légende Braille">
-              @for (letter of alphabet; track letter) {
-                <span class="legend-item">
-                  <strong>{{ letter }}</strong>
-                  <span class="braille-cell" [attr.aria-label]="'Braille ' + letter">
-                    @for (dot of [1, 4, 2, 5, 3, 6]; track dot) {
-                      <span
-                        class="braille-dot"
-                        [class.active]="isBrailleDotActive(letter, dot)"
-                      ></span>
-                    }
-                  </span>
-                </span>
-              }
-            </div>
-          }
-
-          @case ('atbash') {
-            <div class="alphabet-reference" aria-label="Correspondance Atbash">
-              <div class="alphabet-row">
-                <span class="row-label">Original</span>
-                @for (letter of alphabet; track letter) {
-                  <span>{{ letter }}</span>
-                }
-              </div>
-              <div class="alphabet-row accent-row">
-                <span class="row-label">Atbash</span>
-                @for (letter of atbashAlphabet; track $index) {
-                  <span>{{ letter }}</span>
-                }
-              </div>
-            </div>
-          }
-
-          @case ('tap-code') {
-            <div class="tap-code-table" aria-label="Légende Tap code">
-              <span class="tap-code-corner"></span>
-              @for (column of [1, 2, 3, 4, 5]; track column) {
-                <span class="tap-code-header">{{ column }}</span>
-              }
-              @for (row of tapCodeGrid; track $index; let rowIndex = $index) {
-                <span class="tap-code-header">{{ rowIndex + 1 }}</span>
-                @for (letter of row; track letter) {
-                  <span class="tap-code-cell">{{ letter }}</span>
-                }
-              }
-            </div>
-            <p class="legend-note">I et J partagent la case 2-4.</p>
-          }
-
-          @case ('semaphore') {
-            <div class="letter-grid semaphore-grid" aria-label="Légende Sémaphore">
-              @for (item of semaphoreLegend; track item.letter) {
-                <span class="legend-item">
-                  <strong>{{ item.letter }}</strong>
-                  <span class="semaphore-symbol" [attr.aria-label]="'Sémaphore ' + item.letter">
-                    @for (armClass of semaphoreArmClasses(item.symbol); track armClass) {
-                      <span class="semaphore-arm {{ armClass }}"></span>
-                    }
-                  </span>
-                </span>
-              }
-            </div>
-          }
-
-          @case ('nato') {
-            <div class="letter-grid nato-grid" aria-label="Légende NATO">
-              @for (item of natoLegend; track item.letter) {
-                <span class="legend-item">
-                  <strong>{{ item.letter }}</strong>
-                  <span>{{ item.symbol }}</span>
-                </span>
-              }
-            </div>
-          }
+            }
+          </article>
         }
-      </article>
-    }
-  </section>
+      </section>
+    </section>
+  }
 </main>

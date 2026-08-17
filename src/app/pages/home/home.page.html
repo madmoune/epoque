@@ -61,6 +61,14 @@
               <span
                 >{{ playlist.routes.length }} jeu{{ playlist.routes.length === 1 ? '' : 'x' }}</span
               >
+              @if (playlistProgress(playlist); as progress) {
+                <span class="playlist-progress"
+                  >{{ progress.index }} / {{ playlist.routes.length }} complété{{
+                    progress.index === 1 ? '' : 's'
+                  }}
+                  · Reprise disponible</span
+                >
+              }
             </div>
             <div class="playlist-card-actions">
               <button
@@ -68,7 +76,7 @@
                 [disabled]="playlist.routes.length === 0"
                 (click)="playPlaylist(playlist)"
               >
-                Jouer dans l’ordre
+                {{ playlistProgress(playlist) ? 'Continuer' : 'Jouer dans l’ordre' }}
               </button>
               <button
                 type="button"
@@ -76,7 +84,9 @@
                 [disabled]="playlist.routes.length === 0"
                 (click)="playPlaylist(playlist, true)"
               >
-                Jouer aléatoirement
+                {{
+                  playlistProgress(playlist) ? 'Recommencer aléatoirement' : 'Jouer aléatoirement'
+                }}
               </button>
               <button type="button" class="secondary-button" (click)="editPlaylist(playlist.id)">
                 Modifier

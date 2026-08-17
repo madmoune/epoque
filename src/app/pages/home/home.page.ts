@@ -1,7 +1,11 @@
 import { Component, HostListener, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { PuzzlePlayHistoryService } from '../../puzzle-play-history.service';
-import { PuzzlePlaylist, PuzzlePlaylistService } from '../../puzzle-playlist.service';
+import {
+  PlaylistProgressSnapshot,
+  PuzzlePlaylist,
+  PuzzlePlaylistService,
+} from '../../puzzle-playlist.service';
 import { LAB_PUZZLE_TYPES } from '../lab/lab.puzzle-types';
 import {
   FirebasePuzzleCatalogService,
@@ -489,6 +493,10 @@ export class HomePage {
 
   isPuzzleInPlaylist(playlistId: string, route: string): boolean {
     return this.playlistService.find(playlistId)?.routes.includes(route) ?? false;
+  }
+
+  playlistProgress(playlist: PuzzlePlaylist): PlaylistProgressSnapshot | null {
+    return this.playlistService.progressFor(playlist);
   }
 
   areAllCategoryPuzzlesInPlaylist(playlistId: string, puzzles: PuzzleCard[]): boolean {

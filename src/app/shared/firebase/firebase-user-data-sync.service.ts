@@ -10,6 +10,7 @@ import { DOCUMENT } from '@angular/common';
 type SyncStatus = 'idle' | 'syncing' | 'synced' | 'error';
 
 const PLAYLISTS_KEY = 'epique-puzzle-playlists';
+const PLAYLIST_PROGRESS_KEY = 'epique-puzzle-playlist-progress';
 const PLAY_HISTORY_KEY = 'epique-puzzle-play-history';
 const SOLVED_HISTORY_KEY = 'epique-puzzle-solved-history';
 
@@ -240,6 +241,15 @@ export class FirebaseUserDataSyncService {
       merged[PLAYLISTS_KEY] = mergedPlaylists;
     }
 
+    const mergedPlaylistProgress = this.mergePlaylistProgress(
+      remoteValues[PLAYLIST_PROGRESS_KEY],
+      localValues[PLAYLIST_PROGRESS_KEY],
+    );
+
+    if (mergedPlaylistProgress) {
+      merged[PLAYLIST_PROGRESS_KEY] = mergedPlaylistProgress;
+    }
+
     const mergedPlayHistory = this.mergeNumberRecords(
       remoteValues[PLAY_HISTORY_KEY],
       localValues[PLAY_HISTORY_KEY],
@@ -309,6 +319,22 @@ export class FirebaseUserDataSyncService {
     return JSON.stringify(merged);
   }
 
+  private mergePlaylistProgress(
+    remoteValue: string | undefined,
+    localValue: string | undefined,
+  ): string | null {
+    const remote = this.parsePlaylistProgress(remoteValue);
+    const local = this.parsePlaylistProgress(localValue);
+
+    if (remote) {
+      // An empty remote object is intentional: it propagates completion and
+      // prevents an old local progress from reappearing on another device.
+      return JSON.stringify(remote);
+    }
+
+    return local ? JSON.stringify(local) : null;
+  }
+
   private mergeBooleanRecords(
     remoteValue: string | undefined,
     localValue: string | undefined,
@@ -355,6 +381,46 @@ export class FirebaseUserDataSyncService {
     } catch {
       return null;
     }
+  }
+
+  private parsePlaylistProgress(value: string | undefined): Record<string, unknown> | null {
+    const parsed = this.parseRecord(value);
+
+    if (!parsed) {
+      return null;
+    }
+
+    const entries = Object.entries(parsed).filter(([, progress]) => {
+      if (!progress || typeof progress !== 'object' || Array.isArray(progress)) {
+        return false;
+      }
+
+      const candidate = progress as {
+        index?: unknown;
+        order?: unknown;
+        routes?: unknown;
+      };
+
+      return (
+        typeof candidate.index === 'number' &&
+        Number.isInteger(candidate.index) &&
+        candidate.index >= 0 &&
+        Array.isArray(candidate.order) &&
+        Array.isArray(candidate.routes) &&
+        candidate.index < candidate.order.length &&
+        candidate.order.length === candidate.routes.length &&
+        candidate.order.every(
+          (routeIndex, index, order) =>
+            Number.isInteger(routeIndex) &&
+            (routeIndex as number) >= 0 &&
+            (routeIndex as number) < order.length &&
+            order.indexOf(routeIndex) === index,
+        ) &&
+        candidate.routes.every((route) => typeof route === 'string')
+      );
+    });
+
+    return Object.fromEntries(entries);
   }
 
   private valuesEqual(first: Record<string, string>, second: Record<string, string>): boolean {
