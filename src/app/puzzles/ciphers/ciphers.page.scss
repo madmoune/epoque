@@ -6,7 +6,19 @@
 
 .back-link {
   display: inline-block;
+  color: #444;
+  font-weight: 800;
+}
+
+.page-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
   margin-bottom: 1rem;
+}
+
+.reference-link {
   color: #444;
   font-weight: 800;
 }
@@ -180,9 +192,7 @@ button:disabled {
 .encoded-word.pigpen-word > .encoded-token {
   min-width: 3rem;
   border-color: #9f7ab0;
-  background:
-    linear-gradient(135deg, rgb(108 47 128 / 10%), transparent 55%),
-    #fff;
+  background: linear-gradient(135deg, rgb(108 47 128 / 10%), transparent 55%), #fff;
   color: #351441;
   font-family: Georgia, 'Times New Roman', serif;
   font-size: 2.2rem;
@@ -200,9 +210,7 @@ button:disabled {
   padding: 0.35rem;
   border: 2px solid #9f7ab0;
   border-radius: 0.6rem;
-  background:
-    linear-gradient(135deg, rgb(108 47 128 / 10%), transparent 55%),
-    #fff;
+  background: linear-gradient(135deg, rgb(108 47 128 / 10%), transparent 55%), #fff;
 }
 
 .pigpen-tile.compact {
@@ -641,7 +649,7 @@ button:disabled {
   font-size: 0.78rem;
 }
 
-.legend-item>span {
+.legend-item > span {
   color: #202020;
   font-size: 1rem;
   font-weight: 850;
@@ -709,7 +717,7 @@ button:disabled {
   grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
 }
 
-.nato-legend .legend-item>span {
+.nato-legend .legend-item > span {
   min-width: 0;
   font-size: 0.9rem;
   line-height: 1.1;

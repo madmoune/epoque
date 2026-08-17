@@ -32,6 +32,11 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
   {
+    path: 'ciphers/cheatsheet',
+    loadComponent: () =>
+      import('./puzzles/ciphers/cipher-cheatsheet.page').then((m) => m.CipherCheatsheetPage),
+  },
+  {
     path: 'ciphers/:cipher',
     loadComponent: () => import('./puzzles/ciphers/ciphers.page').then((m) => m.CiphersPage),
   },
