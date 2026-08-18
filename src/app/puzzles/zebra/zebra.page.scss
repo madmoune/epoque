@@ -443,6 +443,14 @@ button {
     --zebra-desktop-cell-size: clamp(1.75rem, 2.7vw, 2.25rem);
   }
 
+  .shell.zebra-level-4 .logic-grid-wrap {
+    --zebra-desktop-cell-size: clamp(1.35rem, min(2.7vw, 2.6vh), 1.85rem);
+  }
+
+  .shell.zebra-level-5 .logic-grid-wrap {
+    --zebra-desktop-cell-size: clamp(1.1rem, min(2.7vw, 2.1vh), 1.55rem);
+  }
+
   .logic-grid th,
   .logic-grid td {
     width: var(--zebra-desktop-cell-size);
@@ -505,6 +513,34 @@ button {
     height: calc(var(--zebra-desktop-cell-size) * 0.26);
     border-bottom-width: max(0.1rem, calc(var(--zebra-desktop-cell-size) * 0.13));
     border-left-width: max(0.1rem, calc(var(--zebra-desktop-cell-size) * 0.13));
+  }
+
+  .shell.zebra-level-4 .category-heading {
+    height: 1.5rem;
+    font-size: 0.6rem;
+  }
+
+  .shell.zebra-level-4 .value-heading {
+    height: 3.7rem !important;
+    font-size: 0.58rem;
+  }
+
+  .shell.zebra-level-4 .value-heading span {
+    width: 3.5rem;
+  }
+
+  .shell.zebra-level-5 .category-heading {
+    height: 1.35rem;
+    font-size: 0.56rem;
+  }
+
+  .shell.zebra-level-5 .value-heading {
+    height: 3.35rem !important;
+    font-size: 0.54rem;
+  }
+
+  .shell.zebra-level-5 .value-heading span {
+    width: 3.15rem;
   }
 }
 

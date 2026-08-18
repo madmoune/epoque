@@ -1,7 +1,12 @@
 ﻿<main class="page">
   <a routerLink="/" fragment="deduction-logique" class="back-link">Retour au menu</a>
 
-  <section class="shell">
+  <section
+    class="shell"
+    [class.zebra-level-3]="level() === 3"
+    [class.zebra-level-4]="level() === 4"
+    [class.zebra-level-5]="level() === 5"
+  >
     <header class="hero">
       <p class="eyebrow">Deduction</p>
       <h1>Zebra logique</h1>
