@@ -110,26 +110,30 @@ export class AnagramsPage {
 
     protected updateAnswer(value: string): void {
         this.answerInput.set(value);
+
+        if (this.letterInteractionMode() === 'drag') {
+            this.reorderLettersFromAnswer(value);
+        }
     }
 
     protected handleKeyboardKey(key: CustomKeyboardKey): void {
         if (this.isCorrect()) return;
 
         if (key === 'backspace') {
-            this.answerInput.update((answer) => answer.slice(0, -1));
+            this.updateAnswer(this.answerInput().slice(0, -1));
             this.focusAnswerField(false);
             return;
         }
 
         if (key === 'clear') {
-            this.answerInput.set('');
+            this.updateAnswer('');
             this.focusAnswerField(false);
             return;
         }
 
         if (key === 'space') return;
 
-        this.answerInput.update((answer) => `${answer}${key}`);
+        this.updateAnswer(`${this.answerInput()}${key}`);
         this.focusAnswerField(false);
     }
 
@@ -296,6 +300,30 @@ export class AnagramsPage {
         const reorderedLetters = letters.join('');
 
         this.scrambledLetters.set(reorderedLetters);
+    }
+
+    private reorderLettersFromAnswer(value: string): void {
+        const remainingLetters = this.scrambledLetters().split('');
+        const orderedLetters: string[] = [];
+
+        for (const inputLetter of value) {
+            const matchingIndex = remainingLetters.findIndex(
+                (letter) =>
+                    this.normalizeLetter(letter) ===
+                    this.normalizeLetter(inputLetter),
+            );
+
+            if (matchingIndex === -1) {
+                continue;
+            }
+
+            orderedLetters.push(remainingLetters[matchingIndex]);
+            remainingLetters.splice(matchingIndex, 1);
+        }
+
+        this.scrambledLetters.set(
+            [...orderedLetters, ...remainingLetters].join(''),
+        );
     }
 
     private animatePlacedLetter(index: number): void {

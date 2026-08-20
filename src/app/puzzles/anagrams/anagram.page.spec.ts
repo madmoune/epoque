@@ -102,4 +102,35 @@ describe('AnagramsPage letter randomization', () => {
         expect(page.scrambledLetters()).toBe('acht');
         expect(page.answerInput()).toBe('cha');
     });
+
+    it('reorders drag-mode letters from manual input and ignores unavailable letters', async () => {
+        const scrambleWord = vi.fn().mockReturnValue('tahc');
+
+        await TestBed.configureTestingModule({
+            imports: [AnagramsPage],
+            providers: [
+                provideRouter([]),
+                {
+                    provide: AnagramService,
+                    useValue: {
+                        loadWords: vi.fn().mockResolvedValue(undefined),
+                        getRandomWord: vi.fn().mockReturnValue({ answer: 'chat' }),
+                        scrambleWord,
+                        isCorrectAnswer: vi.fn().mockReturnValue(false),
+                    },
+                },
+            ],
+        }).compileComponents();
+
+        const fixture = TestBed.createComponent(AnagramsPage);
+        const page = fixture.componentInstance as any;
+
+        await fixture.whenStable();
+        page.setDragMode();
+        page.updateAnswer('c-hat?x');
+        fixture.detectChanges();
+
+        expect(page.scrambledLetters()).toBe('chat');
+        expect(fixture.nativeElement.querySelector('#answer').disabled).toBe(false);
+    });
 });

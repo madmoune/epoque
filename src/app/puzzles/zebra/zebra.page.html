@@ -53,8 +53,18 @@
       <aside class="clue-panel">
         <h2>{{ puzzle().title }}</h2>
         <ol>
-          @for (clue of puzzle().clues; track clue) {
-            <li>{{ clue }}</li>
+          @for (clue of puzzle().clues; track clue; let clueIndex = $index) {
+            <li>
+              <button
+                type="button"
+                class="clue-button"
+                [class.used]="isClueUsed(clueIndex)"
+                [attr.aria-pressed]="isClueUsed(clueIndex)"
+                (click)="toggleClue(clueIndex)"
+              >
+                {{ clue }}
+              </button>
+            </li>
           }
         </ol>
 

@@ -1,5 +1,5 @@
 import '@angular/compiler';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ZebraPage } from './zebra.page';
 
 describe('ZebraPage', () => {
@@ -129,6 +129,80 @@ describe('ZebraPage', () => {
       const puzzle = page.puzzle();
 
       expect(page.countMatchingSolutions(puzzle.categories, puzzle.logicalClues, 2)).toBe(1);
+    }
+  });
+
+  it('toggles used clues and clears them when restarting', () => {
+    expect(page.isClueUsed(0)).toBe(false);
+
+    page.toggleClue(0);
+    expect(page.isClueUsed(0)).toBe(true);
+
+    page.toggleClue(0);
+    expect(page.isClueUsed(0)).toBe(false);
+
+    page.toggleClue(1);
+    expect(page.isClueUsed(1)).toBe(true);
+
+    page.resetPuzzle();
+    expect(page.isClueUsed(1)).toBe(false);
+  });
+
+  it('uses house-based wording for spatial clues', () => {
+    const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0);
+
+    try {
+      expect(
+        page.describeLeftOfClue(
+          { id: 'person' },
+          'Félix',
+          { id: 'pet' },
+          'Hamster',
+        ),
+      ).toBe(
+        'La maison de Félix se trouve quelque part à gauche de la maison où vit le hamster.',
+      );
+    } finally {
+      randomSpy.mockRestore();
+    }
+  });
+
+  it('keeps every spatial clue anchored to house positions', () => {
+    const randomSpy = vi.spyOn(Math, 'random');
+
+    try {
+      for (const randomValue of [0, 0.2, 0.4, 0.6, 0.8, 0.999]) {
+        randomSpy.mockReturnValue(randomValue);
+
+        const clues = [
+          page.describeAdjacentClue({ id: 'person' }, 'Félix', { id: 'pet' }, 'Hamster'),
+          page.describeNeighborClue({ id: 'person' }, 'Félix', { id: 'pet' }, 'Hamster'),
+          page.describeLeftOfClue({ id: 'person' }, 'Félix', { id: 'pet' }, 'Hamster'),
+          page.describeOneBetweenClue({ id: 'person' }, 'Félix', { id: 'pet' }, 'Hamster'),
+        ];
+
+        expect(clues.every((clue: string) => clue.toLowerCase().includes('maison'))).toBe(true);
+        expect(clues.some((clue: string) => /Félix (précède|est) le hamster/i.test(clue))).toBe(
+          false,
+        );
+      }
+    } finally {
+      randomSpy.mockRestore();
+    }
+  });
+
+  it('uses natural articles for drinks and hobbies', () => {
+    const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0);
+
+    try {
+      expect(
+        page.describeSameClue({ id: 'person' }, 'Félix', { id: 'drink' }, 'Cafe'),
+      ).toBe('Félix boit du café.');
+      expect(
+        page.describeSameClue({ id: 'person' }, 'Félix', { id: 'hobby' }, 'Jardin'),
+      ).toBe('Félix pratique le jardinage.');
+    } finally {
+      randomSpy.mockRestore();
     }
   });
 });
