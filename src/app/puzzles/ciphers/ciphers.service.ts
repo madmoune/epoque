@@ -40,6 +40,38 @@ export type CipherTransformStep = {
   caesarShift?: number;
 };
 
+// Positions used by the semaphore drawings:
+// 0 = gauche, 1 = haut-gauche, 2 = haut, 3 = haut-droite,
+// 4 = droite, 5 = bas-droite, 6 = bas, 7 = bas-gauche.
+export const SEMAPHORE_POSITIONS_BY_LETTER: Record<string, string> = {
+  a: '6,7',
+  b: '0,6',
+  c: '1,6',
+  d: '2,6',
+  e: '3,6',
+  f: '4,6',
+  g: '5,6',
+  h: '0,7',
+  i: '1,7',
+  j: '2,4',
+  k: '2,7',
+  l: '3,7',
+  m: '4,7',
+  n: '5,7',
+  o: '0,1',
+  p: '0,2',
+  q: '0,3',
+  r: '0,4',
+  s: '0,5',
+  t: '1,2',
+  u: '1,3',
+  v: '2,5',
+  w: '3,4',
+  x: '3,5',
+  y: '1,4',
+  z: '4,5',
+};
+
 @Injectable({
   providedIn: 'root',
 })
@@ -380,34 +412,7 @@ export class CiphersService {
     z: '5-5',
   };
 
-  private readonly semaphoreLetters: Record<string, string> = {
-    a: '6,7',
-    b: '5,7',
-    c: '4,7',
-    d: '3,7',
-    e: '2,7',
-    f: '1,7',
-    g: '0,7',
-    h: '5,6',
-    i: '4,6',
-    j: '3,6',
-    k: '2,6',
-    l: '1,6',
-    m: '0,6',
-    n: '4,5',
-    o: '3,5',
-    p: '2,5',
-    q: '1,5',
-    r: '0,5',
-    s: '3,4',
-    t: '2,4',
-    u: '1,4',
-    v: '0,4',
-    w: '2,3',
-    x: '1,3',
-    y: '0,3',
-    z: '0,2',
-  };
+  private readonly semaphoreLetters = SEMAPHORE_POSITIONS_BY_LETTER;
 
   private readonly brailleDotsByLetter: Record<string, number[]> = {
     a: [1],

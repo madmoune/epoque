@@ -16,7 +16,13 @@ import {
   CustomKeyboardKey,
 } from '../shared/custom-keyboard/custom-keyboard.component';
 import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
-import { CipherPuzzle, CipherType, CiphersService, NatoMode } from './ciphers.service';
+import {
+  CipherPuzzle,
+  CipherType,
+  CiphersService,
+  NatoMode,
+  SEMAPHORE_POSITIONS_BY_LETTER,
+} from './ciphers.service';
 
 @Component({
   selector: 'app-ciphers-page',
@@ -507,32 +513,5 @@ export class CiphersPage implements OnDestroy {
     z: [1, 3, 5, 6],
   };
 
-  private readonly semaphorePositionsByLetter: Record<string, string> = {
-    a: '6,7',
-    b: '5,7',
-    c: '4,7',
-    d: '3,7',
-    e: '2,7',
-    f: '1,7',
-    g: '0,7',
-    h: '5,6',
-    i: '4,6',
-    j: '3,6',
-    k: '2,6',
-    l: '1,6',
-    m: '0,6',
-    n: '4,5',
-    o: '3,5',
-    p: '2,5',
-    q: '1,5',
-    r: '0,5',
-    s: '3,4',
-    t: '2,4',
-    u: '1,4',
-    v: '0,4',
-    w: '2,3',
-    x: '1,3',
-    y: '0,3',
-    z: '0,2',
-  };
+  private readonly semaphorePositionsByLetter = SEMAPHORE_POSITIONS_BY_LETTER;
 }

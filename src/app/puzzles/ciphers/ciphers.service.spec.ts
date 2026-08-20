@@ -1,6 +1,6 @@
 import '@angular/compiler';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { CiphersService } from './ciphers.service';
+import { CiphersService, SEMAPHORE_POSITIONS_BY_LETTER } from './ciphers.service';
 
 describe('CiphersService NATO modes', () => {
   let service: CiphersService;
@@ -53,5 +53,38 @@ describe('CiphersService NATO modes', () => {
       service.transformText('abc', [{ type: 'caesar', caesarShift: 1 }, { type: 'atbash' }]),
     ).toBe('YXW');
     expect(service.transformText('Été', [{ type: 'a1z26' }])).toBe('5 20 5');
+  });
+});
+
+describe('Semaphore positions', () => {
+  it('uses the standard A-Z flag combinations', () => {
+    expect(SEMAPHORE_POSITIONS_BY_LETTER).toEqual({
+      a: '6,7',
+      b: '0,6',
+      c: '1,6',
+      d: '2,6',
+      e: '3,6',
+      f: '4,6',
+      g: '5,6',
+      h: '0,7',
+      i: '1,7',
+      j: '2,4',
+      k: '2,7',
+      l: '3,7',
+      m: '4,7',
+      n: '5,7',
+      o: '0,1',
+      p: '0,2',
+      q: '0,3',
+      r: '0,4',
+      s: '0,5',
+      t: '1,2',
+      u: '1,3',
+      v: '2,5',
+      w: '3,4',
+      x: '3,5',
+      y: '1,4',
+      z: '4,5',
+    });
   });
 });
