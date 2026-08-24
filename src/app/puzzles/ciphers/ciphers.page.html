@@ -214,7 +214,7 @@
 
           @if (isCreeSyllabics() || cipherLegend().length > 0) {
             <details class="legend" [class.cree-legend]="isCreeSyllabics()">
-              <summary (click)="isCreeSyllabics() && hideKeyboard()">
+              <summary (click)="handleLegendClick()">
                 {{ isCreeSyllabics() ? 'Légende, tableau et sons' : 'Légende' }}
               </summary>
               @if (isCreeSyllabics()) {

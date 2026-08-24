@@ -172,6 +172,12 @@ export class CiphersPage implements OnDestroy {
       .map((position) => `position-${position}`);
   }
 
+  protected handleLegendClick(): void {
+    if (this.isCreeSyllabics()) {
+      this.hideKeyboard();
+    }
+  }
+
   constructor() {
     this.route.paramMap.subscribe((params) => {
       const nextCipher = this.cipherFromRoute(params.get('cipher'));
