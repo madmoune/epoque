@@ -351,6 +351,53 @@ button:disabled {
   outline: 0;
 }
 
+.encoded-word.cree-word > .cree-syllabic-tile {
+  position: relative;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 3.7rem;
+  min-height: 4.25rem;
+  padding: 0.45rem 0.7rem;
+  border-color: #9f7ab0;
+  background: linear-gradient(145deg, #fff, #f3eafb);
+}
+
+.encoded-word.cree-symbol-prompt {
+  min-height: 8rem;
+}
+
+.encoded-word.cree-symbol-prompt > .cree-syllabic-tile {
+  min-width: 6.25rem;
+  min-height: 6.25rem;
+}
+
+.encoded-word.cree-symbol-prompt .cree-syllabic-glyph {
+  font-size: 3.5rem;
+}
+
+.cree-syllabic-glyph {
+  font-family: 'Noto Sans Canadian Aboriginal', 'Euphemia UCAS', sans-serif;
+  font-size: 2.35rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.cree-token-reading {
+  color: #6c2f80;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 0.7rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.cree-listen-icon {
+  position: absolute;
+  right: 0.3rem;
+  bottom: 0.28rem;
+  color: #6c2f80;
+  font-size: 0.55rem;
+}
+
 .semaphore-symbol {
   position: relative;
   display: block;
@@ -448,6 +495,22 @@ button:disabled {
   border: 1px solid #eadcf0;
   border-radius: 0.75rem;
   background: #fff;
+}
+
+.legend.cree-legend {
+  width: 100%;
+  border-color: var(--border);
+  background: var(--surface);
+}
+
+.legend.cree-legend summary {
+  border-color: var(--border);
+  background: var(--surface-raised);
+  color: var(--accent);
+}
+
+.cree-legend-shell {
+  padding: 1rem;
 }
 
 .legend summary {
@@ -784,6 +847,57 @@ button:disabled {
   font-weight: 850;
 }
 
+.symbol-choice-group {
+  display: grid;
+  gap: 0.6rem;
+  width: min(100%, 28rem);
+}
+
+.symbol-choice-prompt {
+  margin: 0;
+  color: #555;
+  font-weight: 850;
+  text-align: center;
+}
+
+.symbol-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.symbol-choice {
+  min-height: 3.25rem;
+  border: 2px solid #d7c3df;
+  border-radius: 0.65rem;
+  background: #fff;
+  color: #351441;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 1.1rem;
+  font-weight: 850;
+  letter-spacing: 0.03em;
+}
+
+.symbol-choice:hover,
+.symbol-choice:focus-visible,
+.symbol-choice.selected {
+  border-color: #6c2f80;
+  outline: 3px solid rgb(108 47 128 / 20%);
+  outline-offset: 2px;
+}
+
+.symbol-choice.correct {
+  border-color: #1f7a3d;
+  background: #ecf8f0;
+  color: #1f7a3d;
+}
+
+.symbol-choice.incorrect {
+  border-color: #a62c3a;
+  background: #fff0f2;
+  color: #a62c3a;
+}
+
 input {
   min-height: 3rem;
   box-sizing: border-box;
@@ -833,6 +947,10 @@ input.correct {
   .puzzle-area.keyboard-open .legend {
     display: none;
   }
+
+  .puzzle-area.keyboard-open .legend.cree-legend {
+    display: block;
+  }
 }
 
 @media (max-width: 600px) {
@@ -856,6 +974,33 @@ input.correct {
     font-size: 2.6rem;
   }
 
+  .encoded-word.cree-word > .cree-syllabic-tile {
+    min-width: 3.15rem;
+    min-height: 3.75rem;
+    padding: 0.35rem 0.55rem;
+  }
+
+  .encoded-word.cree-symbol-prompt {
+    min-height: 6.5rem;
+  }
+
+  .encoded-word.cree-symbol-prompt > .cree-syllabic-tile {
+    min-width: 5.25rem;
+    min-height: 5.25rem;
+  }
+
+  .cree-syllabic-glyph {
+    font-size: 2rem;
+  }
+
+  .encoded-word.cree-symbol-prompt .cree-syllabic-glyph {
+    font-size: 3rem;
+  }
+
+  .cree-legend-shell {
+    padding: 0.65rem;
+  }
+
   .answer-mode {
     gap: 0.3rem;
   }
@@ -863,6 +1008,15 @@ input.correct {
   .answer-mode-label {
     width: 100%;
     text-align: center;
+  }
+
+  .symbol-choice-group {
+    width: 100%;
+  }
+
+  .symbol-choice {
+    min-height: 3rem;
+    font-size: 1rem;
   }
 
   .answer-letter-input {

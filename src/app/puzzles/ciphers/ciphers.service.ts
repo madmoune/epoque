@@ -2,6 +2,12 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { RecentRandomPicker } from '../shared/recent-random-picker';
+import {
+  CREE_LEARNING_SYMBOLS,
+  type CreeSyllabicCell,
+  encodeFrenchTextAsEasternCree,
+  encodeFrenchWordAsEasternCree,
+} from './cree-syllabics.data';
 
 export type CipherType =
   | 'caesar'
@@ -12,9 +18,12 @@ export type CipherType =
   | 'atbash'
   | 'tap-code'
   | 'semaphore'
-  | 'nato';
+  | 'nato'
+  | 'cree-syllabics';
 
 export type NatoMode = 'letter-to-code' | 'decode-word';
+
+export type CreeMode = 'word' | 'symbol';
 
 export type CipherPuzzle = {
   answer: string;
@@ -23,6 +32,10 @@ export type CipherPuzzle = {
   encoded: string[];
   note: string;
   caesarShift: number | null;
+  encodedReadings?: string[];
+  encodedAudioKeys?: string[];
+  romanApproximation?: string;
+  answerChoices?: string[];
 };
 
 export type CipherOption = {
@@ -78,6 +91,7 @@ export const SEMAPHORE_POSITIONS_BY_LETTER: Record<string, string> = {
 export class CiphersService {
   private readonly http = inject(HttpClient);
   private readonly randomWords = new RecentRandomPicker<string>(50);
+  private readonly randomCreeSymbols = new RecentRandomPicker<CreeSyllabicCell>(50);
 
   private words: string[] = [];
 
@@ -91,6 +105,7 @@ export class CiphersService {
     { type: 'tap-code', label: 'Tap code' },
     { type: 'semaphore', label: 'Sémaphore' },
     { type: 'nato', label: 'NATO' },
+    { type: 'cree-syllabics', label: 'Syllabique cri' },
   ];
 
   async loadWords(): Promise<void> {
@@ -117,30 +132,45 @@ export class CiphersService {
       });
   }
 
-  createPuzzle(cipher: CipherType, natoMode: NatoMode = 'letter-to-code'): CipherPuzzle {
+  createPuzzle(
+    cipher: CipherType,
+    natoMode: NatoMode = 'letter-to-code',
+    creeMode: CreeMode = 'word',
+  ): CipherPuzzle {
     if (cipher === 'nato' && natoMode === 'letter-to-code') {
       return this.createNatoCodePuzzle();
+    }
+
+    if (cipher === 'cree-syllabics' && creeMode === 'symbol') {
+      return this.createCreeSymbolPuzzle();
     }
 
     if (this.words.length === 0) {
       throw new Error('Cipher words have not been loaded yet.');
     }
 
-    const wordPool =
-      cipher === 'tap-code'
-        ? this.words.filter((word) => !this.normalize(word).includes('j'))
-        : this.words;
+    const wordPool = this.wordPoolFor(cipher);
     const answer = this.randomWords.pick(wordPool, (word) => `${cipher}:${this.normalize(word)}`);
     const normalizedAnswer = this.normalize(answer);
     const caesarShift = cipher === 'caesar' ? this.randomCaesarShift() : null;
+    const creeEncoding = cipher === 'cree-syllabics' ? encodeFrenchWordAsEasternCree(answer) : null;
 
     return {
       answer,
       normalizedAnswer,
       cipher,
-      encoded: this.encode(normalizedAnswer, cipher, caesarShift === null ? 0 : -caesarShift),
-      note: this.noteFor(cipher, natoMode),
+      encoded: creeEncoding
+        ? creeEncoding.tokens.map((token) => token.glyph)
+        : this.encode(normalizedAnswer, cipher, caesarShift === null ? 0 : -caesarShift),
+      note: this.noteFor(cipher, natoMode, creeMode),
       caesarShift,
+      ...(creeEncoding
+        ? {
+            encodedReadings: creeEncoding.tokens.map((token) => token.reading),
+            encodedAudioKeys: creeEncoding.tokens.map((token) => token.audioKey),
+            romanApproximation: creeEncoding.roman,
+          }
+        : {}),
     };
   }
 
@@ -225,6 +255,10 @@ export class CiphersService {
   }
 
   private transformStep(value: string, step: CipherTransformStep): string {
+    if (step.type === 'cree-syllabics') {
+      return encodeFrenchTextAsEasternCree(value);
+    }
+
     if (step.type === 'caesar') {
       const shift = Math.max(-25, Math.min(25, Math.trunc(step.caesarShift ?? 1)));
       return this.mapLetters(value, (letter) => this.shiftLetter(letter, shift).toUpperCase());
@@ -304,6 +338,25 @@ export class CiphersService {
     return -(Math.floor(Math.random() * 25) + 1);
   }
 
+  private wordPoolFor(cipher: CipherType): string[] {
+    if (cipher === 'tap-code') {
+      return this.words.filter((word) => !this.normalize(word).includes('j'));
+    }
+
+    if (cipher === 'cree-syllabics') {
+      return this.words.filter((word) => {
+        const encoding = encodeFrenchWordAsEasternCree(word);
+        return (
+          encoding.tokens.length >= 2 &&
+          encoding.tokens.length <= 12 &&
+          encoding.tokens.some((token) => !token.isFinal)
+        );
+      });
+    }
+
+    return this.words;
+  }
+
   private atbashLetter(letter: string): string {
     const alphabetIndex = letter.charCodeAt(0) - 97;
     return String.fromCharCode(122 - alphabetIndex);
@@ -333,11 +386,50 @@ export class CiphersService {
     };
   }
 
+  private createCreeSymbolPuzzle(): CipherPuzzle {
+    const symbol = this.randomCreeSymbols.pick(
+      CREE_LEARNING_SYMBOLS,
+      (item) => `cree-symbol:${item.reading}:${item.glyph}`,
+    );
+
+    return {
+      answer: symbol.reading,
+      normalizedAnswer: this.normalizeComparableAnswer(symbol.reading),
+      cipher: 'cree-syllabics',
+      encoded: [symbol.glyph],
+      note: 'Lis le symbole cri et choisis sa lecture romanisée parmi les réponses.',
+      caesarShift: null,
+      encodedReadings: [symbol.reading],
+      encodedAudioKeys: [symbol.audioKey],
+      romanApproximation: symbol.reading,
+      answerChoices: this.createCreeSymbolChoices(symbol.reading),
+    };
+  }
+
+  private createCreeSymbolChoices(correctReading: string): string[] {
+    const readings = [...new Set(CREE_LEARNING_SYMBOLS.map((symbol) => symbol.reading))].filter(
+      (reading) => reading !== correctReading,
+    );
+
+    for (let index = readings.length - 1; index > 0; index -= 1) {
+      const swapIndex = Math.floor(Math.random() * (index + 1));
+      [readings[index], readings[swapIndex]] = [readings[swapIndex], readings[index]];
+    }
+
+    const choices = [correctReading, ...readings.slice(0, 3)];
+    for (let index = choices.length - 1; index > 0; index -= 1) {
+      const swapIndex = Math.floor(Math.random() * (index + 1));
+      [choices[index], choices[swapIndex]] = [choices[swapIndex], choices[index]];
+    }
+
+    return choices;
+  }
+
   private normalizeComparableAnswer(value: string): string {
     return this.normalize(value).replace(/[^a-z0-9]/g, '');
   }
 
-  private noteFor(cipher: CipherType, natoMode: NatoMode): string {
+  private noteFor(cipher: CipherType, natoMode: NatoMode, creeMode: CreeMode): string {
     if (cipher === 'caesar') return 'Chaque lettre est décalée dans l’alphabet.';
     if (cipher === 'pigpen')
       return 'Chaque lettre est remplacée par un symbole de la grille Pigpen.';
@@ -349,6 +441,11 @@ export class CiphersService {
     if (cipher === 'tap-code')
       return 'Chaque code indique la ligne et la colonne dans une grille 5 x 5. I et J partagent la même case.';
     if (cipher === 'semaphore') return 'Chaque lettre est montrée par deux positions de drapeaux.';
+    if (cipher === 'cree-syllabics') {
+      return creeMode === 'symbol'
+        ? 'Lis le symbole cri et choisis sa lecture romanisée parmi les réponses.'
+        : 'Lis les syllabes à l’oreille : le mot français est rapproché des sons du cri oriental du Sud.';
+    }
     return natoMode === 'letter-to-code'
       ? 'Écris le mot-code NATO correspondant à la lettre affichée.'
       : 'Chaque lettre est remplacée par son mot de l’alphabet radio NATO.';

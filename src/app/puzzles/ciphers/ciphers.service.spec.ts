@@ -11,6 +11,9 @@ describe('CiphersService NATO modes', () => {
     testService.randomWords = {
       pick: (items: readonly string[]) => items[0],
     };
+    testService.randomCreeSymbols = {
+      pick: (items: readonly any[]) => items[0],
+    };
     testService.natoWords = {
       a: 'Alpha',
       c: 'Charlie',
@@ -53,6 +56,32 @@ describe('CiphersService NATO modes', () => {
       service.transformText('abc', [{ type: 'caesar', caesarShift: 1 }, { type: 'atbash' }]),
     ).toBe('YXW');
     expect(service.transformText('Été', [{ type: 'a1z26' }])).toBe('5 20 5');
+  });
+
+  it('creates a syllabic puzzle from the sound of a words.txt entry', () => {
+    (service as any).words = ['vtt', 'canotage'];
+
+    const puzzle = service.createPuzzle('cree-syllabics');
+
+    expect(puzzle.answer).toBe('canotage');
+    expect(puzzle.encoded.join('')).toBe('ᑳᓍᑖᔥ');
+    expect(puzzle.encodedReadings).toEqual(['kaa', 'nwaa', 'taa', 'sh']);
+    expect(puzzle.romanApproximation).toBe('kaa·nwaa·taa·sh');
+  });
+
+  it('creates a one-symbol syllabic practice puzzle', () => {
+    const puzzle = service.createPuzzle('cree-syllabics', 'letter-to-code', 'symbol');
+
+    expect(puzzle.answer).toBe('e');
+    expect(puzzle.encoded).toEqual(['ᐁ']);
+    expect(puzzle.encodedReadings).toEqual(['e']);
+    expect(puzzle.encodedAudioKeys).toEqual(['e']);
+    expect(puzzle.note).toBe(
+      'Lis le symbole cri et choisis sa lecture romanisée parmi les réponses.',
+    );
+    expect(puzzle.answerChoices).toHaveLength(4);
+    expect(puzzle.answerChoices).toContain('e');
+    expect(new Set(puzzle.answerChoices).size).toBe(4);
   });
 });
 

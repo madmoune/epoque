@@ -233,6 +233,12 @@ export class HomePage {
           route: '/ciphers/nato',
           tag: 'Codes',
         },
+        {
+          title: 'Syllabique cri',
+          description: 'Écoute et lis le mot français transcrit en syllabes cries.',
+          route: '/ciphers/cree-syllabics',
+          tag: 'Codes',
+        },
       ],
     },
     {

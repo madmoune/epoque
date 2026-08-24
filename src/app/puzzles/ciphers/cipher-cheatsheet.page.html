@@ -7,7 +7,7 @@
     <p class="eyebrow">Ciphers</p>
     <h1>Cheatsheet des légendes</h1>
     <p class="intro">
-      Toutes les correspondances utiles pour décoder les neuf ciphers du site, regroupées au même
+      Toutes les correspondances utiles pour décoder les dix ciphers du site, regroupées au même
       endroit.
     </p>
   </header>
@@ -178,8 +178,8 @@
           }
         </ol>
         <p class="transformer-note">
-          Les accents sont simplifiés automatiquement. Les ciphers visuels utilisent une notation
-          textuelle pour pouvoir être enchaînés.
+          Les accents sont simplifiés automatiquement, sauf pendant la transcription sonore crie.
+          Les ciphers visuels utilisent une notation textuelle pour pouvoir être enchaînés.
         </p>
       </section>
     </section>
@@ -356,6 +356,10 @@
                     </span>
                   }
                 </div>
+              }
+
+              @case ('cree-syllabics') {
+                <app-cree-syllabics-legend />
               }
             }
           </article>

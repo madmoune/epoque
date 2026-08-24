@@ -16,17 +16,25 @@ import {
   CustomKeyboardKey,
 } from '../shared/custom-keyboard/custom-keyboard.component';
 import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
+import { CreeSyllabicsAudioService } from './cree-syllabics-audio.service';
+import { CreeSyllabicsLegendComponent } from './cree-syllabics-legend.component';
 import {
   CipherPuzzle,
   CipherType,
   CiphersService,
+  CreeMode,
   NatoMode,
   SEMAPHORE_POSITIONS_BY_LETTER,
 } from './ciphers.service';
 
 @Component({
   selector: 'app-ciphers-page',
-  imports: [RouterLink, PuzzleSuccessPopupComponent, CustomKeyboardComponent],
+  imports: [
+    RouterLink,
+    PuzzleSuccessPopupComponent,
+    CustomKeyboardComponent,
+    CreeSyllabicsLegendComponent,
+  ],
   templateUrl: './ciphers.page.html',
   styleUrl: './ciphers.page.scss',
 })
@@ -39,9 +47,11 @@ export class CiphersPage implements OnDestroy {
 
   private readonly route = inject(ActivatedRoute);
   private readonly ciphersService = inject(CiphersService);
+  private readonly creeAudio = inject(CreeSyllabicsAudioService);
 
   protected readonly selectedCipher = signal<CipherType>('caesar');
   protected readonly natoMode = signal<NatoMode>('letter-to-code');
+  protected readonly creeMode = signal<CreeMode>('word');
   protected readonly puzzle = signal<CipherPuzzle | null>(null);
   protected readonly answerInput = signal('');
   protected readonly answerLetters = signal<string[]>([]);
@@ -85,26 +95,43 @@ export class CiphersPage implements OnDestroy {
 
   protected readonly isCorrect = computed(() => {
     const puzzle = this.puzzle();
-    return puzzle ? this.ciphersService.isCorrectAnswer(this.answerInput(), puzzle.normalizedAnswer) : false;
+    return puzzle
+      ? this.ciphersService.isCorrectAnswer(this.answerInput(), puzzle.normalizedAnswer)
+      : false;
   });
 
   protected readonly selectedCipherLabel = computed(
     () =>
-      this.ciphersService.cipherOptions.find((option) => option.type === this.selectedCipher())?.label ??
-      'Cipher',
+      this.ciphersService.cipherOptions.find((option) => option.type === this.selectedCipher())
+        ?.label ?? 'Cipher',
   );
 
   protected readonly isNatoLetterMode = computed(
     () => this.selectedCipher() === 'nato' && this.natoMode() === 'letter-to-code',
   );
 
-  protected readonly introText = computed(() =>
-    this.isNatoLetterMode()
-      ? 'Trouve le mot-code de l’alphabet radio NATO correspondant à la lettre affichée.'
-      : 'Retrouve le mot de la liste après transformation par un cipher simple.',
+  protected readonly isCreeSyllabics = computed(() => this.selectedCipher() === 'cree-syllabics');
+  protected readonly isCreeSymbolMode = computed(
+    () => this.isCreeSyllabics() && this.creeMode() === 'symbol',
   );
 
-  protected readonly cipherLegend = computed(() => this.ciphersService.legendFor(this.selectedCipher()));
+  protected readonly introText = computed(() => {
+    if (this.isNatoLetterMode()) {
+      return 'Trouve le mot-code de l’alphabet radio NATO correspondant à la lettre affichée.';
+    }
+
+    if (this.isCreeSyllabics()) {
+      return this.isCreeSymbolMode()
+        ? 'Entraîne-toi à reconnaître une syllabe crie à la fois.'
+        : 'Retrouve le mot français transcrit à l’oreille avec les caractères syllabiques cris.';
+    }
+
+    return 'Retrouve le mot de la liste après transformation par un cipher simple.';
+  });
+
+  protected readonly cipherLegend = computed(() =>
+    this.ciphersService.legendFor(this.selectedCipher()),
+  );
 
   protected readonly hintText = computed(() => {
     const puzzle = this.puzzle();
@@ -115,9 +142,7 @@ export class CiphersPage implements OnDestroy {
     return `Indice: ${this.partialWordHint(puzzle)}`;
   });
 
-  protected readonly maxHintLevel = computed(
-    () => this.puzzle()?.normalizedAnswer.length ?? 0,
-  );
+  protected readonly maxHintLevel = computed(() => this.puzzle()?.normalizedAnswer.length ?? 0);
 
   protected pigpenSymbolClass(letter: string): string {
     const normalizedLetter = letter.toLowerCase();
@@ -183,6 +208,23 @@ export class CiphersPage implements OnDestroy {
     this.nextPuzzle();
   }
 
+  protected setCreeMode(mode: CreeMode): void {
+    if (this.creeMode() === mode) return;
+
+    this.creeMode.set(mode);
+    // A symbol reading can contain several roman letters, so the compact
+    // full-answer field is more useful than one input per character here.
+    this.letterByLetter.set(mode === 'word');
+    this.nextPuzzle();
+  }
+
+  protected chooseCreeAnswer(choice: string): void {
+    if (!this.isCreeSymbolMode() || this.isCorrect()) return;
+
+    this.answerInput.set(choice);
+    this.keyboardVisible.set(false);
+  }
+
   protected updateAnswerFromEvent(event: Event): void {
     if (event.target instanceof HTMLInputElement) {
       this.updateAnswer(event.target.value);
@@ -211,7 +253,10 @@ export class CiphersPage implements OnDestroy {
   protected updateAnswerLetterFromEvent(event: Event, index: number): void {
     if (!(event.target instanceof HTMLInputElement)) return;
 
-    const letter = event.target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 1);
+    const letter = event.target.value
+      .toUpperCase()
+      .replace(/[^A-Z]/g, '')
+      .slice(0, 1);
     this.setAnswerLetter(index, letter);
     event.target.value = letter;
 
@@ -276,6 +321,18 @@ export class CiphersPage implements OnDestroy {
     return puzzle.normalizedAnswer[index]?.toUpperCase() ?? '';
   }
 
+  protected creeReadingFor(puzzle: CipherPuzzle, index: number): string {
+    return puzzle.encodedReadings?.[index] ?? '';
+  }
+
+  protected playCreeToken(puzzle: CipherPuzzle, index: number): void {
+    this.revealLetter(index);
+    const audioKey = puzzle.encodedAudioKeys?.[index];
+    if (audioKey) {
+      void this.creeAudio.play(audioKey);
+    }
+  }
+
   protected handleKeyboardKey(key: CustomKeyboardKey): void {
     if (this.isCorrect()) return;
 
@@ -332,9 +389,17 @@ export class CiphersPage implements OnDestroy {
     this.hintLevel.update((level) => Math.min(level + 1, this.maxHintLevel()));
   }
 
+  protected hideKeyboard(): void {
+    this.keyboardVisible.set(false);
+  }
+
   protected nextPuzzle(): void {
     this.clearLetterReveal();
-    const nextPuzzle = this.ciphersService.createPuzzle(this.selectedCipher(), this.natoMode());
+    const nextPuzzle = this.ciphersService.createPuzzle(
+      this.selectedCipher(),
+      this.natoMode(),
+      this.creeMode(),
+    );
     this.puzzle.set(nextPuzzle);
     this.answerInput.set('');
     this.answerLetters.set(Array.from({ length: nextPuzzle.normalizedAnswer.length }, () => ''));
@@ -350,6 +415,7 @@ export class CiphersPage implements OnDestroy {
 
   ngOnDestroy(): void {
     this.clearLetterReveal();
+    this.creeAudio.stop();
   }
 
   private clearLetterReveal(): void {
@@ -412,7 +478,10 @@ export class CiphersPage implements OnDestroy {
 
     if (key === 'space') return;
 
-    const letter = key.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 1);
+    const letter = key
+      .toUpperCase()
+      .replace(/[^A-Z]/g, '')
+      .slice(0, 1);
     if (!letter || index >= this.answerLetters().length) return;
 
     this.setAnswerLetter(index, letter);
@@ -433,12 +502,17 @@ export class CiphersPage implements OnDestroy {
   }
 
   private lettersFromValue(value: string, length: number): string[] {
-    const letters = value.toUpperCase().replace(/[^A-Z]/g, '').split('');
+    const letters = value
+      .toUpperCase()
+      .replace(/[^A-Z]/g, '')
+      .split('');
     return Array.from({ length }, (_, index) => letters[index] ?? '');
   }
 
   private cipherFromRoute(value: string | null): CipherType {
-    const matchingOption = this.ciphersService.cipherOptions.find((option) => option.type === value);
+    const matchingOption = this.ciphersService.cipherOptions.find(
+      (option) => option.type === value,
+    );
 
     return matchingOption?.type ?? 'caesar';
   }

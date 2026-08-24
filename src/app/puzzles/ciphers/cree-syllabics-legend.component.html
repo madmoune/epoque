@@ -1,0 +1,162 @@
+<div class="cree-reference">
+  <p class="dialect-note">
+    <strong>Dialecte de référence :</strong> cri oriental de la Baie James, avec la série
+    <strong>E</strong> du cri du Sud. Les prononciations varient selon les communautés.
+  </p>
+
+  <section class="sound-section" aria-labelledby="cree-vowels-title">
+    <div class="section-heading">
+      <h3 id="cree-vowels-title">Son des voyelles</h3>
+      <span>Appuie sur ▶ pour écouter</span>
+    </div>
+    <div class="sound-grid vowel-grid">
+      @for (vowel of vowels; track vowel.label) {
+        <article class="sound-card">
+          <div>
+            <strong>{{ vowel.label }}</strong>
+            <span class="ipa">{{ vowel.ipa }}</span>
+          </div>
+          <p>{{ vowel.approximation }}</p>
+          <button
+            type="button"
+            class="listen-button"
+            [class.playing]="activeSound() === vowel.audioKey"
+            [attr.aria-label]="'Écouter la voyelle ' + vowel.label"
+            (click)="playSound(vowel.audioKey)"
+          >
+            <span aria-hidden="true">{{ activeSound() === vowel.audioKey ? '■' : '▶' }}</span>
+            {{ activeSound() === vowel.audioKey ? 'Lecture' : 'Écouter' }}
+          </button>
+        </article>
+      }
+    </div>
+  </section>
+
+  <section class="sound-section" aria-labelledby="cree-consonants-title">
+    <div class="section-heading">
+      <h3 id="cree-consonants-title">Son des consonnes</h3>
+      <span>Les séries grisées sont complémentaires ou rares</span>
+    </div>
+    <div class="sound-grid consonant-grid">
+      @for (consonant of consonants; track consonant.label) {
+        <article class="sound-card compact" [class.secondary]="consonant.secondary">
+          <div>
+            <strong>{{ consonant.label }}</strong>
+            <span class="ipa">{{ consonant.ipa }}</span>
+          </div>
+          <p>{{ consonant.approximation }}</p>
+          <button
+            type="button"
+            class="listen-button icon-only"
+            [class.playing]="activeSound() === consonant.audioKey"
+            [attr.aria-label]="'Écouter la consonne ' + consonant.label"
+            (click)="playSound(consonant.audioKey)"
+          >
+            <span aria-hidden="true">{{ activeSound() === consonant.audioKey ? '■' : '▶' }}</span>
+          </button>
+        </article>
+      }
+    </div>
+  </section>
+
+  <section class="chart-section" aria-labelledby="cree-chart-title">
+    <div class="section-heading">
+      <div>
+        <h3 id="cree-chart-title">Tableau syllabique</h3>
+        <p>La consonne est donnée par la ligne; la voyelle, par l’orientation du signe.</p>
+      </div>
+      <span>Chaque case est sonore</span>
+    </div>
+
+    <div class="chart-frame" aria-label="Tableau syllabique cri">
+      <table class="syllabic-chart">
+        <thead>
+          <tr>
+            <th scope="col">Initiale</th>
+            @for (column of columns; track column.label) {
+              <th scope="col">
+                <strong>{{ column.label }}</strong>
+                <span>{{ column.sound }}</span>
+              </th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows; track row.label) {
+            <tr>
+              <th scope="row">{{ row.label }}</th>
+              @for (cell of row.cells; track $index) {
+                <td>
+                  @if (cell) {
+                    <button
+                      type="button"
+                      class="syllabic-cell"
+                      [class.playing]="activeSound() === cell.audioKey"
+                      [attr.aria-label]="'Écouter ' + cell.reading"
+                      (click)="playSound(cell.audioKey)"
+                    >
+                      <span class="cree-glyph" lang="cr">{{ cell.glyph }}</span>
+                      <span class="roman-reading">{{ cell.reading }}</span>
+                      <span class="cell-play" aria-hidden="true">▶</span>
+                    </button>
+                  } @else {
+                    <span class="empty-cell" aria-hidden="true">—</span>
+                  }
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="finals-section" aria-labelledby="cree-finals-title">
+    <div class="section-heading">
+      <div>
+        <h3 id="cree-finals-title">Finales</h3>
+        <p>Une petite forme note une consonne qui n’est suivie d’aucune voyelle.</p>
+      </div>
+    </div>
+    <div class="finals-grid">
+      @for (final of finals; track final.label) {
+        <button
+          type="button"
+          class="final-card"
+          [class.playing]="activeSound() === final.audioKey"
+          [attr.aria-label]="'Écouter la finale ' + final.label"
+          (click)="playSound(final.audioKey)"
+        >
+          <strong>{{ final.label }}</strong>
+          <span class="cree-glyph" lang="cr">{{ final.glyph }}</span>
+          <span class="cell-play" aria-hidden="true">▶</span>
+        </button>
+      }
+    </div>
+  </section>
+
+  <div class="reading-notes">
+    <p><strong>Point au-dessus :</strong> la voyelle est tendue ou longue (ii, uu, aa).</p>
+    <p><strong>Point avant :</strong> un son w s’ajoute à la consonne.</p>
+    <p>
+      <strong>Dans le jeu :</strong> les mots français de <code>words.txt</code> sont rapprochés des
+      sons disponibles en cri. Ce sont des transcriptions ludiques, pas des traductions en langue
+      crie.
+    </p>
+  </div>
+
+  @if (soundError()) {
+    <p class="sound-error" role="status">{{ soundError() }}</p>
+  }
+
+  <p class="source-note">
+    Tableau et enregistrements :
+    <a href="https://www.eastcree.org/syl-keyboard.html" target="_blank" rel="noreferrer">
+      EastCree.org — Cree School Board
+    </a>
+    ·
+    <a href="https://en.wikipedia.org/wiki/Eastern_Cree_syllabics" target="_blank" rel="noreferrer">
+      inventaire Unicode du syllabaire cri oriental
+    </a>
+  </p>
+</div>

@@ -38,6 +38,28 @@
           </div>
         }
 
+        @if (isCreeSyllabics()) {
+          <div class="nato-mode-switch cree-mode-switch" role="group" aria-label="Mode syllabique cri">
+            <span class="answer-mode-label">Entraînement</span>
+            <button
+              type="button"
+              class="input-mode-button"
+              [class.active]="creeMode() === 'word'"
+              (click)="setCreeMode('word')"
+            >
+              Mot complet
+            </button>
+            <button
+              type="button"
+              class="input-mode-button"
+              [class.active]="creeMode() === 'symbol'"
+              (click)="setCreeMode('symbol')"
+            >
+              Un symbole
+            </button>
+          </div>
+        }
+
         <p class="cipher-note">{{ currentPuzzle.note }}</p>
 
         @if (selectedCipher() === 'caesar' && currentPuzzle.caesarShift !== null) {
@@ -52,19 +74,45 @@
             [class.symbolic]="
               selectedCipher() === 'pigpen' ||
               selectedCipher() === 'braille' ||
-              selectedCipher() === 'semaphore'
+              selectedCipher() === 'semaphore' ||
+              isCreeSyllabics()
             "
             [class.pigpen-word]="selectedCipher() === 'pigpen'"
             [class.braille-word]="selectedCipher() === 'braille'"
             [class.semaphore-word]="selectedCipher() === 'semaphore'"
             [class.nato-word]="selectedCipher() === 'nato'"
             [class.nato-letter-prompt]="isNatoLetterMode()"
+            [class.cree-word]="isCreeSyllabics()"
+            [class.cree-symbol-prompt]="isCreeSymbolMode()"
           >
             @for (token of currentPuzzle.encoded; track $index; let tokenIndex = $index) {
               @if (isNatoLetterMode()) {
                 <span class="encoded-token nato-letter-token" [attr.aria-label]="'Lettre ' + token">
                   {{ token }}
                 </span>
+              } @else if (isCreeSyllabics()) {
+                <button
+                  type="button"
+                  class="encoded-token cree-syllabic-tile"
+                  [class.revealed]="isLetterRevealed(tokenIndex)"
+                  [attr.aria-label]="
+                    isCreeSymbolMode()
+                      ? 'Symbole cri. Appuie pour écouter.'
+                      : 'Syllabe crie ' +
+                        creeReadingFor(currentPuzzle, tokenIndex) +
+                        '. Appuie pour écouter.'
+                  "
+                  (click)="playCreeToken(currentPuzzle, tokenIndex)"
+                >
+                  <span class="cree-syllabic-glyph" lang="cr">{{ token }}</span>
+                  @if (isLetterRevealed(tokenIndex)) {
+                    <span class="cree-token-reading">{{
+                      creeReadingFor(currentPuzzle, tokenIndex)
+                    }}</span>
+                  } @else {
+                    <span class="cree-listen-icon" aria-hidden="true">▶</span>
+                  }
+                </button>
               } @else if (selectedCipher() === 'pigpen') {
                 <button
                   type="button"
@@ -164,10 +212,16 @@
             }
           </div>
 
-          @if (cipherLegend().length > 0) {
-            <details class="legend">
-              <summary>Légende</summary>
-              @if (selectedCipher() === 'pigpen') {
+          @if (isCreeSyllabics() || cipherLegend().length > 0) {
+            <details class="legend" [class.cree-legend]="isCreeSyllabics()">
+              <summary (click)="isCreeSyllabics() && hideKeyboard()">
+                {{ isCreeSyllabics() ? 'Légende, tableau et sons' : 'Légende' }}
+              </summary>
+              @if (isCreeSyllabics()) {
+                <div class="cree-legend-shell">
+                  <app-cree-syllabics-legend />
+                </div>
+              } @else if (selectedCipher() === 'pigpen') {
                 <div class="pigpen-key">
                   @for (grid of pigpenSquareKeys; track $index; let gridIndex = $index) {
                     <div class="pigpen-square-key" [class.dotted-key]="gridIndex === 1">
@@ -247,7 +301,7 @@
             </details>
           }
 
-          @if (!isNatoLetterMode()) {
+          @if (!isNatoLetterMode() && !isCreeSymbolMode()) {
             <div class="answer-mode" role="group" aria-label="Mode de saisie">
               <span class="answer-mode-label">Réponse</span>
               <button
@@ -269,7 +323,7 @@
             </div>
           }
 
-          @if (letterByLetter() && !isNatoLetterMode()) {
+          @if (letterByLetter() && !isNatoLetterMode() && !isCreeSymbolMode()) {
             <div class="letter-answer-group" role="group" aria-label="Réponse lettre par lettre">
               @for (letter of answerLetters(); track $index) {
                 <input
@@ -289,9 +343,13 @@
                 />
               }
             </div>
-          } @else {
+          } @else if (!isCreeSymbolMode()) {
             <label class="answer-group">
-              <span>{{ isNatoLetterMode() ? 'Code NATO' : 'Mot original' }}</span>
+              <span>{{
+                isNatoLetterMode()
+                  ? 'Code NATO'
+                  : 'Mot original'
+              }}</span>
               <input
                 #answerField
                 class="answer-input"
@@ -306,6 +364,26 @@
                 [disabled]="isCorrect()"
               />
             </label>
+          } @else {
+            <div class="symbol-choice-group" role="group" aria-label="Choix de lecture du symbole">
+              <p class="symbol-choice-prompt">Quelle lecture correspond à ce symbole&nbsp;?</p>
+              <div class="symbol-choice-grid">
+                @for (choice of currentPuzzle.answerChoices ?? []; track choice) {
+                  <button
+                    type="button"
+                    class="symbol-choice"
+                    [class.selected]="answerInput() === choice"
+                    [class.correct]="answerInput() === choice && isCorrect()"
+                    [class.incorrect]="answerInput() === choice && !isCorrect()"
+                    [attr.aria-pressed]="answerInput() === choice"
+                    [disabled]="isCorrect()"
+                    (click)="chooseCreeAnswer(choice)"
+                  >
+                    {{ choice }}
+                  </button>
+                }
+              </div>
+            </div>
           }
         </div>
 
@@ -327,7 +405,13 @@
             Indice
           </button>
           <button type="button" class="secondary-button" (click)="nextPuzzle()">
-            {{ isNatoLetterMode() ? 'Nouvelle lettre' : 'Nouveau mot' }}
+            {{
+              isNatoLetterMode()
+                ? 'Nouvelle lettre'
+                : isCreeSymbolMode()
+                  ? 'Nouveau symbole'
+                  : 'Nouveau mot'
+            }}
           </button>
         </div>
 
@@ -337,7 +421,13 @@
 
         @if (isCorrect()) {
           <app-puzzle-success-popup
-            [title]="isNatoLetterMode() ? 'Code trouvé!' : 'Mot trouvé!'"
+            [title]="
+              isNatoLetterMode()
+                ? 'Code trouvé!'
+                : isCreeSymbolMode()
+                  ? 'Symbole identifié!'
+                  : 'Mot trouvé!'
+            "
             [message]="
               isNatoLetterMode()
                 ? 'La lettre ' +
@@ -345,10 +435,18 @@
                   ' correspond à ' +
                   currentPuzzle.answer +
                   '.'
+                : isCreeSymbolMode()
+                  ? 'Le symbole ' + currentPuzzle.encoded[0] + ' se lit « ' + currentPuzzle.answer + ' ».'
                 : 'Le mot codé a été décodé.'
             "
             [answer]="currentPuzzle.answer"
-            [actionLabel]="isNatoLetterMode() ? 'Nouvelle lettre' : 'Nouveau mot'"
+            [actionLabel]="
+              isNatoLetterMode()
+                ? 'Nouvelle lettre'
+                : isCreeSymbolMode()
+                  ? 'Nouveau symbole'
+                  : 'Nouveau mot'
+            "
             (action)="nextPuzzle()"
           />
         }

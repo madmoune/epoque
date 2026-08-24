@@ -1,5 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { CreeSyllabicsLegendComponent } from './cree-syllabics-legend.component';
 import {
   CipherLegendItem,
   CipherTransformStep,
@@ -23,7 +24,7 @@ type CheatsheetView = 'legends' | 'transformer';
 
 @Component({
   selector: 'app-cipher-cheatsheet-page',
-  imports: [RouterLink],
+  imports: [RouterLink, CreeSyllabicsLegendComponent],
   templateUrl: './cipher-cheatsheet.page.html',
   styleUrl: './cipher-cheatsheet.page.scss',
 })
@@ -54,6 +55,13 @@ export class CipherCheatsheetPage {
       title: 'César',
       description: 'Chaque lettre avance ou recule du même nombre de positions dans l’alphabet.',
       route: '/ciphers/caesar',
+    },
+    {
+      id: 'cree-syllabics',
+      title: 'Syllabique cri',
+      description:
+        'Les sons du mot français sont rapprochés des caractères syllabiques du cri oriental.',
+      route: '/ciphers/cree-syllabics',
     },
     {
       id: 'morse',

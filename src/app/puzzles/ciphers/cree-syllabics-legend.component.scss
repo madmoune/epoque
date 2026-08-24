@@ -1,0 +1,385 @@
+:host {
+  display: block;
+  min-width: 0;
+  color: var(--text, #202020);
+}
+
+.cree-reference {
+  display: grid;
+  gap: 1.2rem;
+  min-width: 0;
+}
+
+.dialect-note,
+.reading-notes,
+.source-note,
+.sound-error {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.dialect-note {
+  padding: 0.75rem 0.85rem;
+  border-left: 0.25rem solid var(--accent, #6c2f80);
+  border-radius: 0.45rem;
+  background: color-mix(in srgb, var(--accent, #6c2f80) 9%, var(--surface-raised, #fff));
+  color: var(--muted-strong, #444);
+  font-size: 0.86rem;
+}
+
+.sound-section,
+.chart-section,
+.finals-section {
+  display: grid;
+  gap: 0.7rem;
+  min-width: 0;
+}
+
+.section-heading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.section-heading h3,
+.section-heading p {
+  margin: 0;
+}
+
+.section-heading h3 {
+  color: var(--text, #202020);
+  font-size: 1.05rem;
+}
+
+.section-heading p,
+.section-heading > span {
+  color: var(--muted, #666);
+  font-size: 0.76rem;
+  line-height: 1.4;
+}
+
+.sound-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 0.45rem;
+}
+
+.consonant-grid {
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+}
+
+.sound-card {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 0.35rem;
+  min-width: 0;
+  min-height: 7.2rem;
+  box-sizing: border-box;
+  padding: 0.7rem;
+  border: 1px solid var(--border, #ddd);
+  border-radius: 0.6rem;
+  background: var(--surface-raised, #fff);
+}
+
+.sound-card.compact {
+  min-height: 6.5rem;
+  padding-right: 2.8rem;
+}
+
+.sound-card.secondary {
+  background: color-mix(in srgb, var(--surface-raised, #fff) 82%, var(--muted, #777));
+  opacity: 0.82;
+}
+
+.sound-card > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.55rem;
+  align-items: baseline;
+}
+
+.sound-card strong {
+  color: var(--accent, #6c2f80);
+  font-size: 0.95rem;
+}
+
+.ipa {
+  color: var(--text, #202020);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.sound-card p {
+  margin: 0;
+  color: var(--muted, #666);
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+
+button {
+  font: inherit;
+  touch-action: manipulation;
+}
+
+.listen-button,
+.syllabic-cell,
+.final-card {
+  border: 1px solid var(--border-strong, #bbb);
+  background: var(--surface, #fff);
+  color: var(--text, #202020);
+  cursor: pointer;
+}
+
+.listen-button {
+  justify-self: start;
+  min-height: 2rem;
+  padding: 0.35rem 0.55rem;
+  border-radius: 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 850;
+}
+
+.listen-button.icon-only {
+  position: absolute;
+  top: 0.55rem;
+  right: 0.55rem;
+  display: grid;
+  width: 2rem;
+  padding: 0;
+  place-items: center;
+}
+
+.listen-button:hover,
+.listen-button:focus-visible,
+.syllabic-cell:hover,
+.syllabic-cell:focus-visible,
+.final-card:hover,
+.final-card:focus-visible,
+.playing {
+  border-color: var(--accent, #6c2f80);
+  color: var(--accent, #6c2f80);
+}
+
+.listen-button:focus-visible,
+.syllabic-cell:focus-visible,
+.final-card:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--focus, #6c2f80) 35%, transparent);
+  outline-offset: 2px;
+}
+
+.chart-frame {
+  max-width: 100%;
+  overflow: visible;
+  padding: 0.15rem 0.05rem 0.45rem;
+}
+
+.syllabic-chart {
+  width: 100%;
+  min-width: 0;
+  table-layout: fixed;
+  border-spacing: 0.14rem;
+}
+
+.syllabic-chart th,
+.syllabic-chart td {
+  padding: 0;
+  text-align: center;
+}
+
+.syllabic-chart thead th,
+.syllabic-chart tbody th {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  min-width: 0;
+  width: 11%;
+  padding: 0.45rem;
+  border-radius: 0.45rem;
+  background: var(--accent, #6c2f80);
+  color: var(--accent-contrast, #fff);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.syllabic-chart thead th {
+  position: static;
+  min-width: 0;
+  width: 9.89%;
+}
+
+.syllabic-chart thead th:first-child {
+  width: 11%;
+}
+
+.syllabic-chart thead th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+}
+
+.syllabic-chart thead th span {
+  display: block;
+  margin-top: 0.12rem;
+  font-size: 0.62rem;
+  opacity: 0.8;
+}
+
+.syllabic-cell {
+  position: relative;
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  min-height: 4.2rem;
+  place-items: center;
+  box-sizing: border-box;
+  padding: 0.3rem 0.8rem 0.3rem 0.2rem;
+  border-radius: 0.45rem;
+}
+
+.cree-glyph {
+  font-family: 'Noto Sans Canadian Aboriginal', 'Euphemia UCAS', sans-serif;
+  font-size: 1.7rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.roman-reading {
+  color: var(--muted-strong, #444);
+  font-size: 0.65rem;
+  font-weight: 850;
+}
+
+.cell-play {
+  position: absolute;
+  right: 0.32rem;
+  bottom: 0.28rem;
+  color: var(--accent, #6c2f80);
+  font-size: 0.58rem;
+}
+
+.empty-cell {
+  display: grid;
+  min-width: 0;
+  min-height: 4.2rem;
+  place-items: center;
+  border: 1px dashed var(--border, #ddd);
+  border-radius: 0.45rem;
+  color: var(--muted, #777);
+  opacity: 0.55;
+}
+
+.finals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(5.2rem, 1fr));
+  gap: 0.35rem;
+}
+
+.final-card {
+  position: relative;
+  display: grid;
+  min-height: 4.5rem;
+  place-items: center;
+  padding: 0.4rem 1rem 0.4rem 0.4rem;
+  border-radius: 0.5rem;
+}
+
+.final-card strong {
+  color: var(--accent, #6c2f80);
+  font-size: 0.65rem;
+}
+
+.reading-notes {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border, #ddd);
+  border-radius: 0.6rem;
+  background: color-mix(in srgb, var(--surface-raised, #fff) 90%, var(--accent, #6c2f80));
+  color: var(--muted-strong, #444);
+  font-size: 0.78rem;
+}
+
+.reading-notes code {
+  color: var(--text, #202020);
+}
+
+.sound-error {
+  color: #a62c3a;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.source-note {
+  color: var(--muted, #666);
+  font-size: 0.72rem;
+}
+
+.source-note a {
+  color: var(--accent, #6c2f80);
+  font-weight: 800;
+}
+
+@media (max-width: 600px) {
+  .sound-grid,
+  .consonant-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .sound-card {
+    min-height: 8rem;
+    padding: 0.6rem;
+  }
+
+  .sound-card.compact {
+    min-height: 7.6rem;
+  }
+
+  .section-heading > span {
+    width: 100%;
+  }
+
+  .chart-frame {
+    padding-inline: 0;
+  }
+
+  .syllabic-chart {
+    border-spacing: 0.08rem;
+  }
+
+  .syllabic-chart thead th,
+  .syllabic-chart tbody th {
+    padding: 0.25rem 0.08rem;
+    font-size: 0.56rem;
+  }
+
+  .syllabic-chart thead th span {
+    font-size: 0.46rem;
+  }
+
+  .syllabic-cell,
+  .empty-cell {
+    min-height: 3.25rem;
+  }
+
+  .syllabic-cell {
+    padding: 0.18rem 0.55rem 0.18rem 0.08rem;
+  }
+
+  .cree-glyph {
+    font-size: clamp(1.05rem, 5vw, 1.4rem);
+  }
+
+  .roman-reading {
+    font-size: 0.48rem;
+  }
+
+  .cell-play {
+    right: 0.12rem;
+    bottom: 0.12rem;
+    font-size: 0.42rem;
+  }
+}
