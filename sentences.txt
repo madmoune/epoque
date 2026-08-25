@@ -64,7 +64,7 @@ Les amis franchissent la rivière sans se presser, préférant protéger leur ma
 Au sommet, personne ne parle du chrono pendant quelques secondes; le paysage impose naturellement une autre mesure de la réussite.
 La formation quitte le contrôle avec une carte complète, une stratégie révisée et davantage de confiance qu'au départ.
 La meneuse ne dit presque rien sous les épinettes, mais calme la panique pour éviter qu'un détail technique ne brise l'élan.
-Après le portage, le plus jeune du trio ajuste la boussole et comprend que un détail technique peut briser l'élan.
+Après le portage, le plus jeune du trio ajuste la boussole et comprend qu'un détail technique peut briser l'élan.
 Un équipier ne dit presque rien pendant la remontée, mais calme la panique pour ne pas laisser le classement imposer la peur.
 La formation hésite sous les épinettes, puis compte les balises quand la consigne semble plus lourde que le sac.
 Au départ du relais, le capitaine partage sa réserve d’eau, puis garde le dialogue ouvert malgré les jambes lourdes.
@@ -77,7 +77,7 @@ Le duo de tête ne dit presque rien dans le sous-bois, mais change de plan pour 
 Avant le signal, les poursuivants accélèrent au sommet du raidillon dans un silence attentif; la patience devient alors le meilleur avantage.
 Après une courte pause, le premier de cordée choisit une prise stable avec le sommet en vue; la patience devient alors le meilleur avantage.
 Au parc de la Jacques-Cartier, les alliés prennent une décision unanime, puis encouragent le dernier sous la pression du chrono.
-Sur la falaise, une participante teste le radeau et comprend que un détail technique peut briser l'élan.
+Sur la falaise, une participante teste le radeau et comprend qu'un détail technique peut briser l'élan.
 Les poursuivants portent la charge sous les épinettes, pour garder la bonne lecture du jeu malgré le bruit.
 Sur la piste gaspésienne, les poursuivants accélèrent au sommet du raidillon, puis reviennent sur le peloton sans gaspiller les réserves.
 À l'entrée du canyon, les poursuivants observent les repères et comprennent que le classement ne doit pas imposer la peur.
@@ -109,9 +109,9 @@ Un équipier ne dit presque rien au milieu des racines, mais surveille la mété
 Avant le tir de précision, le capitaine ralentit volontairement et comprend que la consigne semble plus lourde que le sac.
 La formation observe les repères près du lac, pour éviter que la prochaine erreur coûte la finale.
 À quelques minutes du départ, l'observatrice mémorise quatre couleurs avec patience et méthode; la patience devient alors le meilleur avantage.
-Au bord du rapide, l'équipe en retard corrige sa trajectoire et comprend que un détail technique peut briser l'élan.
+Au bord du rapide, l'équipe en retard corrige sa trajectoire et comprend qu'un détail technique peut briser l'élan.
 Les poursuivants ne disent presque rien dans le brouillard, mais gèrent le retard même si le corps demande une pause que le chrono refuse.
-Au pied du mur, la dernière équipe vérifie les noeuds et comprend que la bonne lecture du jeu vaut plus qu'un sprint.
+Au pied du mur, la dernière équipe vérifie les nœuds et comprend que la bonne lecture du jeu vaut plus qu'un sprint.
 Quand le vent tourne vers l’est, la capitaine additionne les balises rouges sans négliger la sécurité; la fatigue se fait enfin sentir.
 Un équipier calme la panique après le portage, pour éviter qu'un détail technique ne brise l'élan.
 Pendant la remontée, un équipier cache son inquiétude et comprend que la victoire se cache parfois derrière une décision simple.
@@ -130,7 +130,7 @@ Le capitaine calme la panique pendant la remontée, pour garder la bonne lecture
 Le courant accélère, et soudain la stratégie remplace l'élan dans un décor qui ne laisse aucune marge facile.
 Au moment de choisir, le trio mesure la distance restante avec toute la concentration nécessaire; le groupe garde assez de lucidité.
 Le capitaine hésite sur le quai glissant, puis révise la carte car la victoire se cache parfois derrière une décision simple.
-Pendant la remontée, les poursuivants comptent les balises et comprennent que le ballotage peut rappeler l'enjeu réel à tout moment.
+Pendant la remontée, les poursuivants comptent les balises et comprennent que le ballottage peut rappeler l'enjeu réel à tout moment.
 Sur le quai glissant, la meneuse prend une seconde pour respirer, puis teste le radeau pour garder la bonne lecture du jeu malgré le bruit.
 Derrière le vieux moulin, les partenaires célèbrent chaque progrès; la finale semble soudain accessible pendant que le chrono annonce cinq minutes.
 Le trio ne dit presque rien au milieu des racines, mais teste le radeau pour éviter que la prochaine erreur coûte la finale.
@@ -147,7 +147,7 @@ Dans le brouillard, le capitaine cache son inquiétude et comprend que le classe
 Au milieu des racines, la meneuse protège son avance et comprend que la victoire se cache parfois derrière une décision simple.
 Sur les escaliers du mont Royal, les amis grimpent à petits pas dans un silence attentif, tandis que le plan initial reste valable.
 Dans la fissure verticale, les coéquipières vérifient le nœud principal, puis annoncent leur prochain mouvement après avoir consulté le groupe.
-Près du lac, l'équipe en retard vérifie les noeuds et comprend que le classement ne doit pas imposer la peur.
+Près du lac, l'équipe en retard vérifie les nœuds et comprend que le classement ne doit pas imposer la peur.
 La formation hésite au pied du mur, puis serre le baudrier afin de transformer un risque en avantage clair.
 Le trio hésite à la sortie du marais, puis cache son inquiétude pour ne pas laisser le classement imposer la peur.
 Le fanion apparaît, et soudain il faut écouter avant d'agir sans offrir de cadeau aux équipes qui reviennent.
@@ -161,41 +161,41 @@ Dans le brouillard, l'équipe en retard prend une seconde pour respirer, puis vi
 La formation vise la cible après le portage, car la victoire se cache parfois derrière une décision simple.
 Les finalistes hésitent au pied du mur, puis observent les repères quand la consigne semble plus lourde que le sac.
 Lorsque le silence tombe, la patience devient une arme sans offrir de cadeau aux équipes qui reviennent.
-Le passage en CôteNord mélange horizon, roches et distances intimidantes, comme si le territoire écrivait l'étape.
+Le passage sur la Côte-Nord mélange des horizons, des roches et des distances intimidantes, comme si le territoire écrivait l'étape.
 Les poursuivants observent les repères au pied du mur, pour garder la bonne lecture du jeu malgré le bruit.
 Le groupe répartit les rôles dans le brouillard, pour éviter que la prochaine erreur coûte la finale.
 Lorsqu’une balise demeure introuvable, le trio relie les formes aux régions, puis associe chaque son à une lettre avec une précision tranquille.
 L'équipe dessine le profil de la vallée avec patience et méthode, puis lit les courbes de niveau avant le prochain contrôle.
-La meneuse hésite dans le brouillard, puis relance la discussion avant que le ballotage ne rappelle l'enjeu réel.
+La meneuse hésite dans le brouillard, puis relance la discussion avant que le ballottage ne rappelle l'enjeu réel.
 Quand le terrain devient moins prévisible, la capitaine protège une réserve pour les rapides avec toute la concentration nécessaire; le terrain impose son propre rythme.
 Près des îles de Mingan, le duo prépare le prochain virage en respectant le plan collectif, tandis que la confiance circule encore.
 Au pied du mur, le duo de tête prend une seconde pour respirer, puis choisit l'option longue quand la consigne semble plus lourde que le sac.
 Quand une hypothèse résiste aux vérifications, les partenaires ralentissent sous le surplomb sans briser le rythme commun; la météo refuse de se stabiliser.
-Le trio vérifie les noeuds à l'entrée du canyon, même si le corps demande une pause que le chrono refuse.
+Le trio vérifie les nœuds à l'entrée du canyon, même si le corps demande une pause que le chrono refuse.
 Lorsque la prochaine transition approche, la formation retrouve le ruisseau sur la carte, puis repère une borne ancienne avant le prochain relais.
-Sur la falaise, le groupe vérifie les noeuds et comprend que la victoire se cache parfois derrière une décision simple.
+Sur la falaise, le groupe vérifie les nœuds et comprend que la victoire se cache parfois derrière une décision simple.
 Le groupe lit le courant devant la grille logique, même si le corps demande une pause que le chrono refuse.
 Quand les encouragements montent de la rive, les poursuivants préparent le prochain relais avant le prochain relais; une idée plus simple apparaît.
-La meneuse hésite près de la balise, puis porte la charge avant que le ballotage ne rappelle l'enjeu réel.
+La meneuse hésite près de la balise, puis porte la charge avant que le ballottage ne rappelle l'enjeu réel.
 Autour du feu de camp, les deux amies partagent leur réserve d’eau, puis portent le matériel collectif avec patience et méthode.
 Dans l'étape, le harnais sépare l'audace de la panique, pendant que l'équipe cherche encore son souffle.
 Durant les dernières minutes, les amis reviennent sur le peloton, puis gardent une réserve pour la finale sans briser le rythme commun.
 Au prochain méandre, le trio observe la réaction de l'eau, puis rame avec une force mesurée avec une confiance nouvelle.
 Au camp de transition, les coéquipières simplifient le problème logique avec une confiance nouvelle, tandis que les souvenirs se complètent.
-Sur le quai glissant, le capitaine prend une seconde pour respirer, puis relance la discussion avant que le ballotage ne rappelle l'enjeu réel.
+Sur le quai glissant, le capitaine prend une seconde pour respirer, puis relance la discussion avant que le ballottage ne rappelle l'enjeu réel.
 Quand le juge annonce une nouvelle contrainte, les poursuivants partagent la charge sans perdre le fil; la météo refuse de se stabiliser.
-Le duo de tête répartit les rôles au bord du rapide, avant que le ballotage ne rappelle l'enjeu réel.
+Le duo de tête répartit les rôles au bord du rapide, avant que le ballottage ne rappelle l'enjeu réel.
 Lorsque le terrain devient moins prévisible, les amis suivent la ligne de crête, puis dessinent le profil de la vallée malgré les jambes lourdes.
 Les finalistes comptent les balises au milieu des racines, pour garder la bonne lecture du jeu malgré le bruit.
 Les poursuivants portent la charge au bord du rapide, pour ne pas laisser le classement imposer la peur.
-Les finalistes hésitent dans le brouillard, puis cachent leur inquiétude avant que le ballotage ne rappelle l'enjeu réel.
+Les finalistes hésitent dans le brouillard, puis cachent leur inquiétude avant que le ballottage ne rappelle l'enjeu réel.
 Au pied du mur, les finalistes observent les repères et comprennent que la bonne lecture du jeu vaut plus qu'un sprint.
 Lorsque la fatigue trouble les décisions, le groupe prépare le prochain virage, puis lit les remous après avoir consulté le groupe.
 Quand la carte semble contradictoire, les coéquipières retiennent une portion du code avec le sommet en vue; les encouragements gagnent en force.
 Le trio ne dit presque rien dans le brouillard, mais gère le retard sans savoir si les autres équipes ont déjà trouvé l'indice.
 Un équipier cache son inquiétude devant la grille logique, sans savoir si les autres équipes ont déjà trouvé l'indice.
 Dans l'étape, la corde ment moins que la fatigue, et personne ne veut porter la responsabilité du retard.
-Une participante vérifie les noeuds dans le brouillard, pour garder la bonne lecture du jeu malgré le bruit.
+Une participante vérifie les nœuds dans le brouillard, pour garder la bonne lecture du jeu malgré le bruit.
 Sur le quai glissant, le groupe surveille la météo et comprend que la victoire se cache parfois derrière une décision simple.
 Le fanion apparaît, et soudain la force seule ne suffit plus avec une précision que personne ne peut improviser.
 Les alliés demandent un relais au bon moment sans céder à la précipitation, puis protègent la confiance commune lorsque la brume efface la crête.
@@ -206,28 +206,28 @@ Au pied du mur, un équipier répartit les rôles et comprend que le classement 
 Près du lac, le capitaine choisit l'option longue et comprend que la consigne semble plus lourde que le sac.
 Un équipier hésite au milieu des racines, puis compte les balises quand la consigne semble plus lourde que le sac.
 Près du lac, le trio prend une seconde pour respirer, puis répartit les rôles quand la consigne semble plus lourde que le sac.
-Sur la falaise, un équipier révise la carte et comprend que le ballotage peut rappeler l'enjeu réel à tout moment.
+Sur la falaise, un équipier révise la carte et comprend que le ballottage peut rappeler l'enjeu réel à tout moment.
 Dans Chaudière-Appalaches, l'équipe corrige son azimut, puis compte les pas jusqu’au contrôle sans céder à la précipitation.
 Une participante hésite dans le brouillard, puis calme la panique sans savoir si les autres équipes ont déjà trouvé l'indice.
 La roue glisse, et soudain la stratégie remplace l'élan dans un décor qui ne laisse aucune marge facile.
 Quand la prochaine transition approche, une participante protège ses jambes dans la descente dans un silence attentif; personne ne rompt la cadence.
 Lorsque la pression gagne les finalistes, l'équipe coupe le vent pour le groupe, puis relance progressivement la cadence avec toute la concentration nécessaire.
 Le groupe partage sa réserve d’eau sans perdre le fil, puis répartit les rôles clairement avant le prochain contrôle.
-Le capitaine hésite pendant la remontée, puis révise la carte avant que le ballotage ne rappelle l'enjeu réel.
+Le capitaine hésite pendant la remontée, puis révise la carte avant que le ballottage ne rappelle l'enjeu réel.
 Quand le chrono annonce cinq minutes, les partenaires corrigent leur azimut malgré la pluie froide; chaque détail conserve son importance.
 Quand le juge annonce une nouvelle contrainte, le barreur choisit la rive abritée après une rapide vérification; la patience devient alors le meilleur avantage.
 Au camp de transition, le spécialiste du code reconstruit la consigne sans briser le rythme commun, tandis que la fatigue se fait enfin sentir.
 Devant la grille logique, la formation observe les repères et comprend que les autres équipes ont peut-être déjà trouvé l'indice.
-Les finalistes ajustent la boussole sur la falaise, avant que le ballotage ne rappelle l'enjeu réel.
+Les finalistes ajustent la boussole sur la falaise, avant que le ballottage ne rappelle l'enjeu réel.
 Quand le chrono annonce cinq minutes, un équipier prépare le prochain relais sans perdre le fil; le chronomètre continue sans attendre.
-Une participante hésite au pied du mur, puis vérifie les noeuds pour éviter qu'un détail technique ne brise l'élan.
+Une participante hésite au pied du mur, puis vérifie les nœuds pour éviter qu'un détail technique ne brise l'élan.
 Le courant accélère, et soudain le trio doit refaire ses priorités pendant que le chrono continue de faire son travail.
 Sous le vieux pont couvert, l'équipe lit les remous; la confiance circule encore pendant qu’un rire traverse le groupe.
 Dans l'étape, la carte devient soudain le centre du monde, alors que les autres trios se rapprochent dangereusement.
 Les coéquipières confirment la direction du refuge malgré les jambes lourdes, puis observent les repères lointains avant le prochain contrôle.
 Sur les eaux du Saint-Laurent, l'équipage attaque la vague de biais en respectant le plan collectif, tandis que la fatigue se fait enfin sentir.
 Les finalistes hésitent pendant la remontée, puis mémorisent la séquence même si le corps demande une pause que le chrono refuse.
-Les finalistes hésitent après le portage, puis vérifient les noeuds quand la consigne semble plus lourde que le sac.
+Les finalistes hésitent après le portage, puis vérifient les nœuds quand la consigne semble plus lourde que le sac.
 Après une courte pause, les partenaires partagent la magnésie, puis ralentissent sous le surplomb après avoir consulté le groupe.
 Sur la falaise, le trio porte la charge et comprend que le risque peut encore devenir un avantage clair.
 Un équipier ajuste la boussole dans le sous-bois, pour éviter qu'un détail technique ne brise l'élan.
@@ -236,7 +236,7 @@ Au premier changement de rythme, le groupe vise le chenal calme dans un silence 
 Lorsque le chrono annonce cinq minutes, le spécialiste du code déduit le numéro du quai, puis assemble les fragments de carte après avoir consulté le groupe.
 Lorsqu’un rire traverse le groupe, le relayeur coupe le vent pour le groupe, puis prépare le prochain relais sans négliger la sécurité.
 Le groupe hésite pendant la remontée, puis teste le radeau pour garder la bonne lecture du jeu malgré le bruit.
-Les finalistes hésitent sur le quai glissant, puis observent les repères avant que le ballotage ne rappelle l'enjeu réel.
+Les finalistes hésitent sur le quai glissant, puis observent les repères avant que le ballottage ne rappelle l'enjeu réel.
 Le trio simplifie le problème logique sous la pression du chrono, puis déduit le numéro du quai lorsque la fatigue trouble les décisions.
 Au milieu des racines, l'équipe en retard mémorise la séquence et comprend que le classement ne doit pas imposer la peur.
 La dernière équipe hésite près de la balise, puis révise la carte pour ne pas laisser le classement imposer la peur.
@@ -252,7 +252,7 @@ Au Centre-du-Québec, les poursuivants écoutent chaque proposition, puis partag
 Devant la dalle humide, les coéquipières annoncent leur prochain mouvement malgré les jambes lourdes, tandis que le terrain impose son propre rythme.
 La meneuse hésite au bord du rapide, puis calme la panique quand la consigne semble plus lourde que le sac.
 Le capitaine vise la cible près de la balise, car la victoire se cache parfois derrière une décision simple.
-Près de la balise, une participante observe les repères et comprend que un détail technique peut briser l'élan.
+Près de la balise, une participante observe les repères et comprend qu'un détail technique peut briser l'élan.
 Au premier changement de rythme, les poursuivants additionnent les balises rouges avec patience et méthode; le classement reste secondaire.
 Une participante hésite au pied du mur, puis ralentit volontairement pour éviter que la prochaine erreur coûte la finale.
 Après une courte pause, les kayakistes synchronisent leur mouvement, puis protègent une réserve pour les rapides sous la pression du chrono.
@@ -267,19 +267,19 @@ Au milieu des racines, le trio prend une seconde pour respirer, puis surveille l
 Dans le refuge forestier, les finalistes inversent la séquence donnée; la météo refuse de se stabiliser pendant que les réserves commencent à diminuer.
 Le groupe vise la cible sur la falaise, sans savoir si les autres équipes ont déjà trouvé l'indice.
 Le groupe protège son avance dans le sous-bois, pour garder la bonne lecture du jeu malgré le bruit.
-Une participante vérifie les noeuds pendant la remontée, avant que le ballotage ne rappelle l'enjeu réel.
+Une participante vérifie les nœuds pendant la remontée, avant que le ballottage ne rappelle l'enjeu réel.
 Dans la vallée de la Matapédia, le groupe grimpe à petits pas en conservant assez d’énergie, tandis que le chronomètre continue sans attendre.
 Le trio encourage le dernier sur la falaise, sans savoir si les autres équipes ont déjà trouvé l'indice.
 Dans les champs de la Montérégie, les amis alignent deux sommets, puis corrigent leur azimut sans céder à la précipitation.
 L'équipe additionne les balises rouges en conservant assez d’énergie, puis repère un motif discret avant le prochain contrôle.
 Sur le fjord du Saguenay, les amis repèrent le prochain débarquement, puis protègent une réserve pour les rapides avec une attention constante au terrain.
 Le trio corrige sa trajectoire devant la grille logique, pour éviter que la prochaine erreur coûte la finale.
-Au milieu des racines, le groupe prend une seconde pour respirer, puis teste le radeau avant que le ballotage ne rappelle l'enjeu réel.
+Au milieu des racines, le groupe prend une seconde pour respirer, puis teste le radeau avant que le ballottage ne rappelle l'enjeu réel.
 Un équipier calme la panique près de la balise, afin de transformer un risque en avantage clair.
 La formation grimpe à petits pas avec une précision tranquille, puis adopte une foulée souple avant le prochain contrôle.
 Le groupe gère le retard à l'entrée du canyon, sans savoir si les autres équipes ont déjà trouvé l'indice.
 Le capitaine calme la panique sous les épinettes, pour garder la bonne lecture du jeu malgré le bruit.
-Les poursuivants surveillent la météo sur la falaise, avant que le ballotage ne rappelle l'enjeu réel.
+Les poursuivants surveillent la météo sur la falaise, avant que le ballottage ne rappelle l'enjeu réel.
 Le vent change, et soudain la patience devient une arme sans offrir de cadeau aux équipes qui reviennent.
 Une participante cache son inquiétude à l'entrée du canyon, quand la consigne semble plus lourde que le sac.
 Un équipier relance la discussion dans le brouillard, pour garder la bonne lecture du jeu malgré le bruit.
@@ -292,12 +292,12 @@ La meneuse observe les repères sous les épinettes, afin de transformer un risq
 Dans l'étape, la falaise met les certitudes en désordre, pendant que l'équipe cherche encore son souffle.
 Quand le prochain indice reste muet, les coureurs franchissent le gué sans hésiter avec toute la concentration nécessaire; les encouragements gagnent en force.
 Le trio hésite sur la falaise, puis encourage le dernier pour éviter que la prochaine erreur coûte la finale.
-Le groupe vérifie les noeuds sous les épinettes, afin de transformer un risque en avantage clair.
+Le groupe vérifie les nœuds sous les épinettes, afin de transformer un risque en avantage clair.
 Un équipier change de plan après le portage, sans savoir si les autres équipes ont déjà trouvé l'indice.
 Le groupe vise la cible près de la balise, pour éviter qu'un détail technique ne brise l'élan.
 Quand une équipe rivale revient, les amis préparent le prochain virage sans briser le rythme commun; la finale semble soudain accessible.
 Les finalistes comptent les balises sous les épinettes, afin de transformer un risque en avantage clair.
-Au milieu des racines, les poursuivants respirent, puis observent les repères avant que le ballotage ne rappelle l'enjeu réel.
+Au milieu des racines, les poursuivants respirent, puis observent les repères avant que le ballottage ne rappelle l'enjeu réel.
 La pluie redouble, et soudain il faut écouter avant d'agir sans offrir de cadeau aux équipes qui reviennent.
 Une participante révise la carte à la sortie du marais, pour ne pas laisser le classement imposer la peur.
 L'observatrice teste une nouvelle hypothèse avant le prochain relais, puis associe chaque son à une lettre lorsque le terrain devient moins prévisible.
@@ -306,15 +306,15 @@ Les poursuivants cachent leur inquiétude après le portage, même si le corps d
 Le trio hésite dans le brouillard, puis ajuste la boussole même si le corps demande une pause que le chrono refuse.
 Un équipier encourage le dernier au milieu des racines, même si le corps demande une pause que le chrono refuse.
 Le groupe surveille la météo avant le tir de précision, pour garder la bonne lecture du jeu malgré le bruit.
-Sur le quai glissant, une participante corrige sa trajectoire et comprend que le ballotage peut rappeler l'enjeu réel à tout moment.
-Le trio vise la cible au milieu des racines, avant que le ballotage ne rappelle l'enjeu réel.
+Sur le quai glissant, une participante corrige sa trajectoire et comprend que le ballottage peut rappeler l'enjeu réel à tout moment.
+Le trio vise la cible au milieu des racines, avant que le ballottage ne rappelle l'enjeu réel.
 Les poursuivants mémorisent la séquence avant le tir de précision, afin de transformer un risque en avantage clair.
 Une participante porte la charge dans le sous-bois, sans savoir si les autres équipes ont déjà trouvé l'indice.
 Les poursuivants changent de plan à l'entrée du canyon, quand la consigne semble plus lourde que le sac.
-Une participante écoute le silence près de la balise, avant que le ballotage ne rappelle l'enjeu réel.
+Une participante écoute le silence près de la balise, avant que le ballottage ne rappelle l'enjeu réel.
 Durant les dernières minutes, les cordées partagent la magnésie, puis replacent calmement la corde sans négliger la sécurité.
 La meneuse change de plan sur le quai glissant, quand la consigne semble plus lourde que le sac.
-Les finalistes vérifient les noeuds à la sortie du marais, pour garder la bonne lecture du jeu malgré le bruit.
+Les finalistes vérifient les nœuds à la sortie du marais, pour garder la bonne lecture du jeu malgré le bruit.
 Dans le silence du poste, les amis retiennent une portion du code; le plan initial reste valable pendant qu’un rire traverse le groupe.
 La meneuse ralentit volontairement dans le brouillard, pour ne pas laisser le classement imposer la peur.
 Lorsque le courant accélère, la force seule ne suffit plus avant que la fatigue ne prenne toute la place.
@@ -332,12 +332,12 @@ Un équipier révise la carte à l'entrée du canyon, pour éviter qu'un détail
 La formation cache son inquiétude près du lac, quand la consigne semble plus lourde que le sac.
 La meneuse répartit les rôles sur la falaise, même si le corps demande une pause que le chrono refuse.
 La formation compte les pas jusqu’au contrôle avec le sommet en vue, puis aligne deux sommets lorsqu’une balise demeure introuvable.
-Le trio hésite au pied du mur, puis ajuste la boussole avant que le ballotage ne rappelle l'enjeu réel.
+Le trio hésite au pied du mur, puis ajuste la boussole avant que le ballottage ne rappelle l'enjeu réel.
 Quand le terrain devient moins prévisible, le spécialiste du code décode la suite de symboles en respectant le plan collectif; le classement reste secondaire.
 Les finalistes révisent la carte près du lac, même si le corps demande une pause que le chrono refuse.
 À la sortie du rapide, l'équipage protège une réserve pour les rapides, puis laisse glisser le bateau malgré les jambes lourdes.
 Quand les encouragements montent de la rive, la capitaine retrouve le ruisseau sur la carte en respectant le plan collectif; les souvenirs se complètent.
-Les poursuivants protègent leur avance sous les épinettes, avant que le ballotage ne rappelle l'enjeu réel.
+Les poursuivants protègent leur avance sous les épinettes, avant que le ballottage ne rappelle l'enjeu réel.
 Le groupe révise la carte devant la grille logique, même si le corps demande une pause que le chrono refuse.
 Le trio surveille la météo sous les épinettes, sans savoir si les autres équipes ont déjà trouvé l'indice.
 La meneuse protège son avance sur le quai glissant, car la victoire se cache parfois derrière une décision simple.
@@ -363,7 +363,7 @@ Les finalistes lisent le courant sur la falaise, pour éviter que la prochaine e
 Une participante change de plan dans le brouillard, pour ne pas laisser le classement imposer la peur.
 Le capitaine gère le retard au pied du mur, pour garder la bonne lecture du jeu malgré le bruit.
 Les finalistes révisent la carte avant le tir de précision, sans savoir si les autres équipes ont déjà trouvé l'indice.
-Les finalistes calment la panique pendant la remontée, avant que le ballotage ne rappelle l'enjeu réel.
+Les finalistes calment la panique pendant la remontée, avant que le ballottage ne rappelle l'enjeu réel.
 Un équipier porte la charge à l'entrée du canyon, pour garder la bonne lecture du jeu malgré le bruit.
 Le groupe ajuste la boussole avant le tir de précision, afin de transformer un risque en avantage clair.
 Les grimpeurs sécurisent le passage exposé avec une précision tranquille, puis contournent la dalle humide lorsque le vent tourne vers l’est.
@@ -378,7 +378,7 @@ Le groupe change de plan près du lac, car la victoire se cache parfois derrièr
 Le capitaine compte les balises à la sortie du marais, même si le corps demande une pause que le chrono refuse.
 La meneuse surveille la météo sur le quai glissant, pour garder la bonne lecture du jeu malgré le bruit.
 À la croisée des sentiers, un équipier porte le matériel collectif, puis partage sa réserve d’eau avec patience et méthode.
-Les finalistes lisent le courant au milieu des racines, avant que le ballotage ne rappelle l'enjeu réel.
+Les finalistes lisent le courant au milieu des racines, avant que le ballottage ne rappelle l'enjeu réel.
 Pendant le relais nocturne, les coéquipières observent le grain du granite, puis cherchent une fissure solide après avoir consulté le groupe.
 Un équipier ajuste la boussole sous les épinettes, pour éviter qu'un détail technique ne brise l'élan.
 La meneuse répartit les rôles sur le quai glissant, pour éviter que la prochaine erreur coûte la finale.
@@ -395,7 +395,7 @@ Le groupe relance progressivement la cadence sans céder à la précipitation, p
 Sur le chemin de gravier, la meneuse coupe le vent pour le groupe avant le prochain relais, tandis que les souvenirs se complètent.
 Un équipier relance la discussion devant la grille logique, afin de transformer un risque en avantage clair.
 Quand la prochaine transition approche, les partenaires raccourcissent leurs coups de pagaie avec une attention constante au terrain; personne ne rompt la cadence.
-Les poursuivants corrigent leur trajectoire au milieu des racines, avant que le ballotage ne rappelle l'enjeu réel.
+Les poursuivants corrigent leur trajectoire au milieu des racines, avant que le ballottage ne rappelle l'enjeu réel.
 Au cœur de la Mauricie, le duo garde le dialogue ouvert; le silence facilite la décision pendant que le plan initial montre ses limites.
 Quand les réserves commencent à diminuer, la capitaine classe les indices utiles malgré une fatigue grandissante; une idée plus simple apparaît.
 Au retour de la lumière, le trio prend une décision unanime malgré une fatigue grandissante; le chronomètre continue sans attendre.
@@ -406,7 +406,7 @@ La formation répartit les rôles dans le sous-bois, afin de transformer un risq
 Dans la boue profonde, les poursuivants franchissent le gué sans hésiter, puis reviennent sur le peloton en conservant assez d’énergie.
 Les finalistes encouragent le dernier sous les épinettes, afin de transformer un risque en avantage clair.
 La formation ajuste la boussole après le portage, pour éviter que la prochaine erreur coûte la finale.
-Un équipier protège son avance devant la grille logique, avant que le ballotage ne rappelle l'enjeu réel.
+Un équipier protège son avance devant la grille logique, avant que le ballottage ne rappelle l'enjeu réel.
 Dans la toundra du Nunavik, les finalistes attendent une amie dans la pente; la patience devient alors le meilleur avantage pendant que le juge annonce une nouvelle contrainte.
 Les poursuivants gèrent le retard avant le tir de précision, quand la consigne semble plus lourde que le sac.
 Dans Chaudière-Appalaches, le capitaine prend une décision unanime; le chronomètre continue sans attendre pendant qu’une balise demeure introuvable.
@@ -416,7 +416,7 @@ La formation mémorise quatre couleurs avec une attention constante au terrain, 
 Le groupe gère le retard devant la grille logique, sans savoir si les autres équipes ont déjà trouvé l'indice.
 La meneuse relance la discussion dans le brouillard, pour ne pas laisser le classement imposer la peur.
 Lorsque le terrain devient moins prévisible, la meneuse prend une décision unanime, puis garde le dialogue ouvert avec une précision tranquille.
-Les poursuivants vérifient les noeuds à la sortie du marais, pour ne pas laisser le classement imposer la peur.
+Les poursuivants vérifient les nœuds à la sortie du marais, pour ne pas laisser le classement imposer la peur.
 Lorsque le silence tombe, la stratégie remplace l'élan dans un décor qui ne laisse aucune marge facile.
 Le trio observe les repères à la sortie du marais, même si le corps demande une pause que le chrono refuse.
 Lorsque le vent change, la stratégie remplace l'élan sans offrir de cadeau aux équipes qui reviennent.
@@ -434,7 +434,7 @@ Une participante observe les repères dans le brouillard, sans savoir si les aut
 La meneuse lit le courant au pied du mur, sans savoir si les autres équipes ont déjà trouvé l'indice.
 Sur la crête boisée, un équipier partage la magnésie; la patience devient alors le meilleur avantage pendant que la pression gagne les finalistes.
 Au lever du jour, les amis relancent progressivement la cadence avant le prochain contrôle; la confiance circule encore.
-La meneuse change de plan près du lac, avant que le ballotage ne rappelle l'enjeu réel.
+La meneuse change de plan près du lac, avant que le ballottage ne rappelle l'enjeu réel.
 Le trio encourage le dernier près du lac, pour garder la bonne lecture du jeu malgré le bruit.
 Lorsque le sentier disparaît, l'instinct doit rester discipliné sans offrir de cadeau aux équipes qui reviennent.
 Une participante mémorise la séquence à l'entrée du canyon, même si le corps demande une pause que le chrono refuse.
@@ -453,7 +453,7 @@ Dès la prochaine balise, les poursuivants partagent leur réserve d’eau avec 
 Le trio serre le baudrier près de la balise, sans savoir si les autres équipes ont déjà trouvé l'indice.
 Les poursuivants confient la carte à un partenaire en respectant le plan collectif, puis protègent la confiance commune lorsqu’une équipe rivale revient.
 Le trio révise la carte avant le tir de précision, pour ne pas laisser le classement imposer la peur.
-Les poursuivants écoutent le silence dans le brouillard, avant que le ballotage ne rappelle l'enjeu réel.
+Les poursuivants écoutent le silence dans le brouillard, avant que le ballottage ne rappelle l'enjeu réel.
 La roue glisse, et soudain la force seule ne suffit plus avant que la fatigue ne prenne toute la place.
 Le capitaine cache son inquiétude près du lac, car la victoire se cache parfois derrière une décision simple.
 Lorsque la brume efface la crête, la meneuse corrige son azimut, puis lit les courbes de niveau avec patience et méthode.
@@ -464,13 +464,13 @@ Au dernier point d’eau, les deux amies encouragent le dernier après une rapid
 Le groupe compte les balises près du lac, afin de transformer un risque en avantage clair.
 Les partenaires grimpent à petits pas sans céder à la précipitation, puis gèrent le dernier ravitaillement lorsque la pression gagne les finalistes.
 La meneuse calme la panique dans le sous-bois, afin de transformer un risque en avantage clair.
-Une participante calme la panique sous les épinettes, avant que le ballotage ne rappelle l'enjeu réel.
+Une participante calme la panique sous les épinettes, avant que le ballottage ne rappelle l'enjeu réel.
 Devant la dalle humide, la grimpeuse étudie la ligne de montée avant le prochain relais, tandis qu’une idée plus simple apparaît.
 Au sommet de la côte, une participante revient sur le peloton; chaque détail conserve son importance pendant que la pression gagne les finalistes.
 Le capitaine observe les repères au bord du rapide, même si le corps demande une pause que le chrono refuse.
 Après le passage du gué, la meneuse corrige légèrement la trajectoire, puis raccourcit ses coups de pagaie avec une précision tranquille.
 Quand le juge annonce une nouvelle contrainte, le groupe associe chaque son à une lettre malgré la pluie froide; le classement reste secondaire.
-Les poursuivants serrent le baudrier à l'entrée du canyon, avant que le ballotage ne rappelle l'enjeu réel.
+Les poursuivants serrent le baudrier à l'entrée du canyon, avant que le ballottage ne rappelle l'enjeu réel.
 Le groupe compte les balises sur la falaise, pour éviter que la prochaine erreur coûte la finale.
 Le trio corrige sa trajectoire à l'entrée du canyon, pour éviter que la prochaine erreur coûte la finale.
 Les finalistes changent de plan au bord du rapide, pour ne pas laisser le classement imposer la peur.
@@ -486,27 +486,27 @@ Lorsque le fanion apparaît, le trio doit refaire ses priorités dans un décor 
 Quand une équipe rivale revient, un équipier dessine le profil de la vallée avec patience et méthode; le classement reste secondaire.
 Dans Lanaudière, les alliés portent le matériel collectif malgré la pluie froide, tandis que le groupe garde assez de lucidité.
 Le capitaine choisit l'option longue après le portage, pour ne pas laisser le classement imposer la peur.
-La formation encourage le dernier après le portage, avant que le ballotage ne rappelle l'enjeu réel.
+La formation encourage le dernier après le portage, avant que le ballottage ne rappelle l'enjeu réel.
 Dans la brume matinale, les coéquipières visent le chenal calme; le silence facilite la décision pendant que le prochain indice reste muet.
 Le trio contourne la dalle humide avec patience et méthode, puis annonce son prochain mouvement lorsqu’un fanion disparaît derrière les arbres.
 La meneuse serre le baudrier près du lac, sans savoir si les autres équipes ont déjà trouvé l'indice.
 Un équipier vise la cible pendant la remontée, pour éviter que la prochaine erreur coûte la finale.
 La meneuse révise la carte au milieu des racines, pour éviter qu'un détail technique ne brise l'élan.
 Les poursuivants comptent les balises pendant la remontée, pour éviter que la prochaine erreur coûte la finale.
-Le capitaine serre le baudrier sous les épinettes, avant que le ballotage ne rappelle l'enjeu réel.
+Le capitaine serre le baudrier sous les épinettes, avant que le ballottage ne rappelle l'enjeu réel.
 Quand la lumière baisse sous les épinettes, les finalistes cherchent une fissure solide avec toute la concentration nécessaire; le chronomètre continue sans attendre.
 Sur la petite vire, les cordées cherchent une fissure solide; le chronomètre continue sans attendre pendant que la pluie couvre les traces.
 La rive s'éloigne, et soudain la patience devient une arme pour garder la finale dans le champ des possibles.
-La formation porte la charge près de la balise, avant que le ballotage ne rappelle l'enjeu réel.
+La formation porte la charge près de la balise, avant que le ballottage ne rappelle l'enjeu réel.
 Les finalistes corrigent légèrement la trajectoire avant le prochain contrôle, puis gardent le canot dans la ligne lorsqu’une balise demeure introuvable.
 Les finalistes relancent la discussion dans le brouillard, pour garder la bonne lecture du jeu malgré le bruit.
 Quand une hypothèse résiste aux vérifications, l'équipe stabilise le radeau chargé sans gaspiller les réserves; le plan initial reste valable.
 Les coéquipières relient les formes aux régions sans céder à la précipitation, puis mémorisent quatre couleurs avant le prochain contrôle.
 Le trio gère le retard sur la falaise, car la victoire se cache parfois derrière une décision simple.
-Les finalistes serrent le baudrier au milieu des racines, avant que le ballotage ne rappelle l'enjeu réel.
-Le groupe répartit les rôles près de la balise, avant que le ballotage ne rappelle l'enjeu réel.
+Les finalistes serrent le baudrier au milieu des racines, avant que le ballottage ne rappelle l'enjeu réel.
+Le groupe répartit les rôles près de la balise, avant que le ballottage ne rappelle l'enjeu réel.
 La meneuse serre le baudrier au milieu des racines, pour garder la bonne lecture du jeu malgré le bruit.
-Un équipier vérifie les noeuds dans le sous-bois, pour garder la bonne lecture du jeu malgré le bruit.
+Un équipier vérifie les nœuds dans le sous-bois, pour garder la bonne lecture du jeu malgré le bruit.
 Le trio ralentit volontairement pendant la remontée, pour éviter que la prochaine erreur coûte la finale.
 Un équipier écoute le silence à l'entrée du canyon, pour éviter qu'un détail technique ne brise l'élan.
 Le capitaine protège son avance devant la grille logique, car la victoire se cache parfois derrière une décision simple.
@@ -526,10 +526,10 @@ La formation écoute le silence dans le brouillard, pour éviter qu'un détail t
 Sous une arête rocheuse, le duo grimpe avec une force précise, puis protège la corde des arêtes malgré une fatigue grandissante.
 Les partenaires distinguent le vrai carrefour après une rapide vérification, puis comptent les pas jusqu’au contrôle avant le prochain contrôle.
 La meneuse lit le courant à la sortie du marais, pour éviter qu'un détail technique ne brise l'élan.
-Le groupe vérifie les noeuds sur la falaise, pour ne pas laisser le classement imposer la peur.
+Le groupe vérifie les nœuds sur la falaise, pour ne pas laisser le classement imposer la peur.
 Un équipier corrige sa trajectoire à la sortie du marais, car la victoire se cache parfois derrière une décision simple.
 Près du mont Royal, le cartographe compte les pas jusqu’au contrôle, puis corrige son azimut malgré la pluie froide.
-Le capitaine porte la charge au milieu des racines, avant que le ballotage ne rappelle l'enjeu réel.
+Le capitaine porte la charge au milieu des racines, avant que le ballottage ne rappelle l'enjeu réel.
 Lorsque la lumière baisse, le trio doit refaire ses priorités dans un décor qui ne laisse aucune marge facile.
 Derrière le vieux moulin, le trio demande un relais au bon moment; le silence facilite la décision pendant que la carte semble contradictoire.
 La formation répartit les rôles sous les épinettes, pour éviter que la prochaine erreur coûte la finale.
@@ -543,7 +543,7 @@ Quand la pluie couvre les traces, les coéquipières testent une nouvelle hypoth
 Au Bas-Saint-Laurent, le groupe retrouve le ruisseau sur la carte; le plan initial reste valable pendant que les encouragements montent de la rive.
 La formation porte la charge pendant la remontée, car la victoire se cache parfois derrière une décision simple.
 Un équipier gère le retard au pied du mur, même si le corps demande une pause que le chrono refuse.
-Le groupe ralentit volontairement à la sortie du marais, avant que le ballotage ne rappelle l'enjeu réel.
+Le groupe ralentit volontairement à la sortie du marais, avant que le ballottage ne rappelle l'enjeu réel.
 Au moment de choisir, le duo garde le dialogue ouvert, puis demande un relais au bon moment sans perdre le fil.
 Les finalistes mémorisent la séquence dans le sous-bois, sans savoir si les autres équipes ont déjà trouvé l'indice.
 La meneuse calme la panique dans le sous-bois, pour éviter que la prochaine erreur coûte la finale.
@@ -556,13 +556,13 @@ La formation relance la discussion avant le tir de précision, pour éviter que 
 Le groupe cache son inquiétude sur le quai glissant, car la victoire se cache parfois derrière une décision simple.
 Le sentier disparaît, et soudain la confiance circule autrement dans un décor qui ne laisse aucune marge facile.
 La capitaine porte le matériel collectif après avoir consulté le groupe, puis confie la carte à un partenaire lorsqu’un fanion disparaît derrière les arbres.
-Le défi du réparation du vélo déplace la chaîne capricieuse et demande une patience forcée, avant que le prochain indice ne redistribue les positions.
+Le défi de la réparation du vélo exige de remettre en place une chaîne capricieuse et demande une patience forcée, avant que le prochain indice ne redistribue les positions.
 Dès la prochaine balise, la coureuse résiste au départ trop rapide avant le prochain contrôle; chaque détail conserve son importance.
 Quand les réserves commencent à diminuer, la formation fait confiance à ses pieds avant le prochain contrôle; la confiance circule encore.
 La formation protège son avance à la sortie du marais, même si le corps demande une pause que le chrono refuse.
 La grimpeuse garde trois points de contact avec toute la concentration nécessaire, puis observe le grain du granite lorsque la prochaine transition approche.
 Les poursuivants choisissent l'option longue sur le quai glissant, pour éviter qu'un détail technique ne brise l'élan.
-Pendant le tir à l'arc, les mains tremblantes relance le trio; il faut une respiration maîtrisée, quand la finale cesse d'être une idée lointaine.
+Pendant le tir à l'arc, les mains tremblantes déconcentrent le trio; il faut une respiration maîtrisée, quand la finale cesse d'être une idée lointaine.
 Les poursuivants relancent la discussion près de la balise, pour garder la bonne lecture du jeu malgré le bruit.
 Lorsque le fanion apparaît, il faut écouter avant d'agir avec une précision que personne ne peut improviser.
 Un équipier teste le radeau à l'entrée du canyon, car la victoire se cache parfois derrière une décision simple.
@@ -584,13 +584,13 @@ Près du coffre verrouillé, la meneuse mémorise quatre couleurs; la confiance 
 Le trio choisit l'option longue avant le tir de précision, pour ne pas laisser le classement imposer la peur.
 Au parc de la Jacques-Cartier, le duo compte les pas jusqu’au contrôle; les rivaux choisissent une autre option pendant que les encouragements montent de la rive.
 La formation choisit l'option longue devant la grille logique, même si le corps demande une pause que le chrono refuse.
-Le trio cache son inquiétude au bord du rapide, avant que le ballotage ne rappelle l'enjeu réel.
+Le trio cache son inquiétude au bord du rapide, avant que le ballottage ne rappelle l'enjeu réel.
 Une participante corrige sa trajectoire au bord du rapide, pour éviter qu'un détail technique ne brise l'élan.
 La capitaine évite l'ancien chemin forestier sans céder à la précipitation, puis observe les repères lointains lorsqu’un rire traverse le groupe.
 Le trio compte les balises sur la falaise, car la victoire se cache parfois derrière une décision simple.
 Avant la longue montée, les poursuivants testent une nouvelle hypothèse, puis relient les formes aux régions sans gaspiller les réserves.
 Les analystes écartent les fausses pistes après une rapide vérification, puis mémorisent quatre couleurs lorsque la carte semble contradictoire.
-Avant le signal, les mémoristes relient les formes aux régions sans négliger la sécurité; le plan initial reste valable.
+Avant le signal, les participants relient les formes aux régions sans négliger la sécurité; le plan initial reste valable.
 Une participante mémorise la séquence dans le brouillard, même si le corps demande une pause que le chrono refuse.
 Lorsque le silence tombe, l'instinct doit rester discipliné avec une précision que personne ne peut improviser.
 Quand une balise demeure introuvable, la navigatrice suit la ligne de crête sous la pression du chrono; une nouvelle trajectoire se dessine.
@@ -606,7 +606,7 @@ Quand l'indice tombe enfin, les équipes comprennent que la course vient de reco
 Les partenaires alternent course et marche avant le prochain relais, puis gardent une réserve pour la finale avant le prochain contrôle.
 Près du col venteux, une participante replace calmement la corde, puis étudie la ligne de montée sans briser le rythme commun.
 La meneuse cache son inquiétude près du lac, afin de transformer un risque en avantage clair.
-Le capitaine vérifie les noeuds au milieu des racines, pour éviter qu'un détail technique ne brise l'élan.
+Le capitaine vérifie les nœuds au milieu des racines, pour éviter qu'un détail technique ne brise l'élan.
 Le trio écoute le silence avant le tir de précision, pour éviter qu'un détail technique ne brise l'élan.
 Le capitaine change de plan après le portage, pour ne pas laisser le classement imposer la peur.
 Au Centre-du-Québec, l'orienteuse observe les repères lointains; le plan initial reste valable pendant qu’une hypothèse résiste aux vérifications.
@@ -626,23 +626,23 @@ Un équipier vise la cible près de la balise, car la victoire se cache parfois 
 La corde se tend, et soudain le trio doit refaire ses priorités sans offrir de cadeau aux équipes qui reviennent.
 Le groupe corrige sa trajectoire dans le sous-bois, même si le corps demande une pause que le chrono refuse.
 Les poursuivants visent la cible avant le tir de précision, sans savoir si les autres équipes ont déjà trouvé l'indice.
-Une participante répartit les rôles dans le brouillard, avant que le ballotage ne rappelle l'enjeu réel.
+Une participante répartit les rôles dans le brouillard, avant que le ballottage ne rappelle l'enjeu réel.
 Un équipier teste le radeau près du lac, pour ne pas laisser le classement imposer la peur.
 Le trio répartit les rôles au milieu des racines, afin de transformer un risque en avantage clair.
 Un équipier répartit les rôles près de la balise, pour ne pas laisser le classement imposer la peur.
-La meneuse ralentit volontairement sur le quai glissant, avant que le ballotage ne rappelle l'enjeu réel.
+La meneuse ralentit volontairement sur le quai glissant, avant que le ballottage ne rappelle l'enjeu réel.
 La formation cache son inquiétude après le portage, sans savoir si les autres équipes ont déjà trouvé l'indice.
 Les finalistes corrigent leur trajectoire près de la balise, pour éviter qu'un détail technique ne brise l'élan.
 Sur les berges de Laval, une participante distingue le vrai carrefour avec une précision tranquille, tandis que les souvenirs se complètent.
 Durant la première boucle, le trio franchit le gué sans hésiter avec toute la concentration nécessaire; le terrain impose son propre rythme.
 Le capitaine corrige sa trajectoire avant le tir de précision, pour éviter qu'un détail technique ne brise l'élan.
-Le défi du réparation du vélo exige la chaîne capricieuse et demande une patience forcée, alors que le chrono réduit chaque marge d'erreur.
+Le défi de la réparation du vélo exige de remettre en place la chaîne capricieuse et demande une patience forcée, alors que le chrono réduit chaque marge d'erreur.
 Le trio ralentit volontairement à l'entrée du canyon, afin de transformer un risque en avantage clair.
 La canotière maintient la cadence en conservant assez d’énergie, puis lit les remous avant le prochain contrôle.
 Le capitaine encourage le dernier pendant la remontée, car la victoire se cache parfois derrière une décision simple.
 Les poursuivants mémorisent la séquence au bord du rapide, quand la consigne semble plus lourde que le sac.
 Une participante surveille la météo au milieu des racines, car la victoire se cache parfois derrière une décision simple.
-La meneuse gère le retard sous les épinettes, avant que le ballotage ne rappelle l'enjeu réel.
+La meneuse gère le retard sous les épinettes, avant que le ballottage ne rappelle l'enjeu réel.
 Près du juge de parcours, le trio écarte les fausses pistes; le chronomètre continue sans attendre pendant qu’une équipe rivale revient.
 Les poursuivants testent le radeau sur la falaise, sans savoir si les autres équipes ont déjà trouvé l'indice.
 Une participante compte les balises sur le quai glissant, pour éviter qu'un détail technique ne brise l'élan.
@@ -651,7 +651,7 @@ Les poursuivants gardent le canot dans la ligne avec patience et méthode, puis 
 Le spécialiste du code reconstruit la consigne après une rapide vérification, puis repère l'élément incohérent avant le prochain contrôle.
 Le capitaine relance la discussion sous les épinettes, quand la consigne semble plus lourde que le sac.
 Derrière la grande bouée, le duo compte les coups de pagaie avec toute la concentration nécessaire, tandis que le groupe garde assez de lucidité.
-Le défi du traversée de plage punit le sable mou et demande une endurance discrète, et force chacun à choisir entre vitesse, prudence et confiance.
+Le défi de la traversée de la plage met le trio à l'épreuve dans le sable mou et demande une endurance discrète; chacun doit choisir entre vitesse, prudence et confiance.
 Lorsque la roue glisse, il faut écouter avant d'agir dans un décor qui ne laisse aucune marge facile.
 Lorsque la corde se tend, la confiance circule autrement avec une précision que personne ne peut improviser.
 Un équipier choisit l'option longue au milieu des racines, pour éviter que la prochaine erreur coûte la finale.
@@ -664,22 +664,22 @@ Les poursuivants ralentissent volontairement après le portage, pour ne pas lais
 Les cordées choisissent une prise stable avec une attention constante au terrain, puis protègent la corde des arêtes lorsque le plan initial montre ses limites.
 Un équipier observe les repères dans le brouillard, même si le corps demande une pause que le chrono refuse.
 Lorsque le plan initial montre ses limites, les grimpeurs étudient la ligne de montée, puis vérifient le nœud principal avec patience et méthode.
-Un équipier vérifie les noeuds au milieu des racines, pour ne pas laisser le classement imposer la peur.
+Un équipier vérifie les nœuds au milieu des racines, pour ne pas laisser le classement imposer la peur.
 Lorsque le prochain indice reste muet, la meneuse prépare le prochain virage, puis maintient la cadence avec une attention constante au terrain.
 Le trio ralentit volontairement pendant la remontée, quand la consigne semble plus lourde que le sac.
 Au belvédère du parcours, la formation contourne la dalle humide en respectant le plan collectif, tandis que la finale semble soudain accessible.
 Lorsque le fanion apparaît, la force seule ne suffit plus pour garder la finale dans le champ des possibles.
 Une participante gère le retard près de la balise, même si le corps demande une pause que le chrono refuse.
 Une amie accueille les critiques utiles avant le prochain relais, puis partage la charge lorsqu’une balise demeure introuvable.
-Les poursuivants ralentissent volontairement sur la falaise, avant que le ballotage ne rappelle l'enjeu réel.
+Les poursuivants ralentissent volontairement sur la falaise, avant que le ballottage ne rappelle l'enjeu réel.
 Au prochain méandre, les poursuivants choisissent la rive abritée sans céder à la précipitation, tandis qu’une idée plus simple apparaît.
 La meneuse ralentit volontairement près du lac, pour ne pas laisser le classement imposer la peur.
 Les poursuivants écoutent le silence à l'entrée du canyon, sans savoir si les autres équipes ont déjà trouvé l'indice.
-La formation compte les balises dans le sous-bois, avant que le ballotage ne rappelle l'enjeu réel.
+La formation compte les balises dans le sous-bois, avant que le ballottage ne rappelle l'enjeu réel.
 Lorsque le bois craque, l'erreur devient une leçon immédiate avant que la fatigue ne prenne toute la place.
-La formation ralentit volontairement près du lac, avant que le ballotage ne rappelle l'enjeu réel.
+La formation ralentit volontairement près du lac, avant que le ballottage ne rappelle l'enjeu réel.
 Un équipier répartit les rôles avant le tir de précision, pour éviter que la prochaine erreur coûte la finale.
-Le capitaine vérifie les noeuds à la sortie du marais, pour ne pas laisser le classement imposer la peur.
+Le capitaine vérifie les nœuds à la sortie du marais, pour ne pas laisser le classement imposer la peur.
 Une participante encourage le dernier dans le sous-bois, quand la consigne semble plus lourde que le sac.
 Sur les eaux du Saint-Laurent, la capitaine stabilise le radeau chargé malgré une fatigue grandissante, tandis qu’une idée plus simple apparaît.
 Près du ruisseau glacé, les partenaires alternent course et marche, puis conservent une allure durable dans un silence attentif.
@@ -692,7 +692,7 @@ Au dernier point d’eau, les poursuivants proposent une pause courte; la confia
 La formation serre le baudrier au milieu des racines, même si le corps demande une pause que le chrono refuse.
 Une participante vise la cible dans le sous-bois, pour éviter qu'un détail technique ne brise l'élan.
 Lorsqu’un rire traverse le groupe, l'équipage maintient la cadence, puis stabilise le radeau chargé en conservant assez d’énergie.
-Les finalistes ralentissent volontairement à la sortie du marais, avant que le ballotage ne rappelle l'enjeu réel.
+Les finalistes ralentissent volontairement à la sortie du marais, avant que le ballottage ne rappelle l'enjeu réel.
 Les poursuivants cachent leur inquiétude sur la falaise, pour ne pas laisser le classement imposer la peur.
 Le silence tombe, et soudain le trio doit refaire ses priorités avant que la fatigue ne prenne toute la place.
 La meneuse corrige sa trajectoire au pied du mur, sans savoir si les autres équipes ont déjà trouvé l'indice.
@@ -701,11 +701,11 @@ Les finalistes protègent leur avance avant le tir de précision, pour éviter q
 Une participante cache son inquiétude dans le brouillard, afin de transformer un risque en avantage clair.
 Sur une paroi de Charlevoix, le trio étudie la ligne de montée, puis garde trois points de contact avant le prochain relais.
 Le groupe synchronise son mouvement en conservant assez d’énergie, puis rame avec une force mesurée lorsque les encouragements montent de la rive.
-Le trio teste le radeau devant la grille logique, avant que le ballotage ne rappelle l'enjeu réel.
+Le trio teste le radeau devant la grille logique, avant que le ballottage ne rappelle l'enjeu réel.
 Au cœur des Laurentides, la meneuse résiste au départ trop rapide; la météo refuse de se stabiliser pendant que les réserves commencent à diminuer.
 Les finalistes ralentissent volontairement dans le brouillard, même si le corps demande une pause que le chrono refuse.
 Lorsque la pluie redouble, le trio doit refaire ses priorités dans un décor qui ne laisse aucune marge facile.
-La meneuse encourage le dernier sur la falaise, avant que le ballotage ne rappelle l'enjeu réel.
+La meneuse encourage le dernier sur la falaise, avant que le ballottage ne rappelle l'enjeu réel.
 Un équipier ralentit volontairement près du lac, pour éviter que la prochaine erreur coûte la finale.
 Une participante ralentit volontairement à l'entrée du canyon, car la victoire se cache parfois derrière une décision simple.
 La formation replace calmement la corde après avoir consulté le groupe, puis partage la magnésie avant le prochain contrôle.
@@ -719,13 +719,13 @@ Sur les dunes des Îles-de-la-Madeleine, les coéquipières préparent le procha
 Les poursuivants lisent le courant sur la falaise, quand la consigne semble plus lourde que le sac.
 La formation ralentit volontairement sur la falaise, car la victoire se cache parfois derrière une décision simple.
 L'équipe repère le prochain débarquement en respectant le plan collectif, puis maintient la cadence lorsque le juge annonce une nouvelle contrainte.
-Au contrôle des régions, les mémoristes associent chaque son à une lettre; personne ne rompt la cadence pendant qu’une hypothèse résiste aux vérifications.
+Au contrôle des régions, les participants associent chaque son à une lettre; personne ne rompt la cadence pendant qu’une hypothèse résiste aux vérifications.
 Le groupe écoute le silence pendant la remontée, pour ne pas laisser le classement imposer la peur.
-Pendant le tri des indices, les fausses pistes déplace le trio; il faut un jugement clair, alors que le chrono réduit chaque marge d'erreur.
+Pendant le tri des indices, les fausses pistes désorientent le trio; il faut un jugement clair, alors que le chrono réduit chaque marge d'erreur.
 Dès la prochaine balise, la grimpeuse replace calmement la corde, puis fait confiance à ses pieds avant le prochain contrôle.
 La formation ralentit volontairement après le portage, pour éviter qu'un détail technique ne brise l'élan.
 Les finalistes ralentissent volontairement après le portage, sans savoir si les autres équipes ont déjà trouvé l'indice.
-Les finalistes ralentissent volontairement près du lac, avant que le ballotage ne rappelle l'enjeu réel.
+Les finalistes ralentissent volontairement près du lac, avant que le ballottage ne rappelle l'enjeu réel.
 Le groupe écoute le silence après le portage, même si le corps demande une pause que le chrono refuse.
 Un équipier ralentit volontairement sur la falaise, afin de transformer un risque en avantage clair.
 Le bois craque, et soudain la patience devient une arme avant que la fatigue ne prenne toute la place.
@@ -741,11 +741,11 @@ Le portage ne se gagne pas avec les épaules seulement, mais avec une cadence co
 Lorsque le bois craque, la patience devient une arme sans offrir de cadeau aux équipes qui reviennent.
 En Abitibi, personne ne traverse les silences profonds sans apprendre quelque chose sur son équipe.
 Quand la carte semble contradictoire, la formation atteint la petite vire sans gaspiller les réserves; les encouragements gagnent en force.
-Le groupe ralentit volontairement dans le sous-bois, avant que le ballotage ne rappelle l'enjeu réel.
+Le groupe ralentit volontairement dans le sous-bois, avant que le ballottage ne rappelle l'enjeu réel.
 Le vent peut faire dévier une flèche, mais la panique dévie encore plus la pensée.
 Les poursuivants ralentissent volontairement sur le quai glissant, pour éviter que la prochaine erreur coûte la finale.
 Le passage en Laurentides mélange lacs, sous-bois et sentiers serrés, comme si le territoire écrivait l'étape.
-Pendant le sprint final, les jambes vides révèle le trio; il faut un reste d'orgueil bien placé, alors que le chrono réduit chaque marge d'erreur.
+Pendant le sprint final, les jambes vides ralentissent le trio; il faut un reste d'orgueil bien placé, alors que le chrono réduit chaque marge d'erreur.
 Une participante répartit les rôles dans le brouillard, pour garder la bonne lecture du jeu malgré le bruit.
 Les poursuivants ralentissent volontairement au bord du rapide, pour ne pas laisser le classement imposer la peur.
 Lorsque la lumière baisse, la stratégie remplace l'élan pour garder la finale dans le champ des possibles.
@@ -759,7 +759,7 @@ Sur les dunes des Îles-de-la-Madeleine, le duo grimpe à petits pas, puis relan
 Les finalistes ralentissent volontairement sur le quai glissant, même si le corps demande une pause que le chrono refuse.
 Lorsque la lumière baisse, la confiance circule autrement sans offrir de cadeau aux équipes qui reviennent.
 La formation change de plan près de la balise, car la victoire se cache parfois derrière une décision simple.
-Pendant le traversée de plage, le sable mou exige le trio; il faut une endurance discrète, alors que le chrono réduit chaque marge d'erreur.
+Pendant la traversée de la plage, le sable mou met le trio à l'épreuve; il faut une endurance discrète, alors que le chrono réduit chaque marge d'erreur.
 Un équipier ralentit volontairement dans le brouillard, car la victoire se cache parfois derrière une décision simple.
 Les poursuivants révisent la carte sous les épinettes, pour ne pas laisser le classement imposer la peur.
 Un équipier ralentit volontairement avant le tir de précision, quand la consigne semble plus lourde que le sac.
@@ -779,7 +779,7 @@ Devant la zone de relais, la coureuse coupe le vent pour le groupe sous la press
 Une balise trouvée trop tard transforme la confiance en course de rattrapage.
 La formation attend le signal du relais avant le prochain relais, puis protège ses jambes dans la descente avant le prochain contrôle.
 Près du sommet gaspésien, les cordées replacent calmement la corde; le terrain impose son propre rythme pendant que les encouragements montent de la rive.
-Une participante ralentit volontairement avant le tir de précision, avant que le ballotage ne rappelle l'enjeu réel.
+Une participante ralentit volontairement avant le tir de précision, avant que le ballottage ne rappelle l'enjeu réel.
 Lorsque la carte semble contradictoire, une participante grimpe avec une force précise, puis annonce son prochain mouvement sans céder à la précipitation.
 Le capitaine ralentit volontairement à l'entrée du canyon, pour éviter qu'un détail technique ne brise l'élan.
 Avant le dernier contrôle, les finalistes observent la réaction de l'eau avant le prochain relais; le classement reste secondaire.
@@ -795,18 +795,18 @@ Quand une hypothèse résiste aux vérifications, une participante accélère au
 Près du cap rocheux, l'équipe observe la réaction de l'eau malgré une fatigue grandissante, tandis que la finale semble soudain accessible.
 Lorsque le sentier disparaît, il faut écouter avant d'agir pour garder la finale dans le champ des possibles.
 Près du quai de Tadoussac, le duo lit les remous; le classement reste secondaire pendant que le juge annonce une nouvelle contrainte.
-Pendant le ballotage final, les regards lourds exige le trio; il faut une tension presque immobile, alors que le chrono réduit chaque marge d'erreur.
+Pendant le ballottage final, les regards lourds pèsent sur le trio; il faut une tension presque immobile, alors que le chrono réduit chaque marge d'erreur.
 Lorsque la roue glisse, le trio doit refaire ses priorités avec une précision que personne ne peut improviser.
 Lorsque le courant accélère, l'instinct doit rester discipliné pour garder la finale dans le champ des possibles.
 Le tri des indices commence avec les fausses pistes, mais se gagne surtout avec un jugement clair, alors que le chrono réduit chaque marge d'erreur.
-Outaouais ajoute ses rivières, son forêts et ses courants imprévisibles à une course déjà pleine de pièges.
+L'Outaouais ajoute ses rivières, ses forêts et ses courants imprévisibles à une course déjà pleine de pièges.
 Le groupe ralentit volontairement à la sortie du marais, pour ne pas laisser le classement imposer la peur.
 L'équipe économise ses avant-bras malgré les jambes lourdes, puis observe le grain du granite lorsque les encouragements montent de la rive.
 Près du juge de parcours, l'observatrice mémorise quatre couleurs; la patience devient alors le meilleur avantage pendant que le juge annonce une nouvelle contrainte.
 La meneuse vise le chenal calme sans perdre le fil, puis maintient la cadence lorsque le plan initial montre ses limites.
 Un canot trop lourd devient plus léger quand trois personnes respirent au même rythme.
 Dans les dernières minutes, une équipe parle moins, mais chaque mot compte davantage.
-En Lanaudière, les forêt et le relief donnent aux pentes patientes une intensité que le classement ne montre pas.
+En Lanaudière, les forêts et le relief donnent aux pentes patientes une intensité que le classement ne montre pas.
 Lorsque le bois craque, le trio doit refaire ses priorités avant que la fatigue ne prenne toute la place.
 Le portage de canot commence avec les épaules brûlantes, mais se gagne surtout avec un rythme commun, quand la finale cesse d'être une idée lointaine.
 Lorsqu’une balise demeure introuvable, le trio récupère dans la section plate, puis garde une réserve pour la finale avec le sommet en vue.
@@ -814,35 +814,35 @@ Près de Baie-Saint-Paul, les finalistes préparent le prochain relais, puis gri
 La formation ralentit volontairement près de la balise, car la victoire se cache parfois derrière une décision simple.
 La formation ralentit volontairement sous les épinettes, pour éviter que la prochaine erreur coûte la finale.
 Quand le vent tourne vers l’est, les partenaires replacent calmement la corde en respectant le plan collectif; le groupe garde assez de lucidité.
-Le décor de CôteNord semble immense, mais ce sont les distances intimidantes qui serrent vraiment le jeu.
+Le décor de la Côte-Nord semble immense, mais ce sont les distances intimidantes qui serrent vraiment le jeu.
 Lorsque la lumière baisse, il faut écouter avant d'agir dans un décor qui ne laisse aucune marge facile.
 La météo change le parcours, mais elle change surtout la façon de se parler.
 En le Bas-Saint-Laurent, personne ne traverse les rives exposées sans apprendre quelque chose sur son équipe.
 Lorsque la carte semble contradictoire, le trio écarte les fausses pistes, puis relie les formes aux régions après une rapide vérification.
-Le décor de les Îles semble immense, mais ce sont les vents changeants qui serrent vraiment le jeu.
+Le décor des Îles-de-la-Madeleine semble immense, mais ce sont les vents changeants qui serrent vraiment le jeu.
 Près du panneau renversé, la meneuse écarte les fausses pistes sans perdre le fil, tandis que le silence facilite la décision.
 Quand les réserves commencent à diminuer, les coéquipières protègent une réserve pour les rapides avec le sommet en vue; les souvenirs se complètent.
 Lorsque le bois craque, le trio doit refaire ses priorités pour garder la finale dans le champ des possibles.
 Le dernier pas vers la victoire commence souvent par un doute bien maîtrisé.
 Pendant la transition, les poursuivants visent le chenal calme avec une précision tranquille; le chronomètre continue sans attendre.
-Pendant le tri des indices, les fausses pistes relance le trio; il faut un jugement clair, dans une étape où l'audace doit rester très précise.
+Pendant le tri des indices, les fausses pistes désorientent le trio; il faut un jugement clair, dans une étape où l'audace doit rester très précise.
 Quand le vent tourne vers l’est, les kayakistes maintiennent la cadence avec patience et méthode; les rivaux choisissent une autre option.
 Sur les dunes des Îles-de-la-Madeleine, la meneuse coupe le vent pour le groupe avec une confiance nouvelle, tandis que le classement reste secondaire.
 Devant la zone de relais, les poursuivants conservent une allure durable, puis protègent leurs jambes dans la descente en conservant assez d’énergie.
-CôteNord ajoute ses horizon, son roches et ses distances intimidantes à une course déjà pleine de pièges.
-Pendant le course d'orientation, la carte froissée exige le trio; il faut une lecture patiente, pendant que les autres trios cherchent la même faille.
+La Côte-Nord ajoute ses horizons, ses roches et ses distances intimidantes à une course déjà pleine de pièges.
+Pendant la course d'orientation, la carte froissée met le trio à l'épreuve; il faut une lecture patiente, pendant que les autres trios cherchent la même faille.
 Dans les Cantons, les équipes découvrent que les dénivelés sournois comptent autant que la vitesse pure.
 Le passage en Mauricie mélange eau sombre, pins et portages exigeants, comme si le territoire écrivait l'étape.
-Lanaudière ajoute ses forêt, son relief et ses pentes patientes à une course déjà pleine de pièges.
+Lanaudière ajoute ses forêts, son relief et ses pentes patientes à une course déjà pleine de pièges.
 Lorsqu’une équipe rivale revient, les finalistes contournent la dalle humide, puis font confiance à leurs pieds avec patience et méthode.
 Seulement cinq places en finale attendent les équipes qui savent garder la tête froide.
 Lorsque la pluie redouble, il faut écouter avant d'agir avant que la fatigue ne prenne toute la place.
 Le décor de Charlevoix semble immense, mais ce sont les montées franches qui serrent vraiment le jeu.
 La remontée la plus difficile est parfois celle qui suit une erreur évitable.
-Au contrôle cognitif, les mémoristes reconstruisent la consigne sans céder à la précipitation, tandis que la météo refuse de se stabiliser.
+Au contrôle cognitif, les participants reconstruisent la consigne sans céder à la précipitation, tandis que la météo refuse de se stabiliser.
 Un trio fatigué devient dangereux pour lui-même s'il cesse de vérifier les consignes.
 Le duo vérifie le nœud principal malgré la pluie froide, puis annonce son prochain mouvement avant le prochain contrôle.
-Pendant le tyrolienne, le vide sous les pieds transforme le trio; il faut un courage bref et net, dans une étape où l'audace doit rester très précise.
+Pendant la tyrolienne, le vide sous les pieds déstabilise le trio; il faut un courage bref et net, dans une étape où l'audace doit rester très précise.
 Après le passage du gué, le duo replace calmement la corde, puis atteint la petite vire sans briser le rythme commun.
 Lorsque le silence tombe, il faut écouter avant d'agir dans un décor qui ne laisse aucune marge facile.
 Le décor de Outaouais semble immense, mais ce sont les courants imprévisibles qui serrent vraiment le jeu.
@@ -852,11 +852,11 @@ Le dernier relais transforme les encouragements en carburant pour des jambes ép
 Sous le vieux pont couvert, les amis comptent les coups de pagaie en conservant assez d’énergie, tandis que le silence facilite la décision.
 Le bon choix arrive rarement avec fracas; il ressemble souvent à une phrase simple.
 Dans Saguenay, les équipes découvrent que les échos puissants comptent autant que la vitesse pure.
-Laurentides ajoute ses lacs, son sous-bois et ses sentiers serrés à une course déjà pleine de pièges.
+Les Laurentides ajoutent leurs lacs, leur sous-bois et leurs sentiers serrés à une course déjà pleine de pièges.
 Lorsque le sentier disparaît, le trio doit refaire ses priorités pendant que le chrono continue de faire son travail.
 L'équipe contourne les galets noirs malgré les jambes lourdes, puis attaque la vague de biais avant le prochain contrôle.
 La nature impose ses règles, et les trios doivent apprendre à composer avec chacune.
-Dans CôteNord, les équipes découvrent que les distances intimidantes comptent autant que la vitesse pure.
+Sur la Côte-Nord, les équipes découvrent que les distances intimidantes comptent autant que la vitesse pure.
 Lorsque le bois craque, il faut écouter avant d'agir avant que la fatigue ne prenne toute la place.
 Sur une falaise, le courage devient concret, attaché à un harnais et à une corde.
 Le stress fait courir les jambes, mais seule la lucidité trouve la prochaine balise.
@@ -867,13 +867,13 @@ Les partenaires résistent au départ trop rapide après avoir consulté le grou
 Les coéquipières distinguent le vrai carrefour malgré les jambes lourdes, puis alignent deux sommets lorsqu’un fanion disparaît derrière les arbres.
 Dans le refuge forestier, le groupe repère l'élément incohérent, puis reconstruit la consigne avec patience et méthode.
 La carte ne ment pas, mais elle ne pardonne pas non plus une lecture trop rapide.
-Pendant le marche en ravin, les pierres instables ralentit le trio; il faut une prudence partagée, alors que le chrono réduit chaque marge d'erreur.
-Mauricie ajoute ses eau sombre, son pins et ses portages exigeants à une course déjà pleine de pièges.
-En CôteNord, les horizon et le roches donnent aux distances intimidantes une intensité que le classement ne montre pas.
+Pendant la marche dans le ravin, les pierres instables ralentissent le trio; il faut une prudence partagée, alors que le chrono réduit chaque marge d'erreur.
+La Mauricie ajoute ses eaux sombres, ses pins et ses portages exigeants à une course déjà pleine de pièges.
+Sur la Côte-Nord, les horizons et les roches donnent aux distances intimidantes une intensité que le classement ne montre pas.
 Au début de la descente, la capitaine retient une portion du code sans briser le rythme commun; une nouvelle trajectoire se dessine.
 Rien ne sert de forcer la cadence si le groupe ne respire plus ensemble.
 Au contrôle des régions, le trio associe chaque son à une lettre, puis repère un motif discret dans un silence attentif.
-Pendant le remontée de pente, les mollets lourds punit le trio; il faut une réserve mentale, quand la finale cesse d'être une idée lointaine.
+Pendant la remontée de la pente, les mollets lourds ralentissent le trio; il faut une réserve mentale, quand la finale cesse d'être une idée lointaine.
 Au large de la Côte-Nord, les rameuses laissent glisser le bateau, puis attaquent la vague de biais sans perdre le fil.
 Près du ruisseau glacé, les poursuivants gèrent le dernier ravitaillement, puis observent le rythme des rivaux sans négliger la sécurité.
 Dans les collines de l’Estrie, les éclaireuses mesurent la distance restante; le terrain impose son propre rythme pendant que les réserves commencent à diminuer.
@@ -891,8 +891,8 @@ La ligne d'arrivée paraît simple seulement à ceux qui n'ont pas vu le parcour
 Les alliés partagent leur réserve d’eau sans gaspiller les réserves, puis accueillent les critiques utiles lorsque le plan initial montre ses limites.
 Dans Laurentides, les équipes découvrent que les sentiers serrés comptent autant que la vitesse pure.
 Dans les Îles, les équipes découvrent que les vents changeants comptent autant que la vitesse pure.
-Pendant le remontée de pente, les mollets lourds révèle le trio; il faut une réserve mentale, alors que le chrono réduit chaque marge d'erreur.
-Pendant le pont suspendu, les planches qui bougent révèle le trio; il faut une confiance testée, alors que le chrono réduit chaque marge d'erreur.
+Pendant la remontée de la pente, les mollets lourds mettent le trio à l'épreuve; il faut une réserve mentale, alors que le chrono réduit chaque marge d'erreur.
+Pendant le pont suspendu, les planches qui bougent déstabilisent le trio; il faut une confiance testée, alors que le chrono réduit chaque marge d'erreur.
 Le sable ralentit les jambes et fait ressortir les équipes qui savent doser.
 Lorsqu’une balise demeure introuvable, les analystes retiennent une portion du code, puis simplifient le problème logique après avoir consulté le groupe.
 Le premier de cordée protège la corde des arêtes sans négliger la sécurité, puis grimpe avec une force précise lorsque la brume efface la crête.
@@ -905,33 +905,33 @@ Sous les érables rouges, les coureurs résistent au départ trop rapide; le cla
 Dans les rapides, une pagaie en retard suffit à briser toute la cadence de l'équipe.
 Les relayeuses gardent une réserve pour la finale en respectant le plan collectif, puis adoptent une foulée souple avant le prochain contrôle.
 Sur l’île d’Anticosti, le trio corrige son azimut malgré la pluie froide, tandis que les encouragements gagnent en force.
-En Abitibi, les grands espaces et le lacs donnent aux silences profonds une intensité que le classement ne montre pas.
+En Abitibi, les grands espaces et les lacs donnent aux silences profonds une intensité que le classement ne montre pas.
 Au contrôle des régions, le trio reconstruit la consigne; le chronomètre continue sans attendre pendant que le vent tourne vers l’est.
 Charlevoix ajoute ses crêtes, son fleuve et ses montées franches à une course déjà pleine de pièges.
 La formation encourage le dernier avant le prochain contrôle, puis adapte son rythme au groupe lorsque le chrono annonce cinq minutes.
 Un parcours d'obstacles parle aux corps, mais il juge aussi les réflexes d'équipe.
-Pendant le tir à l'arc, les mains tremblantes relance le trio; il faut une respiration maîtrisée, dans une étape où l'audace doit rester très précise.
-les Îles ajoute ses sable, son embruns et ses vents changeants à une course déjà pleine de pièges.
+Pendant le tir à l'arc, les mains tremblantes déconcentrent le trio; il faut une respiration maîtrisée, dans une étape où l'audace doit rester très précise.
+Les Îles-de-la-Madeleine ajoutent leur sable, leurs embruns et leurs vents changeants à une course déjà pleine de pièges.
 Au contrôle cognitif, un équipier classe les indices utiles malgré une fatigue grandissante, tandis qu’une nouvelle trajectoire se dessine.
 À mi-parcours, le duo mémorise quatre couleurs, puis déduit le numéro du quai avec le sommet en vue.
 Quand le classement se resserre, l'équipe adapte son rythme au groupe avec patience et méthode; le classement reste secondaire.
 La peur du vide devient moins lourde quand une voix calme guide le prochain geste.
-Le traversée de plage commence avec le sable mou, mais se gagne surtout avec une endurance discrète, alors que le chrono réduit chaque marge d'erreur.
-Pendant le repérage du fanion, les couleurs cachées révèle le trio; il faut un oeil plus attentif, quand la finale cesse d'être une idée lointaine.
+La traversée de la plage commence avec le sable mou, mais se gagne surtout avec une endurance discrète, alors que le chrono réduit chaque marge d'erreur.
+Pendant le repérage du fanion, les couleurs cachées révèlent la présence du trio; il faut un œil plus attentif, quand la finale cesse d'être une idée lointaine.
 Sous une arête rocheuse, les coéquipières étudient la ligne de montée; le groupe garde assez de lucidité pendant qu’un rire traverse le groupe.
 Le tri des indices commence avec les fausses pistes, mais se gagne surtout avec un jugement clair, quand la finale cesse d'être une idée lointaine.
 Dans la dernière ligne droite, l'équipe qui doute le moins n'est pas toujours la plus forte.
 Un sentier boueux révèle vite les équipes qui savent ralentir sans perdre confiance.
-Le sable mou donnent au traversée de plage un poids particulier, surtout avec une endurance discrète, quand la finale cesse d'être une idée lointaine.
+Le sable mou donne à la traversée de la plage un poids particulier, surtout avec une endurance discrète, quand la finale cesse d'être une idée lointaine.
 Dans une baie de Charlevoix, les poursuivants préparent le prochain virage malgré une fatigue grandissante, tandis que la météo refuse de se stabiliser.
 Dans Abitibi, les équipes découvrent que les silences profonds comptent autant que la vitesse pure.
 En Charlevoix, les crêtes et le fleuve donnent aux montées franches une intensité que le classement ne montre pas.
-En les Cantons, les collines et le chemins donnent aux dénivelés sournois une intensité que le classement ne montre pas.
+Dans les Cantons-de-l'Est, les collines et les chemins donnent aux dénivelés sournois une intensité que le classement ne montre pas.
 Les cordées vérifient le nœud principal après avoir consulté le groupe, puis font confiance à leurs pieds lorsque le plan initial montre ses limites.
-Pendant le traversée de plage, le sable mou révèle le trio; il faut une endurance discrète, quand le territoire impose son propre rythme à la course.
-Abitibi ajoute ses grands espaces, son lacs et ses silences profonds à une course déjà pleine de pièges.
+Pendant la traversée de la plage, le sable mou met le trio à l'épreuve; il faut une endurance discrète, quand le territoire impose son propre rythme à la course.
+L'Abitibi ajoute ses grands espaces, ses lacs et ses silences profonds à une course déjà pleine de pièges.
 En Gaspésie, personne ne traverse les falaises ouvertes sans apprendre quelque chose sur son équipe.
-Pendant le défi de construction, les pièces éparpillées punit le trio; il faut des décisions rapides, quand la finale cesse d'être une idée lointaine.
+Pendant le défi de construction, les pièces éparpillées mettent le trio à l'épreuve; il faut des décisions rapides, quand la finale cesse d'être une idée lointaine.
 En Saguenay, personne ne traverse les échos puissants sans apprendre quelque chose sur son équipe.
 Au sommet du raidillon, les grimpeurs annoncent leur prochain mouvement; le groupe garde assez de lucidité pendant que la prochaine transition approche.
 À la table des cartes, les partenaires additionnent les balises rouges, puis partagent leur souvenir précis sans briser le rythme commun.
@@ -943,46 +943,46 @@ Dans le Bas-Saint-Laurent, les équipes découvrent que les rives exposées comp
 Près du cap Tourmente, les finalistes grimpent à petits pas; le chronomètre continue sans attendre pendant qu’un rire traverse le groupe.
 Dans Charlevoix, les équipes découvrent que les montées franches comptent autant que la vitesse pure.
 Une main tendue dans le bon moment peut sauver une équipe entière de la rupture.
-En les Cantons, personne ne traverse les dénivelés sournois sans apprendre quelque chose sur son équipe.
+Dans les Cantons-de-l'Est, personne ne traverse les dénivelés sournois sans apprendre quelque chose sur son équipe.
 Pendant la transition, un équipier raccourcit ses coups de pagaie malgré les jambes lourdes; une idée plus simple apparaît.
 Le bon repère apparaît souvent quand le groupe cesse de courir dans toutes les directions.
-Pendant le halage d'embarcation, la corde rugueuse mesure le trio; il faut des épaules solidaires, alors que le chrono réduit chaque marge d'erreur.
+Pendant le halage d'embarcation, la corde rugueuse met le trio à l'épreuve; il faut des épaules solidaires, alors que le chrono réduit chaque marge d'erreur.
 Près du coffre verrouillé, le groupe mémorise quatre couleurs, puis associe chaque son à une lettre en conservant assez d’énergie.
 Sous la limite des arbres, un équipier repère une borne ancienne, puis aligne deux sommets avant le prochain relais.
 Les partenaires résistent au départ trop rapide après une rapide vérification, puis protègent leurs jambes dans la descente lorsqu’une hypothèse résiste aux vérifications.
-Un noeud solide vaut parfois mieux qu'un départ trop enthousiaste sur une rivière froide.
+Un nœud solide vaut parfois mieux qu'un départ trop enthousiaste sur une rivière froide.
 Les partenaires proposent une pause courte avec une attention constante au terrain, puis transforment une erreur en stratégie avant le prochain contrôle.
 Quand la pluie couvre les traces, la formation conserve une allure durable malgré une fatigue grandissante; la fatigue se fait enfin sentir.
 Lorsque la prochaine transition approche, le trio compte les coups de pagaie, puis choisit la rive abritée dans un silence attentif.
 En Saguenay, les parois et le fjord donnent aux échos puissants une intensité que le classement ne montre pas.
-En Gaspésie, les vent et le mer donnent aux falaises ouvertes une intensité que le classement ne montre pas.
-Quand un fanion disparaît derrière les arbres, les mémoristes déduisent le numéro du quai avec toute la concentration nécessaire; les rivaux choisissent une autre option.
+En Gaspésie, le vent et la mer donnent aux falaises ouvertes une intensité que le classement ne montre pas.
+Quand un fanion disparaît derrière les arbres, les participants déduisent le numéro du quai avec toute la concentration nécessaire; les rivaux choisissent une autre option.
 Une équipe peut perdre du temps sur l'eau et le regagner devant une énigme bien lue.
 Au cœur de la Mauricie, le groupe partage sa réserve d’eau; la finale semble soudain accessible pendant que le prochain indice reste muet.
 Le territoire québécois n'est pas un décor; il décide souvent du tempo de l'épreuve.
-L'équipe en retard hésite près de la balise, puis corrige sa trajectoire avant que le ballotage ne rappelle l'enjeu réel.
+L'équipe en retard hésite près de la balise, puis corrige sa trajectoire avant que le ballottage ne rappelle l'enjeu réel.
 Le capitaine ne dit presque rien avant le tir de précision, mais ajuste la boussole quand la consigne semble plus lourde que le sac.
 La formation ne dit presque rien sur le quai glissant, mais cache son inquiétude sans savoir si les autres équipes ont déjà trouvé l'indice.
-La voix calme du groupe hésite près de la balise, puis observe les repères avant que le ballotage ne rappelle l'enjeu réel.
-Le plus jeune du trio vérifie les noeuds après le portage, car la victoire se cache parfois derrière une décision simple.
+La voix calme du groupe hésite près de la balise, puis observe les repères avant que le ballottage ne rappelle l'enjeu réel.
+Le plus jeune du trio vérifie les nœuds après le portage, car la victoire se cache parfois derrière une décision simple.
 Dans la longue descente, le duo garde une réserve pour la finale avec toute la concentration nécessaire, tandis qu’une nouvelle trajectoire se dessine.
 Pendant la transition, la capitaine relie les formes aux régions en conservant assez d’énergie; les encouragements gagnent en force.
 La meilleure rameuse hésite au pied du mur, puis lit le courant sans savoir si les autres équipes ont déjà trouvé l'indice.
 À la sortie du marais, une participante prend une seconde pour respirer, puis révise la carte pour éviter que la prochaine erreur coûte la finale.
 La formation sécurise le passage exposé en conservant assez d’énergie, puis fait confiance à ses pieds lorsque le plan initial montre ses limites.
-Les poursuivants ne disent presque rien dans le sous-bois, mais observent les repères avant que le ballotage ne rappelle l'enjeu réel.
+Les poursuivants ne disent presque rien dans le sous-bois, mais observent les repères avant que le ballottage ne rappelle l'enjeu réel.
 Le duo de tête ne dit presque rien devant la grille logique, mais gère le retard pour éviter qu'un détail technique ne brise l'élan.
 La dernière équipe ne dit presque rien à l'entrée du canyon, mais gère le retard quand la consigne semble plus lourde que le sac.
 À l'entrée du canyon, un équipier prend une seconde pour respirer, puis compte les balises pour ne pas laisser le classement imposer la peur.
 Au bord du rapide, le duo de tête prend une seconde pour respirer, puis protège son avance pour garder la bonne lecture du jeu malgré le bruit.
 Lorsque le prochain indice reste muet, les partenaires simplifient le problème logique, puis reconstruisent la consigne sous la pression du chrono.
-Les finalistes ne disent presque rien pendant la remontée, mais portent la charge avant que le ballotage ne rappelle l'enjeu réel.
+Les finalistes ne disent presque rien pendant la remontée, mais portent la charge avant que le ballottage ne rappelle l'enjeu réel.
 Un équipier ne dit presque rien devant la grille logique, mais compte les balises pour éviter qu'un détail technique ne brise l'élan.
 Au bord du rapide, la meneuse prend une seconde pour respirer, puis cache son inquiétude pour éviter que la prochaine erreur coûte la finale.
 Le groupe ne dit presque rien au milieu des racines, mais gère le retard afin de transformer un risque en avantage clair.
 Le duo de tête hésite au bord du rapide, puis surveille la météo car la victoire se cache parfois derrière une décision simple.
 Devant le petit quai rouge, le duo protège une réserve pour les rapides après avoir consulté le groupe, tandis que la confiance circule encore.
-Après le portage, la voix calme du groupe prend une seconde pour respirer, puis vérifie les noeuds quand la consigne semble plus lourde que le sac.
+Après le portage, la voix calme du groupe prend une seconde pour respirer, puis vérifie les nœuds quand la consigne semble plus lourde que le sac.
 Avant le signal, les finalistes reconstruisent la consigne, puis relient les formes aux régions sans briser le rythme commun.
 Les coéquipières observent le grain du granite avec le sommet en vue, puis gardent trois points de contact lorsque les encouragements montent de la rive.
 Après le portage, la dernière équipe relance la discussion et comprend que la prochaine erreur pourrait coûter la finale.
