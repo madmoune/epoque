@@ -169,8 +169,9 @@ h3 {
   background: color-mix(in srgb, #d7a438 12%, var(--surface-soft));
   color: var(--text);
   font-size: 0.82rem;
-  font-weight: 750;
-  line-height: 1.4;
+  font-weight: 650;
+  line-height: 1.55;
+  white-space: pre-line;
 }
 
 .logic-grid-wrap {

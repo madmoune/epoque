@@ -6,6 +6,8 @@ import {
   CipherTransformStep,
   CipherType,
   CiphersService,
+  SEMAPHORE_ORIENTATION_GROUPS,
+  SemaphoreOrientationGroup,
 } from './ciphers.service';
 
 type CheatsheetSection = {
@@ -21,6 +23,9 @@ type TransformStep = CipherTransformStep & {
 };
 
 type CheatsheetView = 'legends' | 'transformer';
+type SemaphoreOrientationGroupView = SemaphoreOrientationGroup & {
+  items: CipherLegendItem[];
+};
 
 @Component({
   selector: 'app-cipher-cheatsheet-page',
@@ -122,6 +127,11 @@ export class CipherCheatsheetPage {
   protected readonly morseLegend: CipherLegendItem[] = this.ciphersService.legendFor('morse');
   protected readonly semaphoreLegend: CipherLegendItem[] =
     this.ciphersService.legendFor('semaphore');
+  protected readonly semaphoreOrientationGroups: readonly SemaphoreOrientationGroupView[] =
+    SEMAPHORE_ORIENTATION_GROUPS.map((group) => ({
+      ...group,
+      items: this.semaphoreItemsFor(group.letters),
+    }));
   protected readonly natoLegend: CipherLegendItem[] = this.ciphersService.legendFor('nato');
   protected readonly pigpenSquareKeys = [
     [
@@ -185,6 +195,13 @@ export class CipherCheatsheetPage {
       .map((position) => position.trim())
       .filter(Boolean)
       .map((position) => `position-${position}`);
+  }
+
+  private semaphoreItemsFor(letters: readonly string[]): CipherLegendItem[] {
+    return letters.flatMap((letter) => {
+      const item = this.semaphoreLegend.find((candidate) => candidate.letter === letter);
+      return item ? [item] : [];
+    });
   }
 
   protected updateTransformInput(event: Event): void {

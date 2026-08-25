@@ -17,6 +17,7 @@ export type PlaylistProgress = {
   playlist: PuzzlePlaylist;
   index: number;
   order: number[];
+  previousRoute?: string | null;
   nextRoute: string | null;
 };
 
@@ -151,6 +152,7 @@ export class PuzzlePlaylistService {
       playlist,
       index,
       order,
+      previousRoute: index > 0 ? this.playUrl(playlist, index - 1, order) : null,
       nextRoute: index + 1 < order.length ? this.playUrl(playlist, index + 1, order) : null,
     };
   }

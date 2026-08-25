@@ -1,3 +1,43 @@
+@if (playlistProgress(); as progress) {
+  <nav
+    class="playlist-navigation"
+    aria-label="Navigation de la playlist"
+    [attr.aria-description]="
+      progress.playlist.name + ' · jeu ' + (progress.index + 1) + ' sur ' + progress.order.length
+    "
+  >
+    <button
+      type="button"
+      class="playlist-nav-button previous"
+      [disabled]="!progress.previousRoute"
+      (click)="navigateToPlaylistPuzzle(progress.previousRoute)"
+      aria-label="Jeu précédent"
+    >
+      <span class="playlist-nav-arrow" aria-hidden="true">←</span>
+      <span class="playlist-nav-text">Précédent</span>
+    </button>
+
+    <div class="playlist-nav-copy">
+      <span class="playlist-nav-kicker">Playlist</span>
+      <strong [title]="progress.playlist.name">{{ progress.playlist.name }}</strong>
+      <span class="playlist-nav-position"
+        >{{ progress.index + 1 }} / {{ progress.order.length }}</span
+      >
+    </div>
+
+    <button
+      type="button"
+      class="playlist-nav-button next"
+      [disabled]="!progress.nextRoute"
+      (click)="navigateToPlaylistPuzzle(progress.nextRoute)"
+      aria-label="Jeu suivant"
+    >
+      <span class="playlist-nav-text">Suivant</span>
+      <span class="playlist-nav-arrow" aria-hidden="true">→</span>
+    </button>
+  </nav>
+}
+
 <details class="quick-menu">
   <summary class="quick-menu-toggle" aria-label="Ouvrir le menu des options" title="Options">
     <span aria-hidden="true">☰</span>
@@ -12,7 +52,9 @@
         type="button"
         class="theme-button"
         (click)="toggleTheme()"
-        [attr.aria-label]="theme() === 'dark' ? 'Activer le thème clair' : 'Activer le thème sombre'"
+        [attr.aria-label]="
+          theme() === 'dark' ? 'Activer le thème clair' : 'Activer le thème sombre'
+        "
       >
         <span aria-hidden="true">{{ theme() === 'dark' ? '☀' : '☾' }}</span>
         <span>{{ theme() === 'dark' ? 'Mode clair' : 'Mode sombre' }}</span>
@@ -37,10 +79,17 @@
                 <span class="account-email" [title]="user.email">{{ user.email }}</span>
               }
               <span class="account-sync-status">
-                {{ userDataSync.status() === 'error' ? 'Synchronisation indisponible' : 'Sauvegardé' }}
+                {{
+                  userDataSync.status() === 'error' ? 'Synchronisation indisponible' : 'Sauvegardé'
+                }}
               </span>
             </div>
-            <button type="button" class="account-button" (click)="signOut()" [disabled]="firebaseAuth.isBusy()">
+            <button
+              type="button"
+              class="account-button"
+              (click)="signOut()"
+              [disabled]="firebaseAuth.isBusy()"
+            >
               Déconnexion
             </button>
           </div>

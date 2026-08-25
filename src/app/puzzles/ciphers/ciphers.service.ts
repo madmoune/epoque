@@ -85,6 +85,46 @@ export const SEMAPHORE_POSITIONS_BY_LETTER: Record<string, string> = {
   z: '4,5',
 };
 
+export type SemaphoreOrientationGroup = {
+  id: string;
+  title: string;
+  description: string;
+  letters: readonly string[];
+};
+
+export const SEMAPHORE_ORIENTATION_GROUPS: readonly SemaphoreOrientationGroup[] = [
+  {
+    id: 'nearby-arms',
+    title: 'Bras rapprochés',
+    description: 'Les deux bras forment un angle de 45°.',
+    letters: ['A', 'G', 'H', 'O', 'T', 'W', 'Z'],
+  },
+  {
+    id: 'right-angle',
+    title: 'Angle droit',
+    description: 'Les bras forment un angle droit dans les directions principales.',
+    letters: ['B', 'F', 'J', 'P'],
+  },
+  {
+    id: 'shifted-right-angle',
+    title: 'Angle droit décalé',
+    description: 'Le même angle droit, tourné d’un cran de 45°.',
+    letters: ['I', 'N', 'U', 'X'],
+  },
+  {
+    id: 'wide-angle',
+    title: 'Angle ouvert',
+    description: 'Les deux bras forment un angle de 135°.',
+    letters: ['C', 'E', 'K', 'M', 'Q', 'S', 'V', 'Y'],
+  },
+  {
+    id: 'opposite-arms',
+    title: 'Bras opposés',
+    description: 'Les bras sont alignés en sens opposés.',
+    letters: ['D', 'L', 'R'],
+  },
+];
+
 @Injectable({
   providedIn: 'root',
 })

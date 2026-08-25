@@ -1,3 +1,101 @@
+.playlist-navigation {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.55rem;
+  align-items: center;
+  width: min(52rem, calc(100% - 5.25rem));
+  margin: max(0.65rem, env(safe-area-inset-top))
+    max(0.75rem, calc(3.6rem + env(safe-area-inset-right))) 0.55rem auto;
+  padding: 0.45rem 0.55rem;
+  box-sizing: border-box;
+  border: 1px solid var(--border);
+  border-radius: 0.8rem;
+  background: var(--surface);
+  box-shadow: 0 0.35rem 1rem var(--shadow);
+}
+
+.playlist-nav-button {
+  display: inline-flex;
+  min-width: 7rem;
+  min-height: 2.35rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.6rem;
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1;
+  touch-action: manipulation;
+
+  &.previous {
+    background: var(--surface-raised) !important;
+  }
+
+  &.next {
+    border-color: var(--accent);
+    background: var(--accent) !important;
+    color: var(--accent-contrast);
+  }
+
+  &:hover:not(:disabled),
+  &:focus-visible:not(:disabled) {
+    border-color: var(--focus);
+  }
+
+  &:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--focus) 35%, transparent);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.38;
+  }
+}
+
+.playlist-nav-arrow {
+  font-size: 1.1rem;
+  line-height: 0.8;
+}
+
+.playlist-nav-copy {
+  display: grid;
+  min-width: 0;
+  justify-items: center;
+  gap: 0.08rem;
+  color: var(--muted);
+  text-align: center;
+
+  strong {
+    max-width: 100%;
+    overflow: hidden;
+    color: var(--text);
+    font-size: 0.86rem;
+    line-height: 1.1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.playlist-nav-kicker {
+  color: var(--accent);
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.playlist-nav-position {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
 .quick-menu {
   position: fixed;
   z-index: 200;
@@ -175,6 +273,26 @@
 }
 
 @media (max-width: 44rem) {
+  .playlist-navigation {
+    gap: 0.35rem;
+    padding: 0.35rem;
+  }
+
+  .playlist-nav-button {
+    width: 2.35rem;
+    min-width: 2.35rem;
+    min-height: 2.2rem;
+    padding: 0.3rem;
+  }
+
+  .playlist-nav-text {
+    display: none;
+  }
+
+  .playlist-nav-arrow {
+    font-size: 1.25rem;
+  }
+
   .quick-menu-panel {
     width: min(17rem, calc(100vw - 1.5rem));
   }

@@ -345,6 +345,45 @@
                     </span>
                   }
                 </div>
+                <section
+                  class="semaphore-orientation-section"
+                  aria-labelledby="cheatsheet-semaphore-orientation-title"
+                >
+                  <h3 id="cheatsheet-semaphore-orientation-title">Lettres par orientation</h3>
+                  <p class="semaphore-orientation-intro">
+                    Regroupe les lettres qui forment des angles semblables entre leurs deux
+                    drapeaux.
+                  </p>
+                  <div class="semaphore-orientation-groups">
+                    @for (group of semaphoreOrientationGroups; track group.id) {
+                      <section
+                        class="semaphore-orientation-group"
+                        [attr.aria-labelledby]="'cheatsheet-semaphore-group-' + group.id"
+                      >
+                        <h4 [id]="'cheatsheet-semaphore-group-' + group.id">{{ group.title }}</h4>
+                        <p>{{ group.description }}</p>
+                        <div class="letter-grid semaphore-grid semaphore-orientation-grid">
+                          @for (item of group.items; track item.letter) {
+                            <span class="legend-item">
+                              <strong>{{ item.letter }}</strong>
+                              <span
+                                class="semaphore-symbol"
+                                [attr.aria-label]="'Sémaphore ' + item.letter"
+                              >
+                                @for (
+                                  armClass of semaphoreArmClasses(item.symbol);
+                                  track armClass
+                                ) {
+                                  <span class="semaphore-arm {{ armClass }}"></span>
+                                }
+                              </span>
+                            </span>
+                          }
+                        </div>
+                      </section>
+                    }
+                  </div>
+                </section>
               }
 
               @case ('nato') {

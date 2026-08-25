@@ -1,8 +1,9 @@
 import { DOCUMENT } from '@angular/common';
-import { Component, HostListener, inject, signal } from '@angular/core';
-import { NavigationError, Router, RouterOutlet } from '@angular/router';
+import { Component, HostListener, computed, inject, signal } from '@angular/core';
+import { NavigationEnd, NavigationError, Router, RouterOutlet } from '@angular/router';
 import { SwUpdate } from '@angular/service-worker';
 import { PuzzlePlayHistoryService } from './puzzle-play-history.service';
+import { PuzzlePlaylistService } from './puzzle-playlist.service';
 import { FirebaseAuthService } from './shared/firebase/firebase-auth.service';
 import { FirebaseUserDataSyncService } from './shared/firebase/firebase-user-data-sync.service';
 import { AppStorageService } from './shared/storage/app-storage.service';
@@ -21,15 +22,21 @@ type ThemeTransitionDocument = Document & {
 export class App {
   private readonly document = inject(DOCUMENT);
   private readonly router = inject(Router);
+  private readonly playlistService = inject(PuzzlePlaylistService);
   private readonly storage = inject(AppStorageService);
   private readonly swUpdate = inject(SwUpdate, { optional: true });
   protected readonly firebaseAuth = inject(FirebaseAuthService);
   protected readonly userDataSync = inject(FirebaseUserDataSyncService);
+  private readonly currentUrl = signal(this.router.url);
   private recoveringFromChunkError = false;
 
   constructor() {
     inject(PuzzlePlayHistoryService);
     this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        this.currentUrl.set(event.urlAfterRedirects);
+      }
+
       if (event instanceof NavigationError) {
         this.handleChunkLoadFailure(event.error);
       }
@@ -39,6 +46,9 @@ export class App {
 
   protected readonly theme = signal<Theme>(
     this.document.documentElement.dataset['theme'] === 'light' ? 'light' : 'dark',
+  );
+  protected readonly playlistProgress = computed(() =>
+    this.playlistService.progressFromUrl(this.currentUrl()),
   );
 
   @HostListener('document:pointerdown', ['$event'])
@@ -104,6 +114,12 @@ export class App {
 
   protected signOut(): void {
     void this.firebaseAuth.signOut();
+  }
+
+  protected navigateToPlaylistPuzzle(route: string | null | undefined): void {
+    if (route) {
+      void this.router.navigateByUrl(route);
+    }
   }
 
   private watchForApplicationUpdates(): void {

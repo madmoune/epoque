@@ -804,6 +804,57 @@ h2 {
   justify-content: start;
 }
 
+.semaphore-orientation-section {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.semaphore-orientation-section h3 {
+  margin: 0;
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.semaphore-orientation-intro,
+.semaphore-orientation-group p {
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+.semaphore-orientation-groups {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 0.8rem;
+}
+
+.semaphore-orientation-group {
+  min-width: 0;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.7rem;
+  background: var(--surface-soft);
+}
+
+.semaphore-orientation-group h4 {
+  margin: 0;
+  color: var(--accent);
+  font-size: 0.85rem;
+}
+
+.semaphore-orientation-grid {
+  grid-template-columns: repeat(auto-fit, minmax(5.4rem, 1fr));
+  gap: 0.35rem;
+  margin-top: 0.65rem;
+}
+
+.semaphore-orientation-grid .legend-item {
+  min-height: 2.45rem;
+  padding: 0.3rem 0.4rem;
+}
+
 .semaphore-symbol {
   position: relative;
   display: block;

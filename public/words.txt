@@ -1,7 +1,6 @@
 canotage
 kayakisme
 pagayage
-pagaillage
 rame
 aviron
 rabaska
@@ -95,7 +94,6 @@ sauvetage
 gouvernail
 dérive
 flotteur
-pagailler
 pagayer
 ramer
 nager
@@ -352,7 +350,7 @@ crevaison
 traction
 propulsion
 cycliste
-vttiste
+vététiste
 rouleur
 rouleuse
 pédaleur
@@ -1444,7 +1442,7 @@ protecteur
 durable
 sécuritaire
 poursuit
-poursuisable
+poursuivable
 traqueur
 traqueuse
 talonne
@@ -1773,7 +1771,7 @@ cadrage
 cadrer
 campagnard
 canyoning
-canyonner
+canyoner
 capture
 caractériser
 carnet
@@ -1818,7 +1816,7 @@ coordonnateur
 coordonnatrice
 courantologie
 couvrir
-cranponner
+cramponner
 créer
 cryptique
 cyclable
@@ -1963,8 +1961,8 @@ jauger
 juger
 laboratoire
 latérale
-lectureur
-lectureuse
+lecteur
+lectrice
 libérateur
 libératrice
 lisibilité

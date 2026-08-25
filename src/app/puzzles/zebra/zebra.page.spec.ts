@@ -152,14 +152,7 @@ describe('ZebraPage', () => {
     const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0);
 
     try {
-      expect(
-        page.describeLeftOfClue(
-          { id: 'person' },
-          'Félix',
-          { id: 'pet' },
-          'Hamster',
-        ),
-      ).toBe(
+      expect(page.describeLeftOfClue({ id: 'person' }, 'Félix', { id: 'pet' }, 'Hamster')).toBe(
         'La maison de Félix se trouve quelque part à gauche de la maison où vit le hamster.',
       );
     } finally {
@@ -182,6 +175,11 @@ describe('ZebraPage', () => {
         ];
 
         expect(clues.every((clue: string) => clue.toLowerCase().includes('maison'))).toBe(true);
+        expect(
+          clues.every(
+            (clue: string) => clue.includes('Félix') && clue.toLowerCase().includes('hamster'),
+          ),
+        ).toBe(true);
         expect(clues.some((clue: string) => /Félix (précède|est) le hamster/i.test(clue))).toBe(
           false,
         );
@@ -191,18 +189,243 @@ describe('ZebraPage', () => {
     }
   });
 
+  it('spells out direction and distance in spatial hint explanations', () => {
+    expect(
+      page.explainClueRule({
+        type: 'adjacentRight',
+        leftCategoryId: 'person',
+        leftValue: 'Félix',
+        rightCategoryId: 'pet',
+        rightValue: 'Hamster',
+        text: '',
+      }),
+    ).toContain('le numéro de droite vaut celui de gauche + 1');
+    expect(
+      page.explainClueRule({
+        type: 'adjacent',
+        firstCategoryId: 'person',
+        firstValue: 'Félix',
+        secondCategoryId: 'pet',
+        secondValue: 'Hamster',
+        text: '',
+      }),
+    ).toContain('leurs numéros diffèrent de 1');
+    expect(
+      page.explainClueRule({
+        type: 'oneBetween',
+        firstCategoryId: 'person',
+        firstValue: 'Félix',
+        secondCategoryId: 'pet',
+        secondValue: 'Hamster',
+        text: '',
+      }),
+    ).toContain('leurs numéros diffèrent exactement de 2');
+  });
+
   it('uses natural articles for drinks and hobbies', () => {
     const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0);
 
     try {
-      expect(
-        page.describeSameClue({ id: 'person' }, 'Félix', { id: 'drink' }, 'Cafe'),
-      ).toBe('Félix boit du café.');
-      expect(
-        page.describeSameClue({ id: 'person' }, 'Félix', { id: 'hobby' }, 'Jardin'),
-      ).toBe('Félix pratique le jardinage.');
+      expect(page.describeSameClue({ id: 'person' }, 'Félix', { id: 'drink' }, 'Cafe')).toBe(
+        'Félix boit du café.',
+      );
+      expect(page.describeSameClue({ id: 'person' }, 'Félix', { id: 'hobby' }, 'Jardin')).toBe(
+        'Félix pratique le jardinage.',
+      );
     } finally {
       randomSpy.mockRestore();
+    }
+  });
+
+  it('explains a direct hint with numbered, actionable steps', () => {
+    const categories = [
+      { id: 'house', label: 'Maison', values: ['Maison 1', 'Maison 2', 'Maison 3'] },
+      { id: 'person', label: 'Personne', values: ['Alice', 'Bruno', 'Clara'] },
+      { id: 'color', label: 'Couleur', values: ['Rouge', 'Bleu', 'Vert'] },
+    ];
+    const directClue = {
+      type: 'same',
+      firstCategoryId: 'person',
+      firstValue: 'Alice',
+      secondCategoryId: 'color',
+      secondValue: 'Rouge',
+      text: 'Alice habite la maison rouge.',
+    };
+
+    page.activePuzzle.set({
+      level: 3,
+      title: 'Test',
+      intro: '',
+      positions: categories[0].values,
+      categories,
+      clues: [directClue.text],
+      logicalClues: [directClue],
+      solution: [
+        { house: 'Maison 1', person: 'Alice', color: 'Rouge' },
+        { house: 'Maison 2', person: 'Bruno', color: 'Bleu' },
+        { house: 'Maison 3', person: 'Clara', color: 'Vert' },
+      ],
+    });
+
+    page.showHint();
+
+    expect(page.hintMessage()).toContain('Indice utilisé :');
+    expect(page.hintMessage()).toContain('« Alice habite la maison rouge. »');
+    expect(page.hintMessage()).toContain('1. Cet indice affirme');
+    expect(page.hintMessage()).toContain('Conclusion :');
+    expect(page.hintMessage()).toContain('✓');
+  });
+
+  it('names every clue used for a multi-step deduction', () => {
+    const categories = [
+      { id: 'house', label: 'Maison', values: ['Maison 1', 'Maison 2', 'Maison 3'] },
+      { id: 'person', label: 'Personne', values: ['Alice', 'Bruno', 'Clara'] },
+      { id: 'color', label: 'Couleur', values: ['Rouge', 'Bleu', 'Vert'] },
+      { id: 'pet', label: 'Animal', values: ['Chat', 'Chien', 'Oiseau'] },
+    ];
+    const logicalClues = [
+      {
+        type: 'same',
+        firstCategoryId: 'person',
+        firstValue: 'Alice',
+        secondCategoryId: 'color',
+        secondValue: 'Rouge',
+        text: 'Alice habite la maison rouge.',
+      },
+      {
+        type: 'same',
+        firstCategoryId: 'color',
+        firstValue: 'Rouge',
+        secondCategoryId: 'pet',
+        secondValue: 'Chat',
+        text: 'Le chat vit dans la maison rouge.',
+      },
+    ];
+
+    page.activePuzzle.set({
+      level: 3,
+      title: 'Test',
+      intro: '',
+      positions: categories[0].values,
+      categories,
+      clues: logicalClues.map((clue) => clue.text),
+      logicalClues,
+      solution: [
+        { house: 'Maison 1', person: 'Alice', color: 'Rouge', pet: 'Chat' },
+        { house: 'Maison 2', person: 'Bruno', color: 'Bleu', pet: 'Chien' },
+        { house: 'Maison 3', person: 'Clara', color: 'Vert', pet: 'Oiseau' },
+      ],
+    });
+
+    const explanation = page.explainHint({
+      firstCategory: categories[1],
+      firstValue: 'Alice',
+      secondCategory: categories[3],
+      secondValue: 'Chat',
+    });
+
+    expect(explanation).toContain('Indices à combiner :');
+    expect(explanation).toContain('« Alice habite la maison rouge. »');
+    expect(explanation).toContain('« Le chat vit dans la maison rouge. »');
+    expect(explanation).toContain('Chacune de ces possibilités crée une contradiction');
+    expect(explanation).toContain('Conclusion : seule « Chat » reste possible');
+  });
+
+  it('allows only one three-clue support before requiring shorter hints', () => {
+    const categories = [
+      { id: 'house', label: 'Maison', values: ['Maison 1', 'Maison 2', 'Maison 3'] },
+      { id: 'person', label: 'Personne', values: ['Alice', 'Bruno', 'Clara'] },
+      { id: 'color', label: 'Couleur', values: ['Rouge', 'Bleu', 'Vert'] },
+      { id: 'pet', label: 'Animal', values: ['Chat', 'Chien', 'Oiseau'] },
+      { id: 'hobby', label: 'Loisir', values: ['Échecs', 'Peinture', 'Course'] },
+    ];
+    const logicalClues = [
+      {
+        type: 'same',
+        firstCategoryId: 'person',
+        firstValue: 'Alice',
+        secondCategoryId: 'color',
+        secondValue: 'Rouge',
+        text: 'Alice habite la maison rouge.',
+      },
+      {
+        type: 'same',
+        firstCategoryId: 'color',
+        firstValue: 'Rouge',
+        secondCategoryId: 'pet',
+        secondValue: 'Chat',
+        text: 'Le chat vit dans la maison rouge.',
+      },
+      {
+        type: 'same',
+        firstCategoryId: 'pet',
+        firstValue: 'Chat',
+        secondCategoryId: 'hobby',
+        secondValue: 'Échecs',
+        text: 'La personne qui joue aux échecs a le chat.',
+      },
+    ];
+
+    page.activePuzzle.set({
+      level: 5,
+      title: 'Test',
+      intro: '',
+      positions: categories[0].values,
+      categories,
+      clues: logicalClues.map((clue) => clue.text),
+      logicalClues,
+      solution: [
+        {
+          house: 'Maison 1',
+          person: 'Alice',
+          color: 'Rouge',
+          pet: 'Chat',
+          hobby: 'Échecs',
+        },
+        {
+          house: 'Maison 2',
+          person: 'Bruno',
+          color: 'Bleu',
+          pet: 'Chien',
+          hobby: 'Peinture',
+        },
+        {
+          house: 'Maison 3',
+          person: 'Clara',
+          color: 'Vert',
+          pet: 'Oiseau',
+          hobby: 'Course',
+        },
+      ],
+    });
+
+    const relation = {
+      firstCategory: categories[1],
+      firstValue: 'Alice',
+      secondCategory: categories[4],
+      secondValue: 'Échecs',
+    };
+
+    expect(page.supportingCluesFor(relation)).toHaveLength(3);
+
+    page.complexHintCount = 1;
+    expect(page.supportingCluesFor(relation)).toBeNull();
+  });
+
+  it('keeps finding a hint through several 4x4 game states', () => {
+    for (let puzzleIndex = 0; puzzleIndex < 3; puzzleIndex += 1) {
+      page.setLevel(4);
+
+      for (let hintIndex = 0; hintIndex < 20; hintIndex += 1) {
+        page.showHint();
+        const message = page.hintMessage() ?? '';
+
+        expect(message).not.toContain('Les indices restants ne donnent pas');
+
+        if (page.isSolved()) {
+          break;
+        }
+      }
     }
   });
 });

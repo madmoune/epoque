@@ -31,6 +31,7 @@ describe('PuzzlePlaylistService progress', () => {
     const firstProgress = service.progressFromUrl(firstUrl!);
 
     expect(firstProgress?.index).toBe(0);
+    expect(firstProgress?.previousRoute).toBeNull();
     expect(service.progressFor(playlist)).toEqual({
       index: 0,
       order: [0, 1, 2],
@@ -40,7 +41,13 @@ describe('PuzzlePlaylistService progress', () => {
     service.complete(firstProgress!);
 
     expect(service.progressFor(playlist)?.index).toBe(1);
-    expect(service.startUrl(playlist)).toContain('playlistIndex=1');
+    const secondUrl = service.startUrl(playlist)!;
+    const secondProgress = service.progressFromUrl(secondUrl);
+
+    expect(secondUrl).toContain('playlistIndex=1');
+    expect(secondProgress?.previousRoute).toBe(
+      '/first?from=playlist&playlist=progress-test&playlistIndex=0',
+    );
   });
 
   it('keeps a random order while the playlist is in progress', () => {

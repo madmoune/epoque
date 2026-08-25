@@ -1,6 +1,10 @@
 import '@angular/compiler';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { CiphersService, SEMAPHORE_POSITIONS_BY_LETTER } from './ciphers.service';
+import {
+  CiphersService,
+  SEMAPHORE_ORIENTATION_GROUPS,
+  SEMAPHORE_POSITIONS_BY_LETTER,
+} from './ciphers.service';
 
 describe('CiphersService NATO modes', () => {
   let service: CiphersService;
@@ -115,5 +119,18 @@ describe('Semaphore positions', () => {
       y: '1,4',
       z: '4,5',
     });
+  });
+
+  it('groups all semaphore letters by similar arm orientations', () => {
+    const groupedLetters = SEMAPHORE_ORIENTATION_GROUPS.flatMap((group) => group.letters);
+
+    expect(groupedLetters).toHaveLength(26);
+    expect(new Set(groupedLetters).size).toBe(26);
+    expect(
+      SEMAPHORE_ORIENTATION_GROUPS.find((group) => group.id === 'right-angle')?.letters,
+    ).toEqual(['B', 'F', 'J', 'P']);
+    expect(
+      SEMAPHORE_ORIENTATION_GROUPS.find((group) => group.id === 'shifted-right-angle')?.letters,
+    ).toEqual(['I', 'N', 'U', 'X']);
   });
 });

@@ -19,11 +19,13 @@ import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzz
 import { CreeSyllabicsAudioService } from './cree-syllabics-audio.service';
 import { CreeSyllabicsLegendComponent } from './cree-syllabics-legend.component';
 import {
+  CipherLegendItem,
   CipherPuzzle,
   CipherType,
   CiphersService,
   CreeMode,
   NatoMode,
+  SEMAPHORE_ORIENTATION_GROUPS,
   SEMAPHORE_POSITIONS_BY_LETTER,
 } from './ciphers.service';
 
@@ -132,6 +134,12 @@ export class CiphersPage implements OnDestroy {
   protected readonly cipherLegend = computed(() =>
     this.ciphersService.legendFor(this.selectedCipher()),
   );
+  protected readonly semaphoreLegend: CipherLegendItem[] =
+    this.ciphersService.legendFor('semaphore');
+  protected readonly semaphoreOrientationGroups = SEMAPHORE_ORIENTATION_GROUPS.map((group) => ({
+    ...group,
+    items: this.semaphoreItemsFor(group.letters),
+  }));
 
   protected readonly hintText = computed(() => {
     const puzzle = this.puzzle();
@@ -170,6 +178,13 @@ export class CiphersPage implements OnDestroy {
       .map((position) => position.trim())
       .filter(Boolean)
       .map((position) => `position-${position}`);
+  }
+
+  private semaphoreItemsFor(letters: readonly string[]): CipherLegendItem[] {
+    return letters.flatMap((letter) => {
+      const item = this.semaphoreLegend.find((candidate) => candidate.letter === letter);
+      return item ? [item] : [];
+    });
   }
 
   protected handleLegendClick(): void {
