@@ -1391,11 +1391,10 @@ export class ZebraPage {
     );
 
     const candidateClues = this.createCandidateClues(categories, solution);
-    const logicalClues = this.addHintScaffolding(
-      this.reduceToEssentialClues(candidateClues, categories, clueProfile),
-      candidateClues,
-      categories,
-    );
+    // Let the clue reduction choose the minimum set needed for a unique
+    // solution. Adding one positional clue for every category makes the
+    // puzzle much too transparent.
+    const logicalClues = this.reduceToEssentialClues(candidateClues, categories, clueProfile);
 
     if (this.countMatchingSolutions(categories, logicalClues, 2) !== 1) {
       return this.createRandomPuzzle(basePuzzle);
@@ -1410,40 +1409,6 @@ export class ZebraPage {
       logicalClues,
       solution,
     };
-  }
-
-  private addHintScaffolding(
-    logicalClues: ZebraClue[],
-    candidateClues: ZebraClue[],
-    categories: ZebraCategory[],
-  ): ZebraClue[] {
-    const nextClues = [...logicalClues];
-    const clueKeys = new Set(nextClues.map((clue) => this.clueKey(clue)));
-
-    for (const category of categories.slice(1)) {
-      const existingPositionClues = nextClues.filter(
-        (clue) => clue.type === 'position' && clue.categoryId === category.id,
-      ).length;
-      const requiredPositionClues = Math.max(1, category.values.length - 2);
-      const missingPositionClues = Math.max(0, requiredPositionClues - existingPositionClues);
-      const positionCandidates = this.shuffle(
-        candidateClues.filter(
-          (clue): clue is Extract<ZebraClue, { type: 'position' }> =>
-            clue.type === 'position' && clue.categoryId === category.id,
-        ),
-      );
-
-      for (const clue of positionCandidates.slice(0, missingPositionClues)) {
-        const key = this.clueKey(clue);
-
-        if (!clueKeys.has(key)) {
-          clueKeys.add(key);
-          nextClues.push(clue);
-        }
-      }
-    }
-
-    return nextClues;
   }
 
   private createVariantCategories(basePuzzle: ZebraPuzzle): ZebraCategory[] {
