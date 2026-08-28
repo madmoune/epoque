@@ -1,0 +1,33 @@
+<div
+  class="syllabic-word"
+  role="img"
+  [attr.aria-label]="'Mot codé en trois signes'"
+>
+  @for (syllable of word.syllables; track $index) {
+    <div class="syllabic-syllable">
+      <svg class="syllabic-glyph" viewBox="0 0 80 80" aria-hidden="true" focusable="false">
+        <g [attr.transform]="'rotate(' + syllable.rotation + ' 40 40)'">
+          <circle class="syllabic-glyph-orientation-dot" cx="40" cy="5" r="2.5" />
+          @switch (syllable.symbol) {
+            @case ('glyph-1') {
+              <path class="syllabic-glyph-stroke" d="M40 17L60 57H20Z" />
+            }
+            @case ('glyph-2') {
+              <path class="syllabic-glyph-stroke" d="M40 17L60 40L40 58L20 40Z" />
+              <path class="syllabic-glyph-stroke" d="M40 58V65" />
+            }
+            @case ('glyph-3') {
+              <path class="syllabic-glyph-stroke" d="M22 22H58M28 40H52M22 58H44" />
+            }
+            @case ('glyph-4') {
+              <path class="syllabic-glyph-stroke" d="M20 54L34 26L46 46L60 20" />
+            }
+            @case ('glyph-5') {
+              <path class="syllabic-glyph-stroke" d="M40 17L59 31L52 58H28L21 34Z" />
+            }
+          }
+        </g>
+      </svg>
+    </div>
+  }
+</div>

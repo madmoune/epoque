@@ -334,6 +334,7 @@
                 [class.segment-phrase-card]="figure.displayMode === 'segment-phrase'"
                 [class.color-chain-card]="figure.displayMode === 'color-chain'"
                 [class.hidden-color-card]="figure.displayMode === 'hidden-colors'"
+                [class.syllabic-rotation-card]="figure.displayMode === 'syllabic-rotation'"
               >
                 <div
                   class="figure-visual"
@@ -343,6 +344,9 @@
                   [class.segment-phrase-visual-container]="figure.displayMode === 'segment-phrase'"
                   [class.color-chain-visual-container]="figure.displayMode === 'color-chain'"
                   [class.hidden-color-visual-container]="figure.displayMode === 'hidden-colors'"
+                  [class.syllabic-rotation-visual-container]="
+                    figure.displayMode === 'syllabic-rotation'
+                  "
                 >
                   @if (figure.displayMode === 'navigation') {
                     <img
@@ -576,18 +580,25 @@
                       }
                     </div>
                   }
+                  @if (figure.displayMode === 'syllabic-rotation' && figure.syllabicWord) {
+                    <app-syllabic-rotation-visual
+                      [word]="figure.syllabicWord"
+                    />
+                  }
                   <svg
                     [hidden]="
                       figure.displayMode === 'word-split' ||
                       figure.displayMode === 'segment-phrase' ||
                       figure.displayMode === 'color-chain' ||
-                      figure.displayMode === 'hidden-colors'
+                      figure.displayMode === 'hidden-colors' ||
+                      figure.displayMode === 'syllabic-rotation'
                     "
                     [style.display]="
                       figure.displayMode === 'word-split' ||
                       figure.displayMode === 'segment-phrase' ||
                       figure.displayMode === 'color-chain' ||
-                      figure.displayMode === 'hidden-colors'
+                      figure.displayMode === 'hidden-colors' ||
+                      figure.displayMode === 'syllabic-rotation'
                         ? 'none'
                         : ''
                     "
@@ -712,11 +723,15 @@
               [class.hidden-color-card]="
                 instance().challengeFigure.displayMode === 'hidden-colors'
               "
+              [class.syllabic-rotation-card]="
+                instance().challengeFigure.displayMode === 'syllabic-rotation'
+              "
               [style.grid-template-columns]="
                 instance().challengeFigure.displayMode === 'word-split' ||
                 instance().challengeFigure.displayMode === 'segment-phrase' ||
                 instance().challengeFigure.displayMode === 'color-chain' ||
-                instance().challengeFigure.displayMode === 'hidden-colors'
+                instance().challengeFigure.displayMode === 'hidden-colors' ||
+                instance().challengeFigure.displayMode === 'syllabic-rotation'
                   ? 'minmax(0, 1fr)'
                   : ''
               "
@@ -724,7 +739,8 @@
                 instance().challengeFigure.displayMode === 'word-split' ||
                 instance().challengeFigure.displayMode === 'segment-phrase' ||
                 instance().challengeFigure.displayMode === 'color-chain' ||
-                instance().challengeFigure.displayMode === 'hidden-colors'
+                instance().challengeFigure.displayMode === 'hidden-colors' ||
+                instance().challengeFigure.displayMode === 'syllabic-rotation'
                   ? 'none'
                   : ''
               "
@@ -732,7 +748,8 @@
                 instance().challengeFigure.displayMode === 'word-split' ||
                 instance().challengeFigure.displayMode === 'segment-phrase' ||
                 instance().challengeFigure.displayMode === 'color-chain' ||
-                instance().challengeFigure.displayMode === 'hidden-colors'
+                instance().challengeFigure.displayMode === 'hidden-colors' ||
+                instance().challengeFigure.displayMode === 'syllabic-rotation'
                   ? 'transparent'
                   : ''
               "
@@ -753,6 +770,9 @@
                 "
                 [class.hidden-color-visual-container]="
                   instance().challengeFigure.displayMode === 'hidden-colors'
+                "
+                [class.syllabic-rotation-visual-container]="
+                  instance().challengeFigure.displayMode === 'syllabic-rotation'
                 "
               >
                 @if (instance().challengeFigure.displayMode === 'navigation') {
@@ -1080,18 +1100,28 @@
                     }
                   </div>
                 }
+                @if (
+                  instance().challengeFigure.displayMode === 'syllabic-rotation' &&
+                  instance().challengeFigure.syllabicWord
+                ) {
+                  <app-syllabic-rotation-visual
+                    [word]="instance().challengeFigure.syllabicWord!"
+                  />
+                }
                 <svg
                   [hidden]="
                     instance().challengeFigure.displayMode === 'word-split' ||
                     instance().challengeFigure.displayMode === 'segment-phrase' ||
                     instance().challengeFigure.displayMode === 'color-chain' ||
-                    instance().challengeFigure.displayMode === 'hidden-colors'
+                    instance().challengeFigure.displayMode === 'hidden-colors' ||
+                    instance().challengeFigure.displayMode === 'syllabic-rotation'
                   "
                   [style.display]="
                     instance().challengeFigure.displayMode === 'word-split' ||
                     instance().challengeFigure.displayMode === 'segment-phrase' ||
                     instance().challengeFigure.displayMode === 'color-chain' ||
-                    instance().challengeFigure.displayMode === 'hidden-colors'
+                    instance().challengeFigure.displayMode === 'hidden-colors' ||
+                    instance().challengeFigure.displayMode === 'syllabic-rotation'
                       ? 'none'
                       : ''
                   "
@@ -1192,7 +1222,8 @@
                   (instance().challengeFigure.displayMode === 'word-split' ||
                     instance().challengeFigure.displayMode === 'segment-phrase' ||
                     instance().challengeFigure.displayMode === 'color-chain' ||
-                    instance().challengeFigure.displayMode === 'hidden-colors')
+                    instance().challengeFigure.displayMode === 'hidden-colors' ||
+                    instance().challengeFigure.displayMode === 'syllabic-rotation')
                 "
                 [class.navigation-code]="instance().challengeFigure.displayMode === 'navigation'"
               >
@@ -1222,6 +1253,8 @@
                     [partials]="challengePartialAnswers()"
                     label="Votre réponse"
                     submitLabel="Vérifier"
+                    [autoValidate]="selectedType().id === 'syllabic-rotation'"
+                    [clearAfterSubmit]="selectedType().id !== 'syllabic-rotation'"
                     (correctAnswer)="markPlaySolved()"
                   />
                 </div>

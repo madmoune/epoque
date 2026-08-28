@@ -75,6 +75,7 @@ export class PuzzleSuccessPopupComponent implements OnInit {
     '/play/faux-words',
     '/play/segment-phrase',
     '/play/color-chain',
+    '/play/syllabic-rotation',
   ];
 
   private readonly sectionFragmentsByRoute: Record<string, string> = {
@@ -134,6 +135,7 @@ export class PuzzleSuccessPopupComponent implements OnInit {
     'play/faux-words': 'enigmes',
     'play/segment-phrase': 'enigmes',
     'play/color-chain': 'enigmes',
+    'play/syllabic-rotation': 'enigmes',
   };
 
   private readonly router = inject(Router);

@@ -1,7 +1,7 @@
 <form class="answer-form" (submit)="submitAnswer($event)">
   <label for="puzzle-answer">{{ label }}</label>
 
-  <div class="answer-row">
+  <div class="answer-row" [class.auto-validate-row]="autoValidate">
     <input
       id="puzzle-answer"
       name="puzzle-answer"
@@ -13,9 +13,11 @@
       [disabled]="isLocked()"
     />
 
-    <button type="submit" [disabled]="isLocked()">
-      {{ submitLabel }}
-    </button>
+    @if (!autoValidate) {
+      <button type="submit" [disabled]="isLocked()">
+        {{ submitLabel }}
+      </button>
+    }
   </div>
 
   @if (formMessage()) {

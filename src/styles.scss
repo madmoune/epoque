@@ -102,6 +102,14 @@
 .color-chain-cell { position: relative; display: grid; place-items: center; min-width: 0; aspect-ratio: 1; border: 2px solid color-mix(in srgb, var(--surface-raised) 68%, transparent); border-radius: 0.42rem; color: var(--text); font-size: clamp(1rem, 4vw, 1.8rem); font-weight: 1000; line-height: 1; text-shadow: 0 1px 1px rgb(0 0 0 / 78%), 0 -1px 1px rgb(255 255 255 / 52%); box-shadow: 0 0 0 1px rgb(0 0 0 / 12%); }
 
 
+.syllabic-rotation-card { grid-template-columns: 1fr !important; grid-template-areas: 'code' 'figure' !important; gap: 0.7rem; padding: 0.65rem; }
+.figure-list:has(.syllabic-rotation-card) { gap: 0.7rem !important; }
+.figure-list .syllabic-rotation-card + .syllabic-rotation-card { margin-top: 0 !important; }
+.figure-card.challenge.syllabic-rotation-card { grid-template-areas: 'code' 'figure' 'answer' 'feedback' !important; }
+.syllabic-rotation-visual-container { width: 100%; }
+.syllabic-rotation-card > strong { justify-self: center; }
+
+
 html {
   min-height: 100%;
   background: var(--page-bg);

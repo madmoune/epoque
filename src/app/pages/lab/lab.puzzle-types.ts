@@ -8,6 +8,7 @@ import { FauxWordsPuzzleType } from './puzzle-types/faux-words.puzzle-type';
 import { SegmentPhrasePuzzleType } from './puzzle-types/segment-phrase.puzzle-type';
 import { ColorChainPuzzleType } from './puzzle-types/color-chain.puzzle-type';
 import { HiddenColorsPuzzleType } from './puzzle-types/hidden-colors.puzzle-type';
+import { SyllabicRotationPuzzleType } from './puzzle-types/syllabic-rotation.puzzle-type';
 
 export const LAB_PUZZLE_TYPES: PuzzleType[] = [
   new CountBySymbolPuzzleType(),
@@ -19,4 +20,5 @@ export const LAB_PUZZLE_TYPES: PuzzleType[] = [
   new SegmentPhrasePuzzleType(),
   new ColorChainPuzzleType(),
   new HiddenColorsPuzzleType(),
+  new SyllabicRotationPuzzleType(),
 ];

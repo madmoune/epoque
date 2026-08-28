@@ -123,6 +123,55 @@ describe('ZebraPage', () => {
     expect(page.countMatchingSolutions(puzzle.categories, puzzle.logicalClues, 2)).toBe(1);
   });
 
+  it('removes a direct clue when spatial clues already force the solution', () => {
+    const categories = [
+      { id: 'house', label: 'Maison', values: ['Maison 1', 'Maison 2', 'Maison 3'] },
+      { id: 'person', label: 'Personne', values: ['Alice', 'Bruno', 'Clara'] },
+      { id: 'color', label: 'Couleur', values: ['Rouge', 'Bleu', 'Vert'] },
+    ];
+    const spatialClues = [
+      {
+        type: 'adjacentRight',
+        leftCategoryId: 'person',
+        leftValue: 'Alice',
+        rightCategoryId: 'color',
+        rightValue: 'Bleu',
+        text: '',
+      },
+      {
+        type: 'adjacentRight',
+        leftCategoryId: 'person',
+        leftValue: 'Bruno',
+        rightCategoryId: 'color',
+        rightValue: 'Vert',
+        text: '',
+      },
+      {
+        type: 'oneBetween',
+        firstCategoryId: 'person',
+        firstValue: 'Alice',
+        secondCategoryId: 'color',
+        secondValue: 'Vert',
+        text: '',
+      },
+    ];
+    const directClue = {
+      type: 'position',
+      categoryId: 'person',
+      value: 'Alice',
+      houseIndex: 0,
+      text: '',
+    };
+
+    const compactClues = page.removeRedundantDirectClues(
+      [...spatialClues, directClue],
+      categories,
+    );
+
+    expect(compactClues).toHaveLength(spatialClues.length);
+    expect(compactClues.every((clue: any) => page.isSpatialClue(clue))).toBe(true);
+  });
+
   it('keeps a unique solution at every grid size', () => {
     for (const level of [3, 4, 5]) {
       page.setLevel(level);

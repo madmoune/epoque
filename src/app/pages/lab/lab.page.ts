@@ -21,6 +21,15 @@ import {
   HiddenColorDefinition,
   HiddenColorDirection,
 } from './puzzle-types/hidden-colors.puzzle-type';
+import {
+  applySyllabicRotationMapping,
+  createSyllabicRotationMapping,
+  SYLLABIC_ROTATION_CHALLENGE,
+  SYLLABIC_ROTATION_EXAMPLES,
+  SyllabicRotationMapping,
+  SyllabicRotationWord,
+} from './puzzle-types/syllabic-rotation.puzzle-type';
+import { SyllabicRotationVisualComponent } from './puzzle-types/syllabic-rotation-visual.component';
 import { PuzzlePlayHistoryService } from '../../puzzle-play-history.service';
 import { PuzzleAnswerComponent } from '../../puzzles/shared/puzzle-answer';
 import { AppStorageService } from '../../shared/storage/app-storage.service';
@@ -178,7 +187,8 @@ type PuzzleExampleFigure = {
     | 'word-split'
     | 'segment-phrase'
     | 'color-chain'
-    | 'hidden-colors';
+    | 'hidden-colors'
+    | 'syllabic-rotation';
   imageSrc?: string;
   clue?: string;
   clockLetters?: ClockLetterFigure[];
@@ -191,6 +201,7 @@ type PuzzleExampleFigure = {
   colorChainAnswerColors?: string[];
   colorChainCells?: ColorChainCell[];
   hiddenColorEntries?: HiddenColorEntry[];
+  syllabicWord?: SyllabicRotationWord;
 };
 
 type ClockLetterFigure = {
@@ -271,7 +282,7 @@ const COLOR_CHAIN_TERMINAL_COLOR: ColorChainColor = {
 
 @Component({
   selector: 'app-lab-page',
-  imports: [RouterLink, PuzzleAnswerComponent],
+  imports: [RouterLink, PuzzleAnswerComponent, SyllabicRotationVisualComponent],
   templateUrl: './lab.page.html',
   styleUrl: './lab.page.scss',
 })
@@ -516,7 +527,8 @@ export class LabPage {
       this.selectedType().id === 'faux-words' ||
       this.selectedType().id === 'segment-phrase' ||
       this.selectedType().id === 'color-chain' ||
-      this.selectedType().id === 'hidden-colors'
+      this.selectedType().id === 'hidden-colors' ||
+      this.selectedType().id === 'syllabic-rotation'
     );
   }
 
@@ -1110,8 +1122,11 @@ export class LabPage {
         return;
       }
 
-      const words = (await response.text())
+      const sourceWords = (await response.text())
         .split(/\r?\n/)
+        .map((word) => word.trim())
+        .filter(Boolean);
+      const words = sourceWords
         .map((word) =>
           word
             .trim()
@@ -1127,6 +1142,7 @@ export class LabPage {
       if (words.length > 0) {
         this.clockWordPool.set(words);
       }
+
     } catch {
       // Les mots de secours permettent de continuer à générer l’exemple hors ligne.
     }
@@ -1200,6 +1216,8 @@ export class LabPage {
     seed: string,
   ): LabInstance {
     const random = this.seededRandom(`${type.id}-${variant.id}-${difficulty}-${seed}`);
+    const syllabicRotationMapping =
+      variant.id === 'syllabic-rotation-main' ? createSyllabicRotationMapping(random) : undefined;
     const shouldShuffleCode =
       !variant.id.startsWith('3-') &&
       variant.id !== 'navigation-main' &&
@@ -1207,7 +1225,8 @@ export class LabPage {
       variant.id !== 'faux-words-main' &&
       variant.id !== 'segment-phrase-main' &&
       variant.id !== 'color-chain-main' &&
-      variant.id !== 'hidden-colors-main';
+      variant.id !== 'hidden-colors-main' &&
+      variant.id !== 'syllabic-rotation-main';
     const digitOrder = shouldShuffleCode ? this.shuffle([0, 1, 2, 3], random) : [0, 1, 2, 3];
     const sharedSegmentConfiguration =
       variant.id === '3-1-broken-segment'
@@ -1220,6 +1239,7 @@ export class LabPage {
         example,
         variant.id,
         sharedSegmentConfiguration,
+        syllabicRotationMapping,
       );
 
       return shouldShuffleCode
@@ -1294,6 +1314,7 @@ export class LabPage {
     example: PuzzleExample,
     variantId: string,
     sharedSegmentConfiguration?: number[],
+    syllabicRotationMapping?: SyllabicRotationMapping,
   ): PuzzleExampleFigure {
     if (variantId === 'navigation-main') {
       return this.createNavigationFigure(example);
@@ -1312,6 +1333,12 @@ export class LabPage {
     }
     if (variantId === 'hidden-colors-main') {
       return this.createHiddenColorsFigure(example);
+    }
+    if (variantId === 'syllabic-rotation-main') {
+      return this.createSyllabicRotationFigure(
+        example,
+        syllabicRotationMapping,
+      );
     }
     if (variantId.startsWith('3-')) {
       return this.createSevenSegmentFigure(
@@ -1564,6 +1591,32 @@ export class LabPage {
       code: 'NATURE',
       displayMode: 'hidden-colors',
       hiddenColorEntries,
+    };
+  }
+
+  private createSyllabicRotationFigure(
+    example: PuzzleExample,
+    mapping?: SyllabicRotationMapping,
+  ): PuzzleExampleFigure {
+    const exampleIndex = Number(example.id.match(/(\d+)$/)?.[1] ?? 1) - 1;
+    const baseWord =
+      example.id === 'challenge'
+        ? SYLLABIC_ROTATION_CHALLENGE
+        : (SYLLABIC_ROTATION_EXAMPLES[exampleIndex] ?? SYLLABIC_ROTATION_EXAMPLES[0]);
+    const word = mapping ? applySyllabicRotationMapping(baseWord, mapping) : baseWord;
+
+    return {
+      id: `example-${example.id}`,
+      example,
+      viewBox: '0 0 1 1',
+      frame: { x: 0, y: 0, width: 1, height: 1 },
+      gridSize: 1,
+      segments: [],
+      shapes: [],
+      markers: [],
+      code: word.word,
+      displayMode: 'syllabic-rotation',
+      syllabicWord: word,
     };
   }
 

@@ -23,16 +23,6 @@ type ZebraPuzzle = {
 
 type GridMark = 'unknown' | 'yes' | 'no';
 
-type ZebraClueType =
-  | 'same'
-  | 'notSame'
-  | 'position'
-  | 'notPosition'
-  | 'adjacentRight'
-  | 'adjacent'
-  | 'leftOf'
-  | 'oneBetween';
-
 type ZebraClue =
   | {
       type: 'same';
@@ -105,21 +95,6 @@ type ZebraHintMove = {
   mark: 'yes' | 'no';
   clue: ZebraClue;
 };
-
-const ZEBRA_CLUE_PROFILES: ZebraClueType[][] = [
-  ['position', 'same', 'adjacentRight'],
-  ['notPosition', 'notSame', 'adjacent'],
-  ['position', 'notSame', 'leftOf'],
-  ['notPosition', 'same', 'oneBetween'],
-  ['position', 'notPosition', 'adjacent'],
-  ['same', 'notSame', 'leftOf'],
-  ['position', 'same', 'oneBetween'],
-  ['notPosition', 'notSame', 'adjacentRight'],
-  ['same', 'adjacent', 'leftOf'],
-  ['notSame', 'adjacentRight', 'oneBetween'],
-  ['position', 'adjacent', 'oneBetween'],
-  ['notPosition', 'leftOf', 'oneBetween'],
-];
 
 const ZEBRA_PUZZLES: Record<ZebraLevel, ZebraPuzzle> = {
   3: {
@@ -271,7 +246,6 @@ const ZEBRA_PUZZLES: Record<ZebraLevel, ZebraPuzzle> = {
 export class ZebraPage {
   protected readonly level = signal<ZebraLevel>(3);
   private readonly puzzles = ZEBRA_PUZZLES;
-  private lastClueProfileKey: string | null = null;
   private readonly activePuzzle = signal<ZebraPuzzle>(this.createRandomPuzzle(this.puzzles[3]));
   protected readonly puzzle = computed(() => this.activePuzzle());
   private readonly manualGridMarks = signal<Record<string, GridMark>>({});
@@ -1370,7 +1344,6 @@ export class ZebraPage {
 
   private createRandomPuzzle(basePuzzle: ZebraPuzzle): ZebraPuzzle {
     const categories = this.createVariantCategories(basePuzzle);
-    const clueProfile = this.chooseClueProfile();
     const houseCategory = categories[0];
     const randomizedValuesByCategory = new Map(
       categories.map((category) => [
@@ -1391,16 +1364,15 @@ export class ZebraPage {
     );
 
     const candidateClues = this.createCandidateClues(categories, solution);
-    // Let the clue reduction choose the minimum set needed for a unique
-    // solution. Adding one positional clue for every category makes the
-    // puzzle much too transparent.
-    const logicalClues = this.reduceToEssentialClues(candidateClues, categories, clueProfile);
+    // Prefer indirect spatial clues so the grid does the work. Direct
+    // associations are kept only as a fallback when they are indispensable
+    // for uniqueness.
+    const reducedClues = this.reduceToEssentialClues(candidateClues, categories);
+    const logicalClues = this.removeRedundantDirectClues(reducedClues, categories);
 
     if (this.countMatchingSolutions(categories, logicalClues, 2) !== 1) {
       return this.createRandomPuzzle(basePuzzle);
     }
-
-    this.lastClueProfileKey = clueProfile.join('|');
 
     return {
       ...basePuzzle,
@@ -1719,18 +1691,35 @@ export class ZebraPage {
     return [...new Set(clues)];
   }
 
-  private chooseClueProfile(): ZebraClueType[] {
-    const availableProfiles = ZEBRA_CLUE_PROFILES.filter(
-      (profile) => profile.join('|') !== this.lastClueProfileKey,
-    );
-
-    return [...this.randomItem(availableProfiles)];
-  }
-
   private clueKey(clue: ZebraClue): string {
     const { text, ...logicalClue } = clue;
 
     return JSON.stringify(logicalClue);
+  }
+
+  private isSpatialClue(clue: ZebraClue): boolean {
+    return ['adjacentRight', 'adjacent', 'leftOf', 'oneBetween'].includes(clue.type);
+  }
+
+  private removeRedundantDirectClues(
+    clues: ZebraClue[],
+    categories: ZebraCategory[],
+  ): ZebraClue[] {
+    let compactClues = [...clues];
+
+    for (const clue of this.shuffle(compactClues)) {
+      if (this.isSpatialClue(clue)) {
+        continue;
+      }
+
+      const withoutClue = compactClues.filter((candidate) => candidate !== clue);
+
+      if (this.countMatchingSolutions(categories, withoutClue, 2) === 1) {
+        compactClues = withoutClue;
+      }
+    }
+
+    return compactClues;
   }
 
   private randomItem<T>(values: T[]): T {
@@ -1929,19 +1918,11 @@ export class ZebraPage {
   private reduceToEssentialClues(
     clues: ZebraClue[],
     categories: ZebraCategory[],
-    requiredTypes: ZebraClueType[] = [],
   ): ZebraClue[] {
     let essentialClues = [...clues];
 
     for (const clue of this.shuffle(essentialClues)) {
       const nextClues = essentialClues.filter((candidate) => candidate !== clue);
-
-      if (
-        requiredTypes.includes(clue.type) &&
-        !essentialClues.some((candidate) => candidate !== clue && candidate.type === clue.type)
-      ) {
-        continue;
-      }
 
       if (this.countMatchingSolutions(categories, nextClues, 2) === 1) {
         essentialClues = nextClues;

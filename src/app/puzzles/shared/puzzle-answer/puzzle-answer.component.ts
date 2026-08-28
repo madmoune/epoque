@@ -39,6 +39,7 @@ export class PuzzleAnswerComponent {
   @Input() correctText = 'Bonne réponse';
   @Input() incorrectText = 'Mauvaise réponse';
   @Input() partialText = 'Partiel';
+  @Input() autoValidate = false;
   @Input() lockOnCorrect = true;
   @Input() clearAfterSubmit = true;
 
@@ -71,6 +72,10 @@ export class PuzzleAnswerComponent {
   protected updateAnswer(value: string): void {
     this.answerInput.set(value);
     this.formMessage.set('');
+
+    if (this.autoValidate && this.isCompleteAnswer(value)) {
+      this.submitAnswer();
+    }
   }
 
   protected submitAnswer(event?: Event): void {
@@ -174,6 +179,22 @@ export class PuzzleAnswerComponent {
       .normalize('NFD')
       .replace(/\p{Diacritic}/gu, '')
       .toLowerCase();
+  }
+
+  private isCompleteAnswer(value: string): boolean {
+    const normalizedLength = this.normalize(value).length;
+
+    if (normalizedLength === 0) {
+      return false;
+    }
+
+    const expectedAnswers = Array.isArray(this.answer) ? this.answer : [this.answer];
+    const expectedLengths = [
+      ...expectedAnswers.map((answer) => this.normalize(answer).length),
+      ...this.partials.map((partial) => this.normalize(partial.answer).length),
+    ];
+
+    return expectedLengths.includes(normalizedLength);
   }
 
   private withDefaultMessage(result: PuzzleAnswerResult): PuzzleAnswerResult {

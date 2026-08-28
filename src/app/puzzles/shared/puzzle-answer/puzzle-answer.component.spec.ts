@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { By } from '@angular/platform-browser';
 import { PuzzleAnswerComponent } from './puzzle-answer.component';
 
@@ -9,6 +10,7 @@ describe('PuzzleAnswerComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [PuzzleAnswerComponent],
+      providers: [provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(PuzzleAnswerComponent);
@@ -30,7 +32,7 @@ describe('PuzzleAnswerComponent', () => {
     const attempt = fixture.nativeElement.querySelector('.answer-attempt') as HTMLElement;
 
     expect(attempt.textContent).toContain('bins');
-    expect(attempt.textContent).toContain('Indice');
+    expect(attempt.textContent).toContain('Partiel');
     expect(attempt.textContent).toContain('You are close.');
   });
 
@@ -58,6 +60,28 @@ describe('PuzzleAnswerComponent', () => {
     const attempt = fixture.nativeElement.querySelector('.answer-attempt') as HTMLElement;
     const resultText = attempt.querySelector('.attempt-result')?.textContent ?? '';
 
-    expect(resultText.match(/Incorrect/g)?.length).toBe(1);
+    expect(resultText.match(/Mauvaise réponse/g)?.length).toBe(1);
+  });
+
+  it('can validate automatically when the expected answer length is reached', () => {
+    const autoFixture = TestBed.createComponent(PuzzleAnswerComponent);
+    const autoComponent = autoFixture.componentInstance;
+    autoComponent.answer = 'bingo';
+    autoComponent.autoValidate = true;
+    autoComponent.clearAfterSubmit = false;
+    autoFixture.detectChanges();
+
+    const input = autoFixture.debugElement.query(By.css('input')).nativeElement as HTMLInputElement;
+    input.value = 'bingo';
+    input.dispatchEvent(new Event('input'));
+    autoFixture.detectChanges();
+
+    expect(autoFixture.nativeElement.querySelector('button[type="submit"]')).toBeNull();
+    expect(input.disabled).toBe(true);
+    expect(autoFixture.nativeElement.querySelector('.answer-attempt')?.textContent).toContain(
+      'bingo',
+    );
+
+    autoFixture.destroy();
   });
 });
