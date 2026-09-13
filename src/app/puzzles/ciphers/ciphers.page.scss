@@ -181,7 +181,6 @@ button:disabled {
 
 .revealed-letter {
   color: #6c2f80;
-  font-size: 1.3rem;
   font-weight: 950;
 }
 
@@ -393,8 +392,8 @@ button:disabled {
 
 .morse-digit-practice > .encoded-word > .morse-digit-token {
   flex-direction: column;
-  min-width: 4.7rem;
-  min-height: 3.7rem;
+  min-width: min(4.7rem, 18vw);
+  min-height: min(3.7rem, 13vw);
 }
 
 .cree-syllabic-glyph {
