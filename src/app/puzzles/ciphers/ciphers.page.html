@@ -218,10 +218,7 @@
 
           @if (selectedCipher() === 'morse') {
             <section class="morse-digit-practice" aria-label="Entraînement aux chiffres Morse">
-              <p class="morse-digit-title">Chiffres à décoder</p>
-              <p>
-                Essaie de reconnaître ces trois codes Morse, puis touche une case pour vérifier.
-              </p>
+              <p class="morse-digit-title">chiffre bonus</p>
               <div class="encoded-word">
                 @for (practice of currentPuzzle.morseDigitPractice ?? []; track $index) {
                   <button

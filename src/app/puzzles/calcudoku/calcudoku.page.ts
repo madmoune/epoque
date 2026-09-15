@@ -44,6 +44,9 @@ export class CalcudokuPage {
   protected readonly answers = signal<string[][]>(this.createEmptyAnswers());
   protected readonly hintedPositions = signal<Set<string>>(new Set());
   protected readonly activeCell = signal<{ row: number; col: number } | null>(null);
+  protected readonly selectedCageId = signal<string | null>(null);
+
+  protected readonly hasCageSelection = computed(() => this.selectedCageId() !== null);
 
   constructor() {
     this.assignCageOperators();
@@ -79,6 +82,7 @@ export class CalcudokuPage {
   }
 
   protected activateInput(row: number, col: number, event: Event): void {
+    this.selectedCageId.set(this.cellAt(row, col).cage);
     this.activeCell.set({ row, col });
 
     if (event.target instanceof HTMLInputElement) {
@@ -125,9 +129,24 @@ export class CalcudokuPage {
     this.updateAnswer(activeCell.row, activeCell.col, key);
   }
 
+  protected highlightCage(cageId: string): void {
+    this.selectedCageId.set(cageId);
+    this.activeCell.set(null);
+  }
+
+  protected selectCellCage(cageId: string): void {
+    this.selectedCageId.set(cageId);
+  }
+
+  protected clearCageSelection(): void {
+    this.selectedCageId.set(null);
+    this.activeCell.set(null);
+  }
+
   protected resetPuzzle(): void {
     this.answers.set(this.createEmptyAnswers());
     this.hintedPositions.set(new Set());
+    this.selectedCageId.set(null);
     this.activeCell.set(null);
   }
 
@@ -148,6 +167,8 @@ export class CalcudokuPage {
     if (!hintCell) {
       return;
     }
+
+    this.selectedCageId.set(hintCell.cage);
 
     this.answers.update((answers) =>
       answers.map((answerRow, rowIndex) =>
@@ -170,7 +191,10 @@ export class CalcudokuPage {
   }
 
   protected cageLabel(cell: CalcudokuCell): string {
-    const isFirstCell = this.cells().find((candidate) => candidate.cage === cell.cage) === cell;
+    const firstCell = this.cells()
+      .filter((candidate) => candidate.cage === cell.cage)
+      .sort((first, second) => first.row - second.row || first.col - second.col)[0];
+    const isFirstCell = firstCell === cell;
     if (!isFirstCell) {
       return '';
     }
@@ -190,6 +214,34 @@ export class CalcudokuPage {
     const activeCell = this.activeCell();
 
     return activeCell?.row === row && activeCell.col === col;
+  }
+
+  protected isCageSelected(cageId: string): boolean {
+    return this.selectedCageId() === cageId;
+  }
+
+  protected isCageDimmed(cageId: string): boolean {
+    const selectedCageId = this.selectedCageId();
+
+    return selectedCageId !== null && selectedCageId !== cageId;
+  }
+
+  protected cageCellCount(cageId: string): number {
+    return this.cells().filter((cell) => cell.cage === cageId).length;
+  }
+
+  protected cageCellCountLabel(cageId: string): string {
+    const count = this.cageCellCount(cageId);
+
+    return `${count} ${count === 1 ? 'case' : 'cases'}`;
+  }
+
+  protected cageAriaLabel(cageId: string): string {
+    return `Indication ${this.cageLabelFor(cageId)}, ${this.cageCellCountLabel(cageId)}. Toucher pour surligner la cage.`;
+  }
+
+  protected cellAriaLabel(cell: CalcudokuCell): string {
+    return `Ligne ${cell.row + 1}, colonne ${cell.col + 1}, indication ${this.cageLabelFor(cell.cage)}.`;
   }
 
   protected cellClass(cell: CalcudokuCell): string {
@@ -361,7 +413,7 @@ export class CalcudokuPage {
     return [row, col];
   }
 
-  private cageLabelFor(cageId: string): string {
+  protected cageLabelFor(cageId: string): string {
     const cage = this.cages().find((candidate) => candidate.id === cageId);
     const values = this.cells()
       .filter((cell) => cell.cage === cageId)

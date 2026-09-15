@@ -24,4 +24,33 @@ describe('CalcudokuPage', () => {
     page.answers.set(page.solution().map((row: number[]) => row.map(String)));
     expect(page.isSolved()).toBe(true);
   });
+
+  it('places each cage clue in its visual top-left cell and highlights the cage', () => {
+    const page = new CalcudokuPage() as any;
+    const selectedCageId = page.cages()[0].id;
+
+    for (const cage of page.cages()) {
+      const cageCells = page
+        .cells()
+        .filter((cell: { cage: string }) => cell.cage === cage.id)
+        .sort(
+          (first: { row: number; col: number }, second: { row: number; col: number }) =>
+            first.row - second.row || first.col - second.col,
+        );
+
+      expect(page.cageLabel(cageCells[0])).toBe(page.cageLabelFor(cage.id));
+      expect(cageCells.slice(1).every((cell: object) => page.cageLabel(cell) === '')).toBe(true);
+    }
+
+    page.highlightCage(selectedCageId);
+
+    expect(page.selectedCageId()).toBe(selectedCageId);
+    expect(page.isCageSelected(selectedCageId)).toBe(true);
+    expect(page.isCageDimmed(page.cages()[1].id)).toBe(true);
+
+    page.clearCageSelection();
+
+    expect(page.selectedCageId()).toBe(null);
+    expect(page.isCageDimmed(selectedCageId)).toBe(false);
+  });
 });

@@ -8,7 +8,7 @@
       <p class="intro">
         Place les nombres de 1 à 5 une seule fois par ligne et colonne. Dans chaque cage, additionne
         ou multiplie toutes les cases ; pour - et /, fais grand moins petit ou grand divise par
-        petit.
+        petit. Touche une indication ou une case pour voir sa cage.
       </p>
     </header>
 
@@ -22,18 +22,88 @@
     }
 
     <section class="puzzle-area">
-      <div class="calcudoku-grid" aria-label="Grille Calcudoku">
+      <section
+        class="cage-guide"
+        [class.has-selection]="hasCageSelection()"
+        aria-live="polite"
+        aria-label="Correspondance entre les indications et les cages"
+      >
+        @if (selectedCageId(); as selectedCage) {
+          <div class="cage-guide-copy">
+            <span class="cage-guide-kicker">Cage sélectionnée</span>
+            <p class="cage-guide-title">
+              <strong>{{ cageLabelFor(selectedCage) }}</strong>
+              <span>{{ cageCellCountLabel(selectedCage) }} correspondantes</span>
+            </p>
+          </div>
+          <button
+            type="button"
+            class="secondary-button cage-clear-button"
+            (click)="clearCageSelection()"
+          >
+            Tout voir
+          </button>
+        } @else {
+          <div class="cage-guide-copy">
+            <span class="cage-guide-kicker">Pour lire la grille</span>
+            <p class="cage-guide-title">
+              <strong>Touche une indication</strong>
+              <span>les cases liées seront surlignées</span>
+            </p>
+          </div>
+        }
+      </section>
+
+      <section class="cage-legend" aria-labelledby="cage-legend-title">
+        <div class="cage-legend-heading">
+          <h2 id="cage-legend-title">Indications</h2>
+          <p>Chaque bouton colore sa cage.</p>
+        </div>
+        <div class="cage-legend-grid">
+          @for (cage of cages(); track cage.id) {
+            <button
+              type="button"
+              class="secondary-button cage-legend-button"
+              [class.selected]="isCageSelected(cage.id)"
+              [attr.aria-pressed]="isCageSelected(cage.id)"
+              [attr.aria-label]="cageAriaLabel(cage.id)"
+              (click)="highlightCage(cage.id)"
+            >
+              <span class="cage-legend-value">{{ cageLabelFor(cage.id) }}</span>
+              <span class="cage-legend-count">{{ cageCellCountLabel(cage.id) }}</span>
+            </button>
+          }
+        </div>
+      </section>
+
+      <div
+        class="calcudoku-grid"
+        role="grid"
+        aria-label="Grille Calcudoku. Touchez une case pour surligner sa cage."
+      >
         @for (row of gridIndexes; track row) {
           @for (col of gridIndexes; track col) {
             @let cell = cellAt(row, col);
             <div
               [class]="cellClass(cell)"
               [class.active-cell]="isActiveCell(row, col)"
+              [class.cage-selected]="isCageSelected(cell.cage)"
+              [class.cage-dimmed]="isCageDimmed(cell.cage)"
               [class.first-row]="row === 0"
               [class.first-column]="col === 0"
               [attr.data-cage]="cell.cage"
+              [attr.aria-label]="cellAriaLabel(cell)"
+              [attr.aria-selected]="isCageSelected(cell.cage)"
+              role="gridcell"
+              (click)="selectCellCage(cell.cage)"
             >
-              <span class="cage-label">{{ cageLabel(cell) }}</span>
+              <span
+                class="cage-label"
+                [class.selected-label]="isCageSelected(cell.cage)"
+                [attr.aria-hidden]="cageLabel(cell) ? null : 'true'"
+              >
+                {{ cageLabel(cell) }}
+              </span>
               @if (isHinted(row, col)) {
                 <span class="hinted-value">{{ answerAt(row, col) }}</span>
               } @else {
@@ -46,7 +116,7 @@
                   (focus)="activateInput(row, col, $event)"
                   (click)="activateInput(row, col, $event)"
                   (input)="updateAnswer(row, col, $any($event.target).value)"
-                  aria-label="Case Calcudoku"
+                  [attr.aria-label]="cellAriaLabel(cell)"
                 />
               }
             </div>

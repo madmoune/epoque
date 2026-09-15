@@ -2,6 +2,9 @@
   max-width: 980px;
   margin: 0 auto;
   padding: 2rem;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 .back-link {
   display: inline-block;
