@@ -42,15 +42,14 @@ describe('CalcudokuPage', () => {
       expect(cageCells.slice(1).every((cell: object) => page.cageLabel(cell) === '')).toBe(true);
     }
 
-    page.highlightCage(selectedCageId);
+    page.selectCellCage(selectedCageId);
 
     expect(page.selectedCageId()).toBe(selectedCageId);
     expect(page.isCageSelected(selectedCageId)).toBe(true);
-    expect(page.isCageDimmed(page.cages()[1].id)).toBe(true);
 
     page.clearCageSelection();
 
     expect(page.selectedCageId()).toBe(null);
-    expect(page.isCageDimmed(selectedCageId)).toBe(false);
+    expect(page.isCageSelected(selectedCageId)).toBe(false);
   });
 });

@@ -46,8 +46,6 @@ export class CalcudokuPage {
   protected readonly activeCell = signal<{ row: number; col: number } | null>(null);
   protected readonly selectedCageId = signal<string | null>(null);
 
-  protected readonly hasCageSelection = computed(() => this.selectedCageId() !== null);
-
   constructor() {
     this.assignCageOperators();
   }
@@ -99,15 +97,13 @@ export class CalcudokuPage {
     }
 
     if (
-      target.closest('.calcudoku-grid input') ||
-      target.closest('button') ||
-      target.closest('app-custom-keyboard') ||
-      target.closest('app-puzzle-success-popup')
+      target.closest('.calcudoku-grid [role="gridcell"]') ||
+      target.closest('app-custom-keyboard')
     ) {
       return;
     }
 
-    this.activeCell.set(null);
+    this.clearCageSelection();
   }
 
   protected handleKeyboardKey(key: CustomKeyboardKey): void {
@@ -127,11 +123,6 @@ export class CalcudokuPage {
     }
 
     this.updateAnswer(activeCell.row, activeCell.col, key);
-  }
-
-  protected highlightCage(cageId: string): void {
-    this.selectedCageId.set(cageId);
-    this.activeCell.set(null);
   }
 
   protected selectCellCage(cageId: string): void {
@@ -167,8 +158,6 @@ export class CalcudokuPage {
     if (!hintCell) {
       return;
     }
-
-    this.selectedCageId.set(hintCell.cage);
 
     this.answers.update((answers) =>
       answers.map((answerRow, rowIndex) =>
@@ -218,26 +207,6 @@ export class CalcudokuPage {
 
   protected isCageSelected(cageId: string): boolean {
     return this.selectedCageId() === cageId;
-  }
-
-  protected isCageDimmed(cageId: string): boolean {
-    const selectedCageId = this.selectedCageId();
-
-    return selectedCageId !== null && selectedCageId !== cageId;
-  }
-
-  protected cageCellCount(cageId: string): number {
-    return this.cells().filter((cell) => cell.cage === cageId).length;
-  }
-
-  protected cageCellCountLabel(cageId: string): string {
-    const count = this.cageCellCount(cageId);
-
-    return `${count} ${count === 1 ? 'case' : 'cases'}`;
-  }
-
-  protected cageAriaLabel(cageId: string): string {
-    return `Indication ${this.cageLabelFor(cageId)}, ${this.cageCellCountLabel(cageId)}. Toucher pour surligner la cage.`;
   }
 
   protected cellAriaLabel(cell: CalcudokuCell): string {
