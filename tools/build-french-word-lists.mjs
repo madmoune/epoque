@@ -8,9 +8,20 @@ export const WORD_LENGTHS = [4, 5];
 const SCRIPT_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
 export const PROJECT_ROOT = path.resolve(SCRIPT_DIRECTORY, '..');
 export const DEFAULT_OUTPUT_DIRECTORY = path.join(PROJECT_ROOT, 'public');
-export const DEFAULT_MINIMUM_FREQUENCY = 1;
+export const DEFAULT_MINIMUM_FREQUENCY = 0.5;
+export const DEFAULT_GRAMMALECTE_MINIMUM_INDEX = 5;
+export const DEFAULT_MORPHALOU_SOURCE = path.join(
+  PROJECT_ROOT,
+  'public',
+  'morphalou-4-5.txt',
+);
+export const DEFAULT_GRAMMALECTE_SOURCE = path.join(
+  PROJECT_ROOT,
+  'public',
+  'grammalecte-4-5.txt',
+);
 
-const WORD_PATTERN = /^\p{Letter}+$/u;
+const WORD_PATTERN = /^\p{Script=Latin}+$/u;
 const ABBREVIATION_VALUES = new Set([
   'abr',
   'abbr',
@@ -20,6 +31,18 @@ const ABBREVIATION_VALUES = new Set([
   'acronyme',
   'symbole',
 ]);
+const GRAMMALECTE_EXCLUDED_TAGS = new Set([
+  'npr',
+  'patr',
+  'titr',
+  'pfx',
+  'sfx',
+  'ponc',
+  'sign',
+  'div',
+  'err',
+]);
+const GRAMMALECTE_EXCLUDED_NOTES = new Set(['sig', 'symb']);
 
 export function parseLexiqueTsv(text, options = {}) {
   const lines = text.split(/\r?\n/);
@@ -43,6 +66,7 @@ export function parseLexiqueTsv(text, options = {}) {
   const lemmaColumns = findColumns(headers, /^(islem|lemme|lemma)$/u);
   const frequencyColumn = findFrequencyColumn(headers);
   const minimumFrequency = options.minimumFrequency ?? DEFAULT_MINIMUM_FREQUENCY;
+  const allowedWords = options.allowedWords ?? null;
 
   if (!Number.isFinite(minimumFrequency) || minimumFrequency < 0) {
     throw new Error('Le seuil de fréquence doit être un nombre positif ou nul.');
@@ -75,6 +99,10 @@ export function parseLexiqueTsv(text, options = {}) {
       continue;
     }
 
+    if (allowedWords && !allowedWords.has(word)) {
+      continue;
+    }
+
     const length = [...word].length;
 
     if (!wordsByLength.has(length)) {
@@ -101,13 +129,88 @@ export function parseLexiqueTsv(text, options = {}) {
   return sortedWordsByLength;
 }
 
+export function parseMorphalouWordList(text) {
+  return parsePlainWordList(text, 'Morphalou');
+}
+
+export function parseGrammalecteWordList(text) {
+  return parsePlainWordList(text, 'Grammalecte');
+}
+
+export function parseGrammalecteLexique(
+  text,
+  minimumFrequencyIndex = DEFAULT_GRAMMALECTE_MINIMUM_INDEX,
+) {
+  const words = new Set();
+
+  for (const line of text.split(/\r?\n/u)) {
+    if (!/^\d+\t\d+\t/u.test(line)) {
+      continue;
+    }
+
+    const cells = line.split('\t');
+    const tags = (cells[4] ?? '').trim().split(/\s+/u);
+    const notes = (cells[7] ?? '').trim().split(/\s+/u);
+    const frequencyIndex = Number((cells[19] ?? '').trim());
+
+    if (
+      !Number.isFinite(frequencyIndex) ||
+      frequencyIndex < minimumFrequencyIndex ||
+      GRAMMALECTE_EXCLUDED_TAGS.has(tags[0]) ||
+      notes.some((note) => GRAMMALECTE_EXCLUDED_NOTES.has(note))
+    ) {
+      continue;
+    }
+
+    addWord(words, cells[2] ?? '');
+  }
+
+  if (words.size === 0) {
+    throw new Error('Aucun mot de 4 ou 5 lettres valide n’a été trouvé dans Grammalecte.');
+  }
+
+  return words;
+}
+
+export function mergeWordLists(...wordSets) {
+  const words = new Set();
+
+  for (const wordSet of wordSets) {
+    for (const word of wordSet) {
+      words.add(word);
+    }
+  }
+
+  if (words.size === 0) {
+    throw new Error('Aucun mot de 4 ou 5 lettres valide n’a été trouvé dans les sources.');
+  }
+
+  return words;
+}
+
 export async function generateWordLists(
   sourcePath,
   outputDirectory = DEFAULT_OUTPUT_DIRECTORY,
   options = {},
 ) {
-  const sourceText = await readSource(sourcePath);
-  const wordsByLength = parseLexiqueTsv(sourceText, options);
+  const morphalouSourcePath = options.morphalouSourcePath ?? DEFAULT_MORPHALOU_SOURCE;
+  const grammalecteSourcePath =
+    options.grammalecteSourcePath ?? DEFAULT_GRAMMALECTE_SOURCE;
+  const [sourceText, morphalouText, grammalecteText] = await Promise.all([
+    readSource(sourcePath),
+    readSource(morphalouSourcePath),
+    readSource(grammalecteSourcePath),
+  ]);
+  const wordsFromLexique = parseLexiqueTsv(sourceText, {
+    ...options,
+    allowedWords: parseMorphalouWordList(morphalouText),
+  });
+  const wordsByLength = groupWordsByLength(
+    mergeWordLists(
+      ...WORD_LENGTHS.map((length) => new Set(wordsFromLexique.get(length) ?? [])),
+      parseGrammalecteWordList(grammalecteText),
+    ),
+  );
 
   await mkdir(outputDirectory, { recursive: true });
 
@@ -134,13 +237,24 @@ export function resolveDefaultSource() {
   return candidates.find((candidate) => fileExists(candidate)) ?? candidates[0];
 }
 
+export function resolveDefaultMorphalouSource() {
+  return DEFAULT_MORPHALOU_SOURCE;
+}
+
+export function resolveDefaultGrammalecteSource() {
+  return DEFAULT_GRAMMALECTE_SOURCE;
+}
+
 export function parseCliArguments(args) {
   const options = {
     excludePlurals: false,
     lemmasOnly: false,
     minimumFrequency: DEFAULT_MINIMUM_FREQUENCY,
+    morphalouSourcePath: resolveDefaultMorphalouSource(),
+    grammalecteSourcePath: resolveDefaultGrammalecteSource(),
   };
   let sourcePath = null;
+  let outputDirectory = DEFAULT_OUTPUT_DIRECTORY;
 
   for (let index = 0; index < args.length; index += 1) {
     const argument = args[index];
@@ -167,8 +281,44 @@ export function parseCliArguments(args) {
       continue;
     }
 
+    if (argument === '--morphalou-source') {
+      const value = args[index + 1];
+
+      if (value === undefined) {
+        throw new Error('L’option --morphalou-source doit être suivie d’un chemin.');
+      }
+
+      options.morphalouSourcePath = path.resolve(value);
+      index += 1;
+      continue;
+    }
+
     if (argument.startsWith('--min-frequency=')) {
       options.minimumFrequency = parseMinimumFrequency(argument.slice('--min-frequency='.length));
+      continue;
+    }
+
+    if (argument === '--grammalecte-source') {
+      const value = args[index + 1];
+
+      if (value === undefined) {
+        throw new Error('L’option --grammalecte-source doit être suivie d’un chemin.');
+      }
+
+      options.grammalecteSourcePath = path.resolve(value);
+      index += 1;
+      continue;
+    }
+
+    if (argument === '--output-dir') {
+      const value = args[index + 1];
+
+      if (value === undefined) {
+        throw new Error('L’option --output-dir doit être suivie d’un chemin.');
+      }
+
+      outputDirectory = path.resolve(value);
+      index += 1;
       continue;
     }
 
@@ -180,11 +330,12 @@ export function parseCliArguments(args) {
       throw new Error('Un seul chemin de fichier TSV peut être fourni.');
     }
 
-    sourcePath = argument;
+    sourcePath = path.resolve(argument);
   }
 
   return {
-    sourcePath: sourcePath ? path.resolve(sourcePath) : resolveDefaultSource(),
+    sourcePath: sourcePath ?? resolveDefaultSource(),
+    outputDirectory,
     options,
   };
 }
@@ -205,7 +356,7 @@ function findColumns(headers, pattern) {
 
 function findFrequencyColumn(headers) {
   const normalizedHeaders = headers.map(normalizeHeader);
-  const preferredNames = ['freqortho', 'freqmot', 'freqlemme', 'frequencyortho'];
+  const preferredNames = ['freqmot', 'freqortho', 'freqlemme', 'frequencyortho'];
 
   return preferredNames
     .map((name) => normalizedHeaders.indexOf(name))
@@ -255,6 +406,53 @@ function isBelowFrequency(cells, frequencyColumn, minimumFrequency) {
   return !Number.isFinite(frequency) || frequency < minimumFrequency;
 }
 
+function parsePlainWordList(text, sourceName) {
+  const words = new Set();
+
+  for (const line of text.split(/\r?\n/u)) {
+    addWord(words, line);
+  }
+
+  if (words.size === 0) {
+    throw new Error(`Aucun mot de 4 ou 5 lettres valide n’a été trouvé dans ${sourceName}.`);
+  }
+
+  return words;
+}
+
+function addWord(words, rawWord) {
+  const normalizedRawWord = rawWord.trim().normalize('NFC');
+
+  if (!normalizedRawWord || isUppercaseEntry(normalizedRawWord)) {
+    return;
+  }
+
+  const word = normalizedRawWord.toLocaleLowerCase('fr-FR');
+
+  if (!WORD_PATTERN.test(word)) {
+    return;
+  }
+
+  if (WORD_LENGTHS.includes([...word].length)) {
+    words.add(word);
+  }
+}
+
+function groupWordsByLength(words) {
+  const wordsByLength = new Map(WORD_LENGTHS.map((length) => [length, []]));
+  const frenchCollator = new Intl.Collator('fr-FR', { sensitivity: 'variant' });
+
+  for (const word of words) {
+    wordsByLength.get([...word].length)?.push(word);
+  }
+
+  for (const length of WORD_LENGTHS) {
+    wordsByLength.get(length)?.sort((first, second) => frenchCollator.compare(first, second));
+  }
+
+  return wordsByLength;
+}
+
 function isUppercaseEntry(word) {
   return word !== word.toLocaleLowerCase('fr-FR');
 }
@@ -274,11 +472,11 @@ async function readSource(sourcePath) {
     return await readFile(sourcePath, 'utf8');
   } catch (error) {
     if (error?.code === 'ENOENT') {
-      throw new Error('Fichier Lexique introuvable : ' + sourcePath);
+      throw new Error('Fichier source introuvable : ' + sourcePath);
     }
 
     throw new Error(
-      'Impossible de lire le fichier Lexique ' +
+      'Impossible de lire le fichier source ' +
         sourcePath +
         ' : ' +
         (error instanceof Error ? error.message : String(error)),
@@ -292,8 +490,8 @@ function fileExists(filePath) {
 
 async function main() {
   try {
-    const { sourcePath, options } = parseCliArguments(process.argv.slice(2));
-    const counts = await generateWordLists(sourcePath, DEFAULT_OUTPUT_DIRECTORY, options);
+    const { sourcePath, outputDirectory, options } = parseCliArguments(process.argv.slice(2));
+    const counts = await generateWordLists(sourcePath, outputDirectory, options);
 
     for (const length of WORD_LENGTHS) {
       console.log(length + ' lettres : ' + counts.get(length) + ' mots générés.');

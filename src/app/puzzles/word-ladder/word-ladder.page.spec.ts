@@ -5,6 +5,13 @@ import { WordLadderPage } from './word-ladder.page';
 
 describe('WordLadderPage mobile keyboard', () => {
   it('opens the custom keyboard and enters letters through it', async () => {
+    const createPuzzle = vi.fn().mockReturnValue({
+      start: 'pains',
+      target: 'mains',
+      letterCount: 5,
+      minimumMoves: 3,
+    });
+
     await TestBed.configureTestingModule({
       imports: [WordLadderPage],
       providers: [
@@ -13,12 +20,7 @@ describe('WordLadderPage mobile keyboard', () => {
           provide: WordLadderService,
           useValue: {
             loadWords: vi.fn().mockResolvedValue(undefined),
-            createPuzzle: vi.fn().mockReturnValue({
-              start: 'pain',
-              target: 'mats',
-              letterCount: 4,
-              minimumMoves: 3,
-            }),
+            createPuzzle,
             normalize: (value: string) => value.toLocaleLowerCase('fr-CA'),
             sameWord: (first: string, second: string) =>
               first.toLocaleLowerCase('fr-CA') === second.toLocaleLowerCase('fr-CA'),
@@ -32,6 +34,9 @@ describe('WordLadderPage mobile keyboard', () => {
 
     await fixture.whenStable();
     fixture.detectChanges();
+
+    expect(page.selectedLength()).toBe(5);
+    expect(createPuzzle).toHaveBeenCalledWith(5);
 
     const input = fixture.nativeElement.querySelector('#word-ladder-answer') as HTMLInputElement;
 

@@ -42,7 +42,7 @@ export class WordLadderPage {
   protected readonly loadError = signal<string | null>(null);
   protected readonly puzzle = signal<WordLadderPuzzle | null>(null);
   protected readonly wordLengthOptions = WORD_LADDER_LENGTHS;
-  protected readonly selectedLength = signal<WordLadderLength>(4);
+  protected readonly selectedLength = signal<WordLadderLength>(5);
   protected readonly ladder = signal<string[]>([]);
   protected readonly answerInput = signal('');
   protected readonly feedback = signal<WordLadderFeedback | null>(null);
