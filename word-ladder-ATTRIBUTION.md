@@ -1,5 +1,7 @@
 # Attribution de `word-ladder.txt`
 
+> Ce fichier décrit l’ancienne liste `word-ladder.txt`, conservée pour référence. Le jeu utilise maintenant `words-4.txt` et `words-5.txt`; leur attribution se trouve dans [`words-ATTRIBUTION.md`](words-ATTRIBUTION.md).
+
 Le corpus `word-ladder.txt` a été sélectionné et adapté pour le jeu Épique à partir des ressources lexicales suivantes :
 
 - **Lexique 4.00**, Boris New, Christophe Pallier, Gauvain Schalchli, Jessica Bourgin et Manuel Gimenes (2026), distribué sous licence [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
