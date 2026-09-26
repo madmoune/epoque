@@ -46,9 +46,9 @@ export class CrossmathPage {
   private readonly answerFields!: QueryList<ElementRef<HTMLInputElement>>;
   private suppressNextSelection = false;
 
-  protected readonly selectedSize = signal<CrossmathSize>(3);
-  protected readonly puzzle = signal<CrossmathPuzzle>(this.createPuzzle(3));
-  protected readonly answers = signal<string[][]>(this.createEmptyAnswers(3));
+  protected readonly selectedSize = signal<CrossmathSize>(4);
+  protected readonly puzzle = signal<CrossmathPuzzle>(this.createPuzzle(4));
+  protected readonly answers = signal<string[][]>(this.createEmptyAnswers(4));
   protected readonly hintedPositions = signal<Set<string>>(new Set());
   protected readonly activeCell = signal<{ row: number; col: number } | null>(null);
   protected readonly numberKeyboardRows: CustomKeyboardKey[][] = [
