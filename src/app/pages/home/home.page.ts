@@ -422,6 +422,12 @@ export class HomePage {
           tag: 'Blocage',
         },
         {
+          title: 'Tours de Hanoï',
+          description: 'Déplace toute la tour sans poser un grand disque sur un plus petit.',
+          route: '/towers-of-hanoi',
+          tag: 'Stratégie',
+        },
+        {
           title: 'Tiges colorées',
           description: 'Aligne les tiges sans répéter une couleur au même niveau.',
           route: '/color-rods',

@@ -209,6 +209,13 @@ export const routes: Routes = [
       import('./puzzles/games/rush-hour/rush-hour.page').then((m) => m.RushHourPage),
   },
   {
+    path: 'towers-of-hanoi',
+    loadComponent: () =>
+      import('./puzzles/games/towers-of-hanoi/towers-of-hanoi.page').then(
+        (m) => m.TowersOfHanoiPage,
+      ),
+  },
+  {
     path: 'timing-drop',
     loadComponent: () =>
       import('./puzzles/games/timing-drop/timing-drop.page').then((m) => m.TimingDropPage),

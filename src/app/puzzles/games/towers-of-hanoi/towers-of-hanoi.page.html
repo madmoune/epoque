@@ -1,0 +1,145 @@
+<main class="page">
+  <a routerLink="/" fragment="spatial-placement" class="back-link">Retour au menu</a>
+
+  <section class="shell">
+    <header class="hero">
+      <p class="eyebrow">Stratégie · Placement</p>
+      <h1>Tours de Hanoï</h1>
+      <p class="intro">
+        Déplace les {{ diskCount() }} anneaux de la tour {{ rodNames[startRod()] }} vers la tour
+        {{ rodNames[targetRod()] }}, un anneau à la fois. Un grand anneau ne peut jamais être posé
+        sur un plus petit.
+      </p>
+    </header>
+
+    <section class="controls" aria-label="Paramètres de la partie">
+      <div class="challenge-summary">
+        <span class="control-label">Défi aléatoire</span>
+        <strong>{{ diskCount() }} anneaux</strong>
+        <span
+          >Départ : tour {{ rodNames[startRod()] }} · Cible : tour {{ rodNames[targetRod()] }}</span
+        >
+      </div>
+
+      <div class="stats" aria-label="Statistiques de la partie">
+        <div class="stat">
+          <span>Coups</span>
+          <strong>{{ moves() }}</strong>
+        </div>
+        <div class="stat">
+          <span>Optimal</span>
+          <strong>{{ minimumMoves() }}</strong>
+        </div>
+      </div>
+    </section>
+
+    @if (isSolved()) {
+      <app-puzzle-success-popup
+        title="Tour déplacée!"
+        [message]="moves() === minimumMoves() ? 'Résolution parfaite.' : 'La tour est complète.'"
+        [answer]="moves() + ' coups · ' + scoreLabel()"
+        actionLabel="Rejouer"
+        (action)="newGame()"
+      />
+    }
+
+    <section class="game-layout">
+      <div class="board-panel">
+        <p class="status" role="status" aria-live="polite">{{ notice() }}</p>
+
+        <div class="board" aria-label="Plateau des tours de Hanoï">
+          @for (rod of rods(); track $index; let rodIndex = $index) {
+            <button
+              type="button"
+              class="tower"
+              [class.selected]="selectedRod() === rodIndex"
+              [class.destination]="selectedRod() !== null && selectedRod() !== rodIndex"
+              [class.start]="isStartRod(rodIndex)"
+              [class.target]="isTargetRod(rodIndex)"
+              [class.complete]="isTargetRod(rodIndex) && isSolved()"
+              [class.hint-source]="hintVisible() && hintMove()?.source === rodIndex"
+              [class.hint-target]="hintVisible() && hintMove()?.target === rodIndex"
+              [attr.aria-label]="towerLabel(rodIndex)"
+              (click)="selectRod(rodIndex)"
+            >
+              <span class="tower-heading">
+                <span class="tower-name">Tour {{ rodNames[rodIndex] }}</span>
+                @if (isStartRod(rodIndex)) {
+                  <span class="tower-role">Départ</span>
+                }
+                @if (isTargetRod(rodIndex)) {
+                  <span class="tower-role target-role">Cible</span>
+                }
+              </span>
+              <span class="tower-stage" aria-hidden="true">
+                <span class="rod-post"></span>
+                <span class="disks">
+                  @for (disk of rod; track disk) {
+                    <span
+                      class="disk"
+                      [class.top-disk]="isTopDisk(rod, disk)"
+                      [style.width.%]="diskWidth(disk)"
+                      [style.--disk-color]="diskColor(disk)"
+                    ></span>
+                  }
+                </span>
+                <span class="rod-base"></span>
+              </span>
+            </button>
+          }
+        </div>
+
+        <p class="instructions">
+          Clique une tour pour prendre son disque supérieur, puis clique sur la tour de destination.
+        </p>
+
+        @if (hintVisible()) {
+          <div class="hint-card" role="status" aria-live="polite">
+            <span class="hint-kicker">Indice</span>
+            <strong>{{ hintText() }}</strong>
+          </div>
+        }
+      </div>
+
+      <aside class="side-panel" aria-label="Actions et règles">
+        <div class="score-card">
+          <span class="score-label">Objectif</span>
+          <strong>{{ scoreLabel() }}</strong>
+          <span>{{ minimumMoves() }} coups minimum avec {{ diskCount() }} anneaux</span>
+        </div>
+
+        <div class="actions">
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="undoMove()"
+            [disabled]="history().length === 0 || isSolved()"
+          >
+            Annuler le dernier coup
+          </button>
+          <button type="button" class="secondary-button" (click)="restartGame()">
+            Recommencer
+          </button>
+          <button type="button" class="secondary-button" (click)="newGame()">Nouveau départ</button>
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="showHint()"
+            [disabled]="isSolved()"
+          >
+            Indice
+          </button>
+        </div>
+
+        <details class="rules">
+          <summary>Règles</summary>
+          <ul>
+            <li>Un seul disque peut être déplacé à la fois.</li>
+            <li>Seul le disque au sommet d’une tour peut bouger.</li>
+            <li>Un grand disque ne peut pas recouvrir un petit disque.</li>
+          </ul>
+        </details>
+      </aside>
+    </section>
+  </section>
+</main>
