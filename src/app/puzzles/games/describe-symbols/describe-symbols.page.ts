@@ -75,6 +75,7 @@ type DescribeSymbolsState = {
   target: DescribedSymbol | null;
   choices: DescribedSymbol[];
   selectedSymbolId: string | null;
+  barredSymbolIds: string[];
   lastSubmission: SubmissionFeedback | null;
   guesses: Record<string, string>;
 };
@@ -152,6 +153,27 @@ const SECONDARY_DIFFERENCES: SymbolDifference[] = [
   'detailCount',
   'detailShape',
 ];
+const SUBTLE_DIFFERENCES: SymbolDifference[] = [
+  'emblemPosition',
+  'emblemScale',
+  'border',
+  'band',
+  'emblemColor',
+  'symmetry',
+  'detailRegion',
+  'detailCount',
+  'detailShape',
+];
+const DISTINCTIVE_DIFFERENCES: SymbolDifference[] = [
+  'layout',
+  'emblem',
+  'colors',
+  'emblemColor',
+  'emblemPosition',
+  'emblemScale',
+  'border',
+  'band',
+];
 
 @Component({
   selector: 'app-describe-symbols-page',
@@ -178,6 +200,7 @@ export class DescribeSymbolsPage implements OnDestroy {
   protected readonly target = computed(() => this.state().target);
   protected readonly choices = computed(() => this.state().choices);
   protected readonly selectedSymbolId = computed(() => this.state().selectedSymbolId);
+  protected readonly barredSymbolIds = computed(() => this.state().barredSymbolIds);
   protected readonly submissionFeedback = computed(() => this.state().lastSubmission);
   protected readonly guesses = computed(() => this.state().guesses);
   protected readonly players = computed<Player[]>(() => {
@@ -275,6 +298,7 @@ export class DescribeSymbolsPage implements OnDestroy {
       target,
       choices: this.shuffle(this.createChoiceSet(target)),
       selectedSymbolId: null,
+      barredSymbolIds: [],
       lastSubmission: null,
       guesses: {},
     });
@@ -285,9 +309,29 @@ export class DescribeSymbolsPage implements OnDestroy {
     if (!playerId || this.phase() !== 'describing' || this.isDescriber() || this.hasGuessed())
       return;
 
+    const state = this.state();
+    const barredSymbolIds = this.barredSymbolIds();
+
+    if (barredSymbolIds.includes(symbolId)) {
+      await this.saveState({
+        ...state,
+        barredSymbolIds: barredSymbolIds.filter((id) => id !== symbolId),
+      });
+      return;
+    }
+
+    if (this.selectedSymbolId() === symbolId) {
+      await this.saveState({
+        ...state,
+        selectedSymbolId: null,
+        barredSymbolIds: [...barredSymbolIds, symbolId],
+      });
+      return;
+    }
+
     await this.saveState({
-      ...this.state(),
-      selectedSymbolId: this.selectedSymbolId() === symbolId ? null : symbolId,
+      ...state,
+      selectedSymbolId: symbolId,
     });
   }
 
@@ -386,9 +430,10 @@ export class DescribeSymbolsPage implements OnDestroy {
     return Boolean(playerId && this.guesses()[playerId]);
   }
 
-  protected symbolState(symbolId: string): 'correct' | 'picked' | 'wrong' | null {
+  protected symbolState(symbolId: string): 'correct' | 'picked' | 'wrong' | 'barred' | null {
     const playerId = this.playerId();
     if (this.phase() === 'reveal' && symbolId === this.target()?.id) return 'correct';
+    if (this.barredSymbolIds().includes(symbolId)) return 'barred';
     if (this.selectedSymbolId() === symbolId) return 'picked';
     if (playerId && this.guesses()[playerId] === symbolId) {
       return this.phase() === 'reveal' ? 'wrong' : 'picked';
@@ -406,6 +451,13 @@ export class DescribeSymbolsPage implements OnDestroy {
 
   protected guessFor(playerId: string): DescribedSymbol | undefined {
     return this.choices().find((symbol) => symbol.id === this.guesses()[playerId]);
+  }
+
+  protected symbolAriaLabel(symbolId: string): string {
+    const state = this.symbolState(symbolId);
+    if (state === 'barred') return 'Réactiver ce pavillon';
+    if (state === 'picked') return 'Barrer ce pavillon';
+    return 'Sélectionner ce pavillon';
   }
 
   protected stripeColor(symbol: DescribedSymbol, index: number): string {
@@ -524,6 +576,7 @@ export class DescribeSymbolsPage implements OnDestroy {
       target: null,
       choices: [],
       selectedSymbolId: null,
+      barredSymbolIds: [],
       lastSubmission: null,
       guesses: {},
     };
@@ -538,6 +591,7 @@ export class DescribeSymbolsPage implements OnDestroy {
       target: state?.target ? this.withSymbolDefaults(state.target) : fallback.target,
       choices: state?.choices?.map((symbol) => this.withSymbolDefaults(symbol)) ?? fallback.choices,
       selectedSymbolId: state?.selectedSymbolId ?? fallback.selectedSymbolId,
+      barredSymbolIds: state?.barredSymbolIds ?? fallback.barredSymbolIds,
       lastSubmission: state?.lastSubmission ?? fallback.lastSubmission,
       guesses: state?.guesses ?? fallback.guesses,
     };
@@ -558,7 +612,10 @@ export class DescribeSymbolsPage implements OnDestroy {
       const variantIndex = variants.length - 1;
       const primaryDifference = primaryDifferences[variantIndex];
       const secondaryDifference =
-        variantIndex % 3 === 2
+        (
+          variantIndex % 3 === 2 ||
+          (SUBTLE_DIFFERENCES.includes(primaryDifference) && variantIndex % 4 === 0)
+        )
           ? this.pick(
               SECONDARY_DIFFERENCES.filter((difference) => difference !== primaryDifference),
             )
@@ -568,6 +625,13 @@ export class DescribeSymbolsPage implements OnDestroy {
         variants.length,
         primaryDifference,
         secondaryDifference,
+      );
+      this.ensureVisibleDifference(
+        variant,
+        variants,
+        target,
+        [primaryDifference, ...(secondaryDifference ? [secondaryDifference] : [])],
+        variants.length,
       );
       if (!variants.some((symbol) => symbol.id === variant.id)) variants.push(variant);
     }
@@ -603,6 +667,60 @@ export class DescribeSymbolsPage implements OnDestroy {
     return variant;
   }
 
+  private ensureVisibleDifference(
+    variant: DescribedSymbol,
+    existingVariants: DescribedSymbol[],
+    target: DescribedSymbol,
+    excludedDifferences: SymbolDifference[],
+    seed: number,
+  ): void {
+    if (existingVariants.every((existing) => this.hasDistinctiveDifference(variant, existing))) {
+      return;
+    }
+
+    const adjustedVariant = structuredClone(variant);
+    const availableDifferences = DISTINCTIVE_DIFFERENCES.filter(
+      (difference) => !excludedDifferences.includes(difference),
+    );
+
+    for (let attempt = 0; attempt < DISTINCTIVE_DIFFERENCES.length * 4; attempt += 1) {
+      if (existingVariants.every((existing) => this.hasDistinctiveDifference(adjustedVariant, existing))) {
+        Object.assign(variant, adjustedVariant);
+        return;
+      }
+
+      const difference = availableDifferences[attempt % availableDifferences.length];
+      this.applySymbolDifference(adjustedVariant, target, difference, seed + attempt * 17);
+    }
+
+    Object.assign(variant, adjustedVariant);
+  }
+
+  private hasDistinctiveDifference(left: DescribedSymbol, right: DescribedSymbol): boolean {
+    return DISTINCTIVE_DIFFERENCES.some((difference) => {
+      switch (difference) {
+        case 'colors':
+          return left.colors.some((color, index) => color !== right.colors[index]);
+        case 'layout':
+          return left.layout !== right.layout;
+        case 'emblem':
+          return left.emblem !== right.emblem;
+        case 'emblemColor':
+          return left.emblemColor !== right.emblemColor;
+        case 'emblemPosition':
+          return left.emblemPosition !== right.emblemPosition;
+        case 'emblemScale':
+          return left.emblemScale !== right.emblemScale;
+        case 'border':
+          return left.border !== right.border;
+        case 'band':
+          return left.band !== right.band;
+        default:
+          return false;
+      }
+    });
+  }
+
   private applySymbolDifference(
     variant: DescribedSymbol,
     target: DescribedSymbol,
@@ -620,7 +738,7 @@ export class DescribeSymbolsPage implements OnDestroy {
         variant.emblemPosition = this.nearbyValue(EMBLEM_POSITIONS, target.emblemPosition);
         break;
       case 'emblemScale':
-        variant.emblemScale = this.nearbyValue(EMBLEM_SCALES, target.emblemScale);
+        variant.emblemScale = this.moreDistinctScale(target.emblemScale, seed);
         break;
       case 'border':
         variant.border = this.nearbyValue(BORDERS, target.border);
@@ -651,13 +769,11 @@ export class DescribeSymbolsPage implements OnDestroy {
         variant.detailRegion = this.nearbyValue(DETAIL_REGIONS, target.detailRegion);
         break;
       case 'detailCount': {
-        const direction = seed % 2 === 0 ? 1 : -1;
-        variant.detailCount =
-          target.detailCount === 2
-            ? 3
-            : target.detailCount === 8
-              ? 7
-              : target.detailCount + direction;
+        const difference = seed % 2 === 0 ? 1 : 2;
+        const alternatives = [target.detailCount - difference, target.detailCount + difference].filter(
+          (count) => count >= 2 && count <= 8,
+        );
+        variant.detailCount = alternatives[seed % alternatives.length] ?? target.detailCount;
         break;
       }
       case 'detailShape':
@@ -689,6 +805,12 @@ export class DescribeSymbolsPage implements OnDestroy {
   private nearbyValue<T>(values: T[], current: T): T {
     const index = values.indexOf(current);
     return values[(index + 1 + Math.floor(Math.random() * (values.length - 1))) % values.length];
+  }
+
+  private moreDistinctScale(current: EmblemScale, seed: number): EmblemScale {
+    if (current === 'small') return seed % 2 === 0 ? 'medium' : 'large';
+    if (current === 'large') return seed % 2 === 0 ? 'medium' : 'small';
+    return seed % 2 === 0 ? 'small' : 'large';
   }
 
   private pick<T>(items: T[]): T {

@@ -185,6 +185,10 @@
           </section>
         } @else {
           <section class="guesser-view">
+            <p class="choice-hint">
+              Un clic sélectionne un pavillon, un deuxième le barre, un troisième le rend disponible.
+              Les marques sont partagées avec toute la salle.
+            </p>
             <div class="choice-grid">
               @for (symbol of choices(); track symbol.id) {
                 <button
@@ -193,14 +197,18 @@
                   [class.correct]="symbolState(symbol.id) === 'correct'"
                   [class.picked]="symbolState(symbol.id) === 'picked'"
                   [class.wrong]="symbolState(symbol.id) === 'wrong'"
+                  [class.barred]="symbolState(symbol.id) === 'barred'"
                   [disabled]="busy() || phase() === 'reveal' || hasGuessed()"
                   (click)="chooseSymbol(symbol.id)"
-                  aria-label="Choisir ce pavillon"
+                  [attr.aria-label]="symbolAriaLabel(symbol.id)"
                 >
                   <ng-container
                     [ngTemplateOutlet]="symbolTemplate"
                     [ngTemplateOutletContext]="{ symbol: symbol }"
                   />
+                  @if (symbolState(symbol.id) === 'barred') {
+                    <span class="barred-mark" aria-hidden="true"></span>
+                  }
                   @if (playersForSymbol(symbol.id).length > 0) {
                     <span class="choice-badges" aria-label="Joueurs ayant choisi ce pavillon">
                       @for (player of playersForSymbol(symbol.id); track player.id) {

@@ -480,6 +480,54 @@ button {
   letter-spacing: 0.02em;
 }
 
+.choice-hint {
+  margin-bottom: 0.85rem;
+  color: var(--muted-strong);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.choice-card.barred {
+  border-color: #dc2626;
+  background: #fee2e2;
+}
+
+.choice-card.barred:hover:not(:disabled) {
+  background: #fee2e2;
+}
+
+.choice-card.barred .describe-symbol {
+  opacity: 0.48;
+}
+
+.barred-mark {
+  position: absolute;
+  inset: 12%;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.barred-mark::before,
+.barred-mark::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 125%;
+  height: 0.45rem;
+  border-radius: 999px;
+  background: #dc2626;
+  box-shadow: 0 0 0 0.12rem rgb(255 255 255 / 88%);
+  content: '';
+}
+
+.barred-mark::before {
+  transform: translate(-50%, -50%) rotate(27deg);
+}
+
+.barred-mark::after {
+  transform: translate(-50%, -50%) rotate(-27deg);
+}
+
 .choice-card.correct {
   border-color: #16a34a;
   background: #dcfce7;
