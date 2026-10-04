@@ -11,6 +11,7 @@ import {
 import { Router, RouterLink } from '@angular/router';
 import { PuzzlePlayHistoryService } from '../../../puzzle-play-history.service';
 import { PuzzlePlaylistService } from '../../../puzzle-playlist.service';
+import { NEW_GAME_ROUTES } from '../../new-games/new-games.catalog';
 
 export type PuzzlePopupTone = 'success' | 'partial';
 
@@ -22,6 +23,7 @@ export type PuzzlePopupTone = 'success' | 'partial';
 })
 export class PuzzleSuccessPopupComponent implements OnInit {
   private readonly randomPuzzleRoutes = [
+    ...NEW_GAME_ROUTES,
     '/anagrams',
     '/cryptograms',
     '/word-search',
@@ -81,6 +83,7 @@ export class PuzzleSuccessPopupComponent implements OnInit {
   ];
 
   private readonly sectionFragmentsByRoute: Record<string, string> = {
+    ...Object.fromEntries(NEW_GAME_ROUTES.map((route) => [route.slice(1), 'nouveaux-jeux'])),
     anagrams: 'mots-langage',
     cryptograms: 'mots-langage',
     'word-search': 'mots-langage',

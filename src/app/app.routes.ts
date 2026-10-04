@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { NEW_GAMES } from './puzzles/new-games/new-games.catalog';
 
 export const routes: Routes = [
   {
@@ -239,6 +240,11 @@ export const routes: Routes = [
         (m) => m.ClockLettersPuzzlePage,
       ),
   },
+  ...NEW_GAMES.map((game) => ({
+    path: game.id,
+    data: { game: game.id },
+    loadComponent: () => import('./puzzles/new-games/new-games.page').then((m) => m.NewGamesPage),
+  })),
   {
     path: '**',
     redirectTo: '',

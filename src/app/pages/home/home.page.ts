@@ -12,6 +12,7 @@ import {
   PuzzleCatalogApprovalState,
 } from '../../shared/firebase/firebase-puzzle-catalog.service';
 import { AppStorageService } from '../../shared/storage/app-storage.service';
+import { NEW_GAMES } from '../../puzzles/new-games/new-games.catalog';
 
 type PuzzleCard = {
   title: string;
@@ -125,6 +126,17 @@ export class HomePage {
   }
 
   private readonly baseCategories: PuzzleCategory[] = [
+    {
+      id: 'nouveaux-jeux',
+      title: 'Nouveaux jeux',
+      description: 'Six nouveaux défis de chiffres et de lettres aux règles faciles à expliquer.',
+      puzzles: NEW_GAMES.map((game) => ({
+        title: game.title,
+        description: game.description,
+        route: `/${game.id}`,
+        tag: game.tag,
+      })),
+    },
     {
       id: 'mots-langage',
       title: 'Mots et langage',

@@ -1,0 +1,480 @@
+<main class="training-page" [class.keyboard-open]="selectedDigit() !== null">
+  <a class="back-link" routerLink="/" fragment="nouveaux-jeux">Retour au menu</a>
+  <section class="training-card">
+    <header class="training-header">
+      <span class="eyebrow">Nouveaux jeux · {{ game.tag }}</span>
+      <h1>{{ game.title }}</h1>
+      <p>{{ game.rule }}</p>
+    </header>
+
+    <div class="training-toolbar">
+      <span class="difficulty-badge">Niveau intermédiaire</span>
+      <span class="hint-count"
+        >{{ hintCount() }} {{ hintCount() === 1 ? 'indice utilisé' : 'indices utilisés' }}</span
+      >
+      <button type="button" (click)="newPuzzle()">Nouvelle partie</button>
+    </div>
+
+    @if (cryptarithm(); as puzzle) {
+      <section class="crypto-area" aria-label="Addition à résoudre">
+        <div class="addition">
+          @for (term of puzzle.terms; track $index; let row = $index) {
+            <div class="addition-row" [class.result-row]="row === 2">
+              <span class="operator">{{ row === 1 ? '+' : row === 2 ? '=' : '' }}</span>
+              @for (letter of term; track $index) {
+                <span class="addition-letter"
+                  ><strong>{{ letter }}</strong
+                  ><small>{{ digitEntries()[letter] || '?' }}</small></span
+                >
+              }
+            </div>
+          }
+        </div>
+        <div class="letter-digits">
+          @for (letter of puzzle.letters; track letter) {
+            <label class="letter-digit" [class.locked]="lockedKeys().has(letter)">
+              <span>{{ letter }} =</span>
+              <input
+                class="digit-input"
+                type="text"
+                inputmode="none"
+                maxlength="1"
+                autocomplete="off"
+                [attr.aria-label]="'Chiffre de la lettre ' + letter"
+                [value]="digitEntries()[letter] || ''"
+                [readOnly]="lockedKeys().has(letter) || isSolved()"
+                (focus)="selectDigit(letter, $event)"
+                (click)="selectDigit(letter, $event)"
+                (input)="inputDigit(letter, $event)"
+              />
+              @if (lockedKeys().has(letter)) {
+                <small>Indice</small>
+              }
+            </label>
+          }
+        </div>
+        <p class="board-note">
+          Chiffres disponibles : 0 à 9. Chaque chiffre ne peut représenter qu’une lettre.
+        </p>
+      </section>
+    }
+
+    @if (skyscrapers(); as puzzle) {
+      <section class="grid-area" aria-label="Grille de gratte-ciel">
+        <div class="tower-board">
+          <span></span>
+          @for (column of range(puzzle.size); track column) {
+            <span
+              class="edge-clue"
+              [attr.aria-label]="
+                'Vue du haut, colonne ' +
+                (column + 1) +
+                ': ' +
+                (puzzle.top[column] || 'sans indice')
+              "
+              >{{ puzzle.top[column] || ''
+              }}<small>{{ puzzle.top[column] ? '↓' : '' }}</small></span
+            >
+          }
+          <span></span>
+          @for (row of range(puzzle.size); track row) {
+            <span class="edge-clue side-clue"
+              >{{ puzzle.left[row] || '' }}<small>{{ puzzle.left[row] ? '→' : '' }}</small></span
+            >
+            @for (column of range(puzzle.size); track column) {
+              @let cell = row * puzzle.size + column;
+              <div
+                class="tower-cell"
+                [class.locked]="lockedKeys().has('' + cell)"
+                [class.active]="selectedDigit() === '' + cell"
+              >
+                @if (numericEntries()[cell]; as height) {
+                  <span class="tower-glyph" [style.height.%]="height * 18" aria-hidden="true">
+                    @for (floor of range(height); track floor) {
+                      <i></i>
+                    }
+                  </span>
+                }
+                <input
+                  class="digit-input"
+                  type="text"
+                  inputmode="none"
+                  maxlength="1"
+                  autocomplete="off"
+                  [attr.aria-label]="'Hauteur, ligne ' + (row + 1) + ', colonne ' + (column + 1)"
+                  [value]="digitEntries()[cell] || ''"
+                  [readOnly]="lockedKeys().has('' + cell) || isSolved()"
+                  (focus)="selectDigit('' + cell, $event)"
+                  (click)="selectDigit('' + cell, $event)"
+                  (input)="inputDigit('' + cell, $event)"
+                />
+              </div>
+            }
+            <span class="edge-clue side-clue"
+              ><small>{{ puzzle.right[row] ? '←' : '' }}</small
+              >{{ puzzle.right[row] || '' }}</span
+            >
+          }
+          <span></span>
+          @for (column of range(puzzle.size); track column) {
+            <span class="edge-clue"
+              ><small>{{ puzzle.bottom[column] ? '↑' : '' }}</small
+              >{{ puzzle.bottom[column] || '' }}</span
+            >
+          }
+          <span></span>
+        </div>
+        <p class="board-note">
+          Exemple : 2 · 1 · 4 · 3 → deux tours visibles depuis la gauche (2 et 4).
+        </p>
+      </section>
+    }
+
+    @if (kakuro(); as puzzle) {
+      <section class="grid-area" aria-label="Grille de Kakuro">
+        <div
+          class="kakuro-board"
+          [style.grid-template-columns]="'repeat(' + puzzle.width + ', minmax(0, 1fr))'"
+        >
+          @for (cell of range(puzzle.width * puzzle.height); track cell) {
+            @if (puzzle.whiteCells.includes(cell)) {
+              <div
+                class="kakuro-cell"
+                [class.locked]="lockedKeys().has('' + cell)"
+                [class.active]="selectedDigit() === '' + cell"
+              >
+                <input
+                  class="digit-input"
+                  type="text"
+                  inputmode="none"
+                  maxlength="1"
+                  autocomplete="off"
+                  [attr.aria-label]="
+                    'Ligne ' +
+                    (1 + (cell - (cell % puzzle.width)) / puzzle.width) +
+                    ', colonne ' +
+                    (1 + (cell % puzzle.width))
+                  "
+                  [value]="digitEntries()[cell] || ''"
+                  [readOnly]="lockedKeys().has('' + cell) || isSolved()"
+                  (focus)="selectDigit('' + cell, $event)"
+                  (click)="selectDigit('' + cell, $event)"
+                  (input)="inputDigit('' + cell, $event)"
+                />
+              </div>
+            } @else {
+              <div class="kakuro-clue">
+                @if (kakuroClue(cell, 'down'); as total) {
+                  <span class="down-sum" [attr.aria-label]="'Somme vers le bas : ' + total"
+                    >↓ {{ total }}</span
+                  >
+                }
+                @if (kakuroClue(cell, 'across'); as total) {
+                  <span class="across-sum" [attr.aria-label]="'Somme vers la droite : ' + total"
+                    >{{ total }} →</span
+                  >
+                }
+              </div>
+            }
+          }
+        </div>
+        <p class="board-note">
+          Les cases dorées sont des indices. La répétition est interdite dans un groupe, pas dans
+          toute la grille.
+        </p>
+      </section>
+    }
+
+    @if (sumplete(); as puzzle) {
+      <section class="grid-area" aria-label="Nombres à barrer">
+        <div class="sum-board">
+          @for (row of range(puzzle.size); track row) {
+            @for (col of range(puzzle.size); track col) {
+              @let cell = row * puzzle.size + col;
+              <button
+                type="button"
+                data-board-cell
+                class="sum-cell"
+                [class.crossed]="!keptNumbers()[cell]"
+                [class.locked]="lockedKeys().has('' + cell)"
+                [disabled]="lockedKeys().has('' + cell) || isSolved()"
+                [attr.aria-pressed]="!keptNumbers()[cell]"
+                [attr.aria-label]="
+                  'Ligne ' +
+                  (row + 1) +
+                  ', colonne ' +
+                  (col + 1) +
+                  ', nombre ' +
+                  puzzle.numbers[cell] +
+                  (keptNumbers()[cell] ? ' conservé' : ' barré')
+                "
+                (click)="toggleNumber(cell)"
+              >
+                <span>{{ puzzle.numbers[cell] }}</span>
+                @if (!keptNumbers()[cell]) {
+                  <i aria-hidden="true">×</i>
+                }
+              </button>
+            }
+            <span
+              class="sum-total"
+              [class.matched]="sumTotals().rows[row] === puzzle.rowTargets[row]"
+              [attr.aria-label]="
+                'Ligne ' +
+                (row + 1) +
+                ': somme ' +
+                sumTotals().rows[row] +
+                ', objectif ' +
+                puzzle.rowTargets[row]
+              "
+            >
+              <strong>{{ sumTotals().rows[row] }}</strong
+              ><small>/ {{ puzzle.rowTargets[row] }}</small>
+            </span>
+          }
+          @for (col of range(puzzle.size); track col) {
+            <span
+              class="sum-total"
+              [class.matched]="sumTotals().columns[col] === puzzle.columnTargets[col]"
+              [attr.aria-label]="
+                'Colonne ' +
+                (col + 1) +
+                ': somme ' +
+                sumTotals().columns[col] +
+                ', objectif ' +
+                puzzle.columnTargets[col]
+              "
+            >
+              <strong>{{ sumTotals().columns[col] }}</strong
+              ><small>/ {{ puzzle.columnTargets[col] }}</small>
+            </span>
+          }
+          <span></span>
+        </div>
+        <p class="board-note">
+          Somme actuelle / objectif. Un total vert correspond déjà à son objectif.
+        </p>
+      </section>
+    }
+
+    @if (wordFit(); as puzzle) {
+      <section class="word-area" aria-label="Grille et liste des mots à placer">
+        <div
+          class="word-grid"
+          [style.grid-template-columns]="'repeat(' + puzzle.width + ', minmax(0, 1fr))'"
+        >
+          @for (cell of range(puzzle.width * puzzle.height); track cell) {
+            @if (wordCells().has(cell)) {
+              <button
+                type="button"
+                data-board-cell
+                class="word-cell"
+                [class.active]="selectedWordSlot()?.cells?.includes(cell)"
+                [class.locked]="fixedWordCells().has(cell)"
+                [attr.aria-label]="
+                  'Case ligne ' +
+                  (1 + (cell - (cell % puzzle.width)) / puzzle.width) +
+                  ', colonne ' +
+                  (1 + (cell % puzzle.width)) +
+                  ', ' +
+                  (fittedLetters()[cell] || 'vide')
+                "
+                [attr.aria-pressed]="selectedWordSlot()?.cells?.includes(cell) ?? false"
+                (click)="selectWordCell(cell)"
+              >
+                @if (slotNumber(cell); as number) {
+                  <small>{{ number }}</small>
+                }
+                <strong>{{ fittedLetters()[cell] || '' }}</strong>
+              </button>
+            } @else {
+              <span class="word-wall" aria-hidden="true"></span>
+            }
+          }
+        </div>
+        <aside class="word-bank">
+          <label for="word-slot">Emplacement</label>
+          <select
+            id="word-slot"
+            [value]="selectedSlot() ?? ''"
+            (change)="selectedSlot.set(+$any($event.target).value)"
+          >
+            @for (slot of puzzle.slots; track $index; let i = $index) {
+              <option [value]="i">
+                {{ slot.number }} {{ slot.direction === 'across' ? '→' : '↓' }} ·
+                {{ slot.cells.length }} lettres{{ lockedKeys().has('' + i) ? ' · indice' : '' }}
+              </option>
+            }
+          </select>
+          <p class="bank-progress">
+            {{ placedWordCount() }} / {{ puzzle.words.length }} mots placés
+          </p>
+          <div class="word-buttons">
+            @for (word of puzzle.words; track word) {
+              <button
+                type="button"
+                data-board-cell
+                class="word-token"
+                [class.used]="isWordUsed(word)"
+                [disabled]="
+                  isWordUsed(word) ||
+                  isSolved() ||
+                  selectedSlot() === null ||
+                  lockedKeys().has('' + selectedSlot())
+                "
+                (click)="placeWord(word)"
+              >
+                <span>{{ word }}</span
+                ><small>{{ word.length }}</small>
+              </button>
+            }
+          </div>
+          <button
+            type="button"
+            data-board-cell
+            class="secondary-button"
+            [disabled]="
+              selectedSlot() === null || lockedKeys().has('' + selectedSlot()) || isSolved()
+            "
+            (click)="removeWord()"
+          >
+            Retirer ce mot
+          </button>
+        </aside>
+      </section>
+    }
+
+    @if (dropQuote(); as puzzle) {
+      <section class="drop-area" aria-label="Phrase à reconstruire">
+        <p class="phrase-clue">
+          Fil conducteur : <strong>{{ puzzle.clue }}</strong>
+        </p>
+        <div
+          class="drop-board"
+          [style.grid-template-columns]="'repeat(' + puzzle.width + ', minmax(0, 1fr))'"
+        >
+          @for (column of range(puzzle.width); track column) {
+            <div
+              class="drop-column"
+              [class.selected-column]="
+                selectedDropCell() !== null && selectedDropCell()! % puzzle.width === column
+              "
+            >
+              <small class="column-number">{{ column + 1 }}</small>
+              @for (
+                used of range(puzzle.columns[column].length - dropReserve()[column].length);
+                track used
+              ) {
+                <span class="drop-reserve-space" aria-hidden="true"></span>
+              }
+              @for (letter of dropReserve()[column]; track $index) {
+                <button
+                  type="button"
+                  data-board-cell
+                  class="drop-token"
+                  [disabled]="
+                    selectedDropCell() === null ||
+                    selectedDropCell()! % puzzle.width !== column ||
+                    isSolved()
+                  "
+                  [attr.aria-label]="'Lettre ' + letter + ', colonne ' + (column + 1)"
+                  (click)="placeDropLetter(column, letter)"
+                >
+                  {{ letter }}
+                </button>
+              }
+            </div>
+          }
+          @for (row of puzzle.rows; track $index; let r = $index) {
+            @for (letter of row; track $index; let c = $index) {
+              @let cell = r * puzzle.width + c;
+              @if (letter !== ' ') {
+                <button
+                  type="button"
+                  data-board-cell
+                  class="drop-cell"
+                  [class.active]="selectedDropCell() === cell"
+                  [class.locked]="lockedKeys().has('' + cell)"
+                  [disabled]="lockedKeys().has('' + cell) || isSolved()"
+                  [attr.aria-label]="
+                    'Ligne ' +
+                    (r + 1) +
+                    ', colonne ' +
+                    (c + 1) +
+                    ', ' +
+                    (droppedLetters()[cell] || 'vide')
+                  "
+                  [attr.aria-pressed]="selectedDropCell() === cell"
+                  (click)="selectDropCell(cell)"
+                >
+                  {{ droppedLetters()[cell] || '' }}
+                </button>
+              } @else {
+                <span class="drop-space" aria-hidden="true"></span>
+              }
+            }
+          }
+        </div>
+        <button
+          type="button"
+          data-board-cell
+          class="secondary-button"
+          [disabled]="selectedDropCell() === null || isSolved()"
+          (click)="removeDropLetter()"
+        >
+          Effacer la case
+        </button>
+        <p class="board-note">
+          Tu peux aussi taper une lettre au clavier. Les flèches déplacent la sélection ; Retour
+          arrière efface une case.
+        </p>
+      </section>
+    }
+
+    <p class="training-feedback" role="status" aria-live="polite">
+      {{ feedback() }}
+    </p>
+    <div class="training-actions">
+      <button
+        type="button"
+        data-board-cell
+        class="secondary-button"
+        [disabled]="isSolved()"
+        (click)="showHint()"
+      >
+        Indice
+      </button>
+      <button
+        type="button"
+        data-board-cell
+        class="secondary-button"
+        [disabled]="isSolved()"
+        (click)="resetPuzzle()"
+      >
+        Recommencer
+      </button>
+    </div>
+  </section>
+</main>
+
+<app-custom-keyboard
+  [rows]="keyboardRows()"
+  [visible]="selectedDigit() !== null"
+  [disabled]="isSolved()"
+  (keyPress)="pressDigit($event)"
+/>
+
+@if (isSolved()) {
+  <app-puzzle-success-popup
+    [title]="game.title + ' résolu !'"
+    [message]="
+      hintCount() === 0
+        ? 'Bien joué ! Tu as trouvé la solution sans indice.'
+        : 'Bien joué ! Solution trouvée avec ' +
+          hintCount() +
+          (hintCount() === 1 ? ' indice.' : ' indices.')
+    "
+    [answer]="dropQuote()?.phrase ?? ''"
+    (action)="newPuzzle()"
+  />
+}

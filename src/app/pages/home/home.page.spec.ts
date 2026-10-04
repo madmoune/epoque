@@ -3,6 +3,8 @@ import { provideRouter } from '@angular/router';
 import { PuzzlePlaylistService } from '../../puzzle-playlist.service';
 import { FirebasePuzzleCatalogService } from '../../shared/firebase/firebase-puzzle-catalog.service';
 import { HomePage } from './home.page';
+import { NEW_GAME_ROUTES } from '../../puzzles/new-games/new-games.catalog';
+import { routes } from '../../app.routes';
 
 describe('HomePage playlist category controls', () => {
   beforeEach(async () => {
@@ -86,5 +88,21 @@ describe('HomePage playlist category controls', () => {
     page.clearSearch();
 
     expect(page.visibleCategories().length).toBe(page.categories().length);
+  });
+
+  it('lists exactly the six implemented games in the new section, playlists and routes', () => {
+    const page = TestBed.createComponent(HomePage).componentInstance;
+    const category = page.categories().find((category) => category.id === 'nouveaux-jeux');
+
+    expect(category?.title).toBe('Nouveaux jeux');
+    expect(category?.puzzles.map((puzzle) => puzzle.route)).toEqual(NEW_GAME_ROUTES);
+    expect(category?.puzzles).toHaveLength(6);
+    for (const route of NEW_GAME_ROUTES) {
+      expect(page.playlistPuzzleOptions().some((puzzle) => puzzle.route === route)).toBe(true);
+      expect(routes.find((candidate) => candidate.path === route.slice(1))?.data?.['game']).toBe(
+        route.slice(1),
+      );
+    }
+    expect(category?.puzzles.some((puzzle) => /rébus|groupe de 4/i.test(puzzle.title))).toBe(false);
   });
 });
