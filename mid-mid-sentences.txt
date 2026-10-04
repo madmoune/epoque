@@ -25,7 +25,7 @@ Le barreur prépare son virage avant le gros rapide
 Deux amies se relaient pour porter le sac commun
 Une odeur de sapin annonce la proximité du refuge
 Les équipes étudient le ciel avant la traversée côtière
-Au contrôle cognitif chacun mémorise une portion du code
+Au poste de mémoire, chacun retient une partie du code
 La force du rameur complète la finesse du barreur
 Un azimut précis évite une longue vallée sans sortie
 Sur Anticosti les chevreuils observent le départ matinal
@@ -73,25 +73,25 @@ Malgré le brouillard, la relance redonne confiance au trio
 Une participante maintient la cadence avec patience et méthode
 Avant le prochain relais, un équipier répartit les rôles clairement
 La meneuse vise la cible face au courant avec précision
-Les rameurs observent la piste sur le quai jusqu'au bout
+Depuis le quai, les rameurs observent le passage du courant
 La meneuse trouve l'indice dans la boue sous pression
 Les partenaires suivent la trace sous les épinettes en silence
 Avant le signal, une participante repère l'élément incohérent
 Durant les dernières minutes, les finalistes écartent les fausses pistes
 Le relayeur gère le dernier ravitaillement près du cap Tourmente
-Les partenaires relancent l'effort devant la grille jusqu'au bout
+Devant la grille, le duo compare ses deux dernières pistes
 La stratège évite le détour dans la boue sous pression
 Les rameurs évitent le détour sous les épinettes en silence
-La navigatrice révise la carte devant la grille sous pression
-La pagayeuse vise la cible face au courant sous pression
+La navigatrice relie les indices aux lieux marqués sur la carte
+La pagayeuse vise une bouée malgré les remous du courant
 Après le portage, la victoire semble encore accessible
 Dans le refuge forestier, une participante classe les indices utiles
 La formation choisit la trajectoire pendant la remontée sans paniquer
 La pagayeuse suit la trace sous les épinettes jusqu'au bout
-La navigatrice relance l'effort pendant la remontée avant le chrono
-Avec toute la concentration nécessaire, l'équipe encourage le dernier
+La navigatrice retrouve le cap après le passage du rapide
+Une consigne bien comprise permet au duo de mieux s'entraider
 Près du sommet, le doute disparaît peu à peu
-Près du sommet, le courant change la tactique
+Près du sommet, les rafales poussent le trio à changer de voie
 Dans le silence du poste, la stratège repère l'élément incohérent
 Les rameurs ouvrent la marche contre le vent avec prudence
 La vétérane compte les balises devant le fanion sous pression
@@ -127,7 +127,7 @@ L'équipe grimpe avec une force précise au pied du surplomb
 En respectant le plan collectif, une amie partage la charge
 La pagayeuse trouve l'indice dans les rapides avec le trio
 Les finalistes préparent le prochain relais au prochain ravitaillement
-La formation prend une décision unanime près du mont Royal
+Près du mont Royal, chacun donne son avis sur le prochain détour
 La meneuse garde son calme devant le fanion en silence
 Une participante prolonge la course dans le sous-bois en silence
 La formation partage la charge avant le prochain contrôle
@@ -167,7 +167,7 @@ Avant la longue montée, l'équipe choisit la rive abritée
 Le barreur laisse glisser le bateau près du cap rocheux
 Une participante garde son calme au dernier relais en silence
 Les poursuivants mémorisent la séquence sur le quai avec précision
-Les partenaires lisent le courant sous le chrono avec précision
+Le duo repère les zones calmes avant de remettre le canot à l'eau
 Les grimpeurs gardent leur calme dans les rapides avec prudence
 À travers le marais, le groupe poursuit malgré la fatigue
 La stratège maintient la cadence face au courant jusqu'au bout
@@ -198,7 +198,7 @@ Une participante compte les balises dans la boue jusqu'au bout
 La formation contourne les galets noirs au prochain méandre
 La meneuse suit la trace devant le fanion avec précision
 En conservant assez d’énergie, l'équipe partage la magnésie
-La pagayeuse trouve l'indice sous les épinettes avant le chrono
+Un fanion bleu sous les épinettes confirme la bonne rive
 Sans voir le fanion, l'équipe retrouve enfin son repère
 La navigatrice dompte le courant dans le brouillard sous pression
 La meneuse évite l'ancien chemin forestier sans gaspiller les réserves
@@ -315,11 +315,11 @@ La coureuse franchit le passage dans la descente avec courage
 La navigatrice révise la carte sous le chrono avec prudence
 Un équipier retrouve une trace effacée sur l’île d’Anticosti
 La stratège suit la trace près du lac sous pression
-Au contrôle cognitif, le duo assemble les fragments de carte
+Au poste de logique, le duo assemble les fragments de carte
 La stratège trouve l'indice sur le sentier avant le verdict
 La formation observe la piste près du marais avec prudence
 La coureuse observe la piste avant la finale avec courage
-Au contrôle cognitif, la formation classe les indices utiles
+Au poste de logique, les indices sont triés par couleur
 Après le portage, la fuite perd son avance
 Dans le sable mou, la carte révèle un raccourci
 Les poursuivants nouent la corde face au courant avec précision
@@ -385,7 +385,7 @@ La formation contourne le piège près du sommet jusqu'au bout
 Un équipier trouve l'indice à l'entrée du canyon avec précision
 Dans Lanaudière, le trio porte le matériel collectif
 L'équipe observe le rythme des rivaux sans négliger la sécurité
-Les rameurs partagent le poids sous le chrono avec courage
+Deux rameurs partagent le poids du canot pendant le portage
 Les poursuivants franchissent le passage au dernier relais avec prudence
 Une participante protège son avance face au courant avec courage
 Dès la prochaine balise, le duo propose une pause courte
@@ -497,7 +497,7 @@ Pour la finale, la poursuite change de direction
 La formation trouve l'indice face au courant malgré la pression
 Dans le sable mou, la stratégie devient plus claire
 Avec une confiance nouvelle, l'équipe compte les pas jusqu’au contrôle
-La stratège relance l'effort dans les rapides avant le chrono
+La stratège choisit le dernier virage après avoir lu le courant
 Les finalistes laissent glisser le bateau malgré la pluie froide
 Les grimpeurs relancent l'effort près du lac malgré la boue
 Le cartographe observe les repères lointains avec une précision tranquille
@@ -557,7 +557,7 @@ Les analystes simplifient le problème logique avec une confiance nouvelle
 La stratège relance l'effort au dernier relais malgré la boue
 Dans la boue, la confiance revient dans le groupe
 L'équipe garde trois points de contact au mont Mégantic
-En conservant assez d’énergie, les coéquipières prennent une décision unanime
+Les coéquipières comparent leurs réserves avant le sprint final
 Le trio mesure la distance restante sans perdre le fil
 La stratège trouve l'indice sur la rive avec le trio
 Dans le courant, la fuite perd son avance
@@ -596,7 +596,7 @@ Le groupe teste une nouvelle hypothèse sous le fanion numéroté
 La formation teste chaque appui avec une confiance nouvelle
 Au prochain ravitaillement, un équipier gère le dernier ravitaillement
 Les rameurs relancent l'effort devant le fanion pour garder l'élan
-Les grimpeurs relancent l'effort sous le chrono pour garder l'élan
+Les grimpeurs gardent leurs bras souples avant la paroi finale
 Au pied du mur, la relance transforme complètement l'étape
 Avec une précision tranquille, la capitaine aligne deux sommets
 Le groupe inverse la séquence donnée sans gaspiller les réserves
@@ -663,7 +663,7 @@ Après le ravitaillement, le cartographe lit les courbes de niveau
 Sans perdre le cap, le retard commence à fondre
 Un équipier relance l'effort devant le canyon malgré le doute
 Devant les équipes rivales, la capitaine garde le dialogue ouvert
-Les rameurs trouvent l'indice devant la grille avant le chrono
+La grille révèle le numéro du quai où attend le prochain relais
 Au retour de la lumière, l'équipe économise ses avant-bras
 Les partenaires économisent leurs avant-bras après avoir consulté le groupe
 Au cœur du défi, la carte révèle un raccourci
@@ -716,7 +716,7 @@ Une participante mémorise quatre couleurs devant le tableau de symboles
 Les partenaires alignent deux sommets avec toute la concentration nécessaire
 Avec une confiance nouvelle, l'équipe corrige son azimut
 Les partenaires relancent l'effort contre le vent en gardant confiance
-Un équipier relance l'effort devant le fanion avant le chrono
+Un équipier rejoint le fanion après avoir suivi le bon azimut
 Le trio alterne course et marche sans perdre le fil
 Devant la corde, la victoire semble encore accessible
 Au bord du quai, la progression reprend sans hésitation
@@ -801,7 +801,7 @@ Au sommet du raidillon, le duo cherche une fissure solide
 Devant le mur, l'équipe retrouve enfin son repère
 La meneuse trouve l'indice dans le sous-bois malgré la boue
 Sur la falaise, la pression gagne toute l'équipe
-La stratège relance l'effort sous le chrono avant le verdict
+La stratège vérifie le total avant de rendre sa réponse
 Les grimpeurs sécurisent le passage exposé au-dessus de la vallée
 Après la montée, la pression gagne toute l'équipe
 La coureuse relance l'effort sur la rive avant le verdict
@@ -867,7 +867,7 @@ Les partenaires trouvent l'indice devant le fanion malgré la pression
 Au prochain détour, la victoire semble encore accessible
 Au bout du pont, la poursuite change de direction
 À travers le marais, le détour devient finalement nécessaire
-Les partenaires relancent l'effort sous le chrono pour reprendre l'avance
+Une relance sur terrain plat rapproche le duo de la tête
 Un équipier relance l'effort sur la falaise contre toute attente
 Au moment du choix, la cadence revient progressivement
 Au Centre-du-Québec, la navigatrice compte les pas jusqu’au contrôle
@@ -948,7 +948,7 @@ Pendant la transition, une participante vérifie le nœud principal
 Les finalistes trouvent l'indice dans le sous-bois pour éviter l'erreur
 Après une erreur coûteuse, la relance redonne confiance au trio
 Sur la roche humide, la relance transforme complètement l'étape
-La vétérane relance l'effort dans les rapides avant le chrono
+La vétérane lit les remous avant de choisir sa ligne
 Dans les rapides, la carte révèle un raccourci
 L'équipe célèbre chaque progrès dans les collines de l’Estrie
 Une participante retrouve une trace effacée au Centre-du-Québec
@@ -984,7 +984,7 @@ La navigatrice distingue le vrai carrefour au Bas-Saint-Laurent
 Devant la corde, la relance transforme complètement l'étape
 Les partenaires trouvent l'indice devant le fanion malgré le doute
 À travers la boue, la relance transforme complètement l'étape
-Un équipier prend une décision unanime avec patience et méthode
+Un équipier résume les options puis le groupe choisit sa voie
 Durant les dernières minutes, l'équipe vérifie le nord magnétique
 La navigatrice relance l'effort près du lac avant le chrono
 Près du ravin, la pression transforme toute la stratégie
@@ -1010,7 +1010,7 @@ La navigatrice trouve l'indice devant le fanion pour garder l'élan
 À mi-parcours, la pression transforme toute la stratégie
 Au belvédère du parcours, les finalistes cherchent une fissure solide
 Avant le verdict, la fuite perd son avance
-Un équipier partage son souvenir précis au contrôle cognitif
+Un équipier se rappelle la couleur du dernier symbole
 Les coéquipières partagent leur réserve d’eau avec une précision tranquille
 Au bout du pont, la fuite perd son avance
 La meneuse trouve l'indice sur la plage pour reprendre l'avance
@@ -1093,7 +1093,7 @@ Pendant le portage, la formation contourne le mauvais passage
 Au creux du ravin, la trajectoire devient plus précise
 Malgré la fatigue, le relais se poursuit sans erreur
 Un équipier repère un motif discret au contrôle des régions
-La formation relance l'effort près du sommet avant le chrono
+La formation rejoint la crête avec assez de souffle pour finir
 Les partenaires répartissent les rôles clairement au départ du relais
 Au signal du départ, la pression gagne toute l'équipe
 Le trio protège la confiance commune au départ du relais
@@ -1297,7 +1297,7 @@ Contre le courant, la victoire semble encore accessible
 Les relayeuses reviennent sur le peloton avec une précision tranquille
 Les finalistes gardent le dialogue ouvert au Bas-Saint-Laurent
 Dans la descente, la stratégie devient plus claire
-L'équipage rame avec une force mesurée malgré les jambes lourdes
+L'équipage garde un geste souple malgré les bras fatigués
 Devant la corde, la pression gagne toute l'équipe
 En évitant le détour, la remontée commence après quelques secondes
 Le duo corrige légèrement la trajectoire avec patience et méthode
@@ -1329,7 +1329,7 @@ En évitant le détour, la relance redonne confiance au trio
 À quelques secondes près, la remontée devient encore possible
 Les finalistes mémorisent quatre couleurs dans le refuge forestier
 Sans perdre le cap, la progression reprend enfin
-L'équipe relie les formes aux régions au contrôle cognitif
+Au poste de mémoire, le trio relie les formes aux régions
 Les poursuivants inversent la séquence donnée dans un silence attentif
 Près du ruisseau glacé, un équipier gère le dernier ravitaillement
 Dans Chaudière-Appalaches, les coéquipières retrouvent le ruisseau sur la carte
@@ -1452,7 +1452,7 @@ Avant le verdict, le groupe évite le piège
 Les coureurs alternent course et marche au cœur des Laurentides
 À quelques secondes près, le trio retrouve son rythme
 Après la descente, la balise confirme enfin la trajectoire
-Au contrôle cognitif, les participants inversent la séquence donnée
+Au poste de logique, la séquence doit être lue à l'envers
 À quelques secondes près, le courant change la tactique
 Sur la roche humide, le doute disparaît peu à peu
 Au mont Mégantic, la formation observe le grain du granite
@@ -1618,7 +1618,7 @@ Près du fanion, le courant change la tactique
 En fin d'étape, la progression reprend sans hésitation
 En gardant le rythme, le parcours exige une nouvelle lecture
 Après une erreur coûteuse, la balise confirme enfin la trajectoire
-Les coéquipières prennent une décision unanime dans un silence attentif
+Un signe de tête suffit pour confirmer le choix du duo
 Sous la pluie, la fuite perd son avance
 Au premier changement de rythme, la meneuse reconstruit la consigne
 Près du mont Royal, les poursuivants protègent la confiance commune
@@ -1680,7 +1680,7 @@ Dans la toundra du Nunavik, l'orienteuse choisit le sentier supérieur
 L'équipe replace calmement la corde dans les Appalaches
 Dans la longue descente, les finalistes conservent une allure durable
 L'équipe replace calmement la corde devant la dalle humide
-Un équipier assemble les fragments de carte au contrôle cognitif
+Les fragments de carte révèlent un pont oublié près du camp
 Un équipier atteint la petite vire sous une arête rocheuse
 En suivant la carte, la poursuite oblige chacun à accélérer
 Au Centre-du-Québec, les éclaireuses distinguent le vrai carrefour
@@ -1999,7 +1999,7 @@ Le guide relance l'effort sur la plage pour éviter l'erreur
 Le grimpeur relance l'effort dans la boue pour garder l'élan
 Le grimpeur relance l'effort avant la finale malgré le doute
 La meneuse protège la confiance commune sans négliger la sécurité
-Le trio trouve l'indice sous le chrono
+Le trio retrouve le symbole effacé sous une couche de sable
 Avec le sommet en vue, l'équipe gère le dernier ravitaillement
 Le duo annonce son prochain mouvement sur la petite vire
 Le porteur trouve l'indice sous les épinettes malgré la pression
@@ -2040,13 +2040,13 @@ Le capitaine relance l'effort devant le canyon contre toute attente
 Dans une érablière humide, une participante salue les équipes rivales
 Le benjamin trouve l'indice dans les rapides malgré la boue
 Le rameur relance l'effort dans le sous-bois pour garder l'élan
-Le grimpeur relance l'effort sous le chrono avec le trio
-Le capitaine relance l'effort sous le chrono pour éviter l'erreur
+Le grimpeur récupère sur une prise large avant le dernier dévers
+Le capitaine relit le plan avant de guider son groupe
 Le guide relance l'effort devant la grille pour reprendre l'avance
 Les amis préparent le prochain virage avec une confiance nouvelle
 Le porteur trouve l'indice sur la plage pour garder l'élan
 L'équipe vérifie le nord magnétique sans perdre le fil
-Les poursuivants repèrent l'élément incohérent au contrôle cognitif
+Une couleur en trop révèle le piège du défi de mémoire
 Le trio relance l'effort contre le vent pour la finale
 Le grimpeur relance l'effort sur la plage contre toute attente
 La navigatrice retrouve une trace effacée derrière le vieux moulin
@@ -2114,7 +2114,7 @@ Le guide trouve l'indice devant la grille pour garder l'élan
 L'équipe accélère au sommet du raidillon sous les érables rouges
 Les finalistes cherchent une fissure solide au sommet du raidillon
 Le trio trouve l'indice devant le fanion pour la finale
-Une amie prend une décision unanime malgré les jambes lourdes
+Une amie propose une pause et le duo accepte de ralentir
 Le trio trouve l'indice devant la grille pour reprendre l'avance
 Le capitaine confie la carte à un partenaire dans Lanaudière
 Un équipier encourage le dernier avec une confiance nouvelle
@@ -2152,7 +2152,7 @@ Le grimpeur trouve l'indice devant la grille malgré le vent
 Sous la passerelle de bois, l'équipe reconstruit la consigne
 Le trio repère une borne ancienne malgré la pluie froide
 Le capitaine trouve l'indice sur le sentier pour reprendre l'avance
-Le capitaine relance l'effort sous le chrono pour sauver l'étape
+Le capitaine ajuste le rythme pour rallier la prochaine balise
 Les partenaires proposent une pause courte avec une précision tranquille
 Le porteur relance l'effort dans les rapides avant le chrono
 Le grimpeur trouve l'indice sous les épinettes pour sauver l'étape
@@ -2299,7 +2299,7 @@ Quand la corde se tend, le groupe vérifie la carte
 Quand le sommet se cache, la progression ralentit soudain
 Quand la lumière baisse, le groupe respire ensemble
 Quand le silence tombe, le calme devient concret
-Les analystes inversent la séquence donnée au contrôle cognitif
+Les lettres lues à rebours révèlent le nom du prochain lieu
 Les finalistes stabilisent le radeau chargé sans négliger la sécurité
 Quand le vent tourne, la progression ralentit soudain
 Le groupe célèbre chaque progrès derrière le vieux moulin
@@ -2402,7 +2402,7 @@ Une participante maintient la cadence devant le fanion en silence
 Les grimpeurs portent la charge près du lac en silence
 Les partenaires calment la panique dans la descente sans paniquer
 La formation ouvre la marche après le portage sans paniquer
-Les partenaires écartent les fausses pistes au contrôle cognitif
+Les partenaires écartent une piste grâce à un indice sonore
 Les partenaires écartent les fausses pistes malgré la pluie froide
 L'équipe salue les équipes rivales sans gaspiller les réserves
 Les finalistes testent chaque appui dans les Appalaches
@@ -2440,13 +2440,13 @@ Un équipier ferme le relais pendant la remontée sans paniquer
 Un équipier observe la piste près du sommet sans paniquer
 Le barreur lit les remous dans le chenal étroit
 Une participante replace calmement la corde au mont Mégantic
-Le trio repère l'élément incohérent au contrôle cognitif
+Le trio trouve la seule forme qui ne respecte pas la règle
 La dernière équipe trouve l'indice face au courant avec précision
 Les poursuivants contournent les galets noirs au prochain méandre
 La pagayeuse protège son avance sur la plage avec précision
 La pagayeuse suit la trace devant le fanion avec prudence
 Une participante cherche un repère pendant la remontée avec prudence
-La meneuse corrige sa trajectoire sous le chrono avec courage
+La meneuse corrige son cap en visant le clocher au loin
 La pagayeuse déjoue le piège sous la pression du chrono
 Une participante sécurise le passage exposé dans les Appalaches
 Les partenaires déjouent le piège sur la falaise jusqu'au bout
@@ -2648,3 +2648,303 @@ Dans la toundra les cairns remplacent les arbres
 La dernière montée révèle la force mentale du trio
 Un choix courageux mène les équipes vers la rivière
 Les partenaires franchissent la ligne en se tenant la main
+Sur le damier, un seul pion bloque toute la diagonale
+Une carte oubliée change le sens de la manche
+Le dé roule encore quand la joueuse annonce son choix
+Avant son tour, chacun prépare deux coups possibles
+Une tour protège le roi sans quitter sa colonne
+Sous le sablier, les mots viennent parfois plus vite
+Le puzzle avance dès que les coins sont réunis
+Un jeton bleu suffit pour fermer le dernier chemin
+La joueuse garde son atout pour la manche finale
+Au fond du sac se trouve la lettre qui manquait
+Sans bouger les pièces, le duo teste une autre idée
+Le plateau tourne et révèle une menace oubliée
+Pour gagner ce tour, il faut d'abord accepter un recul
+Les cartes forment un pont entre les deux camps
+Un lancer précis place le palet au bord du cercle
+Derrière le paravent, chacun range ses pions autrement
+Le dernier domino relie les deux bouts du parcours
+Une pièce tournée rend enfin l'image plus nette
+À chaque échange, la réserve de jetons se réduit
+La règle paraît simple mais chaque choix compte
+Les joueurs retirent les bâtons sans faire trembler la pile
+Avec trois cartes, le duo prépare une belle surprise
+Le pion le plus lent trouve pourtant le passage libre
+Une case vide permet de sauver la prochaine manche
+Sur la table, les dés dessinent un étrange escalier
+La partie se joue autant dans l'écoute que dans le bluff
+Un regard vers le plateau évite un coup trop rapide
+La débutante remarque le piège que le favori oublie
+Pour finir la grille, il faut déplacer ce seul carré
+Le score reste serré malgré un mauvais premier lancer
+Les lettres du sac composent enfin un mot inattendu
+Une bonne défense laisse une porte pour la riposte
+En changeant de rôle, les joueurs découvrent un autre défi
+Chaque carte posée rend le prochain choix plus délicat
+Le duo gagne du temps en triant les pièces par couleur
+Une tuile glissée ouvre un chemin jusqu'au trésor
+Le cercle se ferme lorsque le dernier jeton est posé
+Deux coups prudents valent mieux qu'un pari trop vague
+La joueuse écoute la règle avant de tenter sa chance
+Au jeu de mémoire, un détail suffit pour trouver la paire
+Le prochain tour commence dès que le sablier est vide
+La dernière carte donne au perdant une chance de revenir
+Sans parler, les partenaires choisissent le même symbole
+Les billes changent de route au milieu du labyrinthe
+Un pion sacrifié libère la diagonale pour la dame
+Le jeu s'arrête quand les deux réserves sont épuisées
+Une main calme place la dernière pièce de la tour
+La stratégie du trio repose sur un seul jeton rouge
+Devant le plateau, chacun défend une solution différente
+Le tirage impose de bâtir un mot avec peu de voyelles
+Une lettre déplacée transforme le mot sans changer sa taille
+Le message devient clair en lisant une ligne sur deux
+Trois chiffres suffisent pour ouvrir le petit coffre
+Dans la grille, un nombre apparaît deux fois par erreur
+La suite continue si chaque terme double le précédent
+Un reflet révèle les mots écrits derrière le miroir
+Chaque symbole désigne une lettre et garde la même valeur
+Pour lire le code, le duo commence par le mot le plus court
+La flèche rouge indique le départ du labyrinthe
+Deux indices séparés racontent la même histoire
+En lisant de bas en haut, la phrase reprend son sens
+Le mot caché emprunte une lettre à chaque ligne du tableau
+Un carré vide empêche la somme de tomber juste dans la grille
+La solution tient dans les lettres que personne ne regarde
+Quatre couleurs doivent trouver chacune leur place
+Le duo élimine un suspect grâce à l'heure du départ
+Une date inversée donne la clé du cadenas près du refuge
+Les lettres voisines forment une anagramme du lieu secret
+Le nombre manquant complète les deux diagonales
+Au centre du dessin, une forme rompt la symétrie des couleurs
+La consigne interdit de lever le crayon avant la fin
+En pliant la feuille, deux morceaux du code se rejoignent
+Le plus petit détail distingue les deux pavillons
+Une seule allumette suffit pour rendre le calcul vrai
+La dernière voyelle permet de retrouver le mot entier
+Les ombres donnent une heure que le cadran ne montre pas
+Un trait de trop brouille la forme du chiffre huit
+Le code change quand les cases noires deviennent blanches
+Chaque ligne contient les mêmes lettres dans un autre ordre
+Une balance égale révèle le poids de la pièce cachée
+Pour classer les cartes, le trio compare leurs bordures
+La première erreur vient d'une consigne lue trop vite
+Le chemin le plus court passe par la seule case vide
+Un mot commun relie la rivière au jeu de cartes
+La réponse apparaît entre deux lignes du message
+En retirant les lettres doubles, un autre mot se forme
+Le nombre de côtés donne l'ordre exact des figures du tableau
+Deux colonnes échangées rendent enfin la grille cohérente
+Le duo relit la question avant de choisir sa réponse
+Une lettre sur trois suffit pour nommer le refuge
+La clé du cryptogramme se cache dans un mot répété
+Les tours les plus hautes cachent celles du fond
+La boussole du dessin pointe vers une lettre oubliée
+Un même total doit apparaître au bout de chaque ligne
+Le trio compte les angles plutôt que les formes
+La troisième carte contredit la piste suivie jusque-là
+Un triangle retourné complète le grand carré du casse-tête
+Les pièces du casse-tête gardent toutes la même surface
+Sous le dessin, un mot donne le sens de lecture
+La réponse semble proche mais une case reste à expliquer
+Au dernier virage, la coureuse réduit l'écart sans forcer
+Le nageur garde son souffle pour la longueur finale
+Une passe courte libère un chemin vers le panier
+Sur la glace, le patineur prend appui avant le virage
+Le ballon touche le filet puis retombe dans le terrain
+La gardienne plonge au bon moment pour sauver le point
+Après le service, le duo couvre les deux coins du court
+Le cycliste attend la sortie du virage pour relancer
+Un tir placé vaut parfois mieux qu'un tir plus fort
+La sauteuse mesure son élan avant de rejoindre la piste
+Les skis glissent mieux dès que le rythme devient régulier
+Le témoin passe de main en main sans perdre de vitesse
+Au bord du bassin, une amie compte les derniers mètres
+Le grimpeur change de prise pour soulager ses doigts
+La volleyeuse annonce la balle avant de monter au filet
+En tir à l'arc, le geste reste calme jusqu'au départ
+Le canot tourne quand les deux pagaies changent de côté
+La balle rebondit bas et oblige le joueur à avancer
+Un appui trop large ralentit la sortie du virage
+La défense recule puis referme le passage au centre
+Sur le vélo, la meneuse protège son groupe du vent
+Un départ prudent laisse de la force pour finir vite
+Le coureur de haies ajuste ses pas entre deux obstacles
+La nageuse touche le mur avant de changer de direction
+Le palet glisse sous la crosse du dernier défenseur
+Une passe en retrait offre un meilleur angle de tir
+La rameuse cale son geste sur le souffle du groupe
+Les raquettes tracent un chemin dans la neige profonde
+Au tennis de table, un effet discret change le rebond
+La gymnaste fixe un point pour garder son équilibre
+Une feinte du regard ouvre la voie vers le but
+Le skieur reste souple malgré les bosses de la piste
+Dans le gymnase, les baskets grincent avant chaque pivot
+La tireuse abaisse son arc après une flèche trop courte
+Un dribble plus lent attire la défense hors du centre
+Le nageur dépasse son rival sans changer sa cadence
+La coureuse trouve un second souffle au pied de la côte
+La balle longe la ligne et surprend le joueur au filet
+Les bâtons aident le fondeur à franchir la dernière bosse
+Une course bien dosée garde le sprint pour la fin
+Le gardien suit la rondelle jusque derrière son but
+Au bord du tapis, le duo répète son premier mouvement
+La joueuse de curling lit la courbe avant son lancer
+Le saut paraît court mais la réception reste solide
+La pagayeuse vise un passage entre les deux rochers
+Les pieds font moins de bruit quand la foulée se détend
+Sur le sable, un pas de côté suffit pour garder la balle
+Le rameur corrige son geste après un conseil du barreur
+Une relance rapide surprend toute la défense adverse
+L'équipe choisit une passe sûre malgré la pression
+Le tableau affiche un seul point entre les deux équipes
+Une égalité impose une manche de plus aux finalistes
+Le favori observe le départ au lieu de partir trop vite
+Avant le verdict, les joueurs relisent la dernière règle
+Le public retient son souffle pendant le dernier essai
+La finale commence avec les scores remis à zéro
+Un point perdu change le plan pour la manche suivante
+Le trio partage ses tâches avant le signal du départ
+La réserve d'énergie compte autant que l'avance au score
+Un geste loyal permet au rival de reprendre la partie
+Les deux équipes finissent avec le même total de points
+La capitaine annonce le plan pendant une courte pause
+Le départ approche et chacun vérifie son propre rôle
+Après trois manches, la dernière réponse décide du podium
+Le temps gagné au début sert à relire la solution
+Une place en finale se joue sur le prochain relais
+La foule applaudit aussi le dernier groupe arrivé
+Le trio préfère une réponse sûre à un pari sans indice
+Le banc encourage les joueurs qui reviennent sur le terrain
+Une courte pause rend le dialogue plus clair dans l'équipe
+Le score bascule au moment où le duo change de tactique
+Les rivaux échangent un sourire avant la dernière épreuve
+Le signal de fin coupe la réflexion au milieu du calcul
+Une réclamation oblige le juge à revoir le dernier point
+La meneuse garde le silence pour laisser son duo réfléchir
+Un résultat serré demande une lecture attentive du tableau
+Le trio se répartit les énigmes selon les forces de chacun
+Le dernier relais commence avec deux équipes côte à côte
+Une bonne idée naît pendant le retour vers le camp
+La médaille récompense aussi des mois de petits efforts
+Le joueur remplaçant trouve sa place dans le plan du groupe
+Une pénalité réduit l'avance mais ne décide pas de tout
+À mi-parcours, le classement montre une surprise
+Un départ manqué devient le début d'une belle remontée
+Le duo change de rythme après avoir observé ses rivaux
+Chaque réponse validée ajoute un point au total commun
+La capitaine protège son calme quand le score se resserre
+Le juge rappelle la règle avant le dernier duel
+Une seconde de marge suffit pour rester dans la course
+Les finalistes préparent leur sac sans regarder le score
+Le duo perd une manche mais trouve une meilleure méthode
+L'avance paraît large jusqu'au changement de terrain
+Une épreuve de mémoire départage les meilleurs groupes
+Le groupe accueille un conseil venu du banc adverse
+La victoire se joue sur un choix fait pendant la pause
+Tous les membres du relais reçoivent la même médaille
+La fatigue s'entend mais les consignes restent précises
+Un point commun réunit deux équipes aux styles opposés
+Avant le podium, chacun remercie les autres pour leur aide
+Le dernier défi exige plus de calme que de vitesse
+La brume laisse apparaître une île au milieu du lac
+Un merle lance son chant avant que le camp se réveille
+Sur la rive, les galets brillent après le passage des vagues
+La mousse couvre le côté humide du vieux tronc
+Des traces de lièvre croisent la piste des raquettes
+Le soleil éclaire le fond de la vallée entre deux nuages
+Une feuille flotte et montre le sens du courant
+Sous les pins, le sol garde la chaleur de la veille
+Le renard s'arrête puis disparaît derrière les fougères
+La neige craque plus fort au bord du sentier gelé
+Une branche basse oblige le groupe à ralentir dans la forêt
+Le chant des grenouilles accompagne le retour au camp
+Au bout du cap, les vagues masquent le bruit des pas
+Le ciel se reflète dans une flaque au pied du rocher
+Un écureuil transporte une noix vers la lisière
+Les bourgeons rouges annoncent le retour des jours doux
+Une odeur de terre mouillée monte après la pluie
+Le brouillard s'accroche aux sommets avant de se lever
+La marée laisse un ruban d'algues au bord du sable
+Un vent chaud fait frémir les roseaux près du quai
+Le ruisseau se divise autour d'une pierre plate près du moulin
+Des papillons suivent la lumière dans la clairière
+Un rayon de soleil révèle les fils d'une toile
+La lune éclaire les traces fraîches sur la neige
+Au creux du vallon, les feuilles cachent un petit pont
+La falaise renvoie l'écho d'un appel venu du sentier
+Un banc de nuages passe au-dessus du refuge encore fermé
+La pluie cesse mais les branches gouttent encore
+Les oiseaux se posent en ligne sur une clôture près du camp
+Une étoile apparaît au-dessus de la crête sombre
+L'eau claire laisse voir les racines au fond du lac
+Le gel dessine des fleurs sur la vitre du refuge
+Une abeille visite les mêmes fleurs au bord du chemin
+Le sable garde la forme des pas malgré le vent léger
+Au pied du bouleau, un champignon pousse dans la mousse
+La rivière porte des feuilles jaunes jusqu'au vieux moulin
+Un porc-épic traverse la piste sans se presser malgré le bruit
+Les nuages ouvrent une fenêtre bleue au-dessus du col
+L'ombre du sapin s'allonge sur le bord du camp
+La rosée mouille les chaussures dès les premiers pas
+Un héron plonge près du quai après une longue attente
+Le bois sec résonne sous les pas du groupe près du refuge
+La vallée change de couleur lorsque le soleil descend
+La neige fond plus vite au bord du rocher sombre
+Une chenille avance lentement sur la sangle du sac
+Le vent fait bouger les ombres au pied des pins
+Le canot laisse une ligne fine sur le lac sans vagues
+La pluie révèle les couleurs cachées dans les galets
+Le sentier rejoint une source au milieu des fougères
+Sous les étoiles, le feu dessine des visages plus calmes
+Un essai raté montre ce qu'il faut changer au prochain
+La peur recule quand le premier geste devient familier
+Une petite victoire redonne envie de tenter la suite
+Le progrès se voit dans un effort devenu plus facile
+Après la chute, la grimpeuse reprend le mouvement lentement
+Une amie rappelle au duo le chemin déjà parcouru
+Le courage commence parfois par une demande d'aide
+Une pause bien choisie permet de revenir plus lucide
+La voix tremble mais la réponse reste claire malgré le doute
+Le trio apprend à se parler même quand le temps presse
+Un objectif modeste devient une étape vers un défi plus grand
+La coureuse découvre une force qu'elle ne soupçonnait pas
+Le doute diminue quand les indices sont rangés dans l'ordre
+Une erreur comprise vaut plus qu'une réussite au hasard
+Chaque essai ajoute un repère pour la prochaine tentative
+La fatigue change le rythme sans effacer le but
+Le duo ose une méthode qu'il n'avait jamais testée
+La confiance revient avec un geste simple et bien fait
+Une réponse trouvée ensemble rapproche les deux partenaires
+Le groupe se relève plus vite quand personne ne reste seul
+La patience aide à distinguer le vrai progrès du score
+Un conseil précis rend le prochain pas moins intimidant
+La meneuse accepte de changer d'idée après un nouvel indice
+Le premier entraînement paraît loin au moment de la finale
+Une limite franchie donne envie de tenter un autre sommet
+Le trio ajuste son but au lieu de renoncer au parcours
+Un pas plus lent permet de garder la tête claire dans la montée
+La joueuse explique son erreur pour aider le reste du groupe
+Une main tendue redonne confiance avant le passage étroit
+Les efforts de la semaine deviennent visibles dans la course
+Un exercice simple devient plus exigeant avec un temps limité
+La pression baisse quand chacun sait ce qu'il doit faire
+Le duo apprend autant de sa défaite que de sa victoire
+Une idée audacieuse prend forme après quelques essais prudents
+La fatigue rend les progrès plus discrets mais bien réels
+Le groupe écoute le plus timide avant de prendre sa décision
+Un souvenir de réussite aide à tenter le passage difficile
+La capitaine sait aussi demander un relais quand il le faut
+Une longue marche commence par un but assez proche
+Le trio fait une pause pour mieux choisir sa prochaine piste
+Le regard change lorsque le défi paraît enfin accessible
+Le calme revient dès que le problème est divisé en étapes
+Une bonne question aide parfois plus qu'une réponse rapide
+La joueuse s'accorde le droit d'essayer une autre voie
+Le groupe célèbre un progrès que le classement ne montre pas
+Le souffle retrouve son rythme après quelques pas tranquilles
+Un défi partagé rend le dernier effort moins lourd
+La crainte du faux pas diminue avec les répétitions
+Une idée corrigée reste une bonne étape vers la solution
+Le sourire revient avant même que la victoire soit acquise
