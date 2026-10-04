@@ -3,6 +3,13 @@ import { describe, expect, it } from 'vitest';
 import { SumPyramidPage } from './sum-pyramid.page';
 
 describe('SumPyramidPage', () => {
+  it('does not count rounding residuals as independent clues', () => {
+    const page = new SumPyramidPage() as any;
+    const positions = ['1:1', '2:1', '4:3', '4:2', '4:1'];
+
+    expect(page.coefficientRank(positions, 6)).toBe(4);
+  });
+
   it('generates puzzles without two consecutive empty rows', () => {
     for (let attempt = 0; attempt < 60; attempt += 1) {
       const page = new SumPyramidPage() as any;

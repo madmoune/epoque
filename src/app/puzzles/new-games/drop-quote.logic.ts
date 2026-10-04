@@ -1,63 +1,77 @@
-import { range, shuffle } from './random';
+import { range } from './random';
 
 export interface DropQuotePuzzle {
   phrase: string;
-  clue: string;
   width: number;
   rows: string[];
   columns: string[][];
   solution: Record<number, string>;
 }
 
-// Original short sentences: no obscure references, names or quotations to know.
-export const DROP_PHRASES = [
-  ['Un bon indice transforme le doute en certitude', 'Résoudre une énigme'],
-  ['La patience ouvre des portes que la force ferme', 'Prendre son temps'],
-  ['Chaque petit effort nous rapproche de la victoire', 'Progresser'],
-  ['Un regard neuf trouve parfois la bonne réponse', 'Changer de perspective'],
-  ['Les idées voyagent plus vite que les trains', 'Imaginer'],
-  ['Le silence aide parfois à entendre ses idées', 'Réfléchir'],
-  ['La lumière du matin dessine des ombres nouvelles', 'Au lever du jour'],
-  ['Les meilleurs chemins commencent par un premier pas', 'Se lancer'],
-  ['Une question simple peut ouvrir un grand débat', 'Discuter'],
-  ['Un ami partage aussi bien les rires que les doutes', 'L’amitié'],
-  ['Le vent raconte aux arbres des histoires sans fin', 'Dans la forêt'],
-  ['Une bonne équipe écoute avant de prendre une décision', 'Coopérer'],
-  ['La curiosité transforme chaque détail en petite découverte', 'Observer'],
-  ['Les mots bien choisis rendent les idées plus claires', 'Bien expliquer'],
-  ['Une pause permet souvent de repartir du bon pied', 'Reprendre son souffle'],
-  ['Le courage grandit chaque fois que nous essayons', 'Oser'],
-  ['Les vagues effacent nos traces mais gardent nos souvenirs', 'Au bord de la mer'],
-  ['La meilleure piste se cache parfois sous nos yeux', 'Faire attention'],
-  ['Le sourire revient quand les amis ouvrent la porte', 'Se retrouver'],
-  ['Les chiffres deviennent simples quand on trouve leur logique', 'Faire des calculs'],
-] as const;
+const DROP_QUOTE_WIDTH = 12;
 
-export function createDropQuote(previousPhrase?: string): DropQuotePuzzle {
-  const [phrase, clue] = shuffle(DROP_PHRASES.filter(([text]) => text !== previousPhrase))[0];
-  const text = phrase
+export function normalizeDropQuotePhrase(phrase: string): string {
+  return phrase
+    .replace(/[Œœ]/g, 'OE')
+    .replace(/[Ææ]/g, 'AE')
     .normalize('NFD')
     .replace(/\p{Diacritic}/gu, '')
+    .replace(/[’‘]/g, "'")
+    .replace(/[‐‑–—]/g, '-')
+    .replace(/\s+/g, ' ')
+    .trim()
     .toUpperCase();
-  const width = 12;
+}
+
+function wrapDropQuote(phrase: string): string[] {
+  const text = normalizeDropQuotePhrase(phrase);
+  const words = text.split(' ');
+  if (!/[A-Z]/.test(text) || words.some((word) => word.length > DROP_QUOTE_WIDTH)) {
+    return [];
+  }
+
   const rows: string[] = [];
   let line = '';
-  for (const word of text.split(' ')) {
-    if (line && line.length + word.length + 1 > width) {
-      rows.push(line.padEnd(width, ' '));
+  for (const word of words) {
+    if (line && line.length + word.length + 1 > DROP_QUOTE_WIDTH) {
+      rows.push(line.padEnd(DROP_QUOTE_WIDTH, ' '));
       line = word;
     } else line += (line ? ' ' : '') + word;
   }
-  if (line) rows.push(line.padEnd(width, ' '));
+  if (line) rows.push(line.padEnd(DROP_QUOTE_WIDTH, ' '));
+  return rows;
+}
+
+export function parseDropQuotePhrases(text: string): string[] {
+  const seen = new Set<string>();
+  return text
+    .split(/\r?\n/)
+    .map((phrase) => phrase.trim().replace(/\s+/g, ' '))
+    .filter((phrase) => {
+      const normalized = normalizeDropQuotePhrase(phrase);
+      const rows = wrapDropQuote(phrase);
+      if (rows.length < 5 || rows.length > 7 || seen.has(normalized)) return false;
+      seen.add(normalized);
+      return true;
+    });
+}
+
+export function createDropQuote(phrase: string): DropQuotePuzzle {
+  const rows = wrapDropQuote(phrase);
+  if (rows.length === 0) throw new Error('The phrase does not fit the Dropquote grid.');
+  const width = DROP_QUOTE_WIDTH;
   const solution = Object.fromEntries(
     rows.flatMap((row, r) =>
-      [...row].flatMap((letter, c) => (letter === ' ' ? [] : [[r * width + c, letter]])),
+      [...row].flatMap((letter, c) => (/^[A-Z]$/.test(letter) ? [[r * width + c, letter]] : [])),
     ),
   );
   const columns = range(width).map((col) =>
-    shuffle(rows.map((row) => row[col]).filter((letter) => letter !== ' ')),
+    rows
+      .map((row) => row[col])
+      .filter((letter) => /^[A-Z]$/.test(letter))
+      .sort(),
   );
-  return { phrase, clue, width, rows, columns, solution };
+  return { phrase, width, rows, columns, solution };
 }
 
 export function remainingDropLetters(

@@ -8,6 +8,7 @@ type TemplateHarness = {
 
 type ServiceHarness = {
   templates: TemplateHarness[];
+  templateDeck: TemplateHarness[];
   lastGenre: string | null;
   drawTemplate: () => TemplateHarness;
   isPerfectCube: (value: number) => boolean;
@@ -55,16 +56,21 @@ describe('SequencesService', () => {
     });
   });
 
-  it('draws every template before repeating one and avoids adjacent genres', () => {
+  it('draws every template before repeating one and changes genre whenever possible', () => {
     const service = new SequencesService();
     const harness = service as unknown as ServiceHarness;
     const drawnTemplates: TemplateHarness[] = [];
 
     for (let index = 0; index < harness.templates.length; index++) {
+      const remainingTemplates =
+        harness.templateDeck.length > 0 ? harness.templateDeck : harness.templates;
+      const canChangeGenre = remainingTemplates.some(
+        (template) => template.genre !== harness.lastGenre,
+      );
       const template = harness.drawTemplate();
       const previousTemplate = drawnTemplates.at(-1);
 
-      if (previousTemplate) {
+      if (previousTemplate && canChangeGenre) {
         expect(template.genre).not.toBe(previousTemplate.genre);
       }
 

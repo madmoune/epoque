@@ -6,25 +6,21 @@ import {
   CustomKeyboardKey,
 } from '../shared/custom-keyboard/custom-keyboard.component';
 import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
-import { CryptarithmPuzzle, createCryptarithm, isCryptarithmSolved } from './cryptarithms.logic';
 import {
-  DropQuotePuzzle,
-  createDropQuote,
-  isDropQuoteSolved,
-  remainingDropLetters,
-} from './drop-quote.logic';
+  CryptarithmMode,
+  CryptarithmPuzzle,
+  createCryptarithm,
+  isCryptarithmSolved,
+} from './cryptarithms.logic';
+import { DropQuotePuzzle, isDropQuoteSolved, remainingDropLetters } from './drop-quote.logic';
+import { DropQuoteService } from './drop-quote.service';
 import { KakuroPuzzle, createKakuro, isKakuroSolved } from './kakuro.logic';
 import { NEW_GAMES, NewGameId } from './new-games.catalog';
 import { range, shuffle } from './random';
 import { SkyscrapersPuzzle, createSkyscrapers, isSkyscrapersSolved } from './skyscrapers.logic';
 import { SumpletePuzzle, createSumplete, isSumpleteSolved, sumpleteTotals } from './sumplete.logic';
-import {
-  WordFitPuzzle,
-  canPlaceWord,
-  createWordFit,
-  isWordFitSolved,
-  wordFitLetters,
-} from './word-fit.logic';
+import { WordFitPuzzle, canPlaceWord, isWordFitSolved, wordFitLetters } from './word-fit.logic';
+import { WordFitService } from './word-fit.service';
 
 @Component({
   selector: 'app-new-games-page',
@@ -38,8 +34,13 @@ export class NewGamesPage {
   protected readonly id = this.route.snapshot.data['game'] as NewGameId;
   protected readonly game = NEW_GAMES.find((game) => game.id === this.id)!;
   protected readonly range = range;
+  private readonly dropQuoteService = this.id === 'drop-quote' ? inject(DropQuoteService) : null;
+  private readonly wordFitService = this.id === 'word-fit' ? inject(WordFitService) : null;
+  protected readonly loading = signal(this.id === 'drop-quote' || this.id === 'word-fit');
+  protected readonly loadError = signal<string | null>(null);
 
   protected readonly cryptarithm = signal<CryptarithmPuzzle | null>(null);
+  protected readonly cryptarithmMode = signal<CryptarithmMode>('deduction');
   protected readonly skyscrapers = signal<SkyscrapersPuzzle | null>(null);
   protected readonly kakuro = signal<KakuroPuzzle | null>(null);
   protected readonly sumplete = signal<SumpletePuzzle | null>(null);
@@ -70,8 +71,13 @@ export class NewGamesPage {
       this.kakuro()?.solution ??
       Object.fromEntries(this.skyscrapers()?.solution.map((value, cell) => [cell, value]) ?? []),
   );
-  protected readonly keyboardRows = computed<CustomKeyboardKey[][]>(() =>
-    this.id === 'skyscrapers'
+  protected readonly keyboardRows = computed<CustomKeyboardKey[][]>(() => {
+    const digits = this.cryptarithm()?.digits;
+    if (digits) {
+      const keys = digits.map(String);
+      return [keys.slice(0, 3), [...keys.slice(3), 'backspace']];
+    }
+    return this.id === 'skyscrapers'
       ? [['1', '2', '3', '4', 'backspace']]
       : [
           range(5).map((i) => String(i + (this.id === 'cryptarithms' ? 0 : 1))),
@@ -81,8 +87,8 @@ export class NewGamesPage {
             ),
             'backspace',
           ],
-        ],
-  );
+        ];
+  });
   protected readonly sumTotals = computed(() => {
     const puzzle = this.sumplete();
     return puzzle ? sumpleteTotals(puzzle, this.keptNumbers()) : { rows: [], columns: [] };
@@ -137,7 +143,9 @@ export class NewGamesPage {
   });
 
   constructor() {
-    this.newPuzzle();
+    if (this.id === 'drop-quote') void this.loadDropPhrases();
+    else if (this.id === 'word-fit') void this.loadWordFitWords();
+    else this.newPuzzle();
     effect(() => {
       if (this.isSolved()) {
         this.selectedDigit.set(null);
@@ -146,10 +154,39 @@ export class NewGamesPage {
     });
   }
 
+  protected async loadDropPhrases(): Promise<void> {
+    this.loading.set(true);
+    this.loadError.set(null);
+    try {
+      await this.dropQuoteService!.loadPhrases();
+      this.loading.set(false);
+      this.newPuzzle();
+    } catch {
+      this.loadError.set('Impossible de charger les phrases. Réessaie dans un instant.');
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  protected async loadWordFitWords(): Promise<void> {
+    this.loading.set(true);
+    this.loadError.set(null);
+    try {
+      await this.wordFitService!.loadWords();
+      this.loading.set(false);
+      this.newPuzzle();
+    } catch {
+      this.loadError.set('Impossible de charger les mots à caser. Réessaie dans un instant.');
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
   protected newPuzzle(): void {
+    if (this.loading() || this.loadError()) return;
     switch (this.id) {
       case 'cryptarithms':
-        this.cryptarithm.set(createCryptarithm());
+        this.cryptarithm.set(createCryptarithm(this.cryptarithmMode()));
         break;
       case 'skyscrapers':
         this.skyscrapers.set(createSkyscrapers());
@@ -161,10 +198,10 @@ export class NewGamesPage {
         this.sumplete.set(createSumplete());
         break;
       case 'word-fit':
-        this.wordFit.set(createWordFit());
+        this.wordFit.set(this.wordFitService!.createPuzzle());
         break;
       case 'drop-quote':
-        this.dropQuote.set(createDropQuote(this.dropQuote()?.phrase));
+        this.dropQuote.set(this.dropQuoteService!.createPuzzle());
         break;
     }
     const givens =
@@ -212,6 +249,16 @@ export class NewGamesPage {
     this.selectedDigit.set(null);
   }
 
+  protected setCryptarithmMode(mode: CryptarithmMode): void {
+    if (this.cryptarithmMode() === mode) return;
+    this.cryptarithmMode.set(mode);
+    this.newPuzzle();
+  }
+
+  protected isCryptarithmDigitUsed(digit: number): boolean {
+    return Object.values(this.numericEntries()).includes(digit);
+  }
+
   protected selectDigit(key: string, event: Event): void {
     if (this.lockedKeys().has(key)) {
       this.selectedDigit.set(null);
@@ -226,7 +273,14 @@ export class NewGamesPage {
     const digit = value.replace(/[^0-9]/g, '').slice(-1);
     const max = this.id === 'skyscrapers' ? 4 : 9;
     const min = this.id === 'cryptarithms' ? 0 : 1;
-    const clean = digit && Number(digit) >= min && Number(digit) <= max ? digit : '';
+    const allowed = this.cryptarithm()?.digits;
+    const clean =
+      digit &&
+      Number(digit) >= min &&
+      Number(digit) <= max &&
+      (!allowed || allowed.includes(Number(digit)))
+        ? digit
+        : '';
     this.digitEntries.update((entries) => ({ ...entries, [key]: clean }));
     this.clearFeedback();
   }
@@ -272,6 +326,21 @@ export class NewGamesPage {
     return Object.values(this.wordAssignments()).includes(word);
   }
 
+  protected isWordLocked(word: string): boolean {
+    const slot = Object.entries(this.wordAssignments()).find(([, value]) => value === word)?.[0];
+
+    return slot !== undefined && this.lockedKeys().has(slot);
+  }
+
+  protected selectOrPlaceWord(word: string): void {
+    if (this.isWordUsed(word)) {
+      this.removeWordByWord(word);
+      return;
+    }
+
+    this.placeWord(word);
+  }
+
   protected placeWord(word: string): void {
     const puzzle = this.wordFit()!;
     const slot = this.selectedSlot();
@@ -299,8 +368,18 @@ export class NewGamesPage {
     this.clearFeedback();
   }
 
+  protected removeWordByWord(word: string): void {
+    const slot = Object.entries(this.wordAssignments()).find(([, value]) => value === word)?.[0];
+
+    if (slot === undefined) return;
+
+    this.selectedSlot.set(Number(slot));
+    this.removeWord();
+  }
+
   protected selectDropCell(cell: number): void {
-    if (this.lockedKeys().has(String(cell)) || this.isSolved()) return;
+    if (!this.dropQuote()?.solution[cell] || this.lockedKeys().has(String(cell)) || this.isSolved())
+      return;
     this.selectedDropCell.set(cell);
     this.clearFeedback();
   }
@@ -319,14 +398,10 @@ export class NewGamesPage {
     if (previous !== letter && !this.dropReserve()[column].includes(letter)) return;
     this.droppedLetters.update((values) => ({ ...values, [cell]: letter }));
     this.clearFeedback();
-    const next = Object.keys(puzzle.solution)
+    const available = Object.keys(puzzle.solution)
       .map(Number)
-      .find(
-        (next) =>
-          next % puzzle.width === column &&
-          !this.droppedLetters()[next] &&
-          !this.lockedKeys().has(String(next)),
-      );
+      .filter((next) => !this.droppedLetters()[next] && !this.lockedKeys().has(String(next)));
+    const next = available.find((next) => next > cell) ?? available[0];
     if (next !== undefined) this.selectedDropCell.set(next);
   }
 

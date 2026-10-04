@@ -10,7 +10,7 @@ export const NEW_GAMES = [
   {
     id: 'cryptarithms',
     title: 'Cryptarithmes courts',
-    description: 'Remplace chaque lettre par un chiffre pour rendre l’addition correcte.',
+    description: 'Déduis les chiffres de chaque lettre en croisant les colonnes et les retenues.',
     tag: 'Chiffres',
     rule: 'Une lettre représente toujours le même chiffre. Deux lettres différentes ont des chiffres différents, et un nombre ne commence jamais par zéro.',
   },
@@ -40,14 +40,14 @@ export const NEW_GAMES = [
     title: 'Mots à caser',
     description: 'Place tous les mots dans une grille en utilisant leurs lettres communes.',
     tag: 'Lettres',
-    rule: 'Choisis un emplacement, puis un mot de la bonne longueur. Utilise chaque mot une seule fois ; les lettres doivent être identiques aux croisements. Clique de nouveau sur une case pour changer de direction.',
+    rule: 'Choisis un emplacement, puis un mot de la bonne longueur. Utilise chaque mot une seule fois ; les lettres doivent être identiques aux croisements. Les accents sont retirés. Clique de nouveau sur une case pour changer de direction.',
   },
   {
     id: 'drop-quote',
     title: 'Lettres tombées',
     description: 'Fais retomber les lettres dans leur colonne pour retrouver une phrase.',
     tag: 'Lettres',
-    rule: 'Choisis une case, puis une lettre de la réserve située au-dessus de sa colonne. Les lettres restent dans leur colonne. Les espaces sont déjà placés ; les accents sont retirés.',
+    rule: 'Choisis une case, puis une lettre de la réserve située au-dessus de sa colonne. Les lettres restent dans leur colonne. Les espaces et la ponctuation sont déjà placés ; les accents sont retirés.',
   },
 ] as const satisfies readonly {
   id: NewGameId;

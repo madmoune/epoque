@@ -1,10 +1,4 @@
 import { createCryptarithm, isCryptarithmSolved, solveCryptarithm } from './cryptarithms.logic';
-import {
-  createDropQuote,
-  DROP_PHRASES,
-  isDropQuoteSolved,
-  remainingDropLetters,
-} from './drop-quote.logic';
 import { createKakuro, isKakuroSolved, solveKakuro } from './kakuro.logic';
 import {
   createSkyscrapers,
@@ -17,6 +11,7 @@ import {
   canPlaceWord,
   createWordFit,
   isWordFitSolved,
+  parseWordFitWords,
   solveWordFit,
   wordFitLetters,
 } from './word-fit.logic';
@@ -128,8 +123,21 @@ describe('New game generators and rules', () => {
   });
 
   it('builds connected, compact word grids with matching crossings and one placement', () => {
+    const words = parseWordFitWords(
+      `canotage kayak pagaie aviron rame canot bateau voile barque radeau
+      rivière cascade courant rapide remous vague plage sable terre roche
+      forêt arbre érable sapin pin racine branche feuille fleur mousse
+      aigle huard héron castor renard lièvre caribou orignal truite saumon
+      énigme indice logique secret lettre nombre symbole grille labyrinthe solution
+      équipe relais ballon cible flèche lancer sport piste course marche
+      boussole carte chemin sentier col sommet vallée montagne rocher falaise
+      soleil étoile lune nuage pluie neige vent orage ciel ombre`
+        .split(/\s+/)
+        .join('\n'),
+    );
     for (let i = 0; i < 12; i++) {
-      const puzzle = createWordFit();
+      const puzzle = createWordFit(words);
+      expect(puzzle.words.every((word) => words.includes(word))).toBe(true);
       expect(puzzle.words.length).toBeGreaterThanOrEqual(8);
       expect(puzzle.words.length).toBeLessThanOrEqual(10);
       expect(puzzle.width).toBeLessThanOrEqual(12);
@@ -161,39 +169,4 @@ describe('New game generators and rules', () => {
     }
   }, 15000);
 
-  it('preserves every dropped letter in its own column, including duplicates', () => {
-    const seen = new Set<string>();
-    let previous: string | undefined;
-    for (let i = 0; i < 50; i++) {
-      const puzzle = createDropQuote(previous);
-      expect(puzzle.phrase).not.toBe(previous);
-      previous = puzzle.phrase;
-      seen.add(puzzle.phrase);
-      expect(puzzle.rows.every((row) => row.length === puzzle.width)).toBe(true);
-      const normalized = puzzle.phrase
-        .normalize('NFD')
-        .replace(/\p{Diacritic}/gu, '')
-        .toUpperCase();
-      expect(puzzle.rows.map((row) => row.trim()).join(' ')).toBe(normalized);
-      puzzle.columns.forEach((letters, col) => {
-        expect([...letters].sort()).toEqual(
-          puzzle.rows
-            .map((row) => row[col])
-            .filter((letter) => letter !== ' ')
-            .sort(),
-        );
-      });
-      expect(isDropQuoteSolved(puzzle, puzzle.solution)).toBe(true);
-      expect(isDropQuoteSolved(puzzle, {})).toBe(false);
-      expect(
-        remainingDropLetters(puzzle, puzzle.solution).every((column) => column.length === 0),
-      ).toBe(true);
-      const [cell, letter] = Object.entries(puzzle.solution)[0];
-      expect(
-        remainingDropLetters(puzzle, { [cell]: letter })[Number(cell) % puzzle.width].length,
-      ).toBe(puzzle.columns[Number(cell) % puzzle.width].length - 1);
-    }
-    expect(seen.size).toBeGreaterThan(10);
-    expect(DROP_PHRASES.length).toBeGreaterThanOrEqual(20);
-  });
 });

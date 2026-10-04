@@ -329,7 +329,8 @@ export class SumPyramidPage {
         }
       }
 
-      if (Math.abs(matrix[pivotRow][pivotCol]) === 0) {
+      // Elimination can leave tiny rounding residuals in a dependent column.
+      if (Math.abs(matrix[pivotRow][pivotCol]) < 1e-10) {
         pivotCol += 1;
         continue;
       }

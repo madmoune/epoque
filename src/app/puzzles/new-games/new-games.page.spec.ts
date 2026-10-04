@@ -1,22 +1,138 @@
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { NEW_GAMES, NewGameId } from './new-games.catalog';
 import { NewGamesPage } from './new-games.page';
-import { remainingDropLetters } from './drop-quote.logic';
+import { createDropQuote, remainingDropLetters } from './drop-quote.logic';
+import { parseWordFitWords } from './word-fit.logic';
+
+const DROP_QUOTE_PHRASES = [
+  'Un bon indice transforme le doute en certitude',
+  'La patience ouvre des portes que la force ferme',
+  'Au cœur du défi, l’équipe garde son calme malgré le bruit',
+].join('\n');
+
+const WORD_FIT_WORDS = `canotage kayak pagaie aviron rame canot bateau voile barque radeau
+  rivière cascade courant rapide remous vague plage sable terre roche
+  forêt arbre érable sapin pin racine branche feuille fleur mousse
+  aigle huard héron castor renard lièvre caribou orignal truite saumon
+  énigme indice logique secret lettre nombre symbole grille labyrinthe solution
+  équipe relais ballon cible flèche lancer sport piste course marche
+  boussole carte chemin sentier col sommet vallée montagne rocher falaise
+  soleil étoile lune nuage pluie neige vent orage ciel ombre`
+  .split(/\s+/)
+  .join('\n');
 
 describe('NewGamesPage interactions', () => {
-  async function createPage(game: NewGameId) {
+  async function createPage(game: NewGameId, loadContent = true) {
     await TestBed.configureTestingModule({
       imports: [NewGamesPage],
       providers: [
         provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: ActivatedRoute, useValue: { snapshot: { data: { game } } } },
       ],
     }).compileComponents();
     const fixture = TestBed.createComponent(NewGamesPage);
     fixture.detectChanges();
+    if (game === 'word-fit' && loadContent) {
+      TestBed.inject(HttpTestingController).expectOne('words.txt').flush(WORD_FIT_WORDS);
+      await vi.waitFor(() => expect(fixture.componentInstance['loading']()).toBe(false));
+      await fixture.whenStable();
+      fixture.detectChanges();
+    }
+    if (game === 'drop-quote' && loadContent) {
+      TestBed.inject(HttpTestingController)
+        .expectOne('mid-mid-sentences.txt')
+        .flush(DROP_QUOTE_PHRASES);
+      await vi.waitFor(() => expect(fixture.componentInstance['loading']()).toBe(false));
+      await fixture.whenStable();
+      fixture.detectChanges();
+    }
     return fixture;
   }
+
+  it('loads the word list before playing and retries a failed word request', async () => {
+    const fixture = await createPage('word-fit', false);
+    const page = fixture.componentInstance;
+    const root = fixture.nativeElement as HTMLElement;
+    const http = TestBed.inject(HttpTestingController);
+    expect(root.textContent).toContain('Chargement des mots');
+    expect(page['wordFit']()).toBeNull();
+    expect(root.querySelectorAll('.training-actions button:not(:disabled)')).toHaveLength(0);
+
+    http.expectOne('words.txt').flush('', { status: 503, statusText: 'Unavailable' });
+    await vi.waitFor(() => expect(page['loading']()).toBe(false));
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(root.querySelector('[role="alert"]')).not.toBeNull();
+
+    Array.from(root.querySelectorAll<HTMLButtonElement>('button'))
+      .find((button) => button.textContent?.trim() === 'Réessayer')!
+      .click();
+    http.expectOne('words.txt').flush(WORD_FIT_WORDS);
+    await vi.waitFor(() => expect(page['loading']()).toBe(false));
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(root.querySelector('.word-grid')).not.toBeNull();
+    expect(root.querySelector('[role="alert"]')).toBeNull();
+    expect(page['loading']()).toBe(false);
+    const words = parseWordFitWords(WORD_FIT_WORDS);
+    expect(page['wordFit']()!.words.every((word) => words.includes(word))).toBe(true);
+
+    page['showHint']();
+    page['newPuzzle']();
+    expect(page['hintCount']()).toBe(0);
+    expect(page['wordAssignments']()).toEqual(page['wordFit']()!.givens);
+    http.expectNone('words.txt');
+    http.verify();
+  });
+
+  it('disables play during loading and lets the player retry a failed phrase request', async () => {
+    const fixture = await createPage('drop-quote', false);
+    const page = fixture.componentInstance;
+    const root = fixture.nativeElement as HTMLElement;
+    const http = TestBed.inject(HttpTestingController);
+    expect(root.textContent).toContain('Chargement des phrases');
+    expect(root.querySelectorAll('.training-actions button:not(:disabled)')).toHaveLength(0);
+    http.expectOne('mid-mid-sentences.txt').flush('', { status: 503, statusText: 'Unavailable' });
+    await vi.waitFor(() => expect(page['loading']()).toBe(false));
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(root.querySelector('[role="alert"]')).not.toBeNull();
+    expect(page['dropQuote']()).toBeNull();
+
+    Array.from(root.querySelectorAll<HTMLButtonElement>('button'))
+      .find((button) => button.textContent?.trim() === 'Réessayer')!
+      .click();
+    http.expectOne('mid-mid-sentences.txt').flush(DROP_QUOTE_PHRASES);
+    await vi.waitFor(() => expect(page['loading']()).toBe(false));
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(root.querySelector('.drop-board')).not.toBeNull();
+    expect(root.querySelector('[role="alert"]')).toBeNull();
+    expect(page['loading']()).toBe(false);
+    http.verify();
+  });
+
+  it('shows punctuation as fixed markers and keeps it out of selectable cells', async () => {
+    const fixture = await createPage('drop-quote');
+    const page = fixture.componentInstance;
+    const puzzle = createDropQuote('Au cœur du défi, l’équipe garde son calme malgré le bruit');
+    page['dropQuote'].set(puzzle);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    expect(
+      Array.from(root.querySelectorAll('.drop-punctuation'), (mark) => mark.textContent),
+    ).toEqual([',', "'"]);
+    const cell = puzzle.rows.join('').indexOf("'");
+    page['selectDropCell'](cell);
+    expect(page['selectedDropCell']()).toBeNull();
+    expect(root.querySelectorAll('.drop-cell')).toHaveLength(Object.keys(puzzle.solution).length);
+    expect(puzzle.columns.flat().every((letter) => /^[A-Z]$/.test(letter))).toBe(true);
+  });
 
   it.each(NEW_GAMES)('renders $title and reaches success through usable hints', async (game) => {
     const fixture = await createPage(game.id);
@@ -103,7 +219,11 @@ describe('NewGamesPage interactions', () => {
           const column = (cell % puzzle.width) + 1;
           const label = `Ligne ${Math.floor(cell / puzzle.width) + 1}, colonne ${column}, vide`;
           actions.push(() => {
-            root.querySelector<HTMLButtonElement>(`.drop-cell[aria-label="${label}"]`)!.click();
+            const button = root.querySelector<HTMLButtonElement>(
+              `.drop-cell[aria-label="${label}"]`,
+            );
+            expect(button, `Missing cell ${cell} in ${puzzle.phrase}`).not.toBeNull();
+            button!.click();
             fixture.detectChanges();
             root
               .querySelector<HTMLButtonElement>(
@@ -175,8 +295,16 @@ describe('NewGamesPage interactions', () => {
     page['placeWord'](word);
     expect(page['wordAssignments']()[slot]).toBe(word);
     expect(page['isWordUsed'](word)).toBe(true);
-    page['selectedSlot'].set(slot);
-    page['removeWord']();
+    expect(page['selectedSlot']()).not.toBe(slot);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const usedWordButton = Array.from(
+      root.querySelectorAll<HTMLButtonElement>('.word-token.used'),
+    ).find((button) => button.textContent?.includes(word));
+    expect(usedWordButton).toBeDefined();
+    expect(usedWordButton?.disabled).toBe(false);
+    usedWordButton?.click();
+    fixture.detectChanges();
     expect(page['wordAssignments']()[slot]).toBeUndefined();
     expect(page['isWordUsed'](word)).toBe(false);
     page['placeWord']('IMPOSSIBLE');
@@ -196,12 +324,48 @@ describe('NewGamesPage interactions', () => {
     expect(page['droppedLetters']()[cell]).toBeUndefined();
     page['placeDropLetter'](column, letter);
     expect(page['droppedLetters']()[cell]).toBe(letter);
+    expect(page['selectedDropCell']()).toBe(Number(Object.keys(puzzle.solution)[1]));
     expect(page['dropReserve']()[column].length).toBe(puzzle.columns[column].length - 1);
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelectorAll('.drop-reserve-space')).toHaveLength(1);
     page['selectDropCell'](cell);
     page['removeDropLetter']();
     expect(page['dropReserve']()).toEqual(puzzle.columns);
+  });
+
+  it('advances dropped-letter selection in reading order for clicks and keyboard input', async () => {
+    const fixture = await createPage('drop-quote');
+    const page = fixture.componentInstance;
+    const puzzle = createDropQuote('Au cœur du défi, l’équipe garde son calme malgré le bruit');
+    const cells = Object.keys(puzzle.solution).map(Number);
+    page['dropQuote'].set(puzzle);
+    page['droppedLetters'].set({
+      [cells[1]]: puzzle.solution[cells[1]],
+      [cells[2]]: puzzle.solution[cells[2]],
+    });
+    page['lockedKeys'].set(new Set([String(cells[1])]));
+    page['selectDropCell'](cells[0]);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    root
+      .querySelector<HTMLButtonElement>(
+        `.drop-token[aria-label="Lettre ${puzzle.solution[cells[0]]}, colonne 1"]`,
+      )!
+      .click();
+    expect(page['selectedDropCell']()).toBe(cells[3]);
+
+    const rowEnd = cells.filter((cell) => cell < puzzle.width).at(-1)!;
+    page['selectDropCell'](rowEnd);
+    page['handleBoardKey'](new KeyboardEvent('keydown', { key: puzzle.solution[rowEnd] }));
+    expect(page['selectedDropCell']()).toBe(cells.find((cell) => cell >= puzzle.width));
+
+    const punctuation = puzzle.rows.join('').indexOf("'");
+    const beforePunctuation = cells.filter((cell) => cell < punctuation).at(-1)!;
+    page['selectDropCell'](beforePunctuation);
+    page['handleBoardKey'](
+      new KeyboardEvent('keydown', { key: puzzle.solution[beforePunctuation] }),
+    );
+    expect(page['selectedDropCell']()).toBe(cells.find((cell) => cell > punctuation));
   });
 
   it('can give a drop-letter hint even if its letter was used in a wrong cell', async () => {

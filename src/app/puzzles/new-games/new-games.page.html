@@ -12,11 +12,72 @@
       <span class="hint-count"
         >{{ hintCount() }} {{ hintCount() === 1 ? 'indice utilisé' : 'indices utilisés' }}</span
       >
-      <button type="button" (click)="newPuzzle()">Nouvelle partie</button>
     </div>
+
+    @if (loading()) {
+      <p role="status">
+        {{ id === 'word-fit' ? 'Chargement des mots…' : 'Chargement des phrases…' }}
+      </p>
+    } @else if (loadError()) {
+      <p role="alert">{{ loadError() }}</p>
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="id === 'word-fit' ? loadWordFitWords() : loadDropPhrases()"
+      >
+        Réessayer
+      </button>
+    }
 
     @if (cryptarithm(); as puzzle) {
       <section class="crypto-area" aria-label="Addition à résoudre">
+        <div class="cryptarithm-modes" role="group" aria-label="Version des cryptarithmes">
+          <button
+            type="button"
+            class="mode-button"
+            [class.active]="cryptarithmMode() === 'deduction'"
+            [attr.aria-pressed]="cryptarithmMode() === 'deduction'"
+            (click)="setCryptarithmMode('deduction')"
+          >
+            Déduction
+          </button>
+          <button
+            type="button"
+            class="mode-button"
+            [class.active]="cryptarithmMode() === 'classic'"
+            [attr.aria-pressed]="cryptarithmMode() === 'classic'"
+            (click)="setCryptarithmMode('classic')"
+          >
+            Classique
+          </button>
+        </div>
+        @if (puzzle.digits; as digits) {
+          <p class="cryptarithm-mode-note">
+            Croise les colonnes et les retenues pour attribuer chaque chiffre à une lettre.
+          </p>
+          <div class="cryptarithm-digit-bank" role="group" aria-label="Chiffres à utiliser">
+            <span>Chiffres à utiliser</span>
+            <div class="cryptarithm-digit-list">
+              @for (digit of digits; track digit) {
+                <span
+                  class="cryptarithm-bank-digit"
+                  [class.used]="isCryptarithmDigitUsed(digit)"
+                  [attr.aria-label]="
+                    'Chiffre ' +
+                    digit +
+                    (isCryptarithmDigitUsed(digit) ? ', attribué' : ', disponible')
+                  "
+                >
+                  {{ digit }}
+                </span>
+              }
+            </div>
+          </div>
+        } @else {
+          <p class="cryptarithm-mode-note">
+            Retrouve les chiffres parmi les dix possibilités, de 0 à 9.
+          </p>
+        }
         <div class="addition">
           @for (term of puzzle.terms; track $index; let row = $index) {
             <div class="addition-row" [class.result-row]="row === 2">
@@ -54,7 +115,12 @@
           }
         </div>
         <p class="board-note">
-          Chiffres disponibles : 0 à 9. Chaque chiffre ne peut représenter qu’une lettre.
+          @if (puzzle.digits) {
+            Tous les chiffres de la réserve sont utilisés. Chaque chiffre correspond à une seule
+            lettre.
+          } @else {
+            Chiffres disponibles : 0 à 9. Chaque chiffre ne peut représenter qu’une lettre.
+          }
         </p>
       </section>
     }
@@ -222,14 +288,14 @@
               [attr.aria-label]="
                 'Ligne ' +
                 (row + 1) +
-                ': somme ' +
-                sumTotals().rows[row] +
-                ', objectif ' +
-                puzzle.rowTargets[row]
+                ': objectif ' +
+                puzzle.rowTargets[row] +
+                ', somme actuelle ' +
+                sumTotals().rows[row]
               "
             >
-              <strong>{{ sumTotals().rows[row] }}</strong
-              ><small>/ {{ puzzle.rowTargets[row] }}</small>
+              <strong class="sum-target">{{ puzzle.rowTargets[row] }}</strong>
+              <small class="sum-current">({{ sumTotals().rows[row] }})</small>
             </span>
           }
           @for (col of range(puzzle.size); track col) {
@@ -239,20 +305,20 @@
               [attr.aria-label]="
                 'Colonne ' +
                 (col + 1) +
-                ': somme ' +
-                sumTotals().columns[col] +
-                ', objectif ' +
-                puzzle.columnTargets[col]
+                ': objectif ' +
+                puzzle.columnTargets[col] +
+                ', somme actuelle ' +
+                sumTotals().columns[col]
               "
             >
-              <strong>{{ sumTotals().columns[col] }}</strong
-              ><small>/ {{ puzzle.columnTargets[col] }}</small>
+              <strong class="sum-target">{{ puzzle.columnTargets[col] }}</strong>
+              <small class="sum-current">({{ sumTotals().columns[col] }})</small>
             </span>
           }
           <span></span>
         </div>
         <p class="board-note">
-          Somme actuelle / objectif. Un total vert correspond déjà à son objectif.
+          Objectif en grand, somme actuelle entre parenthèses. Un objectif vert est atteint.
         </p>
       </section>
     }
@@ -317,12 +383,15 @@
                 class="word-token"
                 [class.used]="isWordUsed(word)"
                 [disabled]="
-                  isWordUsed(word) ||
                   isSolved() ||
-                  selectedSlot() === null ||
-                  lockedKeys().has('' + selectedSlot())
+                  isWordLocked(word) ||
+                  (!isWordUsed(word) &&
+                    (selectedSlot() === null || lockedKeys().has('' + selectedSlot())))
                 "
-                (click)="placeWord(word)"
+                [attr.aria-label]="
+                  isWordUsed(word) ? 'Retirer le mot ' + word : 'Placer le mot ' + word
+                "
+                (click)="selectOrPlaceWord(word)"
               >
                 <span>{{ word }}</span
                 ><small>{{ word.length }}</small>
@@ -346,9 +415,6 @@
 
     @if (dropQuote(); as puzzle) {
       <section class="drop-area" aria-label="Phrase à reconstruire">
-        <p class="phrase-clue">
-          Fil conducteur : <strong>{{ puzzle.clue }}</strong>
-        </p>
         <div
           class="drop-board"
           [style.grid-template-columns]="'repeat(' + puzzle.width + ', minmax(0, 1fr))'"
@@ -388,7 +454,7 @@
           @for (row of puzzle.rows; track $index; let r = $index) {
             @for (letter of row; track $index; let c = $index) {
               @let cell = r * puzzle.width + c;
-              @if (letter !== ' ') {
+              @if (puzzle.solution[cell]) {
                 <button
                   type="button"
                   data-board-cell
@@ -409,8 +475,10 @@
                 >
                   {{ droppedLetters()[cell] || '' }}
                 </button>
-              } @else {
+              } @else if (letter === ' ') {
                 <span class="drop-space" aria-hidden="true"></span>
+              } @else {
+                <span class="drop-punctuation">{{ letter }}</span>
               }
             }
           }
@@ -438,8 +506,16 @@
       <button
         type="button"
         data-board-cell
+        [disabled]="loading() || !!loadError()"
+        (click)="newPuzzle()"
+      >
+        Nouvelle partie
+      </button>
+      <button
+        type="button"
+        data-board-cell
         class="secondary-button"
-        [disabled]="isSolved()"
+        [disabled]="isSolved() || loading() || !!loadError()"
         (click)="showHint()"
       >
         Indice
@@ -448,7 +524,7 @@
         type="button"
         data-board-cell
         class="secondary-button"
-        [disabled]="isSolved()"
+        [disabled]="isSolved() || loading() || !!loadError()"
         (click)="resetPuzzle()"
       >
         Recommencer

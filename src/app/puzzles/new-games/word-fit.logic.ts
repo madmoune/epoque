@@ -15,24 +15,24 @@ export interface WordFitPuzzle {
   givens: Record<number, string>;
 }
 
-// Familiar words, rather than obscure dictionary entries or conjugations.
-const WORDS = `ARBRE PLAGE LIVRE TABLE CHIEN FLEUR PORTE ROUTE CARTE POMME
-  NEIGE SOLEIL MAISON JARDIN ORANGE BANANE CERISE NUAGES CHEVAL OISEAU
-  RIVIERE ETOILE LUMIERE VOYAGE MUSIQUE SOURIRE CRAYON PAPIER ROCHER
-  BALCON CHEMIN FORET FRAISE PIERRE PERLE VAGUE VERRE MONDE TERRE
-  LAMPE SALLE HERBE SABLE BOULE VILLE TRAIN REVE IMAGE AMOUR NUIT
-  LUNE MER LAC CLE ILE CHAT LOUP OURS ROSE VENT FEU EAU MUR TOIT
-  SAC BOL SEL MIEL PAIN LAIT RIRE JOUR MATIN SOIR TEMPS CIEL BLEU
-  ROUGE VERT NOIR BLANC JAUNE BRUN GRIS REPOS REPAS SUCRE PIZZA
-  POIRE PECHE PRUNE CHAISE BATEAU RAISON TRESOR DESSIN SECRET
-  SERPENT RENARD LAPIN TORTUE POULE CANARD CHANT DANSE SPORT
-  AVION FUSEE PLANETE ENIGME LETTRE NOMBRE FENETRE VISAGE
-  COEUR MAIN BRAS JAMBE TETE COUDE DOIGT OREILLE PLAN SOIN
-  TASSE CLOCHE CADRE RUBAN COFFRE PANIER BROSSE SAVON
-  ROULEAU TAPIS RIDEAU VALISE BAGAGE VESTE ROBE BOTTE
-  ECHARPE BONNET CASQUE GANT OMBRE FLAMME GLACE PLUIE`
-  .split(/\s+/)
-  .filter(Boolean);
+export function parseWordFitWords(text: string): string[] {
+  return [
+    ...new Set(
+      text
+        .split(/\r?\n/)
+        .map((word) =>
+          word
+            .trim()
+            .normalize('NFD')
+            .replace(/\p{Diacritic}/gu, '')
+            .toUpperCase()
+            .replace(/Œ/g, 'OE')
+            .replace(/Æ/g, 'AE'),
+        )
+        .filter((word) => /^[A-Z]{3,12}$/.test(word)),
+    ),
+  ];
+}
 
 interface Placement {
   word: string;
@@ -149,9 +149,18 @@ export function solveWordFit(puzzle: WordFitPuzzle, limit = 2): Record<number, s
   return solutions;
 }
 
-export function createWordFit(): WordFitPuzzle {
-  const ordered = shuffle(WORDS);
-  const seed = ordered.find((word) => word.length >= 6)!;
+export function createWordFit(words: readonly string[]): WordFitPuzzle {
+  if (words.length < 8) throw new Error('La liste doit contenir au moins huit mots à caser.');
+  for (let attempt = 0; attempt < 30; attempt++) {
+    const puzzle = createWordFitCandidate(words);
+    if (puzzle) return puzzle;
+  }
+  throw new Error('Impossible de créer une grille avec cette liste de mots.');
+}
+
+function createWordFitCandidate(words: readonly string[]): WordFitPuzzle | null {
+  const ordered = shuffle(words);
+  const seed = ordered.find((word) => word.length >= 6) ?? ordered[0];
   const placements: Placement[] = [{ word: seed, row: 0, col: 0, vertical: false }];
   // Several passes let a new branch make previously impossible words fit.
   for (let pass = 0; pass < 4 && placements.length < 10; pass++) {
@@ -178,7 +187,7 @@ export function createWordFit(): WordFitPuzzle {
       if (placements.length === 10) break;
     }
   }
-  if (placements.length < 8) return createWordFit();
+  if (placements.length < 8) return null;
   placements.sort(
     (a, b) => a.row - b.row || a.col - b.col || Number(a.vertical) - Number(b.vertical),
   );

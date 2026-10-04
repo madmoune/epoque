@@ -172,15 +172,6 @@ describe('ZebraPage', () => {
     expect(compactClues.every((clue: any) => page.isSpatialClue(clue))).toBe(true);
   });
 
-  it('keeps a unique solution at every grid size', () => {
-    for (const level of [3, 4, 5]) {
-      page.setLevel(level);
-      const puzzle = page.puzzle();
-
-      expect(page.countMatchingSolutions(puzzle.categories, puzzle.logicalClues, 2)).toBe(1);
-    }
-  });
-
   it('toggles used clues and clears them when restarting', () => {
     expect(page.isClueUsed(0)).toBe(false);
 

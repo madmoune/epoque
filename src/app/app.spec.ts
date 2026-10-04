@@ -14,10 +14,14 @@ describe('App', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should render title', async () => {
+  it('should render the application options menu', async () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, epoque');
+    expect(compiled.querySelector('.quick-menu-toggle')?.getAttribute('aria-label')).toBe(
+      'Ouvrir le menu des options',
+    );
+    expect(compiled.querySelector('.quick-menu-title')?.textContent).toContain('Options');
+    expect(compiled.querySelector('.theme-button')).not.toBeNull();
   });
 });
