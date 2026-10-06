@@ -375,7 +375,7 @@ export class MemoryPiecesPage {
 
   protected newGame(): void {
     this.phase.set('memorize');
-    this.puzzle.set(createMemoryPiecesPuzzle());
+    this.puzzle.set(createMemoryPiecesPuzzle(Math.random, this.puzzle()));
     this.foundIds.set(new Set());
     this.rejectedIds.set(new Set());
     this.placedIds.set(new Set());

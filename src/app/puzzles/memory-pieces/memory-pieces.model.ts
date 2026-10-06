@@ -16,7 +16,19 @@ export type MemoryPuzzlePiece = MemoryPieceShape & {
   target: PiecePoint;
 };
 
+export type MemorySilhouette =
+  | 'pebble'
+  | 'bean'
+  | 'drop'
+  | 'ribbon'
+  | 'flower'
+  | 'star'
+  | 'rounded';
+export type MemoryPieceLayout = 'fan' | 'center' | 'staggered' | 'bands' | 'scattered';
+
 export type MemoryPiecesPuzzle = {
+  silhouette: MemorySilhouette;
+  layout: MemoryPieceLayout;
   outline: PiecePoint[];
   outlinePath: string;
   pieces: MemoryPuzzlePiece[];

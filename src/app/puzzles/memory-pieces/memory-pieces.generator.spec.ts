@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { canSnapPiece, createMemoryPiecesPuzzle } from './memory-pieces.generator';
-import { MEMORY_SNAP_DISTANCE, PiecePoint } from './memory-pieces.model';
+import { MEMORY_SNAP_DISTANCE, MemoryPiecesPuzzle, PiecePoint } from './memory-pieces.model';
 
 describe('memory pieces generation', () => {
+  const samples = Array.from({ length: 120 }, (_, index) =>
+    createMemoryPiecesPuzzle(seededRandom((index + 1) * 7919)),
+  );
+
   it('offers the five memorized silhouettes unchanged among ten distinct choices', () => {
-    for (let seed = 1; seed <= 50; seed++) {
-      const puzzle = createMemoryPiecesPuzzle(seededRandom(seed * 7919));
+    for (const puzzle of samples) {
       expect(puzzle.pieces).toHaveLength(5);
       expect(puzzle.studyPieces).toHaveLength(5);
       expect(puzzle.choices).toHaveLength(10);
@@ -23,9 +26,9 @@ describe('memory pieces generation', () => {
     }
   });
 
-  it('creates complementary pieces that cover the organic silhouette with no gaps or overlaps', () => {
-    for (let seed = 1; seed <= 50; seed++) {
-      const puzzle = createMemoryPiecesPuzzle(seededRandom(seed * 7919));
+  it('creates complementary pieces for every silhouette and layout with no gaps or overlaps', () => {
+    expect(new Set(samples.map((puzzle) => `${puzzle.silhouette}/${puzzle.layout}`)).size).toBe(35);
+    for (const puzzle of samples) {
       const polygons = puzzle.pieces.map((piece) =>
         piece.points.map((point) => ({ x: point.x + piece.target.x, y: point.y + piece.target.y })),
       );
@@ -55,8 +58,7 @@ describe('memory pieces generation', () => {
   it('removes square corners and varies the outer silhouette and piece arrangement', () => {
     const outlines = new Set<string>();
     const borderPieceCounts = new Set<number>();
-    for (let seed = 1; seed <= 50; seed++) {
-      const puzzle = createMemoryPiecesPuzzle(seededRandom(seed * 7919));
+    for (const puzzle of samples) {
       outlines.add(puzzle.outlinePath);
       borderPieceCounts.add(
         puzzle.pieces.filter((piece) =>
@@ -88,8 +90,42 @@ describe('memory pieces generation', () => {
         expect(point.y).toBeLessThanOrEqual(94 + 1e-8);
       }
     }
-    expect(outlines.size).toBe(50);
-    expect(borderPieceCounts).toEqual(new Set([4, 5]));
+    expect(outlines.size).toBe(samples.length);
+    expect(borderPieceCounts.size).toBeGreaterThanOrEqual(2);
+  });
+
+  it('varies elongation, concavity and which pieces connect, beyond small contour changes', () => {
+    const proportions = samples.map((puzzle) => {
+      const width = extent(puzzle.outline.map((point) => point.x));
+      const height = extent(puzzle.outline.map((point) => point.y));
+      return Math.max(width / height, height / width);
+    });
+    const compactness = samples.map((puzzle) => {
+      const perimeter = puzzle.outline.reduce((sum, point, index) => {
+        const next = puzzle.outline[(index + 1) % puzzle.outline.length];
+        return sum + Math.hypot(next.x - point.x, next.y - point.y);
+      }, 0);
+      return (4 * Math.PI * polygonArea(puzzle.outline)) / perimeter ** 2;
+    });
+    expect(Math.max(...proportions)).toBeGreaterThan(1.8);
+    expect(Math.min(...proportions)).toBeLessThan(1.15);
+    expect(Math.min(...compactness)).toBeLessThan(0.5);
+    expect(Math.max(...compactness)).toBeGreaterThan(0.8);
+    const connections = new Set(samples.map(connectionSignature));
+    expect(connections.has('1,1,2,2,2')).toBe(true);
+    expect(connections.has('3,3,3,3,4')).toBe(true);
+    expect(connections.size).toBeGreaterThanOrEqual(5);
+  });
+
+  it('changes silhouette and cut layout on consecutive rounds', () => {
+    const random = seededRandom(2026);
+    let previous = createMemoryPiecesPuzzle(random);
+    for (let round = 0; round < 30; round++) {
+      const next = createMemoryPiecesPuzzle(random, previous);
+      expect(next.silhouette).not.toBe(previous.silhouette);
+      expect(next.layout).not.toBe(previous.layout);
+      previous = next;
+    }
   });
 
   it('creates new shapes and independently shuffled lists for another round', () => {
@@ -124,6 +160,32 @@ function seededRandom(seed: number): () => number {
     state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
     return state / 4294967296;
   };
+}
+
+function extent(values: number[]): number {
+  return Math.max(...values) - Math.min(...values);
+}
+
+function connectionSignature(puzzle: MemoryPiecesPuzzle): string {
+  const vertices = puzzle.pieces.map(
+    (piece) =>
+      new Set(
+        piece.points.map(
+          (point) =>
+            `${(point.x + piece.target.x).toFixed(5)},${(point.y + piece.target.y).toFixed(5)}`,
+        ),
+      ),
+  );
+  return vertices
+    .map(
+      (points, index) =>
+        vertices.filter(
+          (other, otherIndex) =>
+            otherIndex !== index && [...points].filter((key) => other.has(key)).length > 2,
+        ).length,
+    )
+    .sort()
+    .join(',');
 }
 
 function polygonArea(points: PiecePoint[]): number {

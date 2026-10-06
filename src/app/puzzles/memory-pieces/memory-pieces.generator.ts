@@ -2,8 +2,10 @@ import {
   MEMORY_BOARD_SIZE,
   MEMORY_SNAP_DISTANCE,
   MemoryPieceShape,
+  MemoryPieceLayout,
   MemoryPiecesPuzzle,
   MemoryPuzzlePiece,
+  MemorySilhouette,
   PiecePoint,
 } from './memory-pieces.model';
 
@@ -14,13 +16,32 @@ type SharedEdge = {
   cells: PiecePoint[][];
   points: PiecePoint[];
 };
+type Partition = { cells: PiecePoint[][]; outline: PiecePoint[] };
 
-export function createMemoryPiecesPuzzle(random: RandomSource = Math.random): MemoryPiecesPuzzle {
-  const partition = createPartition(random);
+const SILHOUETTES: readonly MemorySilhouette[] = [
+  'pebble',
+  'bean',
+  'drop',
+  'ribbon',
+  'flower',
+  'star',
+  'rounded',
+];
+const LAYOUTS: readonly MemoryPieceLayout[] = ['fan', 'center', 'staggered', 'bands', 'scattered'];
+
+export function createMemoryPiecesPuzzle(
+  random: RandomSource = Math.random,
+  previous?: MemoryPiecesPuzzle,
+): MemoryPiecesPuzzle {
+  const silhouette = chooseDifferent(SILHOUETTES, previous?.silhouette, random);
+  const layout = chooseDifferent(LAYOUTS, previous?.layout, random);
+  const partition = createPartition(silhouette, layout, random);
   const pieces = partition.cells.map((points, index) => createPiece(points, `piece-${index}`));
   const decoys = pieces.map((piece, index) => createDecoy(piece, index, random));
 
   return {
+    silhouette,
+    layout,
     outline: partition.outline,
     outlinePath: polygonPath(partition.outline),
     pieces,
@@ -40,18 +61,89 @@ export function canSnapPiece(piece: MemoryPuzzlePiece, center: PiecePoint): bool
   );
 }
 
-function createPartition(random: RandomSource): { cells: PiecePoint[][]; outline: PiecePoint[] } {
-  const ringCount = random() < 0.5 ? 5 : 4;
-  const startAngle = between(0, Math.PI * 2, random);
-  const sites = Array.from({ length: ringCount }, (_, index) => {
-    const angle = startAngle + (index * Math.PI * 2) / ringCount + between(-0.16, 0.16, random);
-    const radius = between(26, 34, random);
-    return { x: 50 + Math.cos(angle) * radius, y: 50 + Math.sin(angle) * radius };
-  });
-  if (ringCount === 4) {
-    sites.push({ x: between(44, 56, random), y: between(44, 56, random) });
+function createPartition(
+  silhouette: MemorySilhouette,
+  layout: MemoryPieceLayout,
+  random: RandomSource,
+): Partition {
+  const warp = createSilhouetteWarp(silhouette, random);
+  let best: Partition | undefined;
+  let bestArea = -Infinity;
+  // Keep even the elongated silhouettes playable: reject tiny fragments and
+  // choose the most balanced candidate if all bounded attempts are exhausted.
+  for (let attempt = 0; attempt < 16; attempt++) {
+    const cells = createCells(createSites(layout, random));
+    const partition = shapePartition(cells, warp, random);
+    const areas = partition.cells.map(polygonArea);
+    const smallest = Math.min(...areas);
+    if (smallest > bestArea) {
+      best = partition;
+      bestArea = smallest;
+    }
+    const total = areas.reduce((sum, area) => sum + area, 0);
+    if (smallest >= 300 && smallest / total >= 0.085 && Math.max(...areas) / total <= 0.38) {
+      return partition;
+    }
   }
-  const cells = sites.map((site) => {
+  return best!;
+}
+
+function createSites(layout: MemoryPieceLayout, random: RandomSource): PiecePoint[] {
+  let sites: PiecePoint[];
+  if (layout === 'fan' || layout === 'center') {
+    const count = layout === 'center' ? 4 : 5;
+    const startAngle = between(0, Math.PI * 2, random);
+    sites = Array.from({ length: count }, (_, index) => {
+      const angle = startAngle + (index * Math.PI * 2) / count + between(-0.22, 0.22, random);
+      const radius = between(27, 39, random);
+      return { x: 50 + Math.cos(angle) * radius, y: 50 + Math.sin(angle) * radius };
+    });
+    if (layout === 'center') {
+      sites.push({ x: between(39, 61, random), y: between(39, 61, random) });
+    }
+    return sites;
+  }
+
+  if (layout === 'scattered') {
+    sites = [];
+    for (let attempt = 0; attempt < 100 && sites.length < 5; attempt++) {
+      const candidate = { x: between(13, 87, random), y: between(13, 87, random) };
+      if (sites.every((site) => Math.hypot(candidate.x - site.x, candidate.y - site.y) >= 24)) {
+        sites.push(candidate);
+      }
+    }
+    if (sites.length === 5) return sites;
+  }
+
+  const template =
+    layout === 'bands'
+      ? [
+          { x: 15, y: 50 },
+          { x: 32, y: 50 },
+          { x: 50, y: 50 },
+          { x: 68, y: 50 },
+          { x: 85, y: 50 },
+        ]
+      : [
+          { x: 20, y: 25 },
+          { x: 50, y: 23 },
+          { x: 80, y: 25 },
+          { x: 32, y: 73 },
+          { x: 70, y: 73 },
+        ];
+  const rotation = between(0, Math.PI * 2, random);
+  return template.map((point) => {
+    const x = point.x - 50 + between(-5, 5, random);
+    const y = point.y - 50 + between(-8, 8, random);
+    return {
+      x: 50 + x * Math.cos(rotation) - y * Math.sin(rotation),
+      y: 50 + x * Math.sin(rotation) + y * Math.cos(rotation),
+    };
+  });
+}
+
+function createCells(sites: PiecePoint[]): PiecePoint[][] {
+  return sites.map((site) => {
     let points: PiecePoint[] = [
       { x: 0, y: 0 },
       { x: MEMORY_BOARD_SIZE, y: 0 },
@@ -68,7 +160,13 @@ function createPartition(random: RandomSource): { cells: PiecePoint[][]; outline
 
     return points;
   });
+}
 
+function shapePartition(
+  cells: PiecePoint[][],
+  warp: (point: PiecePoint) => PiecePoint,
+  random: RandomSource,
+): Partition {
   // Build each shared cut once, then reuse it in opposite directions. Deforming
   // this whole partition preserves its complementary boundaries.
   const edges = new Map<string, SharedEdge>();
@@ -91,9 +189,9 @@ function createPartition(random: RandomSource): { cells: PiecePoint[][]; outline
     const dy = edge.end.y - edge.start.y;
     const length = Math.hypot(dx, dy);
     if (length < 10) continue;
-    const depth = Math.min(between(6, 10, random), length * 0.18);
+    const depth = Math.min(between(5, 13, random), length * 0.24);
     const direction = random() < 0.5 ? -1 : 1;
-    const waveCount = random() < 0.5 ? 1 : 2;
+    const profile = createCutProfile(random);
     edge.points = [
       edge.start,
       ...Array.from({ length: 23 }, (_, index) => {
@@ -115,11 +213,7 @@ function createPartition(random: RandomSource): { cells: PiecePoint[][]; outline
             }
           });
         }
-        const offset =
-          Math.min(depth, clearance * 0.35) *
-          Math.sin(Math.PI * fraction) ** 2 *
-          Math.sin(Math.PI * fraction * waveCount) *
-          direction;
+        const offset = Math.min(depth, clearance * 0.35) * profile(fraction) * direction;
         return {
           x: point.x - (dy / length) * offset,
           y: point.y + (dx / length) * offset,
@@ -129,7 +223,6 @@ function createPartition(random: RandomSource): { cells: PiecePoint[][]; outline
     ];
   }
 
-  const warp = createOrganicWarp(random);
   for (const edge of edges.values()) {
     edge.points = sampleEdge(edge.points).map(warp);
   }
@@ -161,31 +254,82 @@ function createPartition(random: RandomSource): { cells: PiecePoint[][]; outline
   return { cells: warpedCells, outline };
 }
 
-function createOrganicWarp(random: RandomSource): (point: PiecePoint) => PiecePoint {
+function createCutProfile(random: RandomSource): (fraction: number) => number {
+  const style = Math.floor(random() * 5);
+  const center = between(0.35, 0.65, random);
+  if (style === 0) return (t) => Math.sin(Math.PI * t) ** 2;
+  if (style === 1) return (t) => Math.sin(2 * Math.PI * t) * Math.sin(Math.PI * t);
+  if (style === 2) {
+    return (t) => Math.sin(Math.PI * t) ** 2 * Math.exp(-(((t - center) / 0.14) ** 2));
+  }
+  const knots = style === 3 ? [0, 0, 0.85, 0.85, 0, 0] : [0, 0.65, -0.8, 0.9, -0.45, 0];
+  return (t) => {
+    const position = t * (knots.length - 1);
+    const index = Math.min(Math.floor(position), knots.length - 2);
+    return knots[index] + (knots[index + 1] - knots[index]) * (position - index);
+  };
+}
+
+function createSilhouetteWarp(
+  silhouette: MemorySilhouette,
+  random: RandomSource,
+): (point: PiecePoint) => PiecePoint {
   const rotation = between(0, Math.PI * 2, random);
-  const width = between(0.85, 1.15, random);
-  const height = between(0.85, 1.15, random);
-  const lobes = [
-    { frequency: 3, depth: between(0.1, 0.16, random), phase: between(0, Math.PI * 2, random) },
-    { frequency: 5, depth: between(0.05, 0.09, random), phase: between(0, Math.PI * 2, random) },
-    { frequency: 7, depth: between(0.02, 0.04, random), phase: between(0, Math.PI * 2, random) },
-  ];
+  const phase = between(0, Math.PI * 2, random);
+  const aspect =
+    silhouette === 'ribbon'
+      ? between(1.65, 2.1, random)
+      : silhouette === 'rounded'
+        ? between(1.1, 1.7, random)
+        : silhouette === 'flower' || silhouette === 'star'
+          ? between(0.9, 1.15, random)
+          : between(1.05, 1.4, random);
+  const width = Math.sqrt(aspect);
+  const height = 1 / width;
+  const frequency = 3 + Math.floor(random() * 3);
+  const depth = between(0.22, 0.32, random);
+  const rounding = between(3, 5, random);
+
+  const contourAt = (angle: number): number => {
+    const theta = angle + phase;
+    switch (silhouette) {
+      case 'bean': {
+        const notchAngle = Math.atan2(Math.sin(theta), Math.cos(theta));
+        return (
+          1 +
+          0.1 * Math.sin(2 * theta) +
+          0.07 * Math.sin(3 * theta) -
+          (depth + 0.15) * Math.exp(-((notchAngle / 0.48) ** 2))
+        );
+      }
+      case 'drop':
+        return 1 + 0.34 * Math.cos(theta) - 0.12 * Math.cos(2 * theta) + 0.04 * Math.sin(3 * theta);
+      case 'ribbon':
+        return 1 + 0.12 * Math.sin(2 * theta) + 0.08 * Math.cos(3 * theta);
+      case 'flower':
+        return 1 + depth * Math.cos(frequency * theta) + 0.03 * Math.cos(2 * frequency * theta);
+      case 'star':
+        return 0.78 + (depth + 0.3) * ((1 + Math.cos(frequency * theta)) / 2) ** 3;
+      case 'rounded':
+        return (
+          (Math.abs(Math.cos(theta)) ** rounding + Math.abs(Math.sin(theta)) ** rounding) **
+            (-1 / rounding) +
+          0.025 * Math.sin(3 * theta)
+        );
+      default:
+        return 1 + 0.06 * Math.sin(3 * theta) + 0.035 * Math.cos(5 * theta);
+    }
+  };
 
   return (point) => {
     const u = point.x / 50 - 1;
     const v = point.y / 50 - 1;
-    // The square-to-disk map removes the four corner cues. A positive radial
-    // deformation then gives both the outline and internal cuts an organic shape.
+    // Map the whole partition to a disk, then deform it to the chosen contour.
+    // Positive radii keep this map invertible, including for concave outlines.
     const x = u * Math.sqrt(1 - (v * v) / 2);
     const y = v * Math.sqrt(1 - (u * u) / 2);
     const angle = Math.atan2(y, x);
-    const contour =
-      1 +
-      lobes.reduce(
-        (sum, lobe) => sum + lobe.depth * Math.sin(lobe.frequency * angle + lobe.phase),
-        0,
-      );
-    const radius = Math.hypot(x, y) * contour;
+    const radius = Math.hypot(x, y) * contourAt(angle);
     return {
       x: Math.cos(angle + rotation) * radius * width,
       y: Math.sin(angle + rotation) * radius * height,
@@ -289,6 +433,26 @@ function interpolate(start: PiecePoint, end: PiecePoint, fraction: number): Piec
 
 function between(min: number, max: number, random: RandomSource): number {
   return min + random() * (max - min);
+}
+
+function chooseDifferent<T>(
+  values: readonly T[],
+  previous: T | undefined,
+  random: RandomSource,
+): T {
+  const available = values.filter((value) => value !== previous);
+  return available[Math.floor(random() * available.length)];
+}
+
+function polygonArea(points: PiecePoint[]): number {
+  return (
+    Math.abs(
+      points.reduce((area, point, index) => {
+        const next = points[(index + 1) % points.length];
+        return area + point.x * next.y - next.x * point.y;
+      }, 0),
+    ) / 2
+  );
 }
 
 function shuffle<T>(values: readonly T[], random: RandomSource): T[] {

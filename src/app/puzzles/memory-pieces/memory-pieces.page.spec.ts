@@ -198,6 +198,8 @@ describe('MemoryPiecesPage', () => {
     page['newGame']();
     fixture.detectChanges();
     expect(page['puzzle']()).not.toBe(oldPuzzle);
+    expect(page['puzzle']().silhouette).not.toBe(oldPuzzle.silhouette);
+    expect(page['puzzle']().layout).not.toBe(oldPuzzle.layout);
     expect(page['phase']()).toBe('memorize');
     expect(page['mistakes']()).toBe(0);
     expect(page['foundIds']().size).toBe(0);
