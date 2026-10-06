@@ -76,6 +76,11 @@ export const routes: Routes = [
       import('./puzzles/memory-grid/memory-grid.page').then((m) => m.MemoryGridPage),
   },
   {
+    path: 'memory-pieces',
+    loadComponent: () =>
+      import('./puzzles/memory-pieces/memory-pieces.page').then((m) => m.MemoryPiecesPage),
+  },
+  {
     path: 'symbol-pairs',
     loadComponent: () =>
       import('./puzzles/symbol-pairs/symbol-pairs.page').then((m) => m.SymbolPairsPage),

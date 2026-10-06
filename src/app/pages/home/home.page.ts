@@ -259,6 +259,12 @@ export class HomePage {
           tag: 'Mémoire',
         },
         {
+          title: 'Mémoire des morceaux',
+          description: 'Retiens cinq formes, retrouve-les parmi dix, puis assemble le casse-tête.',
+          route: '/memory-pieces',
+          tag: 'Formes',
+        },
+        {
           title: 'Paires de symboles',
           description: 'Retourne les cartes et retrouve tous les symboles identiques.',
           route: '/symbol-pairs',

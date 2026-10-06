@@ -1,0 +1,251 @@
+<main class="page memory-pieces-page">
+  <a routerLink="/" fragment="memoire" class="back-link">Retour au menu</a>
+
+  <section class="card">
+    <header>
+      <p class="eyebrow">Mémoire visuelle · Casse-tête</p>
+      <h1>Mémoire des morceaux</h1>
+      <p class="intro">Retiens cinq formes, retrouve-les parmi dix, puis assemble-les.</p>
+    </header>
+
+    <ol class="phase-steps" aria-label="Étapes du jeu">
+      @for (step of steps; track step.phase; let index = $index) {
+        <li
+          [class.current]="phase() === step.phase"
+          [class.complete]="stepIndex() > index || isSolved()"
+          [attr.aria-current]="phase() === step.phase ? 'step' : null"
+        >
+          <span class="step-number" aria-hidden="true">{{
+            stepIndex() > index || isSolved() ? '✓' : index + 1
+          }}</span>
+          <span>{{ step.label }}</span>
+        </li>
+      }
+    </ol>
+
+    @if (phase() === 'memorize') {
+      <section class="stage" aria-labelledby="memorize-title">
+        <div class="stage-heading">
+          <h2 #stageTitle id="memorize-title" tabindex="-1">Observe ces cinq morceaux</h2>
+          <span class="count-badge">5 à retenir</span>
+        </div>
+        <p class="instructions">
+          Prends le temps de retenir leurs contours. Ils garderont la même orientation.
+        </p>
+
+        <div class="pieces-grid study-grid" aria-label="Les cinq morceaux à mémoriser">
+          @for (piece of puzzle().studyPieces; track piece.id; let index = $index) {
+            <div
+              class="piece-card study-piece"
+              role="img"
+              [attr.aria-label]="'Morceau à mémoriser ' + (index + 1)"
+            >
+              <svg [attr.viewBox]="piece.viewBox" aria-hidden="true">
+                <path class="memory-shape" [attr.d]="piece.path"></path>
+              </svg>
+            </div>
+          }
+        </div>
+
+        <div class="memorize-action">
+          <span class="pace-note">À ton rythme, sans chronomètre.</span>
+          <button type="button" class="primary-button" (click)="startRecognition()">
+            J’ai mémorisé les morceaux <span aria-hidden="true">→</span>
+          </button>
+        </div>
+      </section>
+    } @else if (phase() === 'recognize') {
+      <section class="stage" aria-labelledby="recognize-title">
+        <div class="stage-heading">
+          <h2 #stageTitle id="recognize-title" tabindex="-1">Retrouve les cinq bons morceaux</h2>
+          <span class="count-badge">{{ foundIds().size }} / {{ pieceCount }} retrouvés</span>
+        </div>
+        <p class="instructions">
+          Les cinq formes mémorisées sont mélangées à cinq autres. Touche celles que tu reconnais.
+        </p>
+
+        <div class="pieces-grid choice-grid" aria-label="Dix morceaux à identifier">
+          @for (piece of puzzle().choices; track piece.id; let index = $index) {
+            <button
+              type="button"
+              class="piece-button piece-card"
+              [class.found]="foundIds().has(piece.id)"
+              [class.rejected]="rejectedIds().has(piece.id)"
+              [disabled]="foundIds().has(piece.id) || rejectedIds().has(piece.id)"
+              [attr.aria-pressed]="foundIds().has(piece.id)"
+              [attr.aria-label]="
+                'Morceau ' +
+                (index + 1) +
+                (foundIds().has(piece.id)
+                  ? ', retrouvé'
+                  : rejectedIds().has(piece.id)
+                    ? ', incorrect'
+                    : ', à identifier')
+              "
+              (click)="recognizePiece(piece.id)"
+            >
+              <svg [attr.viewBox]="piece.viewBox" aria-hidden="true">
+                <path class="memory-shape" [attr.d]="piece.path"></path>
+              </svg>
+              @if (foundIds().has(piece.id) || rejectedIds().has(piece.id)) {
+                <span class="choice-mark" aria-hidden="true">{{
+                  foundIds().has(piece.id) ? '✓' : '×'
+                }}</span>
+              }
+            </button>
+          }
+        </div>
+      </section>
+    } @else {
+      <section class="stage" aria-labelledby="assemble-title">
+        <div class="stage-heading">
+          <h2 #stageTitle id="assemble-title" tabindex="-1">Assemble les morceaux</h2>
+          <span class="count-badge">{{ placedIds().size }} / {{ pieceCount }} placés</span>
+        </div>
+        <p class="instructions" id="assembly-help">
+          Glisse un morceau sur le plateau, puis déplace-le librement jusqu’à trouver sa place.
+        </p>
+
+        <div class="assembly-layout">
+          <div class="board-area">
+            <div
+              #assemblyBoard
+              class="assembly-board"
+              [class.has-selection]="selectedPiece()"
+              [class.solved]="isSolved()"
+              tabindex="0"
+              role="group"
+              [attr.aria-label]="
+                'Plateau d’assemblage, ' +
+                placedIds().size +
+                (placedIds().size > 1 ? ' morceaux placés' : ' morceau placé') +
+                ' sur cinq'
+              "
+              aria-describedby="assembly-help keyboard-help"
+              (pointermove)="previewOnBoard($event)"
+              (click)="placeOnBoard($event)"
+              (keydown)="handleBoardKey($event)"
+            >
+              <svg [attr.viewBox]="'0 0 ' + boardSize + ' ' + boardSize" aria-hidden="true">
+                @for (piece of placedPieces(); track piece.id) {
+                  <path
+                    class="memory-shape placed-shape"
+                    [class.selected-shape]="selectedPieceId() === piece.id"
+                    [class.snapped-shape]="snappedIds().has(piece.id)"
+                    [attr.d]="piece.path"
+                    [attr.transform]="pieceTransform(piece, pieceCenter(piece))"
+                    role="button"
+                    tabindex="0"
+                    [attr.aria-label]="
+                      'Déplacer le morceau ' +
+                      piece.id +
+                      (snappedIds().has(piece.id) ? ', position reconnue' : '')
+                    "
+                    (pointerdown)="startPlacedDrag(piece.id, $event)"
+                    (click)="selectPlacedPiece(piece.id, $event)"
+                  ></path>
+                }
+                @if (selectedPiece(); as piece) {
+                  @if (previewCenter(); as center) {
+                    <path
+                      class="memory-shape preview-shape"
+                      [attr.d]="piece.path"
+                      [attr.transform]="pieceTransform(piece, center)"
+                    ></path>
+                  }
+                }
+              </svg>
+              @if (placedIds().size === 0 && !selectedPiece()) {
+                <span class="board-placeholder">Sélectionne un morceau pour commencer</span>
+              }
+            </div>
+            <p class="keyboard-help" id="keyboard-help">
+              Au clavier : choisis un morceau, puis utilise les flèches sur le plateau et Entrée
+              pour le poser ou le déplacer. Maj + flèche affine le déplacement.
+            </p>
+          </div>
+
+          <aside class="piece-tray" aria-label="Morceaux à assembler">
+            <h3>Morceaux à placer</h3>
+            <div class="tray-grid">
+              @for (piece of unplacedPieces(); track piece.id; let index = $index) {
+                <button
+                  type="button"
+                  class="piece-button piece-card"
+                  [class.selected]="selectedPieceId() === piece.id"
+                  [class.dragging]="drag()?.active && drag()?.pieceId === piece.id"
+                  [attr.aria-pressed]="selectedPieceId() === piece.id"
+                  [attr.aria-label]="'Sélectionner le morceau ' + (index + 1)"
+                  (pointerdown)="startDrag(piece.id, $event)"
+                  (click)="selectPiece(piece.id, $event)"
+                >
+                  <svg [attr.viewBox]="piece.viewBox" aria-hidden="true">
+                    <path class="memory-shape" [attr.d]="piece.path"></path>
+                  </svg>
+                </button>
+              }
+            </div>
+            @if (isSolved()) {
+              <p class="tray-complete">Tous les morceaux sont en place!</p>
+            } @else {
+              <p class="tray-note">
+                Les morceaux restent déplaçables. Près de leur place, ils s’aimantent
+                automatiquement.
+              </p>
+            }
+          </aside>
+        </div>
+      </section>
+    }
+
+    <div class="game-status">
+      <p class="feedback" [class.error]="feedbackIsError()" role="status">{{ feedback() }}</p>
+      @if (phase() !== 'memorize') {
+        <span class="mistake-count"
+          >{{ mistakes() }} {{ mistakes() > 1 ? 'erreurs' : 'erreur' }} de mémoire</span
+        >
+      }
+    </div>
+
+    <div class="actions">
+      @if (phase() === 'assemble' && !isSolved()) {
+        <button
+          type="button"
+          class="secondary-button"
+          [disabled]="placedIds().size === 0"
+          (click)="resetAssembly()"
+        >
+          Vider le plateau
+        </button>
+      }
+      <button type="button" class="secondary-button" (click)="newGame()">Nouvelle partie</button>
+    </div>
+
+    @if (isSolved()) {
+      <app-puzzle-success-popup
+        title="Bravo! Casse-tête complété!"
+        [message]="successMessage()"
+        actionLabel="Rejouer"
+        (action)="newGame()"
+      />
+    }
+  </section>
+
+  @if (drag(); as currentDrag) {
+    @if (currentDrag.active && !pointerOverBoard()) {
+      @if (selectedPiece(); as piece) {
+        <svg
+          class="drag-preview"
+          [attr.viewBox]="'0 0 ' + piece.width + ' ' + piece.height"
+          [style.left.px]="currentDrag.current.x"
+          [style.top.px]="currentDrag.current.y"
+          [style.width.px]="dragWidth(piece)"
+          [style.height.px]="dragHeight(piece)"
+          aria-hidden="true"
+        >
+          <path class="memory-shape" [attr.d]="piece.path"></path>
+        </svg>
+      }
+    }
+  }
+</main>
