@@ -38,4 +38,6 @@ export type MemoryPiecesPuzzle = {
 
 export const MEMORY_PIECE_COUNT = 5;
 export const MEMORY_BOARD_SIZE = 100;
-export const MEMORY_SNAP_DISTANCE = 6;
+// Ten board units gives roughly a 10% landing zone around each target. It is
+// forgiving enough for a visually aligned piece without accepting a neighboring slot.
+export const MEMORY_SNAP_DISTANCE = 10;
