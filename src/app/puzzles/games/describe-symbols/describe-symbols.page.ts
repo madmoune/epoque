@@ -8,6 +8,7 @@ import {
   MultiplayerRoom,
 } from '../../../shared/multiplayer/firebase-room.service';
 import { PuzzleSuccessPopupComponent } from '../../shared/puzzle-success-popup/puzzle-success-popup.component';
+import { SYMBOL_STYLES, SYMBOL_STYLE_IDS, SymbolStyle } from './describe-symbols.styles';
 
 type GamePhase = 'lobby' | 'describing' | 'reveal';
 type SymbolLayout =
@@ -54,6 +55,8 @@ type SubmissionFeedback = {
 
 type DescribedSymbol = {
   id: string;
+  style: SymbolStyle;
+  silhouette: number;
   layout: SymbolLayout;
   colors: [string, string, string];
   emblem: SymbolEmblem;
@@ -127,6 +130,7 @@ const SYMMETRIES: SymmetryMode[] = ['balanced', 'offset', 'chaotic'];
 const DETAIL_REGIONS: DetailRegion[] = ['left', 'right', 'top', 'bottom', 'center'];
 const DETAIL_SHAPES: DetailShape[] = ['dot', 'ring', 'dash', 'spark'];
 const SYMBOL_DIFFERENCES = [
+  'silhouette',
   'layout',
   'emblem',
   'emblemPosition',
@@ -165,6 +169,7 @@ const SUBTLE_DIFFERENCES: SymbolDifference[] = [
   'detailShape',
 ];
 const DISTINCTIVE_DIFFERENCES: SymbolDifference[] = [
+  'silhouette',
   'layout',
   'emblem',
   'colors',
@@ -237,10 +242,10 @@ export class DescribeSymbolsPage implements OnDestroy {
     if (!this.room()) return 'Cree une salle ou rejoins un code.';
     if (this.phase() === 'lobby') return 'Invite les joueurs, puis lance la partie.';
     if (this.phase() === 'reveal') return 'Reponse envoyee.';
-    if (this.isDescriber()) return 'Decris le pavillon sans montrer ton ecran.';
+    if (this.isDescriber()) return 'Décris le symbole sans montrer ton écran.';
     return this.hasGuessed()
       ? 'Choix verrouille. Attends la revelation.'
-      : 'Ecoute la description, puis choisis le bon pavillon.';
+      : 'Écoute la description, puis choisis le bon symbole.';
   });
 
   ngOnDestroy(): void {
@@ -289,7 +294,7 @@ export class DescribeSymbolsPage implements OnDestroy {
     const previousDescriberId = this.state().describerId;
     const previousIndex = players.findIndex((player) => player.id === previousDescriberId);
     const describer = players[(previousIndex + 1 + players.length) % players.length] ?? players[0];
-    const target = this.createSymbol();
+    const target = this.createSymbol(this.target()?.style);
 
     await this.saveState({
       ...this.state(),
@@ -361,12 +366,12 @@ export class DescribeSymbolsPage implements OnDestroy {
       lastSubmission: isCorrect
         ? {
             title: 'Bonne reponse',
-            message: 'Le bon pavillon a ete trouve.',
+            message: 'Le bon symbole a été trouvé.',
             tone: 'success',
           }
         : {
-            title: 'Mauvais pavillon',
-            message: 'Ce symbole ne correspond pas au pavillon decrit.',
+            title: 'Mauvais symbole',
+            message: 'Ce symbole ne correspond pas au symbole décrit.',
             tone: 'partial',
           },
     });
@@ -455,9 +460,18 @@ export class DescribeSymbolsPage implements OnDestroy {
 
   protected symbolAriaLabel(symbolId: string): string {
     const state = this.symbolState(symbolId);
-    if (state === 'barred') return 'Réactiver ce pavillon';
-    if (state === 'picked') return 'Barrer ce pavillon';
-    return 'Sélectionner ce pavillon';
+    if (state === 'barred') return 'Réactiver ce symbole';
+    if (state === 'picked') return 'Barrer ce symbole';
+    return 'Sélectionner ce symbole';
+  }
+
+  protected symbolStyleLabel(symbol: DescribedSymbol): string {
+    return SYMBOL_STYLES[symbol.style].label;
+  }
+
+  protected symbolSilhouette(symbol: DescribedSymbol): { outline: string; details: string } {
+    const silhouettes = SYMBOL_STYLES[symbol.style].silhouettes;
+    return silhouettes[symbol.silhouette] ?? silhouettes[0];
   }
 
   protected stripeColor(symbol: DescribedSymbol, index: number): string {
@@ -469,14 +483,19 @@ export class DescribeSymbolsPage implements OnDestroy {
   }
 
   protected emblemTransform(symbol: DescribedSymbol): string {
-    const [x, y] = {
-      center: [90, 60],
-      left: [62, 60],
-      right: [118, 60],
-      top: [90, 43],
-      bottom: [90, 77],
+    const style = SYMBOL_STYLES[symbol.style];
+    const [centerX, centerY] = style.emblemCenter;
+    const spread = symbol.style === 'flag' ? 1 : 0.45;
+    const [offsetX, offsetY] = {
+      center: [0, 0],
+      left: [-28, 0],
+      right: [28, 0],
+      top: [0, -17],
+      bottom: [0, 17],
     }[symbol.emblemPosition];
-    const scale = { small: 0.72, medium: 0.9, large: 1.12 }[symbol.emblemScale];
+    const x = centerX + offsetX * spread;
+    const y = centerY + offsetY * spread;
+    const scale = { small: 0.72, medium: 0.9, large: 1.12 }[symbol.emblemScale] * style.emblemScale;
 
     return `translate(${x} ${y}) scale(${scale}) translate(-90 -60)`;
   }
@@ -522,6 +541,12 @@ export class DescribeSymbolsPage implements OnDestroy {
       if (symbol.symmetry === 'offset') {
         x = bounds.minX + randomX * (bounds.maxX - bounds.minX) * 0.7;
         y = bounds.minY + randomY * (bounds.maxY - bounds.minY);
+      }
+
+      if (symbol.style !== 'flag') {
+        const [symbolX, symbolY] = SYMBOL_STYLES[symbol.style].emblemCenter;
+        x = symbolX + (x - 90) * 0.45;
+        y = symbolY + (y - 60) * 0.45;
       }
 
       return {
@@ -599,12 +624,18 @@ export class DescribeSymbolsPage implements OnDestroy {
 
   private createChoiceSet(target: DescribedSymbol): DescribedSymbol[] {
     const variants: DescribedSymbol[] = [target];
-    const shuffledDifferences = this.shuffle(SYMBOL_DIFFERENCES);
+    const shuffledDifferences = this.shuffle(
+      SYMBOL_DIFFERENCES.filter(
+        (difference) => difference !== 'silhouette' || target.style !== 'flag',
+      ),
+    );
     const primaryDifferences = [
+      ...(target.style === 'flag' ? [] : (['silhouette'] as const)),
       'layout',
       'emblem',
       ...shuffledDifferences.filter(
-        (difference) => difference !== 'layout' && difference !== 'emblem',
+        (difference) =>
+          difference !== 'silhouette' && difference !== 'layout' && difference !== 'emblem',
       ),
     ].slice(0, 9) as SymbolDifference[];
 
@@ -612,10 +643,8 @@ export class DescribeSymbolsPage implements OnDestroy {
       const variantIndex = variants.length - 1;
       const primaryDifference = primaryDifferences[variantIndex];
       const secondaryDifference =
-        (
-          variantIndex % 3 === 2 ||
-          (SUBTLE_DIFFERENCES.includes(primaryDifference) && variantIndex % 4 === 0)
-        )
+        variantIndex % 3 === 2 ||
+        (SUBTLE_DIFFERENCES.includes(primaryDifference) && variantIndex % 4 === 0)
           ? this.pick(
               SECONDARY_DIFFERENCES.filter((difference) => difference !== primaryDifference),
             )
@@ -642,6 +671,8 @@ export class DescribeSymbolsPage implements OnDestroy {
   private withSymbolDefaults(symbol: DescribedSymbol): DescribedSymbol {
     return {
       ...symbol,
+      style: symbol.style ?? 'flag',
+      silhouette: symbol.silhouette ?? 0,
       symmetry: symbol.symmetry ?? 'balanced',
       detailRegion: symbol.detailRegion ?? 'center',
       detailShape: symbol.detailShape ?? 'dot',
@@ -680,11 +711,17 @@ export class DescribeSymbolsPage implements OnDestroy {
 
     const adjustedVariant = structuredClone(variant);
     const availableDifferences = DISTINCTIVE_DIFFERENCES.filter(
-      (difference) => !excludedDifferences.includes(difference),
+      (difference) =>
+        !excludedDifferences.includes(difference) &&
+        (difference !== 'silhouette' || target.style !== 'flag'),
     );
 
     for (let attempt = 0; attempt < DISTINCTIVE_DIFFERENCES.length * 4; attempt += 1) {
-      if (existingVariants.every((existing) => this.hasDistinctiveDifference(adjustedVariant, existing))) {
+      if (
+        existingVariants.every((existing) =>
+          this.hasDistinctiveDifference(adjustedVariant, existing),
+        )
+      ) {
         Object.assign(variant, adjustedVariant);
         return;
       }
@@ -699,6 +736,8 @@ export class DescribeSymbolsPage implements OnDestroy {
   private hasDistinctiveDifference(left: DescribedSymbol, right: DescribedSymbol): boolean {
     return DISTINCTIVE_DIFFERENCES.some((difference) => {
       switch (difference) {
+        case 'silhouette':
+          return left.style !== right.style || left.silhouette !== right.silhouette;
         case 'colors':
           return left.colors.some((color, index) => color !== right.colors[index]);
         case 'layout':
@@ -728,6 +767,12 @@ export class DescribeSymbolsPage implements OnDestroy {
     seed: number,
   ): void {
     switch (difference) {
+      case 'silhouette':
+        variant.silhouette = this.nearbyValue(
+          SYMBOL_STYLES[target.style].silhouettes.map((_, index) => index),
+          target.silhouette,
+        );
+        break;
       case 'layout':
         variant.layout = this.nearbyValue(LAYOUTS, target.layout);
         break;
@@ -749,9 +794,7 @@ export class DescribeSymbolsPage implements OnDestroy {
       case 'colors': {
         const indexToChange = seed % variant.colors.length;
         variant.colors[indexToChange] = this.pick(
-          PALETTE.filter(
-            (color) => !target.colors.includes(color) && color !== target.emblemColor,
-          ),
+          PALETTE.filter((color) => !target.colors.includes(color) && color !== target.emblemColor),
         );
         break;
       }
@@ -770,9 +813,10 @@ export class DescribeSymbolsPage implements OnDestroy {
         break;
       case 'detailCount': {
         const difference = seed % 2 === 0 ? 1 : 2;
-        const alternatives = [target.detailCount - difference, target.detailCount + difference].filter(
-          (count) => count >= 2 && count <= 8,
-        );
+        const alternatives = [
+          target.detailCount - difference,
+          target.detailCount + difference,
+        ].filter((count) => count >= 2 && count <= 8);
         variant.detailCount = alternatives[seed % alternatives.length] ?? target.detailCount;
         break;
       }
@@ -782,10 +826,13 @@ export class DescribeSymbolsPage implements OnDestroy {
     }
   }
 
-  private createSymbol(): DescribedSymbol {
+  private createSymbol(previousStyle?: SymbolStyle): DescribedSymbol {
+    const style = this.pick(SYMBOL_STYLE_IDS.filter((style) => style !== previousStyle));
     const colors = this.shuffle(PALETTE).slice(0, 3) as [string, string, string];
     return {
       id: crypto.randomUUID(),
+      style,
+      silhouette: this.randomInt(0, SYMBOL_STYLES[style].silhouettes.length - 1),
       layout: this.pick(LAYOUTS),
       colors,
       emblem: this.pick(EMBLEMS),

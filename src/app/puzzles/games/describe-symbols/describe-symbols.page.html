@@ -6,8 +6,9 @@
       <p class="eyebrow">Multijoueur en ligne</p>
       <h1>Description de symboles</h1>
       <p class="intro">
-        Un joueur voit un pavillon. Il le decrit a voix haute, puis les autres choisissent parmi dix
-        symboles proches.
+        Un joueur décrit un symbole à voix haute, puis les autres le retrouvent parmi dix variantes
+        proches. Les manches alternent entre pavillons, plantes, animaux, paysages, météo et
+        symboles sportifs.
       </p>
     </header>
 
@@ -180,13 +181,13 @@
             </div>
 
             <div class="describer-actions">
-              <p>Tu es le descripteur. Fais deviner ce pavillon aux autres joueurs.</p>
+              <p>Tu es le descripteur. Fais deviner ce symbole aux autres joueurs.</p>
             </div>
           </section>
         } @else {
           <section class="guesser-view">
             <p class="choice-hint">
-              Un clic sélectionne un pavillon, un deuxième le barre, un troisième le rend disponible.
+              Un clic sélectionne un symbole, un deuxième le barre, un troisième le rend disponible.
               Les marques sont partagées avec toute la salle.
             </p>
             <div class="choice-grid">
@@ -210,7 +211,7 @@
                     <span class="barred-mark" aria-hidden="true"></span>
                   }
                   @if (playersForSymbol(symbol.id).length > 0) {
-                    <span class="choice-badges" aria-label="Joueurs ayant choisi ce pavillon">
+                    <span class="choice-badges" aria-label="Joueurs ayant choisi ce symbole">
                       @for (player of playersForSymbol(symbol.id); track player.id) {
                         <span>{{ player.name }}</span>
                       }
@@ -262,10 +263,16 @@
 </main>
 
 <ng-template #symbolTemplate let-symbol="symbol">
-  <svg class="describe-symbol" viewBox="0 0 180 120" role="img" aria-label="Symbole">
+  <svg
+    class="describe-symbol"
+    viewBox="0 0 180 120"
+    role="img"
+    [attr.aria-label]="symbolStyleLabel(symbol)"
+    [attr.data-style]="symbol.style"
+  >
     <defs>
       <clipPath [attr.id]="'clip-' + symbol.id">
-        <rect x="8" y="8" width="164" height="104" rx="8" />
+        <path [attr.d]="symbolSilhouette(symbol).outline" />
       </clipPath>
     </defs>
 
@@ -408,6 +415,23 @@
         />
       }
 
+      @if (symbol.style !== 'flag') {
+        <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path
+            [attr.d]="symbolSilhouette(symbol).details"
+            stroke="#111827"
+            stroke-width="4"
+            opacity="0.35"
+          />
+          <path
+            [attr.d]="symbolSilhouette(symbol).details"
+            stroke="#ffffff"
+            stroke-width="2"
+            opacity="0.85"
+          />
+        </g>
+      }
+
       @for (detail of detailElements(symbol); track detail.key) {
         <g
           [attr.transform]="
@@ -434,59 +458,54 @@
           }
         </g>
       }
+      <g
+        [attr.fill]="symbol.emblemColor"
+        [attr.stroke]="symbol.emblemColor"
+        stroke-width="5"
+        stroke-linejoin="round"
+        [attr.transform]="emblemTransform(symbol)"
+      >
+        @switch (symbol.emblem) {
+          @case ('anchor') {
+            <circle cx="90" cy="44" r="10" fill="none" />
+            <line x1="90" y1="54" x2="90" y2="88" />
+            <path d="M62 74 C66 98 114 98 118 74" fill="none" />
+            <line x1="72" y1="66" x2="108" y2="66" />
+          }
+          @case ('star') {
+            <polygon points="90,31 99,51 121,52 104,67 110,89 90,77 70,89 76,67 59,52 81,51" />
+          }
+          @case ('diamond') {
+            <polygon points="90,30 124,60 90,90 56,60" />
+          }
+          @case ('ring') {
+            <circle cx="90" cy="60" r="27" fill="none" stroke-width="10" />
+          }
+          @case ('triangle') {
+            <polygon points="90,30 126,90 54,90" />
+          }
+          @case ('moon') {
+            <path d="M105 32 C82 40 73 61 84 82 C69 74 63 54 73 39 C81 27 94 25 105 32 Z" />
+          }
+          @case ('bolt') {
+            <polygon points="99,29 69,66 88,66 78,91 112,51 93,51" />
+          }
+          @case ('square') {
+            <rect x="65" y="35" width="50" height="50" rx="5" />
+          }
+          @case ('sun') {
+            <circle cx="90" cy="60" r="16" />
+            <path
+              d="M90 28 V42 M90 78 V92 M58 60 H72 M108 60 H122 M68 38 L78 48 M102 72 L112 82 M112 38 L102 48 M78 72 L68 82"
+              fill="none"
+            />
+          }
+        }
+      </g>
     </g>
 
-    <g
-      [attr.fill]="symbol.emblemColor"
-      [attr.stroke]="symbol.emblemColor"
-      stroke-width="5"
-      stroke-linejoin="round"
-      [attr.transform]="emblemTransform(symbol)"
-    >
-      @switch (symbol.emblem) {
-        @case ('anchor') {
-          <circle cx="90" cy="44" r="10" fill="none" />
-          <line x1="90" y1="54" x2="90" y2="88" />
-          <path d="M62 74 C66 98 114 98 118 74" fill="none" />
-          <line x1="72" y1="66" x2="108" y2="66" />
-        }
-        @case ('star') {
-          <polygon points="90,31 99,51 121,52 104,67 110,89 90,77 70,89 76,67 59,52 81,51" />
-        }
-        @case ('diamond') {
-          <polygon points="90,30 124,60 90,90 56,60" />
-        }
-        @case ('ring') {
-          <circle cx="90" cy="60" r="27" fill="none" stroke-width="10" />
-        }
-        @case ('triangle') {
-          <polygon points="90,30 126,90 54,90" />
-        }
-        @case ('moon') {
-          <path d="M105 32 C82 40 73 61 84 82 C69 74 63 54 73 39 C81 27 94 25 105 32 Z" />
-        }
-        @case ('bolt') {
-          <polygon points="99,29 69,66 88,66 78,91 112,51 93,51" />
-        }
-        @case ('square') {
-          <rect x="65" y="35" width="50" height="50" rx="5" />
-        }
-        @case ('sun') {
-          <circle cx="90" cy="60" r="16" />
-          <path
-            d="M90 28 V42 M90 78 V92 M58 60 H72 M108 60 H122 M68 38 L78 48 M102 72 L112 82 M112 38 L102 48 M78 72 L68 82"
-            fill="none"
-          />
-        }
-      }
-    </g>
-
-    <rect
-      x="8"
-      y="8"
-      width="164"
-      height="104"
-      rx="8"
+    <path
+      [attr.d]="symbolSilhouette(symbol).outline"
       fill="none"
       class="describe-symbol-border"
       [class]="borderClass(symbol)"
