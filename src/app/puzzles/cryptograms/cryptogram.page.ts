@@ -135,6 +135,12 @@ export class CryptogramsPage implements AfterViewInit {
     if (!character || this.isCorrect()) {
       return;
     }
+
+    const input = this.findInputByCharacterIndex(index);
+
+    if (input) {
+      this.focusNextInputIfEmpty(input);
+    }
   }
 
   protected activateInput(index: number, input: HTMLInputElement): void {
@@ -190,6 +196,8 @@ export class CryptogramsPage implements AfterViewInit {
     this.setGuess(activeIndex, key);
 
     if (this.isCorrect()) return;
+
+    this.focusNextInputIfEmpty(input);
   }
 
   protected setFillOccurrencesAutomatically(event: Event): void {
@@ -326,6 +334,35 @@ export class CryptogramsPage implements AfterViewInit {
     return inputs[currentIndex - 1];
   }
 
+  private findNextInput(currentInput: HTMLInputElement): HTMLInputElement | undefined {
+    const inputs = this.guessInputs.toArray().map((input) => input.nativeElement);
+    const currentIndex = inputs.indexOf(currentInput);
+
+    if (currentIndex < 0 || currentIndex >= inputs.length - 1) {
+      return undefined;
+    }
+
+    return inputs[currentIndex + 1];
+  }
+
+  private focusNextInputIfEmpty(currentInput: HTMLInputElement): void {
+    const nextInput = this.findNextInput(currentInput);
+
+    if (!nextInput) {
+      return;
+    }
+
+    const nextIndex = Number(nextInput.dataset['characterIndex']);
+
+    if (Number.isNaN(nextIndex) || this.guesses()[nextIndex]) {
+      return;
+    }
+
+    this.suppressNextSelection = true;
+    nextInput.focus();
+    this.activeCharacterIndex.set(nextIndex);
+  }
+
   protected handleGuessKeydown(
     index: number,
     event: KeyboardEvent,
@@ -348,6 +385,8 @@ export class CryptogramsPage implements AfterViewInit {
     if (this.isCorrect()) {
       return;
     }
+
+    this.focusNextInputIfEmpty(currentInput);
   }
 
   protected clearGuesses(): void {
