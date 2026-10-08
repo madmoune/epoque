@@ -1,12 +1,21 @@
 import '@angular/compiler';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ZebraPage } from './zebra.page';
+import { deduceZebraPositions } from './zebra-deduction';
+
+function seededRandom(seed: number): () => number {
+  return () => {
+    seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+    return seed / 4294967296;
+  };
+}
 
 describe('ZebraPage', () => {
   let page: any;
 
   beforeEach(() => {
     page = new ZebraPage() as any;
+    page.clueWordingChoices.clear();
   });
 
   it('supports the new spatial deduction types', () => {
@@ -103,6 +112,90 @@ describe('ZebraPage', () => {
     ).toBe(false);
   });
 
+  it.each(['oneOf', 'neither'])('checks %s choices and partial assignments safely', (type) => {
+    const clue = {
+      type,
+      firstCategoryId: 'person',
+      firstValue: 'Alice',
+      secondCategoryId: 'pet',
+      secondValues: ['Chat', 'Chien'],
+      text: '',
+    };
+    const pets = { Chat: 0, Chien: 1, Lapin: 2, Oiseau: 3 };
+
+    for (let houseIndex = 0; houseIndex < 4; houseIndex += 1) {
+      expect(page.clueMatches(clue, { person: { Alice: houseIndex }, pet: pets })).toBe(
+        type === 'oneOf' ? houseIndex <= 1 : houseIndex >= 2,
+      );
+    }
+
+    expect(page.clueCouldMatch(clue, { person: { Alice: 0 } })).toBe(true);
+    expect(page.clueCouldMatch(clue, { pet: pets })).toBe(true);
+    expect(page.clueMatches(clue, { pet: pets })).toBe(false);
+    expect(page.clueCouldMatch(clue, { person: { Alice: 0 }, pet: { Chat: 0 } })).toBe(
+      type === 'oneOf',
+    );
+  });
+
+  it('words alternatives and double exclusions as relations between attributes', () => {
+    const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0);
+
+    try {
+      expect(
+        page.describeChoiceClue('oneOf', { id: 'person' }, 'Adam', { id: 'hobby' }, [
+          'Lecture',
+          'Echecs',
+        ]),
+      ).toBe('Adam pratique soit la lecture, soit les échecs.');
+      expect(
+        page.describeChoiceClue('neither', { id: 'color' }, 'Vert', { id: 'pet' }, [
+          'Chat',
+          'Chien',
+        ]),
+      ).toBe('La personne qui habite la maison verte n’a ni le chat ni le chien comme animal.');
+      expect(
+        page.describeChoiceClue('oneOf', { id: 'pet' }, 'Chat', { id: 'person' }, ['Adam', 'Emma']),
+      ).toBe('La maison où vit le chat est habitée par Adam ou Emma.');
+    } finally {
+      randomSpy.mockRestore();
+    }
+  });
+
+  it.each(['oneOf', 'neither'])('only crosses out guaranteed exclusions for a %s hint', (type) => {
+    page.setLevel(4);
+    const puzzle = page.puzzle();
+    const [firstCategory, secondCategory] = puzzle.categories.slice(1, 3);
+    const firstValue = firstCategory.values[0];
+    const secondValues = secondCategory.values.slice(0, 2);
+    const clue = {
+      type,
+      firstCategoryId: firstCategory.id,
+      firstValue,
+      secondCategoryId: secondCategory.id,
+      secondValues,
+      text: '',
+    };
+    const expectedExclusions = type === 'oneOf' ? secondCategory.values.slice(2) : secondValues;
+
+    for (const value of expectedExclusions) {
+      const move = page.hintMoveFromClue(clue);
+
+      expect(move?.mark).toBe('no');
+      expect(move?.secondValue).toBe(value);
+      page.setManualGridMark(firstCategory.id, firstValue, secondCategory.id, value, 'no');
+    }
+
+    expect(page.hintMoveFromClue(clue)).toBeNull();
+    expect(
+      secondCategory.values
+        .filter((value: string) => !expectedExclusions.includes(value))
+        .every(
+          (value: string) =>
+            page.gridMark(firstCategory.id, firstValue, secondCategory.id, value) !== 'yes',
+        ),
+    ).toBe(true);
+  });
+
   it('generates candidates for every deduction type and keeps a unique solution', () => {
     const puzzle = page.puzzle();
     const candidates = page.createCandidateClues(puzzle.categories, puzzle.solution);
@@ -112,6 +205,7 @@ describe('ZebraPage', () => {
       new Set([
         'same',
         'notSame',
+        'oneOf',
         'position',
         'notPosition',
         'adjacentRight',
@@ -123,7 +217,7 @@ describe('ZebraPage', () => {
     expect(page.countMatchingSolutions(puzzle.categories, puzzle.logicalClues, 2)).toBe(1);
   });
 
-  it('removes a direct clue when spatial clues already force the solution', () => {
+  it('keeps a helpful anchor even when spatial clues already force the solution', () => {
     const categories = [
       { id: 'house', label: 'Maison', values: ['Maison 1', 'Maison 2', 'Maison 3'] },
       { id: 'person', label: 'Personne', values: ['Alice', 'Bruno', 'Clara'] },
@@ -163,13 +257,16 @@ describe('ZebraPage', () => {
       text: '',
     };
 
-    const compactClues = page.removeRedundantDirectClues(
+    const compactClues = page.reduceToEssentialClues(
       [...spatialClues, directClue],
       categories,
+      new Set([directClue]),
+      true,
     );
 
-    expect(compactClues).toHaveLength(spatialClues.length);
-    expect(compactClues.every((clue: any) => page.isSpatialClue(clue))).toBe(true);
+    expect(page.countMatchingSolutions(categories, spatialClues, 2)).toBe(1);
+    expect(compactClues).toContain(directClue);
+    expect(deduceZebraPositions(categories, compactClues).solved).toBe(true);
   });
 
   it('toggles used clues and clears them when restarting', () => {
@@ -208,12 +305,7 @@ describe('ZebraPage', () => {
         randomSpy.mockReturnValue(randomValue);
 
         expect(
-          page.describeOneBetweenClue(
-            { id: 'color' },
-            'Violette',
-            { id: 'person' },
-            'Bruno',
-          ),
+          page.describeOneBetweenClue({ id: 'color' }, 'Violette', { id: 'person' }, 'Bruno'),
         ).toMatch(/une seule maison/i);
       }
     } finally {
@@ -290,9 +382,11 @@ describe('ZebraPage', () => {
       expect(page.describeSameClue({ id: 'person' }, 'Félix', { id: 'drink' }, 'Cafe')).toBe(
         'Félix boit du café.',
       );
+      page.clueWordingChoices.clear();
       expect(page.describeSameClue({ id: 'person' }, 'Félix', { id: 'hobby' }, 'Jardin')).toBe(
         'Félix pratique le jardinage.',
       );
+      expect(page.hobbyWithArticle('Yoga')).toBe('le yoga');
     } finally {
       randomSpy.mockRestore();
     }
@@ -473,20 +567,110 @@ describe('ZebraPage', () => {
     expect(page.supportingCluesFor(relation)).toBeNull();
   });
 
-  it('keeps finding a hint through several 4x4 game states', () => {
-    for (let puzzleIndex = 0; puzzleIndex < 3; puzzleIndex += 1) {
-      page.setLevel(4);
+  it('generates varied 4x4 puzzles that can be fully deduced without guesses', () => {
+    const randomSpy = vi.spyOn(Math, 'random');
 
-      for (let hintIndex = 0; hintIndex < 20; hintIndex += 1) {
-        page.showHint();
-        const message = page.hintMessage() ?? '';
+    try {
+      for (let seed = 1; seed <= 80; seed += 1) {
+        randomSpy.mockImplementation(seededRandom(seed));
+        page.setLevel(4);
+        const puzzle = page.puzzle();
+        const deduction = deduceZebraPositions(puzzle.categories, puzzle.logicalClues);
+        const anchors = puzzle.logicalClues.filter((clue: any) => clue.type === 'position');
+        const clueTypes = new Set(puzzle.logicalClues.map((clue: any) => clue.type));
+        const directClues = puzzle.logicalClues.filter((clue: any) =>
+          ['position', 'same', 'notPosition', 'notSame'].includes(clue.type),
+        );
+        const assignments = Object.fromEntries(
+          puzzle.categories.map((category: any) => [
+            category.id,
+            Object.fromEntries(
+              puzzle.solution.map((row: any, houseIndex: number) => [row[category.id], houseIndex]),
+            ),
+          ]),
+        );
 
-        expect(message).not.toContain('Les indices restants ne donnent pas');
+        expect(deduction.solved, `seed ${seed}`).toBe(true);
+        expect(page.countMatchingSolutions(puzzle.categories, puzzle.logicalClues, 2)).toBe(1);
+        expect(clueTypes.size).toBeGreaterThanOrEqual(8);
+        expect(clueTypes.has('oneOf')).toBe(true);
+        expect(clueTypes.has('neither')).toBe(true);
+        expect(clueTypes.has('leftOf')).toBe(true);
+        expect(anchors).toHaveLength(1);
+        expect(
+          puzzle.logicalClues.filter((clue: any) => clue.type === 'same').length,
+        ).toBeLessThanOrEqual(2);
+        expect(deduceZebraPositions(puzzle.categories, directClues).solved).toBe(false);
+        expect(
+          puzzle.logicalClues.every((clue: any) => page.clueMatches(clue, assignments)),
+          `every clue must be true for seed ${seed}`,
+        ).toBe(true);
+        expect(puzzle.clues).toEqual(puzzle.logicalClues.map((clue: any) => clue.text));
 
-        if (page.isSolved()) {
-          break;
+        for (const [houseIndex, row] of puzzle.solution.entries()) {
+          for (const category of puzzle.categories) {
+            expect(deduction.positions[category.id][row[category.id]]).toEqual([houseIndex]);
+          }
         }
       }
+    } finally {
+      randomSpy.mockRestore();
     }
-  });
+  }, 15000);
+
+  it('finishes 4x4 games with explained deductions and no supplemental clues', () => {
+    const randomSpy = vi.spyOn(Math, 'random');
+    const rescueSpy = vi.spyOn(page, 'createRescueHintMove');
+
+    try {
+      for (let seed = 1; seed <= 8; seed += 1) {
+        randomSpy.mockImplementation(seededRandom(seed));
+        page.setLevel(4);
+        const initialClues = [...page.puzzle().clues];
+
+        for (let hintIndex = 0; hintIndex < 80 && !page.isSolved(); hintIndex += 1) {
+          page.showHint();
+          const message = page.hintMessage() ?? '';
+
+          expect(message, `seed ${seed}, hint ${hintIndex}`).toContain('Conclusion :');
+          expect(message).not.toContain('supplémentaire');
+          expect(message).not.toContain('essaie les autres valeurs');
+        }
+
+        expect(page.isSolved(), `seed ${seed}`).toBe(true);
+        expect(page.puzzle().clues).toEqual(initialClues);
+      }
+
+      expect(rescueSpy).not.toHaveBeenCalled();
+    } finally {
+      randomSpy.mockRestore();
+      rescueSpy.mockRestore();
+    }
+  }, 15000);
+
+  it('keeps a mix of clue types and fresh wording at every level', () => {
+    const randomSpy = vi.spyOn(Math, 'random');
+
+    try {
+      for (const level of [3, 4, 5]) {
+        for (let seed = 1; seed <= 4; seed += 1) {
+          randomSpy.mockImplementation(seededRandom(seed));
+          page.setLevel(level);
+          const puzzle = page.puzzle();
+
+          expect(
+            new Set(puzzle.logicalClues.map((clue: any) => clue.type)).size,
+          ).toBeGreaterThanOrEqual(5);
+          expect(page.countMatchingSolutions(puzzle.categories, puzzle.logicalClues, 2)).toBe(1);
+          expect(puzzle.clues.every((clue: string) => /^[A-ZÉÀÇ]/.test(clue))).toBe(true);
+          expect(puzzle.clues.join(' ')).not.toMatch(
+            /On sait que|L’indice à retenir|Il est certain que|Les deux indices/,
+          );
+          expect(puzzle.clues.join(' ')).not.toMatch(/\bvit la maison|peinte en bleue/);
+        }
+      }
+    } finally {
+      randomSpy.mockRestore();
+    }
+  }, 15000);
 });

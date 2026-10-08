@@ -1,14 +1,14 @@
 ﻿import { Component, computed, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
+import {
+  deduceZebraPositions,
+  ZebraCategory,
+  ZebraClue,
+  ZebraDeductionStep,
+} from './zebra-deduction';
 
 type ZebraLevel = 3 | 4 | 5;
-
-type ZebraCategory = {
-  id: string;
-  label: string;
-  values: string[];
-};
 
 type ZebraPuzzle = {
   level: ZebraLevel;
@@ -22,70 +22,6 @@ type ZebraPuzzle = {
 };
 
 type GridMark = 'unknown' | 'yes' | 'no';
-
-type ZebraClue =
-  | {
-      type: 'same';
-      firstCategoryId: string;
-      firstValue: string;
-      secondCategoryId: string;
-      secondValue: string;
-      text: string;
-    }
-  | {
-      type: 'notSame';
-      firstCategoryId: string;
-      firstValue: string;
-      secondCategoryId: string;
-      secondValue: string;
-      text: string;
-    }
-  | {
-      type: 'position';
-      categoryId: string;
-      value: string;
-      houseIndex: number;
-      text: string;
-    }
-  | {
-      type: 'notPosition';
-      categoryId: string;
-      value: string;
-      houseIndex: number;
-      text: string;
-    }
-  | {
-      type: 'adjacentRight';
-      leftCategoryId: string;
-      leftValue: string;
-      rightCategoryId: string;
-      rightValue: string;
-      text: string;
-    }
-  | {
-      type: 'adjacent';
-      firstCategoryId: string;
-      firstValue: string;
-      secondCategoryId: string;
-      secondValue: string;
-      text: string;
-    }
-  | {
-      type: 'oneBetween';
-      firstCategoryId: string;
-      firstValue: string;
-      secondCategoryId: string;
-      secondValue: string;
-      text: string;
-    }
-  | {
-      type: 'leftOf';
-      leftCategoryId: string;
-      leftValue: string;
-      rightCategoryId: string;
-      rightValue: string;
-      text: string;
-    };
 
 type ZebraHintMove = {
   firstCategory: ZebraCategory;
@@ -244,6 +180,7 @@ const ZEBRA_PUZZLES: Record<ZebraLevel, ZebraPuzzle> = {
   styleUrl: './zebra.page.scss',
 })
 export class ZebraPage {
+  private readonly clueWordingChoices = new Map<string, Set<number>>();
   protected readonly level = signal<ZebraLevel>(3);
   private readonly puzzles = ZEBRA_PUZZLES;
   private readonly activePuzzle = signal<ZebraPuzzle>(this.createRandomPuzzle(this.puzzles[3]));
@@ -319,6 +256,18 @@ export class ZebraPage {
       return;
     }
 
+    if (this.puzzle().level === 4) {
+      const deductionHint = this.findDeductionHint();
+
+      if (deductionHint) {
+        this.applyHintMove(deductionHint.move, deductionHint.explanation);
+      } else {
+        this.hintMessage.set('Toutes les associations nécessaires sont déjà déduites.');
+      }
+
+      return;
+    }
+
     const unresolvedRelations = this.trueRelations().filter(
       (relation) => this.relationMark(relation) === 'unknown',
     );
@@ -374,7 +323,7 @@ export class ZebraPage {
     return `${relation.firstCategory.label} « ${relation.firstValue} » ↔ ${relation.secondCategory.label} « ${relation.secondValue} »`;
   }
 
-  private applyHintMove(move: ZebraHintMove, explanation: string): void {
+  private applyHintMove(move: Omit<ZebraHintMove, 'clue'>, explanation: string): void {
     this.setManualGridMark(
       move.firstCategory.id,
       move.firstValue,
@@ -384,6 +333,109 @@ export class ZebraPage {
     );
     this.hasChecked.set(false);
     this.hintMessage.set(explanation);
+  }
+
+  private findDeductionHint(): {
+    move: Omit<ZebraHintMove, 'clue'>;
+    explanation: string;
+  } | null {
+    const houseCategory = this.puzzle().categories[0];
+    const deduction = deduceZebraPositions(this.puzzle().categories, [
+      ...this.currentGridConstraints(),
+      ...(this.puzzle().logicalClues ?? []),
+    ]);
+
+    for (const step of deduction.steps) {
+      const category = this.categoryById(step.categoryId)!;
+      const houseIndexes =
+        step.after.length === 1
+          ? step.after
+          : step.before.filter((index) => !step.after.includes(index));
+      const mark = step.after.length === 1 ? 'yes' : 'no';
+
+      for (const houseIndex of houseIndexes) {
+        const house = houseCategory.values[houseIndex];
+
+        if (this.gridMark(houseCategory.id, house, category.id, step.value) !== 'unknown') {
+          continue;
+        }
+
+        const move = {
+          firstCategory: houseCategory,
+          firstValue: house,
+          secondCategory: category,
+          secondValue: step.value,
+          mark,
+        } as const;
+
+        return { move, explanation: this.explainDeductionHint(step, move) };
+      }
+    }
+
+    return null;
+  }
+
+  private explainDeductionHint(
+    step: ZebraDeductionStep,
+    move: Omit<ZebraHintMove, 'clue'>,
+  ): string {
+    const houses = this.puzzle().categories[0].values;
+    const subject = this.clueValueText(step.categoryId, step.value);
+    const lines: string[] = [];
+
+    if (step.reason.type === 'clue') {
+      const { clue, otherCategoryId, otherValue, otherPositions, relatedValues } = step.reason;
+
+      if (clue.text) {
+        lines.push(
+          'Indice utilisé :',
+          `« ${this.formatClue(clue.text)} »`,
+          '',
+          `1. ${this.explainClueRule(clue)}`,
+        );
+      } else {
+        lines.push(
+          'Déduction à partir de la grille :',
+          `1. La grille indique déjà que ${this.clueValueText(otherCategoryId!, otherValue!)} et ${subject} appartiennent à ${clue.type === 'same' ? 'la même maison' : 'des maisons différentes'}.`,
+        );
+      }
+
+      if (otherCategoryId && otherValue && otherPositions) {
+        lines.push(
+          `2. Pour ${this.clueValueText(otherCategoryId, otherValue)}, les maisons encore possibles sont : ${otherPositions.map((index) => houses[index]).join(', ')}.`,
+          `3. En respectant cet indice, ${subject} ne peut occuper que : ${step.after.map((index) => houses[index]).join(', ')}.`,
+        );
+      }
+
+      if (relatedValues) {
+        lines.push(
+          ...relatedValues.map(
+            (related, index) =>
+              `${index + 2}. Pour ${this.clueValueText(related.categoryId, related.value)}, les maisons encore possibles sont : ${related.positions.map((houseIndex) => houses[houseIndex]).join(', ')}.`,
+          ),
+          `${relatedValues.length + 2}. En combinant ces possibilités avec l’indice, ${subject} ne peut occuper que : ${step.after.map((index) => houses[index]).join(', ')}.`,
+        );
+      }
+    } else if (step.reason.type === 'occupied') {
+      lines.push(
+        'Déduction par élimination :',
+        `1. ${houses[step.reason.houseIndex]} est déjà associée à ${this.clueValueText(step.categoryId, step.reason.otherValue)}.`,
+        '2. Une maison ne peut recevoir qu’une seule valeur de chaque catégorie.',
+        `3. ${subject} doit donc se trouver dans une autre maison.`,
+      );
+    } else {
+      lines.push(
+        'Déduction par élimination :',
+        `1. Dans ${houses[step.reason.houseIndex]}, toutes les autres valeurs de la catégorie ${move.secondCategory.label.toLowerCase()} sont exclues.`,
+        '2. Chaque maison doit recevoir une valeur de cette catégorie.',
+        `3. Seule la valeur « ${step.value} » reste possible.`,
+      );
+    }
+
+    lines.push(
+      `Conclusion : ${this.associationText(move)}; la case correspondante est ${move.mark === 'yes' ? 'cochée ✓' : 'barrée ×'}.`,
+    );
+    return lines.join('\n');
   }
 
   private findDirectHintMove(mark: 'yes' | 'no'): ZebraHintMove | null {
@@ -427,6 +479,27 @@ export class ZebraPage {
       secondCategoryId = clue.secondCategoryId;
       secondValue = clue.secondValue;
       mark = clue.type === 'same' ? 'yes' : 'no';
+    } else if (clue.type === 'oneOf' || clue.type === 'neither') {
+      const category = this.categoryById(clue.secondCategoryId);
+      const excludedValues =
+        clue.type === 'neither'
+          ? clue.secondValues
+          : category?.values.filter((value) => !clue.secondValues.includes(value));
+      const excludedValue = excludedValues?.find(
+        (value) =>
+          this.gridMark(clue.firstCategoryId, clue.firstValue, clue.secondCategoryId, value) ===
+          'unknown',
+      );
+
+      if (!excludedValue) {
+        return null;
+      }
+
+      firstCategoryId = clue.firstCategoryId;
+      firstValue = clue.firstValue;
+      secondCategoryId = clue.secondCategoryId;
+      secondValue = excludedValue;
+      mark = 'no';
     } else if (clue.type === 'adjacentRight' || clue.type === 'leftOf') {
       firstCategoryId = clue.leftCategoryId;
       firstValue = clue.leftValue;
@@ -695,6 +768,17 @@ export class ZebraPage {
       return clue.type === 'same'
         ? `Cet indice affirme que ${first} et ${second} appartiennent à la même maison.`
         : `Cet indice affirme que ${first} et ${second} appartiennent à deux maisons différentes; leur intersection doit être barrée ×.`;
+    }
+
+    if (clue.type === 'oneOf' || clue.type === 'neither') {
+      const first = this.clueValueText(clue.firstCategoryId, clue.firstValue);
+      const [optionA, optionB] = clue.secondValues.map((value) =>
+        this.clueValueText(clue.secondCategoryId, value),
+      );
+
+      return clue.type === 'oneOf'
+        ? `${first} partage sa maison avec ${optionA} ou ${optionB}, mais pas avec les autres valeurs de cette catégorie. Il faut croiser les indices pour départager ces deux possibilités.`
+        : `${first} ne partage sa maison ni avec ${optionA} ni avec ${optionB}. Ces deux associations sont exclues; les autres restent à départager.`;
     }
 
     if (clue.type === 'adjacent' || clue.type === 'oneBetween') {
@@ -1364,11 +1448,15 @@ export class ZebraPage {
     );
 
     const candidateClues = this.createCandidateClues(categories, solution);
-    // Prefer indirect spatial clues so the grid does the work. Direct
-    // associations are kept only as a fallback when they are indispensable
-    // for uniqueness.
-    const reducedClues = this.reduceToEssentialClues(candidateClues, categories);
-    const logicalClues = this.removeRedundantDirectClues(reducedClues, categories);
+    const selectedClues = this.selectBalancedClues(candidateClues, categories, basePuzzle.level);
+
+    // Choose wording after pruning so discarded candidates cannot use up the
+    // different formulations intended for the clues the player actually sees.
+    this.clueWordingChoices.clear();
+    const logicalClues = this.shuffle(selectedClues).map((clue) => ({
+      ...clue,
+      text: this.formatClue(this.describeClue(clue, categories)),
+    }));
 
     if (this.countMatchingSolutions(categories, logicalClues, 2) !== 1) {
       return this.createRandomPuzzle(basePuzzle);
@@ -1376,8 +1464,9 @@ export class ZebraPage {
 
     return {
       ...basePuzzle,
+      intro: `${basePuzzle.intro} Les maisons sont numérotées de gauche à droite.`,
       categories,
-      clues: this.shuffle(logicalClues.map((clue) => this.formatClue(clue.text))),
+      clues: logicalClues.map((clue) => clue.text),
       logicalClues,
       solution,
     };
@@ -1390,7 +1479,7 @@ export class ZebraPage {
       }
 
       const variants = this.categoryValueVariants(category);
-      const values = this.randomItem(variants);
+      const values = this.shuffle([...new Set(variants.flat())]).slice(0, category.values.length);
 
       return { ...category, values: [...values] };
     });
@@ -1452,18 +1541,6 @@ export class ZebraPage {
     return [category.values, ...alternatives];
   }
 
-  private createRandomClues(
-    categories: ZebraCategory[],
-    solution: Record<string, string>[],
-  ): string[] {
-    const clues = this.reduceToEssentialClues(
-      this.createCandidateClues(categories, solution),
-      categories,
-    );
-
-    return this.shuffle(clues.map((clue) => this.formatClue(clue.text)));
-  }
-
   private describeHousePosition(category: ZebraCategory, value: string): string {
     if (category.id === 'person') {
       return `la maison de ${value}`;
@@ -1514,13 +1591,14 @@ export class ZebraPage {
 
   private describeHouseClue(category: ZebraCategory, value: string, house: string): string {
     const houseText = this.houseLabel(house);
+    const ordinalHouse = this.houseOrdinalLabel(house);
 
     if (category.id === 'person') {
-      return this.randomItem([
+      return this.chooseClueWording('position:person', [
         `${value} habite ${houseText}.`,
-        `${this.capitalize(houseText)} est habitée par ${value}.`,
-        `${value} vit ${houseText}.`,
-        `C’est ${value} qui occupe ${houseText}.`,
+        `${this.capitalize(ordinalHouse)} est habitée par ${value}.`,
+        `${value} vit dans ${ordinalHouse}.`,
+        `C’est ${value} qui occupe ${ordinalHouse}.`,
         `On trouve ${value} dans ${houseText}.`,
       ]);
     }
@@ -1528,22 +1606,22 @@ export class ZebraPage {
     if (category.id === 'color') {
       const color = this.feminineColor(value);
 
-      return this.randomItem([
+      return this.chooseClueWording('position:color', [
         `${this.houseLabel(house, true)} est ${color}.`,
-        `La couleur ${color} correspond à ${houseText}.`,
-        `${houseText} a la couleur ${color}.`,
-        `${houseText} est peinte en ${color}.`,
-        `C’est ${houseText} qui porte la couleur ${color}.`,
+        `${this.capitalize(ordinalHouse)} a une façade ${color}.`,
+        `La maison ${color} occupe la position ${house.replace('Maison ', '')}.`,
+        `La façade de ${houseText} est ${color}.`,
+        `C’est ${ordinalHouse} qui est ${color}.`,
       ]);
     }
 
     if (category.id === 'pet') {
       const pet = this.withArticle(value);
 
-      return this.randomItem([
+      return this.chooseClueWording('position:pet', [
         `${this.capitalize(pet)} vit dans ${houseText}.`,
-        `${this.capitalize(pet)} se trouve dans ${houseText}.`,
-        `${this.capitalize(houseText)} abrite ${pet}.`,
+        `Dans ${ordinalHouse}, l’animal est ${pet}.`,
+        `${this.capitalize(ordinalHouse)} abrite ${pet}.`,
         `L’animal de ${houseText} est ${pet}.`,
         `On trouve ${pet} dans ${houseText}.`,
       ]);
@@ -1553,24 +1631,24 @@ export class ZebraPage {
       const drink = this.drinkWithArticle(value);
       const drinkName = this.drinkName(value);
 
-      return this.randomItem([
+      return this.chooseClueWording('position:drink', [
         `On boit ${drink} dans ${houseText}.`,
-        `Dans ${houseText}, on sert ${drink}.`,
+        `Dans ${ordinalHouse}, on sert ${drink}.`,
         `La boisson de ${houseText} est ${drinkName}.`,
-        `${houseText} est celle où l’on boit ${drink}.`,
-        `La personne de ${houseText} choisit ${drink}.`,
+        `${this.capitalize(ordinalHouse)} est celle où l’on boit ${drink}.`,
+        `La personne de ${houseText} choisit ${drinkName}.`,
       ]);
     }
 
     if (category.id === 'hobby') {
       const hobby = this.hobbyWithArticle(value);
 
-      return this.randomItem([
+      return this.chooseClueWording('position:hobby', [
         `${this.capitalize(hobby)} est le loisir de ${houseText}.`,
-        `Dans ${houseText}, le loisir choisi est ${hobby}.`,
+        `Dans ${ordinalHouse}, le loisir choisi est ${hobby}.`,
         `Le loisir de ${houseText} est ${hobby}.`,
-        `${houseText} est celle où l’on pratique ${hobby}.`,
-        `La personne de ${houseText} pratique ${hobby}.`,
+        `${this.capitalize(ordinalHouse)} est celle où l’on pratique ${hobby}.`,
+        `La personne de ${ordinalHouse} pratique ${hobby}.`,
       ]);
     }
 
@@ -1596,6 +1674,14 @@ export class ZebraPage {
     const label = `la ${house.toLowerCase()}`;
 
     return capitalize ? this.capitalize(label) : label;
+  }
+
+  private houseOrdinalLabel(house: string): string {
+    const ordinal = ['première', 'deuxième', 'troisième', 'quatrième', 'cinquième'][
+      Number(house.replace('Maison ', '')) - 1
+    ];
+
+    return ordinal ? `la ${ordinal} maison` : this.houseLabel(house);
   }
 
   private feminineColor(value: string): string {
@@ -1656,7 +1742,7 @@ export class ZebraPage {
     ]);
 
     if (hobby === 'échecs') return 'les échecs';
-    if (/^[aeiouyéèêëàâäîïôöùûü]/.test(hobby)) return `l'${hobby}`;
+    if (/^[aeiouéèêëàâäîïôöùûü]/.test(hobby)) return `l'${hobby}`;
     return `${feminineHobbies.has(hobby) ? 'la' : 'le'} ${hobby}`;
   }
 
@@ -1666,6 +1752,7 @@ export class ZebraPage {
 
   private formatClue(clue: string): string {
     const formattedClue = clue
+      .replace(/\bde ([AEIOUYÉÈÊËÀÂÄÎÏÔÖÙÛÜ])/g, 'd’$1')
       .replace(/de le/g, 'du')
       .replace(/De le/g, 'Du')
       .replace(/de Le/g, 'du')
@@ -1687,43 +1774,125 @@ export class ZebraPage {
 
     return this.capitalize(formattedClue);
   }
-  private uniqueClues(clues: string[]): string[] {
-    return [...new Set(clues)];
-  }
-
   private clueKey(clue: ZebraClue): string {
     const { text, ...logicalClue } = clue;
 
     return JSON.stringify(logicalClue);
   }
 
-  private isSpatialClue(clue: ZebraClue): boolean {
-    return ['adjacentRight', 'adjacent', 'leftOf', 'oneBetween'].includes(clue.type);
+  private randomItem<T>(values: T[]): T {
+    return values[Math.floor(Math.random() * values.length)];
   }
 
-  private removeRedundantDirectClues(
+  private chooseClueWording(kind: string, variants: string[]): string {
+    let usedChoices = this.clueWordingChoices.get(kind);
+
+    if (!usedChoices || usedChoices.size === variants.length) {
+      usedChoices = new Set();
+      this.clueWordingChoices.set(kind, usedChoices);
+    }
+
+    const choice = this.randomItem(
+      variants.map((_, index) => index).filter((index) => !usedChoices.has(index)),
+    );
+    usedChoices.add(choice);
+    return variants[choice];
+  }
+
+  private describeClue(clue: ZebraClue, categories: ZebraCategory[]): string {
+    const category = (id: string): ZebraCategory => categories.find((item) => item.id === id)!;
+
+    if (clue.type === 'position' || clue.type === 'notPosition') {
+      const house = categories[0].values[clue.houseIndex];
+
+      return clue.type === 'position'
+        ? this.describeHouseClue(category(clue.categoryId), clue.value, house)
+        : this.describeNegativeHouseClue(category(clue.categoryId), clue.value, house);
+    }
+
+    if (clue.type === 'adjacentRight' || clue.type === 'leftOf') {
+      const describe =
+        clue.type === 'adjacentRight'
+          ? this.describeAdjacentClue.bind(this)
+          : this.describeLeftOfClue.bind(this);
+
+      return describe(
+        category(clue.leftCategoryId),
+        clue.leftValue,
+        category(clue.rightCategoryId),
+        clue.rightValue,
+      );
+    }
+
+    if (clue.type === 'oneOf' || clue.type === 'neither') {
+      return this.describeChoiceClue(
+        clue.type,
+        category(clue.firstCategoryId),
+        clue.firstValue,
+        category(clue.secondCategoryId),
+        clue.secondValues,
+      );
+    }
+
+    const describe = {
+      same: this.describeSameClue.bind(this),
+      notSame: this.describeNotSameClue.bind(this),
+      adjacent: this.describeNeighborClue.bind(this),
+      oneBetween: this.describeOneBetweenClue.bind(this),
+    }[clue.type];
+
+    return describe(
+      category(clue.firstCategoryId),
+      clue.firstValue,
+      category(clue.secondCategoryId),
+      clue.secondValue,
+    );
+  }
+
+  private selectBalancedClues(
     clues: ZebraClue[],
     categories: ZebraCategory[],
+    level: ZebraLevel,
   ): ZebraClue[] {
-    let compactClues = [...clues];
-
-    for (const clue of this.shuffle(compactClues)) {
-      if (this.isSpatialClue(clue)) {
-        continue;
+    let positionCount = 0;
+    let associationCount = 0;
+    const candidates = this.shuffle(clues).filter((clue) => {
+      if (clue.type === 'position') {
+        return positionCount++ === 0;
       }
 
-      const withoutClue = compactClues.filter((candidate) => candidate !== clue);
+      if (clue.type === 'same') {
+        return associationCount++ < (level === 3 ? 1 : 2);
+      }
 
-      if (this.countMatchingSolutions(categories, withoutClue, 2) === 1) {
-        compactClues = withoutClue;
+      return true;
+    });
+    const protectedClues = new Set<ZebraClue>();
+    const requiredTypes = [
+      'position',
+      'same',
+      'notSame',
+      'oneOf',
+      ...(level >= 4 ? ['neither', 'leftOf'] : []),
+      ...this.shuffle(['adjacentRight', 'adjacent', 'oneBetween']).slice(0, 2),
+    ];
+
+    for (const type of requiredTypes) {
+      const clue = candidates.find((candidate) => candidate.type === type);
+
+      if (clue) {
+        protectedClues.add(clue);
       }
     }
 
-    return compactClues;
-  }
-
-  private randomItem<T>(values: T[]): T {
-    return values[Math.floor(Math.random() * values.length)];
+    // Limit direct answers, then trim immediate-position chains before the
+    // remaining relations. Keep several kinds of reasoning in every puzzle.
+    const removalOrder = [
+      ...candidates.filter((clue) => clue.type === 'same' || clue.type === 'notPosition'),
+      ...candidates.filter((clue) => clue.type === 'adjacentRight'),
+      ...candidates.filter((clue) => !['same', 'notPosition', 'adjacentRight'].includes(clue.type)),
+    ];
+    return this.reduceToEssentialClues(removalOrder, categories, protectedClues, level === 4);
   }
 
   private createCandidateClues(
@@ -1761,7 +1930,7 @@ export class ZebraPage {
           categoryId: category.id,
           value: row[category.id],
           houseIndex,
-          text: this.describeHouseClue(category, row[category.id], row[houseCategory.id]),
+          text: '',
         });
 
         const wrongHouseIndex = this.randomItem(
@@ -1773,11 +1942,7 @@ export class ZebraPage {
           categoryId: category.id,
           value: row[category.id],
           houseIndex: wrongHouseIndex,
-          text: this.describeNegativeHouseClue(
-            category,
-            row[category.id],
-            houseCategory.values[wrongHouseIndex],
-          ),
+          text: '',
         });
       }
 
@@ -1796,12 +1961,7 @@ export class ZebraPage {
             firstValue: row[firstCategory.id],
             secondCategoryId: secondCategory.id,
             secondValue: row[secondCategory.id],
-            text: this.describeSameClue(
-              firstCategory,
-              row[firstCategory.id],
-              secondCategory,
-              row[secondCategory.id],
-            ),
+            text: '',
           });
 
           const wrongSecondValue = this.randomItem(
@@ -1814,13 +1974,41 @@ export class ZebraPage {
             firstValue: row[firstCategory.id],
             secondCategoryId: secondCategory.id,
             secondValue: wrongSecondValue,
-            text: this.describeNotSameClue(
-              firstCategory,
-              row[firstCategory.id],
-              secondCategory,
-              wrongSecondValue,
-            ),
+            text: '',
           });
+
+          // Vary the subject: a person's attributes, or who owns an animal,
+          // has a hobby or lives in a colour.
+          const [subjectCategory, choiceCategory] = this.randomItem([
+            [firstCategory, secondCategory],
+            [secondCategory, firstCategory],
+          ]);
+          const otherValues = this.shuffle(
+            choiceCategory.values.filter((value) => value !== row[choiceCategory.id]),
+          );
+
+          addClue({
+            type: 'oneOf',
+            firstCategoryId: subjectCategory.id,
+            firstValue: row[subjectCategory.id],
+            secondCategoryId: choiceCategory.id,
+            secondValues: this.shuffle([row[choiceCategory.id], otherValues[0]]) as [
+              string,
+              string,
+            ],
+            text: '',
+          });
+
+          if (solution.length >= 4) {
+            addClue({
+              type: 'neither',
+              firstCategoryId: subjectCategory.id,
+              firstValue: row[subjectCategory.id],
+              secondCategoryId: choiceCategory.id,
+              secondValues: [otherValues[0], otherValues[1]],
+              text: '',
+            });
+          }
         }
       }
     }
@@ -1830,19 +2018,19 @@ export class ZebraPage {
       const rightRow = solution[houseIndex + 1];
 
       for (const leftCategory of nonHouseCategories) {
-        for (const rightCategory of nonHouseCategories) {
+        const rightCategories = [
+          leftCategory,
+          this.randomItem(nonHouseCategories.filter((category) => category !== leftCategory)),
+        ];
+
+        for (const rightCategory of rightCategories) {
           addClue({
             type: 'adjacentRight',
             leftCategoryId: leftCategory.id,
             leftValue: leftRow[leftCategory.id],
             rightCategoryId: rightCategory.id,
             rightValue: rightRow[rightCategory.id],
-            text: this.describeAdjacentClue(
-              leftCategory,
-              leftRow[leftCategory.id],
-              rightCategory,
-              rightRow[rightCategory.id],
-            ),
+            text: '',
           });
         }
       }
@@ -1854,12 +2042,7 @@ export class ZebraPage {
           firstValue: leftRow[firstCategory.id],
           secondCategoryId: secondCategory.id,
           secondValue: rightRow[secondCategory.id],
-          text: this.describeNeighborClue(
-            firstCategory,
-            leftRow[firstCategory.id],
-            secondCategory,
-            rightRow[secondCategory.id],
-          ),
+          text: '',
         });
       }
     }
@@ -1880,12 +2063,7 @@ export class ZebraPage {
             leftValue: leftRow[leftCategory.id],
             rightCategoryId: rightCategory.id,
             rightValue: rightRow[rightCategory.id],
-            text: this.describeLeftOfClue(
-              leftCategory,
-              leftRow[leftCategory.id],
-              rightCategory,
-              rightRow[rightCategory.id],
-            ),
+            text: '',
           });
         }
       }
@@ -1902,12 +2080,7 @@ export class ZebraPage {
           firstValue: firstRow[firstCategory.id],
           secondCategoryId: secondCategory.id,
           secondValue: secondRow[secondCategory.id],
-          text: this.describeOneBetweenClue(
-            firstCategory,
-            firstRow[firstCategory.id],
-            secondCategory,
-            secondRow[secondCategory.id],
-          ),
+          text: '',
         });
       }
     }
@@ -1918,13 +2091,22 @@ export class ZebraPage {
   private reduceToEssentialClues(
     clues: ZebraClue[],
     categories: ZebraCategory[],
+    protectedClues = new Set<ZebraClue>(),
+    requireDeduction = false,
   ): ZebraClue[] {
     let essentialClues = [...clues];
 
-    for (const clue of this.shuffle(essentialClues)) {
-      const nextClues = essentialClues.filter((candidate) => candidate !== clue);
+    for (const clue of clues) {
+      if (protectedClues.has(clue)) {
+        continue;
+      }
 
-      if (this.countMatchingSolutions(categories, nextClues, 2) === 1) {
+      const nextClues = essentialClues.filter((candidate) => candidate !== clue);
+      const stillSolvable = requireDeduction
+        ? deduceZebraPositions(categories, nextClues, false).solved
+        : this.countMatchingSolutions(categories, nextClues, 2) === 1;
+
+      if (stillSolvable) {
         essentialClues = nextClues;
       }
     }
@@ -1941,34 +2123,28 @@ export class ZebraPage {
     if (firstCategory.id === 'person') {
       const attribute = this.describePersonAttribute(secondCategory, secondValue);
 
-      return this.randomItem([
+      return this.chooseClueWording('same:person', [
         `${firstValue} ${attribute}.`,
-        `On sait que ${firstValue} ${attribute}.`,
-        `L’indice à retenir est que ${firstValue} ${attribute}.`,
-        `${firstValue} est précisément la personne qui ${attribute}.`,
+        `${this.capitalize(this.describeResident(secondCategory, secondValue))} s’appelle ${firstValue}.`,
+        `C’est ${firstValue} qui ${attribute}.`,
+        `${this.capitalize(this.describeHousePosition(secondCategory, secondValue))} est habitée par ${firstValue}.`,
+        `La maison de ${firstValue} est ${this.describeSameHouseReference(secondCategory, secondValue)}.`,
       ]);
     }
 
     if (secondCategory.id === 'person') {
-      const attribute = this.describePersonAttribute(firstCategory, firstValue);
-
-      return this.randomItem([
-        `${secondValue} ${attribute}.`,
-        `On sait que ${secondValue} ${attribute}.`,
-        `L’indice à retenir est que ${secondValue} ${attribute}.`,
-        `${secondValue} est précisément la personne qui ${attribute}.`,
-      ]);
+      return this.describeSameClue(secondCategory, secondValue, firstCategory, firstValue);
     }
 
     const firstDescription = this.describeHousePosition(firstCategory, firstValue);
     const secondDescription = this.describeSameHouseReference(secondCategory, secondValue);
 
-    return this.randomItem([
-      `${this.capitalize(firstDescription)} est la même que ${secondDescription}.`,
-      `${this.capitalize(firstDescription)} et ${secondDescription} désignent la même maison.`,
-      `${this.capitalize(firstDescription)} correspond à ${secondDescription}.`,
-      `La même maison est à la fois ${firstDescription} et ${secondDescription}.`,
-      `On retrouve ${firstDescription} et ${secondDescription} dans une seule maison.`,
+    return this.chooseClueWording('same:attributes', [
+      `${this.capitalize(this.describeResident(firstCategory, firstValue))} ${this.describePersonAttribute(secondCategory, secondValue)}.`,
+      `${this.capitalize(this.describeResident(secondCategory, secondValue))} ${this.describePersonAttribute(firstCategory, firstValue)}.`,
+      `Dans ${firstDescription}, la personne ${this.describePersonAttribute(secondCategory, secondValue)}.`,
+      `${this.capitalize(firstDescription)} est aussi ${secondDescription}.`,
+      `${this.capitalize(this.describeResident(firstCategory, firstValue))} vit dans ${this.describeHousePosition(secondCategory, secondValue)}.`,
     ]);
   }
 
@@ -1981,35 +2157,132 @@ export class ZebraPage {
     if (firstCategory.id === 'person') {
       const negativeAttribute = this.describeNegativePersonAttribute(secondCategory, secondValue);
 
-      return this.randomItem([
+      return this.chooseClueWording('notSame:person', [
         `${firstValue} ${negativeAttribute}.`,
-        `On sait que ${firstValue} ${negativeAttribute}.`,
-        `Il est certain que ${firstValue} ${negativeAttribute}.`,
+        `${this.capitalize(this.describeResident(secondCategory, secondValue))} ne s’appelle pas ${firstValue}.`,
+        `La maison de ${firstValue} et ${this.describeHousePosition(secondCategory, secondValue)} sont deux maisons différentes.`,
         `La maison de ${firstValue} n'est pas ${this.describeSameHouseReference(secondCategory, secondValue)}.`,
       ]);
     }
 
     if (secondCategory.id === 'person') {
-      const negativeAttribute = this.describeNegativePersonAttribute(firstCategory, firstValue);
-
-      return this.randomItem([
-        `${secondValue} ${negativeAttribute}.`,
-        `On sait que ${secondValue} ${negativeAttribute}.`,
-        `Il est certain que ${secondValue} ${negativeAttribute}.`,
-        `La maison de ${secondValue} n'est pas ${this.describeSameHouseReference(firstCategory, firstValue)}.`,
-      ]);
+      return this.describeNotSameClue(secondCategory, secondValue, firstCategory, firstValue);
     }
 
     const firstDescription = this.describeHousePosition(firstCategory, firstValue);
     const secondDescription = this.describeSameHouseReference(secondCategory, secondValue);
 
-    return this.randomItem([
+    return this.chooseClueWording('notSame:attributes', [
       `${this.capitalize(firstDescription)} n'est pas ${secondDescription}.`,
       `${this.capitalize(firstDescription)} et ${secondDescription} sont deux maisons différentes.`,
-      `Il ne faut pas confondre ${firstDescription} et ${secondDescription}.`,
-      `Les deux indices, ${firstDescription} et ${secondDescription}, renvoient à des maisons différentes.`,
-      `${this.capitalize(firstDescription)} ne correspond pas à ${secondDescription}.`,
+      `${this.capitalize(this.describeResident(firstCategory, firstValue))} ${this.describeNegativePersonAttribute(secondCategory, secondValue)}.`,
+      `${this.capitalize(this.describeResident(secondCategory, secondValue))} ${this.describeNegativePersonAttribute(firstCategory, firstValue)}.`,
+      `Dans ${firstDescription}, la personne ${this.describeNegativePersonAttribute(secondCategory, secondValue)}.`,
     ]);
+  }
+
+  private describeChoiceClue(
+    type: 'oneOf' | 'neither',
+    firstCategory: ZebraCategory,
+    firstValue: string,
+    secondCategory: ZebraCategory,
+    secondValues: [string, string],
+  ): string {
+    const house = this.describeHousePosition(firstCategory, firstValue);
+    const resident = this.capitalize(this.describeResident(firstCategory, firstValue));
+    const [first, second] = secondValues;
+
+    if (secondCategory.id === 'person') {
+      return this.chooseClueWording(
+        `${type}:person`,
+        type === 'oneOf'
+          ? [
+              `${this.capitalize(house)} est habitée par ${first} ou ${second}.`,
+              `${resident} s’appelle soit ${first}, soit ${second}.`,
+              `Seuls ${first} ou ${second} peuvent habiter ${house}.`,
+              `L’occupant de ${house} est ${first} ou ${second}.`,
+            ]
+          : [
+              `${this.capitalize(house)} n’est habitée ni par ${first} ni par ${second}.`,
+              `${resident} ne s’appelle ni ${first} ni ${second}.`,
+              `Ni ${first} ni ${second} n’habitent ${house}.`,
+              `${first} et ${second} habitent ailleurs que dans ${house}.`,
+            ],
+      );
+    }
+
+    const attribute = this.describeChoiceAttribute(type, secondCategory, secondValues);
+    const [firstReference, secondReference] = secondValues.map((value) =>
+      this.describeSameHouseReference(secondCategory, value),
+    );
+    const objects = secondValues.map((value) => {
+      if (secondCategory.id === 'color') return this.feminineColor(value);
+      if (secondCategory.id === 'pet') return this.withArticle(value);
+      if (secondCategory.id === 'drink') return this.drinkName(value);
+      return this.hobbyWithArticle(value);
+    });
+    const attributeLabels: Record<string, string> = {
+      pet: 'L’animal',
+      drink: 'La boisson',
+      hobby: 'Le loisir',
+    };
+    const subject =
+      secondCategory.id === 'color'
+        ? this.capitalize(house)
+        : `${attributeLabels[secondCategory.id]} de ${this.describeResident(firstCategory, firstValue)}`;
+    const attributeChoice =
+      type === 'oneOf'
+        ? `${subject} est soit ${objects[0]}, soit ${objects[1]}.`
+        : `${subject} n’est ni ${objects[0]} ni ${objects[1]}.`;
+
+    return this.chooseClueWording(
+      `${type}:attributes`,
+      type === 'oneOf'
+        ? [
+            `${resident} ${attribute}.`,
+            `${this.capitalize(house)} est soit ${firstReference}, soit ${secondReference}.`,
+            attributeChoice,
+          ]
+        : [
+            `${resident} ${attribute}.`,
+            `${this.capitalize(house)} n’est ni ${firstReference} ni ${secondReference}.`,
+            attributeChoice,
+          ],
+    );
+  }
+
+  private describeChoiceAttribute(
+    type: 'oneOf' | 'neither',
+    category: ZebraCategory,
+    [first, second]: [string, string],
+  ): string {
+    if (category.id === 'color') {
+      const firstHouse = `la maison ${this.feminineColor(first)}`;
+      const secondHouse = `la maison ${this.feminineColor(second)}`;
+
+      return type === 'oneOf'
+        ? `habite soit ${firstHouse}, soit ${secondHouse}`
+        : `n’habite ni ${firstHouse} ni ${secondHouse}`;
+    }
+
+    if (category.id === 'pet') {
+      const firstPet = this.withArticle(first);
+      const secondPet = this.withArticle(second);
+
+      return type === 'oneOf'
+        ? `a pour animal soit ${firstPet}, soit ${secondPet}`
+        : `n’a ni ${firstPet} ni ${secondPet} comme animal`;
+    }
+
+    if (category.id === 'drink') {
+      return type === 'oneOf'
+        ? `boit soit ${this.drinkWithArticle(first)}, soit ${this.drinkWithArticle(second)}`
+        : `ne choisit ni ${this.drinkName(first)} ni ${this.drinkName(second)} comme boisson`;
+    }
+
+    return type === 'oneOf'
+      ? `pratique soit ${this.hobbyWithArticle(first)}, soit ${this.hobbyWithArticle(second)}`
+      : `ne pratique ni ${this.hobbyWithArticle(first)} ni ${this.hobbyWithArticle(second)}`;
   }
 
   private describeAdjacentClue(
@@ -2021,7 +2294,7 @@ export class ZebraPage {
     const leftDescription = this.describeHousePosition(leftCategory, leftValue);
     const rightDescription = this.describeHousePosition(rightCategory, rightValue);
 
-    return this.randomItem([
+    return this.chooseClueWording('adjacentRight', [
       `${this.capitalize(leftDescription)} est juste à gauche de ${rightDescription}.`,
       `${this.capitalize(leftDescription)} se trouve immédiatement à gauche de ${rightDescription}.`,
       `${this.capitalize(rightDescription)} est immédiatement à droite de ${leftDescription}.`,
@@ -2040,8 +2313,8 @@ export class ZebraPage {
     const firstDescription = this.describeHousePosition(firstCategory, firstValue);
     const secondDescription = this.describeHousePosition(secondCategory, secondValue);
 
-    return this.randomItem([
-      `${firstDescription} se trouve à côté de ${secondDescription}.`,
+    return this.chooseClueWording('adjacent', [
+      `${this.capitalize(firstDescription)} se trouve à côté de ${secondDescription}.`,
       `${this.capitalize(firstDescription)} est voisine de ${secondDescription}.`,
       `${this.capitalize(firstDescription)} et ${secondDescription} sont côte à côte.`,
       `${this.capitalize(firstDescription)} et ${secondDescription} occupent des positions consécutives.`,
@@ -2058,7 +2331,7 @@ export class ZebraPage {
     const leftDescription = this.describeHousePosition(leftCategory, leftValue);
     const rightDescription = this.describeHousePosition(rightCategory, rightValue);
 
-    return this.randomItem([
+    return this.chooseClueWording('leftOf', [
       `${this.capitalize(leftDescription)} se trouve quelque part à gauche de ${rightDescription}.`,
       `${this.capitalize(rightDescription)} se trouve plus à droite que ${leftDescription}.`,
       `En allant de gauche à droite, on rencontre ${leftDescription} avant ${rightDescription}.`,
@@ -2076,13 +2349,20 @@ export class ZebraPage {
     const firstDescription = this.describeHousePosition(firstCategory, firstValue);
     const secondDescription = this.describeHousePosition(secondCategory, secondValue);
 
-    return this.randomItem([
+    return this.chooseClueWording('oneBetween', [
       `Une seule maison se trouve exactement entre ${firstDescription} et ${secondDescription}.`,
       `Une seule maison sépare ${firstDescription} de ${secondDescription}.`,
       `Il y a exactement une seule maison entre ${firstDescription} et ${secondDescription}.`,
-      `Une seule maison se trouve entre ${firstDescription} et ${secondDescription}.`,
+      `Entre ${firstDescription} et ${secondDescription}, on compte une seule maison.`,
       `${this.capitalize(firstDescription)} et ${secondDescription} sont séparées par une seule maison.`,
+      `Les numéros de ${firstDescription} et de ${secondDescription} diffèrent de deux : une seule maison les sépare.`,
     ]);
+  }
+
+  private describeResident(category: ZebraCategory, value: string): string {
+    return category.id === 'person'
+      ? value
+      : `la personne qui ${this.describePersonAttribute(category, value)}`;
   }
 
   private describePersonAttribute(category: ZebraCategory, value: string): string {
@@ -2129,7 +2409,7 @@ export class ZebraPage {
     const houseText = this.houseLabel(house);
 
     if (category.id === 'person') {
-      return this.randomItem([
+      return this.chooseClueWording('notPosition:person', [
         `${value} n'est pas dans ${houseText}.`,
         `${value} n'habite pas ${houseText}.`,
         `${this.capitalize(houseText)} n'est pas habitée par ${value}.`,
@@ -2139,7 +2419,7 @@ export class ZebraPage {
     if (category.id === 'color') {
       const color = this.feminineColor(value);
 
-      return this.randomItem([
+      return this.chooseClueWording('notPosition:color', [
         `${this.houseLabel(house, true)} n'est pas ${color}.`,
         `${houseText} n'a pas la couleur ${color}.`,
         `La couleur ${color} n'est pas celle de ${houseText}.`,
@@ -2149,7 +2429,7 @@ export class ZebraPage {
     if (category.id === 'pet') {
       const pet = this.withArticle(value);
 
-      return this.randomItem([
+      return this.chooseClueWording('notPosition:pet', [
         `${this.capitalize(pet)} ne vit pas dans ${houseText}.`,
         `${this.capitalize(pet)} ne se trouve pas dans ${houseText}.`,
         `${this.capitalize(houseText)} n'abrite pas ${pet}.`,
@@ -2160,7 +2440,7 @@ export class ZebraPage {
       const drink = this.drinkWithArticle(value);
       const drinkName = this.drinkName(value);
 
-      return this.randomItem([
+      return this.chooseClueWording('notPosition:drink', [
         `On ne boit pas ${drink} dans ${houseText}.`,
         `Dans ${houseText}, on ne sert pas ${drink}.`,
         `La boisson de ${houseText} n'est pas ${drinkName}.`,
@@ -2170,7 +2450,7 @@ export class ZebraPage {
     if (category.id === 'hobby') {
       const hobby = this.hobbyWithArticle(value);
 
-      return this.randomItem([
+      return this.chooseClueWording('notPosition:hobby', [
         `${this.capitalize(hobby)} n'est pas le loisir de ${houseText}.`,
         `Dans ${houseText}, le loisir choisi n'est pas ${hobby}.`,
         `Le loisir de ${houseText} n'est pas ${hobby}.`,
@@ -2188,15 +2468,39 @@ export class ZebraPage {
     limit: number,
   ): number {
     const houseCategory = categories[0];
-    const nonHouseCategories = categories.slice(1);
-    const permutationsByCategory = new Map(
-      nonHouseCategories.map((category) => [category.id, this.permutations(category.values)]),
-    );
     const assignments: Record<string, Record<string, number>> = {
       [houseCategory.id]: Object.fromEntries(
         houseCategory.values.map((house, index) => [house, index]),
       ),
     };
+    const deduction = deduceZebraPositions(categories, clues, false);
+    const permutationsByCategory = new Map(
+      categories.slice(1).map((category) => [
+        category.id,
+        this.permutations(category.values)
+          .map((permutation) =>
+            Object.fromEntries(permutation.map((value, index) => [value, index])),
+          )
+          .filter(
+            (permutation) =>
+              category.values.every((value) =>
+                deduction.positions[category.id][value].includes(permutation[value]),
+              ) &&
+              clues.every((clue) =>
+                this.clueCouldMatch(clue, { ...assignments, [category.id]: permutation }),
+              ),
+          ),
+      ]),
+    );
+    // Search the most constrained category first, including when its anchor
+    // belongs to a category near the end of the displayed grid.
+    const nonHouseCategories = categories
+      .slice(1)
+      .sort(
+        (first, second) =>
+          permutationsByCategory.get(first.id)!.length -
+          permutationsByCategory.get(second.id)!.length,
+      );
     let solutionCount = 0;
 
     const search = (categoryIndex: number): void => {
@@ -2216,9 +2520,7 @@ export class ZebraPage {
       const permutations = permutationsByCategory.get(category.id) ?? [];
 
       for (const permutation of permutations) {
-        assignments[category.id] = Object.fromEntries(
-          permutation.map((value, index) => [value, index]),
-        );
+        assignments[category.id] = permutation;
 
         if (clues.every((clue) => this.clueCouldMatch(clue, assignments))) {
           search(categoryIndex + 1);
@@ -2272,6 +2574,27 @@ export class ZebraPage {
       return firstHouseIndex === undefined || secondHouseIndex === undefined
         ? allowUnknown
         : firstHouseIndex !== secondHouseIndex;
+    }
+
+    if (clue.type === 'oneOf' || clue.type === 'neither') {
+      const firstHouseIndex = assignments[clue.firstCategoryId]?.[clue.firstValue];
+      const optionIndexes = clue.secondValues.map(
+        (value) => assignments[clue.secondCategoryId]?.[value],
+      );
+
+      if (firstHouseIndex === undefined) {
+        return allowUnknown;
+      }
+
+      if (optionIndexes.includes(firstHouseIndex)) {
+        return clue.type === 'oneOf';
+      }
+
+      if (optionIndexes.some((index) => index === undefined)) {
+        return allowUnknown;
+      }
+
+      return clue.type === 'neither';
     }
 
     if (clue.type === 'adjacent' || clue.type === 'oneBetween') {
