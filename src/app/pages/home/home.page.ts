@@ -554,6 +554,18 @@ export class HomePage {
     return this.playlistService.progressFor(playlist);
   }
 
+  playlistLastCompletedText(playlist: PuzzlePlaylist): string {
+    if (playlist.lastCompletedAt == null) {
+      return 'Jamais complétée';
+    }
+
+    return `Dernière complétion : ${new Intl.DateTimeFormat('fr-CA', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    }).format(new Date(playlist.lastCompletedAt))}`;
+  }
+
   areAllCategoryPuzzlesInPlaylist(playlistId: string, puzzles: PuzzleCard[]): boolean {
     const playlist = this.playlistService.find(playlistId);
 

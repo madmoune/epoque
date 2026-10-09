@@ -282,6 +282,10 @@ h1 {
   .playlist-progress {
     color: var(--accent);
   }
+
+  .playlist-last-completed {
+    overflow-wrap: anywhere;
+  }
 }
 
 .playlist-empty {
@@ -738,6 +742,10 @@ h1 {
 
     span {
       white-space: nowrap;
+    }
+
+    .playlist-last-completed {
+      white-space: normal;
     }
   }
 

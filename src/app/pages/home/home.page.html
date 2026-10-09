@@ -78,6 +78,7 @@
               <span
                 >{{ playlist.routes.length }} jeu{{ playlist.routes.length === 1 ? '' : 'x' }}</span
               >
+              <span class="playlist-last-completed">{{ playlistLastCompletedText(playlist) }}</span>
               @if (playlistProgress(playlist); as progress) {
                 <span class="playlist-progress"
                   >{{ progress.index }} / {{ playlist.routes.length }} complété{{

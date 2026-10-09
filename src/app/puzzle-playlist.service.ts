@@ -5,6 +5,7 @@ export type PuzzlePlaylist = {
   id: string;
   name: string;
   routes: string[];
+  lastCompletedAt?: number | null;
 };
 
 export type PlaylistProgressSnapshot = {
@@ -52,6 +53,7 @@ export class PuzzlePlaylistService {
       id: this.createId(),
       name: name.trim() || 'Nouvelle playlist',
       routes: [],
+      lastCompletedAt: null,
     };
 
     this.setPlaylists([...this.playlists(), playlist]);
@@ -163,6 +165,14 @@ export class PuzzlePlaylistService {
       return;
     }
 
+    const completedAt = Date.now();
+    this.setPlaylists(
+      this.playlists().map((playlist) =>
+        playlist.id === progress.playlist.id
+          ? { ...playlist, lastCompletedAt: completedAt }
+          : playlist,
+      ),
+    );
     this.clearProgress(progress.playlist.id);
   }
 
@@ -284,11 +294,16 @@ export class PuzzlePlaylistService {
         return [];
       }
 
-      return parsed.filter(this.isPlaylist).map((playlist) => ({
-        id: playlist.id,
-        name: playlist.name.trim() || 'Playlist',
-        routes: [...new Set(playlist.routes.filter((route) => route.startsWith('/')))],
-      }));
+      return parsed
+        .filter((value): value is PuzzlePlaylist => this.isPlaylist(value))
+        .map((playlist) => ({
+          id: playlist.id,
+          name: playlist.name.trim() || 'Playlist',
+          routes: [...new Set(playlist.routes.filter((route) => route.startsWith('/')))],
+          lastCompletedAt: this.isValidCompletionTimestamp(playlist.lastCompletedAt)
+            ? playlist.lastCompletedAt
+            : null,
+        }));
     } catch {
       return [];
     }
@@ -330,8 +345,15 @@ export class PuzzlePlaylistService {
       typeof candidate.id === 'string' &&
       typeof candidate.name === 'string' &&
       Array.isArray(candidate.routes) &&
-      candidate.routes.every((route) => typeof route === 'string')
+      candidate.routes.every((route) => typeof route === 'string') &&
+      (candidate.lastCompletedAt === undefined ||
+        candidate.lastCompletedAt === null ||
+        this.isValidCompletionTimestamp(candidate.lastCompletedAt))
     );
+  }
+
+  private isValidCompletionTimestamp(value: unknown): value is number {
+    return typeof value === 'number' && Number.isFinite(value) && value >= 0;
   }
 
   private isProgressSnapshot(value: unknown): value is PlaylistProgressSnapshot {

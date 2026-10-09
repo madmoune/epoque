@@ -75,6 +75,33 @@ describe('PuzzlePlaylistService progress', () => {
     expect(JSON.parse(localStorage.getItem(progressStorageKey) ?? 'null')).toEqual({});
   });
 
+  it('records when the playlist was last completed', () => {
+    const completedAt = Date.UTC(2026, 9, 9, 12, 34);
+    vi.spyOn(Date, 'now').mockReturnValue(completedAt);
+    const service = TestBed.inject(PuzzlePlaylistService);
+    service.update(playlist.id, { routes: ['/only'] });
+    const singlePuzzlePlaylist = service.find(playlist.id)!;
+    const progress = service.progressFromUrl(service.startUrl(singlePuzzlePlaylist)!);
+
+    service.complete(progress!);
+
+    expect(service.find(singlePuzzlePlaylist.id)?.lastCompletedAt).toBe(completedAt);
+    expect(JSON.parse(localStorage.getItem('epique-puzzle-playlists') ?? 'null')).toEqual([
+      expect.objectContaining({ id: singlePuzzlePlaylist.id, lastCompletedAt: completedAt }),
+    ]);
+  });
+
+  it('loads a previously saved completion date', () => {
+    const completedAt = Date.UTC(2026, 8, 30);
+    localStorage.setItem(
+      'epique-puzzle-playlists',
+      JSON.stringify([{ ...playlist, lastCompletedAt: completedAt }]),
+    );
+    const service = TestBed.inject(PuzzlePlaylistService);
+
+    expect(service.find(playlist.id)?.lastCompletedAt).toBe(completedAt);
+  });
+
   it('invalidates progress when the playlist routes change', () => {
     const service = TestBed.inject(PuzzlePlaylistService);
     const storedPlaylist = service.create(playlist.name);
