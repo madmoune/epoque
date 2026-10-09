@@ -71,10 +71,15 @@ export class PhraseService {
   }
 
   private normalizePhrase(phrase: string): string {
-    return phrase
-      .normalize('NFD')
-      .replace(/\p{Diacritic}/gu, '')
-      .toUpperCase();
+    return (
+      phrase
+        // Unicode normalization does not decompose the œ ligature. Expanding it
+        // keeps O and E as two playable letters in the phrase board.
+        .replace(/[Œœ]/g, 'OE')
+        .normalize('NFD')
+        .replace(/\p{Diacritic}/gu, '')
+        .toUpperCase()
+    );
   }
 
   private shuffle<T>(items: T[]): T[] {
