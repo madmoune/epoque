@@ -24,7 +24,6 @@
             #primaryActionButton
             type="button"
             class="primary-action replay-action"
-            data-confirm-action="restart"
             (click)="action.emit()"
           >
             Rejouer
@@ -42,7 +41,6 @@
           #primaryActionButton
           type="button"
           class="primary-action"
-          data-confirm-action="new-game"
           (click)="handlePrimaryAction()"
         >
           {{ primaryActionLabel }}
