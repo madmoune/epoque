@@ -63,11 +63,11 @@
         />
 
         <div class="actions">
-            <button type="button" class="secondary-button" (click)="nextPuzzle()">
+            <button type="button" class="secondary-button" data-confirm-action="new-game" (click)="nextPuzzle()">
                 Passer
             </button>
 
-            <button type="button" class="secondary-button" (click)="revealAllUnlocked()" [disabled]="isSolved()">
+            <button type="button" class="secondary-button" data-confirm-action="hint" (click)="revealAllUnlocked()" [disabled]="isSolved()">
                 Révéler les lettres disponibles
             </button>
         </div>

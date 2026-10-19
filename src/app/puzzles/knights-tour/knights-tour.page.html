@@ -144,6 +144,7 @@
               <button
                 type="button"
                 class="secondary-button"
+                data-confirm-action="hint"
                 (click)="showHint()"
                 [disabled]="isSolved() || remainingMoveCount() === 0"
               >
@@ -152,12 +153,13 @@
               <button
                 type="button"
                 class="secondary-button"
+                data-confirm-action="restart"
                 (click)="restartPuzzle()"
                 [disabled]="path().length <= 1 || isSolved()"
               >
                 Recommencer
               </button>
-              <button type="button" class="secondary-button" (click)="newPuzzle()">
+              <button type="button" class="secondary-button" data-confirm-action="new-game" (click)="newPuzzle()">
                 Nouveau parcours
               </button>
             </div>
@@ -263,6 +265,7 @@
             <button
               type="button"
               class="secondary-button"
+              data-confirm-action="hint"
               (click)="showClassicHint()"
               [disabled]="classicIsSolved() || classicRemainingMoveCount() === 0"
             >
@@ -271,12 +274,13 @@
             <button
               type="button"
               class="secondary-button"
+              data-confirm-action="restart"
               (click)="restartClassicPuzzle()"
               [disabled]="classicPath().length === 0 || classicIsSolved()"
             >
               Recommencer
             </button>
-            <button type="button" class="secondary-button" (click)="newClassicPuzzle()">
+            <button type="button" class="secondary-button" data-confirm-action="new-game" (click)="newClassicPuzzle()">
               Nouvelle grille
             </button>
           </div>

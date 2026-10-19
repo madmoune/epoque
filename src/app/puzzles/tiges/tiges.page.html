@@ -243,10 +243,10 @@
           <button type="button" class="secondary-button" [disabled]="placements().length === 0" (click)="undoLastPlacement()">
             Annuler
           </button>
-          <button type="button" class="secondary-button" [disabled]="placements().length === 0" (click)="resetPath()">
+          <button type="button" class="secondary-button" data-confirm-action="restart" [disabled]="placements().length === 0" (click)="resetPath()">
             Recommencer
           </button>
-          <button type="button" class="new-button" (click)="newPuzzle()">Nouveau parcours</button>
+          <button type="button" class="new-button" data-confirm-action="new-game" (click)="newPuzzle()">Nouveau parcours</button>
         </div>
       </aside>
     </div>

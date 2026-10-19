@@ -33,7 +33,7 @@
             />
 
             <div class="actions">
-                <button type="button" class="secondary-button" (click)="showHint()">
+                <button type="button" class="secondary-button" data-confirm-action="hint" (click)="showHint()">
                     @if (hintCount() === 0) {
                     Indice
                     } @else {
@@ -41,7 +41,7 @@
                     }
                 </button>
 
-                <button type="button" class="secondary-button" (click)="nextPuzzle()">
+                <button type="button" class="secondary-button" data-confirm-action="new-game" (click)="nextPuzzle()">
                     Prochaine séquence
                 </button>
             </div>

@@ -245,9 +245,9 @@
           <button type="button" (click)="undoLastPiece()" [disabled]="!canUndo()">
             Retirer la dernière
           </button>
-          <button type="button" (click)="showHint()" [disabled]="isSolved()">Indice</button>
-          <button type="button" (click)="resetPuzzle()" [disabled]="!canUndo()">Recommencer</button>
-          <button type="button" (click)="newPuzzle()">Nouvelle tour</button>
+          <button type="button" data-confirm-action="hint" (click)="showHint()" [disabled]="isSolved()">Indice</button>
+          <button type="button" data-confirm-action="restart" (click)="resetPuzzle()" [disabled]="!canUndo()">Recommencer</button>
+          <button type="button" data-confirm-action="new-game" (click)="newPuzzle()">Nouvelle tour</button>
         </div>
 
         @if (dragState(); as drag) {

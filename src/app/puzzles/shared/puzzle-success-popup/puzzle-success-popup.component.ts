@@ -1,11 +1,13 @@
 import {
   Component,
+  ElementRef,
   EventEmitter,
   HostListener,
   inject,
   Input,
   OnInit,
   Output,
+  ViewChild,
   signal,
 } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
@@ -162,6 +164,8 @@ export class PuzzleSuccessPopupComponent implements OnInit {
 
   @Output() readonly action = new EventEmitter<void>();
 
+  @ViewChild('primaryActionButton') private primaryActionButton?: ElementRef<HTMLButtonElement>;
+
   ngOnInit(): void {
     if (this.tone !== 'success' || !this.cameFromPlaylist) {
       return;
@@ -263,6 +267,6 @@ export class PuzzleSuccessPopupComponent implements OnInit {
     }
 
     event.preventDefault();
-    this.action.emit();
+    this.primaryActionButton?.nativeElement.click();
   }
 }

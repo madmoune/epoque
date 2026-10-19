@@ -84,7 +84,7 @@
         </section>
 
         <div class="actions">
-            <button type="button" class="secondary-button" (click)="placeHintTile()"
+            <button type="button" class="secondary-button" data-confirm-action="hint" (click)="placeHintTile()"
                 [disabled]="isSolved() || unplacedTiles().length === 0">
                 Indice
             </button>
@@ -105,7 +105,7 @@
             </button>
             }
 
-            <button type="button" (click)="newPuzzle()">
+            <button type="button" data-confirm-action="new-game" (click)="newPuzzle()">
                 Nouvelle pyramide
             </button>
         </div>

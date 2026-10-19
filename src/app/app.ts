@@ -1,5 +1,12 @@
 import { DOCUMENT } from '@angular/common';
-import { Component, HostListener, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  HostListener,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { NavigationEnd, NavigationError, Router, RouterOutlet } from '@angular/router';
 import { SwUpdate } from '@angular/service-worker';
 import { PuzzlePlayHistoryService } from './puzzle-play-history.service';
@@ -9,6 +16,13 @@ import { FirebaseUserDataSyncService } from './shared/firebase/firebase-user-dat
 import { AppStorageService } from './shared/storage/app-storage.service';
 
 type Theme = 'dark' | 'light';
+type ConfirmationAction = 'hint' | 'restart' | 'new-game';
+type PendingConfirmation = {
+  action: ConfirmationAction;
+  element: HTMLButtonElement;
+  message: string;
+  title: string;
+};
 type ThemeTransitionDocument = Document & {
   startViewTransition?: (update: () => void) => unknown;
 };
@@ -25,10 +39,14 @@ export class App {
   private readonly playlistService = inject(PuzzlePlaylistService);
   private readonly storage = inject(AppStorageService);
   private readonly swUpdate = inject(SwUpdate, { optional: true });
+  private readonly destroyRef = inject(DestroyRef);
   protected readonly firebaseAuth = inject(FirebaseAuthService);
   protected readonly userDataSync = inject(FirebaseUserDataSyncService);
   private readonly currentUrl = signal(this.router.url);
+  private readonly confirmedElements = new WeakSet<HTMLButtonElement>();
   private recoveringFromChunkError = false;
+
+  protected readonly pendingConfirmation = signal<PendingConfirmation | null>(null);
 
   constructor() {
     inject(PuzzlePlayHistoryService);
@@ -41,6 +59,10 @@ export class App {
         this.handleChunkLoadFailure(event.error);
       }
     });
+    this.document.addEventListener('click', this.handleConfirmationClick, true);
+    this.destroyRef.onDestroy(() => {
+      this.document.removeEventListener('click', this.handleConfirmationClick, true);
+    });
     this.watchForApplicationUpdates();
   }
 
@@ -50,6 +72,65 @@ export class App {
   protected readonly playlistProgress = computed(() =>
     this.playlistService.progressFromUrl(this.currentUrl()),
   );
+
+  private readonly handleConfirmationClick = (event: MouseEvent): void => {
+    const target = event.target;
+
+    if (!(target instanceof Element)) {
+      return;
+    }
+
+    const button = target.closest('button[data-confirm-action]') as HTMLButtonElement | null;
+
+    if (!button || button.disabled) {
+      return;
+    }
+
+    if (this.confirmedElements.has(button)) {
+      this.confirmedElements.delete(button);
+      return;
+    }
+
+    const action = button.dataset['confirmAction'];
+
+    if (!this.isConfirmationAction(action)) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    const copy = this.confirmationCopy(action);
+    this.pendingConfirmation.set({ action, element: button, ...copy });
+  };
+
+  protected confirmPendingAction(): void {
+    const pending = this.pendingConfirmation();
+
+    if (!pending) {
+      return;
+    }
+
+    this.pendingConfirmation.set(null);
+
+    if (!pending.element.isConnected || pending.element.disabled) {
+      return;
+    }
+
+    this.confirmedElements.add(pending.element);
+    pending.element.click();
+  }
+
+  protected cancelPendingAction(): void {
+    this.pendingConfirmation.set(null);
+  }
+
+  @HostListener('document:keydown.escape')
+  protected closeConfirmationOnEscape(): void {
+    if (this.pendingConfirmation()) {
+      this.cancelPendingAction();
+    }
+  }
 
   @HostListener('document:pointerdown', ['$event'])
   protected closeQuickMenuOnOutsideClick(event: PointerEvent): void {
@@ -119,6 +200,30 @@ export class App {
   protected navigateToPlaylistPuzzle(route: string | null | undefined): void {
     if (route) {
       void this.router.navigateByUrl(route);
+    }
+  }
+
+  private isConfirmationAction(value: string | undefined): value is ConfirmationAction {
+    return value === 'hint' || value === 'restart' || value === 'new-game';
+  }
+
+  private confirmationCopy(action: ConfirmationAction): Pick<PendingConfirmation, 'title' | 'message'> {
+    switch (action) {
+      case 'hint':
+        return {
+          title: 'Utiliser un indice ?',
+          message: 'Une partie de la solution sera révélée et ta progression sera marquée comme aidée.',
+        };
+      case 'restart':
+        return {
+          title: 'Recommencer la partie ?',
+          message: 'Ta progression actuelle sera effacée.',
+        };
+      case 'new-game':
+        return {
+          title: 'Commencer une nouvelle partie ?',
+          message: 'La partie actuelle sera abandonnée.',
+        };
     }
   }
 

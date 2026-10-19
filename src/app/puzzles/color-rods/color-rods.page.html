@@ -177,13 +177,13 @@
     </section>
 
     <div class="actions game-actions">
-      <button type="button" class="secondary-button" (click)="placeHint()" [disabled]="isSolved()">
+      <button type="button" class="secondary-button" data-confirm-action="hint" (click)="placeHint()" [disabled]="isSolved()">
         Indice
       </button>
-      <button type="button" class="secondary-button" (click)="resetPath()" [disabled]="isSolved()">
+      <button type="button" class="secondary-button" data-confirm-action="restart" (click)="resetPath()" [disabled]="isSolved()">
         Tout effacer
       </button>
-      <button type="button" class="secondary-button" (click)="newPuzzle()">Nouveau défi</button>
+      <button type="button" class="secondary-button" data-confirm-action="new-game" (click)="newPuzzle()">Nouveau défi</button>
     </div>
   </section>
 </main>

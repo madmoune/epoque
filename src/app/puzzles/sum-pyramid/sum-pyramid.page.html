@@ -64,13 +64,14 @@
         <button
           type="button"
           class="secondary-button"
+          data-confirm-action="hint"
           (click)="showHint()"
           [disabled]="!hasAvailableHint() || isSolved()"
         >
           Indice
         </button>
-        <button type="button" class="secondary-button" (click)="resetPuzzle()">Recommencer</button>
-        <button type="button" class="secondary-button" (click)="newPuzzle()">Nouvelle pyramide</button>
+        <button type="button" class="secondary-button" data-confirm-action="restart" (click)="resetPuzzle()">Recommencer</button>
+        <button type="button" class="secondary-button" data-confirm-action="new-game" (click)="newPuzzle()">Nouvelle pyramide</button>
       </div>
     </section>
   </section>

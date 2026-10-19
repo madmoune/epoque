@@ -100,6 +100,7 @@
                 type="button"
                 class="secondary-button"
                 [disabled]="playlist.routes.length === 0"
+                [attr.data-confirm-action]="playlistProgress(playlist) ? 'restart' : null"
                 (click)="playPlaylist(playlist, true)"
               >
                 {{

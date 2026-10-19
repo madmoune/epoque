@@ -97,13 +97,14 @@
         <button
           type="button"
           class="secondary-button"
+          data-confirm-action="hint"
           (click)="showHint()"
           [disabled]="!hasAvailableHint() || isSolved()"
         >
           Indice
         </button>
-        <button type="button" class="secondary-button" (click)="resetGrid()">Recommencer</button>
-        <button type="button" class="secondary-button" (click)="newPuzzle()">
+        <button type="button" class="secondary-button" data-confirm-action="restart" (click)="resetGrid()">Recommencer</button>
+        <button type="button" class="secondary-button" data-confirm-action="new-game" (click)="newPuzzle()">
           Nouvelle grille
         </button>
       </div>

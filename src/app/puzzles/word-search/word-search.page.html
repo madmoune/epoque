@@ -44,7 +44,7 @@
               <li [class]="wordClass(word)">
                 <span>{{ word.answer }}</span>
                 @if (!foundWordIds().has(word.id)) {
-                  <button type="button" class="hint-button" (click)="revealWord(word)">Indice</button>
+                  <button type="button" class="hint-button" data-confirm-action="hint" (click)="revealWord(word)">Indice</button>
                 }
               </li>
             }
@@ -72,6 +72,7 @@
                 <button
                   type="button"
                   class="hint-button final-hint-button"
+                  data-confirm-action="hint"
                   (click)="revealFinalAnswerHint()"
                   [disabled]="finalAnswerHintLetterCount() >= currentPuzzle.finalWord.length || isSolved()"
                 >
@@ -96,7 +97,7 @@
           }
 
           <div class="actions">
-            <button type="button" (click)="newPuzzle()">Nouvelle grille</button>
+            <button type="button" data-confirm-action="new-game" (click)="newPuzzle()">Nouvelle grille</button>
           </div>
         </aside>
       </section>

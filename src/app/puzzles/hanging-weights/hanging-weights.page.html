@@ -285,6 +285,7 @@
           <button
             type="button"
             class="secondary-button"
+          data-confirm-action="hint"
             (click)="showHint()"
             [disabled]="isSolved() || !hasAvailableHint()"
           >
@@ -293,12 +294,13 @@
           <button
             type="button"
             class="secondary-button"
+          data-confirm-action="restart"
             (click)="resetPuzzle()"
             [disabled]="isSolved()"
           >
             Recommencer
           </button>
-          <button type="button" class="secondary-button" (click)="newPuzzle()">
+          <button type="button" class="secondary-button" data-confirm-action="new-game" (click)="newPuzzle()">
             Nouveau mobile
           </button>
         </div>

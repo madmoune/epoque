@@ -20,7 +20,13 @@
     <span class="popup-actions" [class.journey-actions]="cameFromRandom || cameFromPlaylist">
       @if (cameFromPlaylist) {
         @if (showAction) {
-          <button type="button" class="primary-action replay-action" (click)="action.emit()">
+          <button
+            #primaryActionButton
+            type="button"
+            class="primary-action replay-action"
+            data-confirm-action="restart"
+            (click)="action.emit()"
+          >
             Rejouer
           </button>
         }
@@ -32,7 +38,13 @@
           {{ primaryActionLabel }}
         </button>
       } @else if (showAction) {
-        <button type="button" class="primary-action" (click)="handlePrimaryAction()">
+        <button
+          #primaryActionButton
+          type="button"
+          class="primary-action"
+          data-confirm-action="new-game"
+          (click)="handlePrimaryAction()"
+        >
           {{ primaryActionLabel }}
         </button>
         @if (cameFromRandom) {

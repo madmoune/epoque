@@ -69,13 +69,14 @@
         <button
           type="button"
           class="reset-button"
+          data-confirm-action="restart"
           [disabled]="moves() === 0 || isGenerating()"
           (click)="resetGame()"
         >
           Recommencer
         </button>
         <div class="new-game-area">
-          <button type="button" class="new-button" [disabled]="isGenerating()" (click)="newGame()">
+          <button type="button" class="new-button" data-confirm-action="new-game" [disabled]="isGenerating()" (click)="newGame()">
             Nouvelle grille
           </button>
         </div>

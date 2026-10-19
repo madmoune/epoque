@@ -472,12 +472,13 @@
           <button
             type="button"
             class="secondary-button"
+            data-confirm-action="hint"
             (click)="showHint()"
             [disabled]="hintLevel() >= maxHintLevel() || isCorrect()"
           >
             Indice
           </button>
-          <button type="button" class="secondary-button" (click)="nextPuzzle()">
+          <button type="button" class="secondary-button" data-confirm-action="new-game" (click)="nextPuzzle()">
             {{
               isNatoLetterMode()
                 ? 'Nouvelle lettre'

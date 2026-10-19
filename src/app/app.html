@@ -113,3 +113,28 @@
 </details>
 
 <router-outlet />
+
+@if (pendingConfirmation(); as confirmation) {
+  <div class="action-confirmation-backdrop" (click)="cancelPendingAction()">
+    <section
+      class="action-confirmation-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="action-confirmation-title"
+      aria-describedby="action-confirmation-message"
+      (click)="$event.stopPropagation()"
+    >
+      <p class="eyebrow">Confirmation</p>
+      <h2 id="action-confirmation-title">{{ confirmation.title }}</h2>
+      <p id="action-confirmation-message">{{ confirmation.message }}</p>
+      <div class="action-confirmation-actions">
+        <button type="button" class="secondary-button" autofocus (click)="cancelPendingAction()">
+          Annuler
+        </button>
+        <button type="button" class="confirm-action-button" (click)="confirmPendingAction()">
+          Confirmer
+        </button>
+      </div>
+    </section>
+  </div>
+}

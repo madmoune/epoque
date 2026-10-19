@@ -31,7 +31,7 @@
             <button type="button" (click)="goToNextRevealStep()">
                 @if (revealStep() < 3) { Révélation suivante } @else { Commencer } </button>
 
-                    <button type="button" class="secondary-button" (click)="nextPuzzle()">
+                    <button type="button" class="secondary-button" data-confirm-action="new-game" (click)="nextPuzzle()">
                         Nouvelle grille
                     </button>
         </div>
@@ -57,15 +57,15 @@
         </div>
 
         <div class="actions">
-            <button type="button" class="secondary-button" (click)="placeHint()" [disabled]="isSolved()">
+            <button type="button" class="secondary-button" data-confirm-action="hint" (click)="placeHint()" [disabled]="isSolved()">
                 Indice
             </button>
 
-            <button type="button" class="secondary-button" (click)="resetPlayerGrid()" [disabled]="isSolved()">
+            <button type="button" class="secondary-button" data-confirm-action="restart" (click)="resetPlayerGrid()" [disabled]="isSolved()">
                 Tout effacer
             </button>
 
-            <button type="button" class="secondary-button" (click)="nextPuzzle()">
+            <button type="button" class="secondary-button" data-confirm-action="new-game" (click)="nextPuzzle()">
                 Nouvelle grille
             </button>
         </div>

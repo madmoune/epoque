@@ -83,10 +83,10 @@
         >
           ↻ Tourner
         </button>
-        <button type="button" class="hint-button" (click)="showHint()" [disabled]="!hasAvailableHint()">
+        <button type="button" class="hint-button" data-confirm-action="hint" (click)="showHint()" [disabled]="!hasAvailableHint()">
           Indice
         </button>
-        <div class="new-area"><button type="button" (click)="newPuzzle()">Nouvelle image</button></div>
+        <div class="new-area"><button type="button" data-confirm-action="new-game" (click)="newPuzzle()">Nouvelle image</button></div>
       </aside>
     </div>
   </section>

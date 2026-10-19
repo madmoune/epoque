@@ -73,16 +73,17 @@
         }
 
         <div class="actions">
-          <button type="button" (click)="newPuzzle()">Nouveau jeu</button>
+          <button type="button" data-confirm-action="new-game" (click)="newPuzzle()">Nouveau jeu</button>
           <button
             type="button"
             class="secondary-button"
+            data-confirm-action="hint"
             (click)="showHint()"
             [disabled]="isSolved()"
           >
             Indice
           </button>
-          <button type="button" class="secondary-button" (click)="resetPuzzle()">
+          <button type="button" class="secondary-button" data-confirm-action="restart" (click)="resetPuzzle()">
             Recommencer
           </button>
         </div>

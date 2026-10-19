@@ -169,13 +169,14 @@
       <button
         type="button"
         class="secondary-button"
+        data-confirm-action="hint"
         (click)="placeHintPiece()"
         [disabled]="!needsHint()"
       >
         Indice
       </button>
-      <button type="button" class="secondary-button" (click)="resetBoard()">Recommencer</button>
-      <button type="button" (click)="newPuzzle()">Nouvelle silhouette</button>
+      <button type="button" class="secondary-button" data-confirm-action="restart" (click)="resetBoard()">Recommencer</button>
+      <button type="button" data-confirm-action="new-game" (click)="newPuzzle()">Nouvelle silhouette</button>
     </div>
 
     @if (isSolved()) {

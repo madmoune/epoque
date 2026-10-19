@@ -113,12 +113,13 @@
         <button
           type="button"
           class="secondary-button"
+          data-confirm-action="hint"
           (click)="showHint()"
           [disabled]="hintLevel() >= maxHintLevel() || isSolved()"
         >
           Indice
         </button>
-        <button type="button" class="secondary-button" (click)="nextProblem()">
+        <button type="button" class="secondary-button" data-confirm-action="new-game" (click)="nextProblem()">
           Nouvelle équation
         </button>
       </div>

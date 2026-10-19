@@ -282,6 +282,75 @@
   box-shadow: 0 0.5rem 1.25rem rgb(0 0 0 / 24%);
 }
 
+.action-confirmation-backdrop {
+  position: fixed;
+  z-index: 500;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgb(0 0 0 / 62%);
+  backdrop-filter: blur(3px);
+}
+
+.action-confirmation-dialog {
+  width: min(28rem, 100%);
+  padding: 1.25rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.9rem;
+  background: var(--surface);
+  box-shadow: 0 1rem 3rem rgb(0 0 0 / 42%);
+
+  .eyebrow {
+    margin: 0 0 0.35rem;
+  }
+
+  h2 {
+    margin: 0;
+    color: var(--text);
+    font-size: 1.2rem;
+  }
+
+  > p:not(.eyebrow) {
+    margin: 0.7rem 0 0;
+    color: var(--muted-strong);
+    line-height: 1.45;
+  }
+}
+
+.action-confirmation-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-top: 1.15rem;
+
+  button {
+    min-height: 2.5rem;
+    padding: 0.5rem 0.9rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 0.6rem;
+    font: inherit;
+    font-weight: 800;
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--focus) 35%, transparent);
+      outline-offset: 2px;
+    }
+  }
+
+  .secondary-button {
+    background: var(--surface-raised);
+    color: var(--text);
+  }
+
+  .confirm-action-button {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--accent-contrast);
+  }
+}
+
 @media (max-width: 44rem) {
   .playlist-navigation {
     gap: 0.35rem;

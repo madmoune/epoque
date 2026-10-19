@@ -80,6 +80,7 @@
         <button
           type="button"
           class="secondary-button"
+          data-confirm-action="hint"
           (click)="showHint()"
           [disabled]="isCorrect()"
         >
@@ -88,13 +89,14 @@
         <button
           type="button"
           class="secondary-button"
+          data-confirm-action="restart"
           (click)="clearGuesses()"
           [disabled]="isCorrect()"
         >
           Vider les champs
         </button>
         @if (!isCorrect()) {
-          <button type="button" class="secondary-button" (click)="nextPuzzle()">Passer</button>
+          <button type="button" class="secondary-button" data-confirm-action="new-game" (click)="nextPuzzle()">Passer</button>
         }
       </div>
 

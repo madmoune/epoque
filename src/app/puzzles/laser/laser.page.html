@@ -69,12 +69,13 @@
         <button
           type="button"
           class="secondary-button"
+          data-confirm-action="hint"
           [disabled]="isSolved() || allControlsLocked()"
           (click)="useHint()"
         >
           Indice
         </button>
-        <button type="button" (click)="newPuzzle()">Nouveau laser</button>
+        <button type="button" data-confirm-action="new-game" (click)="newPuzzle()">Nouveau laser</button>
       </div>
     </section>
   </section>

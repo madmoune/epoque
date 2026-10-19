@@ -213,12 +213,13 @@
           type="button"
           class="secondary-button"
           [disabled]="placedIds().size === 0"
+          data-confirm-action="restart"
           (click)="resetAssembly()"
         >
           Vider le plateau
         </button>
       }
-      <button type="button" class="secondary-button" (click)="newGame()">Nouvelle partie</button>
+      <button type="button" class="secondary-button" data-confirm-action="new-game" (click)="newGame()">Nouvelle partie</button>
     </div>
 
     @if (isSolved()) {

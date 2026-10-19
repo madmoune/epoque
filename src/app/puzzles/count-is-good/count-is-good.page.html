@@ -140,9 +140,9 @@
       </div>
 
       <div class="actions">
-        <button type="button" class="secondary-button" (click)="showHint()">Indice</button>
-        <button type="button" class="secondary-button" (click)="resetPuzzle()">Recommencer</button>
-        <button type="button" class="secondary-button" (click)="newPuzzle()">Nouveau tirage</button>
+        <button type="button" class="secondary-button" data-confirm-action="hint" (click)="showHint()">Indice</button>
+        <button type="button" class="secondary-button" data-confirm-action="restart" (click)="resetPuzzle()">Recommencer</button>
+        <button type="button" class="secondary-button" data-confirm-action="new-game" (click)="newPuzzle()">Nouveau tirage</button>
       </div>
     </section>
   </section>

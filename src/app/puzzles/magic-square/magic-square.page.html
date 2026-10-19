@@ -69,16 +69,16 @@
         </section>
 
         <div class="actions">
-          <button type="button" class="secondary-button" (click)="placeHint()" [disabled]="isSolved()">
+          <button type="button" class="secondary-button" data-confirm-action="hint" (click)="placeHint()" [disabled]="isSolved()">
             Indice
           </button>
           <button type="button" class="secondary-button" (click)="clearSelectedCell()">
             Effacer
           </button>
-          <button type="button" class="secondary-button" (click)="resetPuzzle()">
+          <button type="button" class="secondary-button" data-confirm-action="restart" (click)="resetPuzzle()">
             Recommencer
           </button>
-          <button type="button" class="secondary-button" (click)="newPuzzle()">Nouveau</button>
+          <button type="button" class="secondary-button" data-confirm-action="new-game" (click)="newPuzzle()">Nouveau</button>
         </div>
       </aside>
     </div>

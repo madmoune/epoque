@@ -979,6 +979,7 @@
                       <button
                         type="button"
                         class="hint-button"
+                        data-confirm-action="hint"
                         (click)="revealSegmentPhraseHint()"
                         [disabled]="!canRevealSegmentPhraseHint()"
                       >
@@ -1041,6 +1042,7 @@
                       <button
                         type="button"
                         class="hint-button"
+                        data-confirm-action="hint"
                         (click)="revealColorChainHint()"
                         [disabled]="!canRevealColorChainHint()"
                       >
@@ -1278,6 +1280,7 @@
                     <button
                       type="button"
                       class="hint-button"
+                      data-confirm-action="hint"
                       (click)="revealWordSplitHint()"
                       [disabled]="!canRevealWordSplitHint()"
                     >
@@ -1295,7 +1298,7 @@
                     (keydown.enter)="checkChallenge()"
                   />
                   <button type="button" (click)="checkChallenge()">Vérifier</button>
-                  <button type="button" class="answer-button" (click)="revealChallengeSolution()">
+                  <button type="button" class="answer-button" data-confirm-action="hint" (click)="revealChallengeSolution()">
                     Réponse
                   </button>
                 </div>
@@ -1309,7 +1312,7 @@
           </div>
           @if (!isPlayPage()) {
             <div class="actions example-actions">
-              <button type="button" (click)="randomizeSeed()">Régénérer</button>
+              <button type="button" data-confirm-action="new-game" (click)="randomizeSeed()">Régénérer</button>
             </div>
           }
         </div>

@@ -99,13 +99,13 @@
         />
 
         <div class="actions">
-            <button type="button" class="secondary-button" (click)="showNextHintLetter()"
+            <button type="button" class="secondary-button" data-confirm-action="hint" (click)="showNextHintLetter()"
                 [disabled]="isCorrect() || hintLetterCount() >= word.answer.length">
                 Indice
             </button>
 
             @if(!isCorrect()) {
-            <button type="button" class="secondary-button" (click)="nextPuzzle()">
+            <button type="button" class="secondary-button" data-confirm-action="new-game" (click)="nextPuzzle()">
                 Passer
             </button>
             }

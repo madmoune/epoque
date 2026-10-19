@@ -41,13 +41,13 @@
         </div>
 
         <div class="actions">
-          <button type="button" class="secondary-button" (click)="useHint()" [disabled]="!canUseHint()">
+          <button type="button" class="secondary-button" data-confirm-action="hint" (click)="useHint()" [disabled]="!canUseHint()">
             Indice
           </button>
-          <button type="button" class="secondary-button" (click)="restartPuzzle()">
+          <button type="button" class="secondary-button" data-confirm-action="restart" (click)="restartPuzzle()">
             Recommencer
           </button>
-          <button type="button" (click)="newPuzzle()">Nouvelle phrase</button>
+          <button type="button" data-confirm-action="new-game" (click)="newPuzzle()">Nouvelle phrase</button>
         </div>
       </section>
 

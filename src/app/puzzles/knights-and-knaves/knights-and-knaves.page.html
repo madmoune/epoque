@@ -71,10 +71,10 @@
     </section>
 
     <div class="actions">
-      <button type="button" class="secondary-button" (click)="showHint()" [disabled]="solved()">Indice</button>
-      <button type="button" class="secondary-button" (click)="resetAnswers()"
+      <button type="button" class="secondary-button" data-confirm-action="hint" (click)="showHint()" [disabled]="solved()">Indice</button>
+      <button type="button" class="secondary-button" data-confirm-action="restart" (click)="resetAnswers()"
         [disabled]="answeredCount() === 0 && hintedPeople().size === 0">Réinitialiser</button>
-      <button type="button" class="secondary-button" (click)="newPuzzle()">Nouveau puzzle</button>
+      <button type="button" class="secondary-button" data-confirm-action="new-game" (click)="newPuzzle()">Nouveau puzzle</button>
     </div>
   </section>
 </main>

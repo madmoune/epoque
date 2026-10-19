@@ -506,6 +506,7 @@
       <button
         type="button"
         data-board-cell
+        data-confirm-action="new-game"
         [disabled]="loading() || !!loadError()"
         (click)="newPuzzle()"
       >
@@ -515,6 +516,7 @@
         type="button"
         data-board-cell
         class="secondary-button"
+        data-confirm-action="hint"
         [disabled]="isSolved() || loading() || !!loadError()"
         (click)="showHint()"
       >
@@ -524,6 +526,7 @@
         type="button"
         data-board-cell
         class="secondary-button"
+        data-confirm-action="restart"
         [disabled]="isSolved() || loading() || !!loadError()"
         (click)="resetPuzzle()"
       >

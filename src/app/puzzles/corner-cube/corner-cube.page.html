@@ -96,11 +96,11 @@
     </section>
 
     <div class="actions">
-      <button type="button" class="secondary-button" (click)="placeHint()" [disabled]="isSolved()">
+      <button type="button" class="secondary-button" data-confirm-action="hint" (click)="placeHint()" [disabled]="isSolved()">
         Indice
       </button>
-      <button type="button" (click)="resetPuzzle()">Recommencer</button>
-      <button type="button" (click)="newCube()">Nouveau cube</button>
+      <button type="button" data-confirm-action="restart" (click)="resetPuzzle()">Recommencer</button>
+      <button type="button" data-confirm-action="new-game" (click)="newCube()">Nouveau cube</button>
     </div>
 
     @if (isSolved()) {

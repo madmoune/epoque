@@ -239,12 +239,13 @@
         @if (isHost() && phase() === 'reveal') {
           <section class="round-footer">
             <div class="reveal-actions">
-              <button type="button" class="ghost-button" (click)="resetRoom()" [disabled]="busy()">
+              <button type="button" class="ghost-button" data-confirm-action="restart" (click)="resetRoom()" [disabled]="busy()">
                 Reinitialiser
               </button>
               <button
                 type="button"
                 class="primary-button"
+                data-confirm-action="new-game"
                 (click)="nextRound()"
                 [disabled]="busy()"
               >

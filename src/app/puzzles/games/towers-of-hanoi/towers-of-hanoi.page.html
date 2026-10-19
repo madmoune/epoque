@@ -117,13 +117,14 @@
           >
             Annuler le dernier coup
           </button>
-          <button type="button" class="secondary-button" (click)="restartGame()">
+          <button type="button" class="secondary-button" data-confirm-action="restart" (click)="restartGame()">
             Recommencer
           </button>
-          <button type="button" class="secondary-button" (click)="newGame()">Nouveau départ</button>
+          <button type="button" class="secondary-button" data-confirm-action="new-game" (click)="newGame()">Nouveau départ</button>
           <button
             type="button"
             class="secondary-button"
+            data-confirm-action="hint"
             (click)="showHint()"
             [disabled]="isSolved()"
           >
