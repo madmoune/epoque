@@ -52,6 +52,10 @@ export const routes: Routes = [
       import('./puzzles/word-ladder/word-ladder.page').then((m) => m.WordLadderPage),
   },
   {
+    path: 'wordle',
+    loadComponent: () => import('./puzzles/wordle/wordle.page').then((m) => m.WordlePage),
+  },
+  {
     path: 'knights-tour',
     loadComponent: () =>
       import('./puzzles/knights-tour/knights-tour.page').then((m) => m.KnightsTourPage),

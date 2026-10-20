@@ -21,6 +21,7 @@ export class CustomKeyboardComponent {
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
 
   readonly rows = input.required<CustomKeyboardKey[][]>();
+  readonly keyStates = input<Record<string, string>>({});
   readonly disabled = input(false);
   readonly visible = input(true);
   readonly scrollBehavior = input<CustomKeyboardScrollBehavior>('center');
@@ -54,10 +55,13 @@ export class CustomKeyboardComponent {
   }
 
   protected keyClass(key: CustomKeyboardKey): string {
+    const state = this.keyStates()[key.toLocaleUpperCase('fr-CA')];
+    const stateClass = state ? `state-${state}` : '';
+
     if (key === 'backspace') return 'wide-key';
     if (key === 'clear') return 'wide-key';
     if (key === 'space') return 'space-key';
-    return '';
+    return [stateClass].filter(Boolean).join(' ');
   }
 
   protected pressKey(key: CustomKeyboardKey): void {

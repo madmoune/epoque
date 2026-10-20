@@ -24,6 +24,7 @@ describe('WordLadderService', () => {
     const service = createService(['côte', 'coteau', 'chat', 'char']);
 
     expect(service.resolveWord('COTE')).toBe('côte');
+    expect(service.wordsForLength(4)).toEqual(['côte', 'chat', 'char']);
     expect(service.sameWord('CÔTE', 'cote')).toBe(true);
     expect(service.areNeighbors('chat', 'char')).toBe(true);
     expect(service.areNeighbors('chat', 'cher')).toBe(false);

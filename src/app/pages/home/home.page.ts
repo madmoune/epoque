@@ -167,6 +167,12 @@ export class HomePage {
           tag: 'Lettres',
         },
         {
+          title: 'Wordle',
+          description: 'Trouve le mot de cinq lettres en six essais grâce aux couleurs.',
+          route: '/wordle',
+          tag: 'Lettres',
+        },
+        {
           title: 'Mot pivot',
           description: 'Trouve le mot commun qui relie trois expressions.',
           route: '/pivot-word',

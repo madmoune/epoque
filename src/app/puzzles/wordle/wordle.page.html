@@ -1,0 +1,156 @@
+<main class="wordle-page">
+  <a routerLink="/" fragment="mots-langage" class="back-link">Retour au menu</a>
+
+  <section class="wordle-shell">
+    <header class="wordle-header">
+      <div class="header-title-row">
+        <div>
+          <p class="eyebrow">Mots et langage · Wordle</p>
+          <h1>Le mot mystère</h1>
+        </div>
+        <span class="attempts-pill" [attr.aria-label]="attemptsLabel() + ' essais utilisés'">
+          <strong>{{ guesses().length }}</strong> / {{ maxAttempts }}
+        </span>
+      </div>
+      <p class="intro">
+        Trouve le mot de cinq lettres en six essais. Les couleurs indiquent les lettres bien
+        placées, présentes ailleurs ou absentes.
+      </p>
+      <p class="word-pool-note">
+        Liste partagée avec les word-ladders · {{ wordPoolCount() }} mots acceptés · accents
+        facultatifs
+      </p>
+    </header>
+
+    @if (isLoading()) {
+      <p class="loading-message" role="status">Chargement de la liste de mots…</p>
+    } @else if (loadError()) {
+      <div class="load-error" role="alert">
+        <p>{{ loadError() }}</p>
+        <button type="button" (click)="retryLoad()">Réessayer</button>
+      </div>
+    } @else if (target()) {
+      <section class="game-area" [class.game-finished]="isFinished()">
+        <div class="rule-strip" aria-label="Règles de la partie">
+          <span><strong>5</strong> lettres</span>
+          <span
+            ><strong>{{ maxAttempts }}</strong> essais</span
+          >
+          <span
+            ><strong>{{ guesses().length }}</strong> utilisé{{
+              guesses().length === 1 ? '' : 's'
+            }}</span
+          >
+        </div>
+
+        <div class="board" role="grid" aria-label="Grille Wordle de six lignes et cinq lettres">
+          @for (row of boardRows(); track $index; let rowIndex = $index) {
+            <div class="board-row" role="row" [class.active-row]="row.active">
+              @for (tile of row.tiles; track $index) {
+                <span
+                  class="tile"
+                  role="gridcell"
+                  [class.tile-tbd]="tile.state === 'tbd'"
+                  [class.tile-correct]="tile.state === 'correct'"
+                  [class.tile-present]="tile.state === 'present'"
+                  [class.tile-absent]="tile.state === 'absent'"
+                  [attr.aria-label]="'Ligne ' + (rowIndex + 1) + ', ' + tileLabel(tile)"
+                >
+                  {{ tile.letter }}
+                </span>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="legend" aria-label="Légende des couleurs">
+          <span><i class="legend-tile correct" aria-hidden="true">A</i> bien placée</span>
+          <span><i class="legend-tile present" aria-hidden="true">B</i> ailleurs</span>
+          <span><i class="legend-tile absent" aria-hidden="true">C</i> absente</span>
+        </div>
+
+        @if (!isFinished()) {
+          <form class="guess-entry" (submit)="$event.preventDefault(); submitGuess()">
+            <label for="wordle-answer">Ta proposition</label>
+            <div class="entry-row">
+              <input
+                #wordInput
+                id="wordle-answer"
+                type="text"
+                autocomplete="off"
+                autocapitalize="characters"
+                spellcheck="false"
+                inputmode="none"
+                maxlength="5"
+                [value]="guessInput()"
+                (input)="updateGuessInput($any($event.target).value)"
+                aria-describedby="wordle-help wordle-feedback"
+              />
+              <button type="submit" [disabled]="guessInput().length !== 5">Valider</button>
+            </div>
+            <small id="wordle-help"
+              >Les accents peuvent être omis. Appuie sur Entrée pour valider.</small
+            >
+          </form>
+        }
+
+        <app-custom-keyboard
+          [rows]="letterKeyboardRows"
+          [keyStates]="keyboardStates()"
+          [visible]="!isFinished()"
+          [disabled]="isFinished()"
+          [scrollBehavior]="'minimal'"
+          (keyPress)="handleKeyboardKey($event)"
+        />
+
+        <div id="wordle-feedback" class="feedback-zone" aria-live="polite">
+          @if (feedback(); as currentFeedback) {
+            <p class="feedback" [class.feedback-error]="currentFeedback.tone === 'error'">
+              {{ currentFeedback.text }}
+            </p>
+          } @else if (!isFinished()) {
+            <p class="feedback feedback-muted">Choisis un mot dans la liste des word-ladders.</p>
+          }
+        </div>
+
+        <div class="game-actions">
+          <button
+            type="button"
+            class="secondary-button"
+            data-confirm-action="restart"
+            (click)="restartGame()"
+          >
+            Recommencer
+          </button>
+          <button
+            type="button"
+            class="secondary-button"
+            data-confirm-action="new-game"
+            (click)="newGame()"
+          >
+            Nouvelle partie
+          </button>
+        </div>
+      </section>
+    }
+  </section>
+
+  @if (isWon()) {
+    <app-puzzle-success-popup
+      title="Mot trouvé !"
+      [message]="successMessage()"
+      [answer]="'Mot : ' + target().toLocaleUpperCase('fr-CA')"
+      actionLabel="Nouvelle partie"
+      (action)="newGame()"
+    />
+  } @else if (isLost()) {
+    <app-puzzle-success-popup
+      tone="partial"
+      title="Partie terminée"
+      [message]="lossMessage()"
+      [answer]="'Mot : ' + target().toLocaleUpperCase('fr-CA')"
+      actionLabel="Nouvelle partie"
+      (action)="newGame()"
+    />
+  }
+</main>

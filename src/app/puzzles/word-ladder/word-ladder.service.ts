@@ -77,6 +77,12 @@ export class WordLadderService {
     return this.wordsByKey.get(this.normalize(value)) ?? null;
   }
 
+  wordsForLength(length: WordLadderLength): string[] {
+    return (this.wordKeysByLength.get(length) ?? [])
+      .map((wordKey) => this.wordsByKey.get(wordKey))
+      .filter((word): word is string => word !== undefined);
+  }
+
   areNeighbors(first: string, second: string): boolean {
     const firstKey = this.normalize(first);
     const secondKey = this.normalize(second);
