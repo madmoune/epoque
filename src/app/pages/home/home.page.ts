@@ -13,6 +13,7 @@ import {
 } from '../../shared/firebase/firebase-puzzle-catalog.service';
 import { AppStorageService } from '../../shared/storage/app-storage.service';
 import { NEW_GAMES } from '../../puzzles/new-games/new-games.catalog';
+import { EPIQUE_DUELS } from '../../puzzles/epique-duels/epique-duels.catalog';
 
 type PuzzleCard = {
   title: string;
@@ -131,6 +132,17 @@ export class HomePage {
       title: 'Nouveaux jeux',
       description: 'Six nouveaux défis de chiffres et de lettres aux règles faciles à expliquer.',
       puzzles: NEW_GAMES.map((game) => ({
+        title: game.title,
+        description: game.description,
+        route: `/${game.id}`,
+        tag: game.tag,
+      })),
+    },
+    {
+      id: 'duels-epique',
+      title: 'Duels Épique',
+      description: 'Six jeux de stratégie rapides, à deux joueurs ou contre un CPU.',
+      puzzles: EPIQUE_DUELS.map((game) => ({
         title: game.title,
         description: game.description,
         route: `/${game.id}`,

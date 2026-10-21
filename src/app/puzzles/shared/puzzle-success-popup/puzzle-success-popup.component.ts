@@ -149,6 +149,12 @@ export class PuzzleSuccessPopupComponent implements OnInit {
     'play/segment-phrase': 'enigmes',
     'play/color-chain': 'enigmes',
     'play/syllabic-rotation': 'enigmes',
+    wythoff: 'duels-epique',
+    'nim-emission': 'duels-epique',
+    isola: 'duels-epique',
+    domineering: 'duels-epique',
+    sim: 'duels-epique',
+    hex: 'duels-epique',
   };
 
   private readonly router = inject(Router);

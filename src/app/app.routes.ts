@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { NEW_GAMES } from './puzzles/new-games/new-games.catalog';
+import { EPIQUE_DUELS } from './puzzles/epique-duels/epique-duels.catalog';
 
 export const routes: Routes = [
   {
@@ -230,6 +231,12 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./puzzles/games/timing-drop/timing-drop.page').then((m) => m.TimingDropPage),
   },
+  ...EPIQUE_DUELS.map((game) => ({
+    path: game.id,
+    data: { game: game.id },
+    loadComponent: () =>
+      import('./puzzles/epique-duels/epique-duels.page').then((m) => m.EpiqueDuelsPage),
+  })),
   {
     path: 'describe-symbols',
     loadComponent: () =>

@@ -1,0 +1,429 @@
+<main class="duel-page">
+  <a routerLink="/" fragment="duels-epique" class="back-link">← Retour à l’accueil</a>
+
+  <section class="duel-shell">
+    <header class="duel-header">
+      <div>
+        <p class="eyebrow">Épreuves de duel · {{ game.kicker }}</p>
+        <h1>{{ game.title }}</h1>
+        <p class="intro">{{ game.description }}</p>
+      </div>
+
+      <div class="game-switcher" aria-label="Choisir une épreuve">
+        @for (candidate of allGames; track candidate.id) {
+          <a
+            class="game-switcher-link"
+            [class.active]="gameIsActive(candidate.id)"
+            [routerLink]="gameLink(candidate.id)"
+          >
+            <span>{{ candidate.title }}</span>
+            <small>{{ candidate.tag }}</small>
+          </a>
+        }
+      </div>
+    </header>
+
+    <section class="controls-panel" aria-label="Réglages de la partie">
+      <div class="control-group">
+        <span class="control-label">Adversaire</span>
+        <div class="segmented-control" role="group" aria-label="Mode de jeu">
+          <button
+            type="button"
+            [class.active]="mode() === 'cpu'"
+            (click)="setMode('cpu')"
+          >
+            Contre le CPU
+          </button>
+          <button
+            type="button"
+            [class.active]="mode() === 'local'"
+            (click)="setMode('local')"
+          >
+            Deux joueurs
+          </button>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <span class="control-label">Niveau CPU</span>
+        <div class="segmented-control" role="group" aria-label="Niveau du CPU">
+          <button
+            type="button"
+            [class.active]="difficulty() === 'facile'"
+            [disabled]="mode() === 'local'"
+            (click)="setDifficulty('facile')"
+          >
+            Facile
+          </button>
+          <button
+            type="button"
+            [class.active]="difficulty() === 'intermediaire'"
+            [disabled]="mode() === 'local'"
+            (click)="setDifficulty('intermediaire')"
+          >
+            Intermédiaire
+          </button>
+          <button
+            type="button"
+            [class.active]="difficulty() === 'expert'"
+            [disabled]="mode() === 'local'"
+            (click)="setDifficulty('expert')"
+          >
+            Expert
+          </button>
+        </div>
+      </div>
+
+      <button type="button" class="restart-button" data-confirm-action="new-game" (click)="newGame()">
+        Recommencer
+      </button>
+    </section>
+
+    <section class="status-banner" [class.cpu]="cpuThinking()" [class.finished]="winner()" role="status" aria-live="polite">
+      <span class="turn-dot" [class.player-two]="turn() === 2"></span>
+      <strong>{{ statusText() }}</strong>
+    </section>
+
+    @if (winner(); as finalWinner) {
+      @if (finalWinner === 1) {
+        <app-puzzle-success-popup
+          [title]="'Victoire à ' + game.title + ' !'"
+          [message]="resultText()"
+          actionLabel="Nouvelle partie"
+          (action)="newGame()"
+        />
+      } @else {
+        <section class="result-panel" role="alert">
+          <div>
+            <p class="eyebrow">Résultat</p>
+            <h2>{{ resultTitle() }}</h2>
+            <p>{{ resultText() }}</p>
+          </div>
+          <button type="button" class="primary-button" (click)="newGame()">Nouvelle partie</button>
+        </section>
+      }
+    }
+
+    <section class="rule-strip">
+      <span class="rule-icon" aria-hidden="true">✦</span>
+      <p>{{ game.shortRules }}</p>
+      @if (canCancelSelection()) {
+        <button type="button" class="cancel-button" (click)="cancelSelection()">Annuler la sélection</button>
+      }
+    </section>
+
+    <details class="rules-panel" open>
+      <summary>Comment jouer à {{ game.title }} ?</summary>
+      <div class="rules-content">
+        <p><strong>Objectif :</strong> {{ game.objective }}</p>
+        <ol>
+          @for (rule of game.rules; track rule) {
+            <li>{{ rule }}</li>
+          }
+        </ol>
+      </div>
+    </details>
+
+    @switch (id) {
+      @case ('wythoff') {
+        <section class="board-section wythoff-section" aria-labelledby="wythoff-board-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Deux piles · {{ wythoff()[0] + wythoff()[1] }} jetons</p>
+              <h2 id="wythoff-board-title">Retire une ou deux piles</h2>
+            </div>
+            <span class="instruction-pill">Un seul retrait par tour</span>
+          </div>
+
+          <div class="wythoff-board">
+            @for (pile of wythoff(); track $index; let pileIndex = $index) {
+              <article class="token-pile" [class.empty]="pile === 0">
+                <div class="pile-title">
+                  <span>Pile {{ pileIndex + 1 }}</span>
+                  <strong>{{ pile }}</strong>
+                </div>
+                <div class="token-row" aria-label="Jetons de la pile">
+                  @for (token of tokenIndexes(pile); track token) {
+                    <button
+                      type="button"
+                      class="token"
+                      [disabled]="!isHumanTurn()"
+                      [attr.aria-label]="'Retirer ' + (pile - token) + ' jeton' + (pile - token > 1 ? 's' : '') + ' de la pile ' + (pileIndex + 1)"
+                      (click)="playWythoffToken(pileIndex, token)"
+                    ></button>
+                  }
+                </div>
+                <div class="pile-actions">
+                  @for (count of wythoffMovesForPile(pileIndex); track count) {
+                    <button
+                      type="button"
+                      [disabled]="!isHumanTurn()"
+                      (click)="playWythoff(pileIndex, count)"
+                    >
+                      −{{ count }}
+                    </button>
+                  }
+                </div>
+              </article>
+            }
+          </div>
+
+          <div class="both-actions">
+            <span>Retirer le même nombre des deux piles</span>
+            <div>
+              @for (count of wythoffBothMoves(); track count) {
+                <button type="button" [disabled]="!isHumanTurn()" (click)="playWythoffBoth(count)">
+                  −{{ count }} / −{{ count }}
+                </button>
+              }
+            </div>
+          </div>
+        </section>
+      }
+
+      @case ('nim-emission') {
+        <section class="board-section nim-emission-section" aria-labelledby="nim-emission-board-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Une pile · {{ nimEmission().flags }} drapeaux</p>
+              <h2 id="nim-emission-board-title">Retire les drapeaux</h2>
+            </div>
+            <span class="instruction-pill">Maximum : {{ nimEmission().maxRemoval }}</span>
+          </div>
+
+          <div class="nim-emission-rule-card" role="status" aria-live="polite">
+            <div>
+              <span>Règle de la manche</span>
+              <strong>{{ nimEmissionRuleText() }}</strong>
+            </div>
+            <p>{{ nimEmissionRuleHelp() }}</p>
+          </div>
+
+          <article class="nim-emission-pile">
+            <div class="pile-title">
+              <span>Pile unique</span>
+              <strong>{{ nimEmission().flags }}</strong>
+            </div>
+            <div class="nim-emission-flags" role="group" aria-label="Drapeaux de la pile">
+              @for (flag of tokenIndexes(nimEmission().flags); track flag) {
+                <button
+                  type="button"
+                  class="nim-emission-flag"
+                  [class.available]="nimEmissionFlagSelectable(flag)"
+                  [class.unavailable]="!nimEmissionFlagSelectable(flag)"
+                  [disabled]="!nimEmissionFlagSelectable(flag)"
+                  [attr.aria-label]="nimEmissionFlagLabel(flag)"
+                  (click)="playNimEmissionFlag(flag)"
+                >
+                  <span aria-hidden="true">🚩</span>
+                </button>
+              }
+            </div>
+            <div class="nim-emission-actions" aria-label="Nombre de drapeaux à retirer">
+              <span>Retirer :</span>
+              @for (count of nimEmissionMoveCounts(); track count) {
+                <button
+                  type="button"
+                  [disabled]="!isHumanTurn()"
+                  (click)="playNimEmission(count)"
+                >
+                  −{{ count }}
+                </button>
+              }
+            </div>
+          </article>
+          <p class="board-help">Les drapeaux grisés dépassent le maximum autorisé pour ce tour.</p>
+        </section>
+      }
+
+      @case ('isola') {
+        <section class="board-section" aria-labelledby="isola-board-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Grille 5 × 5</p>
+              <h2 id="isola-board-title">Déplace puis isole</h2>
+            </div>
+            <div class="isola-stepper" aria-label="Progression du tour">
+              <span class="step" [class.active]="isolaStep() === 'move'">1 · Déplacer</span>
+              <span class="step-divider" aria-hidden="true">→</span>
+              <span class="step" [class.active]="isolaStep() === 'block'">2 · Supprimer</span>
+            </div>
+          </div>
+          <div class="square-board isola-board" role="grid" aria-label="Plateau d’Isolation">
+            @for (cell of boardCells; track cell) {
+              <button
+                type="button"
+                class="board-cell isola-cell"
+                [class.blocked]="isolaCellBlocked(cell)"
+                [class.selected]="selectedIsolaDestination() === cell"
+                [class.destination-selected]="selectedIsolaDestination() === cell"
+                [class.move-option]="isolaStep() === 'move' && isolaCellSelectable(cell)"
+                [class.block-option]="isolaStep() === 'block' && isolaCellSelectable(cell)"
+                [class.origin]="isolaStep() === 'move' && isolaPositionPlayer(cell) === turn()"
+                [class.player-one]="isolaPositionPlayer(cell) === 1"
+                [class.player-two]="isolaPositionPlayer(cell) === 2"
+                [disabled]="!isolaCellSelectable(cell)"
+                [attr.aria-label]="isolaCellAriaLabel(cell)"
+                (click)="playIsolaCell(cell)"
+              >
+                @if (isolaPositionPlayer(cell); as player) {
+                  @if (!isolaCellIsPreviewOrigin(cell)) {
+                    <span class="pawn" [class.pawn-two]="player === 2">{{ playerShortLabel(player) }}</span>
+                  }
+                }
+                @if (selectedIsolaDestination() === cell) {
+                  <span class="pawn pawn-preview" aria-hidden="true">{{ playerShortLabel(turn()) }}</span>
+                }
+                @if (isolaCellBlocked(cell)) {
+                  <span class="blocked-mark" aria-hidden="true">×</span>
+                }
+              </button>
+            }
+          </div>
+          <div class="isola-guide" role="status" aria-live="polite">
+            <span class="isola-guide-icon" aria-hidden="true">{{ isolaStep() === 'move' ? '↗' : '×' }}</span>
+            <div>
+              <strong>{{ isolaStep() === 'move' ? 'Déplace ton pion' : 'Supprime une cellule' }}</strong>
+              <p>
+                @if (isolaStep() === 'move') {
+                  Les cases avec un point lumineux sont accessibles. Clique sur l’une d’elles.
+                } @else {
+                  Ta destination est marquée par un pion en pointillés. Clique sur une case avec × pour la supprimer.
+                }
+              </p>
+            </div>
+          </div>
+          <div class="isola-legend" aria-label="Légende du plateau">
+            @if (isolaStep() === 'move') {
+              <span class="isola-legend-item">
+                <span class="isola-legend-mark move" aria-hidden="true"></span>
+                Déplacement possible
+              </span>
+            } @else {
+              <span class="isola-legend-item">
+                <span class="isola-legend-mark remove" aria-hidden="true">×</span>
+                Cellule à supprimer
+              </span>
+              <span class="isola-legend-item">
+                <span class="isola-legend-mark destination" aria-hidden="true"></span>
+                Destination choisie
+              </span>
+            }
+            <span class="isola-legend-item">
+              <span class="isola-legend-mark unavailable" aria-hidden="true"></span>
+              Indisponible
+            </span>
+          </div>
+        </section>
+      }
+
+      @case ('domineering') {
+        <section class="board-section" aria-labelledby="domineering-board-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Grille 5 × 5</p>
+              <h2 id="domineering-board-title">Pose ton domino</h2>
+            </div>
+            <span class="instruction-pill">{{ turn() === 1 ? 'Horizontal' : 'Vertical' }}</span>
+          </div>
+          <div class="square-board domino-board" role="grid" aria-label="Plateau de Domineering">
+            @for (cell of boardCells; track cell) {
+              <button
+                type="button"
+                class="board-cell domino-cell"
+                [class.player-one]="dominoOwner(cell) === 1"
+                [class.player-two]="dominoOwner(cell) === 2"
+                [class.selected]="selectedDominoCell() === cell"
+                [class.partner]="dominoCellHighlighted(cell)"
+                [disabled]="!dominoCellSelectable(cell)"
+                [attr.aria-label]="cellLabel(cell)"
+                (click)="playDominoCell(cell)"
+              >
+                @if (dominoOwner(cell) !== 0) {
+                  <span class="domino-mark">{{ dominoLabel(cell) }}</span>
+                }
+              </button>
+            }
+          </div>
+          <p class="board-help">Clique une première case, puis la case voisine qui complète le domino.</p>
+        </section>
+      }
+
+      @case ('sim') {
+        <section class="board-section" aria-labelledby="sim-board-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Six points · 15 arêtes</p>
+              <h2 id="sim-board-title">Évite ton propre triangle</h2>
+            </div>
+            <span class="instruction-pill">Ta couleur : {{ turn() === 1 ? 'orange' : 'bleu' }}</span>
+          </div>
+          <div class="sim-board" aria-label="Plateau de Sim">
+            <svg viewBox="0 0 100 100" role="img" aria-label="Six points disposés en cercle">
+              @for (edge of simEdges; track $index) {
+                <line
+                  [attr.x1]="simPoint(edge.a).x"
+                  [attr.y1]="simPoint(edge.a).y"
+                  [attr.x2]="simPoint(edge.b).x"
+                  [attr.y2]="simPoint(edge.b).y"
+                  [class]="simEdgeClass($index)"
+                  (click)="playSimEdge($index)"
+                />
+              }
+              @for (point of simPoints; track $index) {
+                <circle class="sim-point" [attr.cx]="point.x" [attr.cy]="point.y" r="4.2" />
+                <text class="sim-point-label" [attr.x]="point.x" [attr.y]="point.y + 1.5">{{ $index + 1 }}</text>
+              }
+            </svg>
+          </div>
+          <div class="sim-edge-list" aria-label="Arêtes disponibles">
+            @for (edge of simEdges; track $index) {
+              <button
+                type="button"
+                [class.player-one]="simEdgeOwner($index) === 1"
+                [class.player-two]="simEdgeOwner($index) === 2"
+                [disabled]="simEdgeOwner($index) !== 0 || !isHumanTurn()"
+                (click)="playSimEdge($index)"
+              >
+                {{ edge.a + 1 }}–{{ edge.b + 1 }}
+              </button>
+            }
+          </div>
+          <p class="board-help">Les croisements ne créent pas de nouveau point.</p>
+        </section>
+      }
+
+      @case ('hex') {
+        <section class="board-section" aria-labelledby="hex-board-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Grille hexagonale 5 × 5</p>
+              <h2 id="hex-board-title">Construis ton chemin</h2>
+            </div>
+            <span class="instruction-pill">{{ turn() === 1 ? 'Rouge · haut ↕ bas' : 'Bleu · gauche ↔ droite' }}</span>
+          </div>
+          <div class="hex-board" role="grid" aria-label="Plateau de Hex">
+            @for (cell of boardCells; track cell) {
+              <button
+                type="button"
+                class="hex-cell"
+                [class.red]="hexOwner(cell) === 1"
+                [class.blue]="hexOwner(cell) === 2"
+                [disabled]="!hexCellSelectable(cell)"
+                [attr.aria-label]="hexCellLabel(cell)"
+                (click)="playHexCell(cell)"
+              >
+                <span aria-hidden="true"></span>
+              </button>
+            }
+          </div>
+          <div class="hex-legend">
+            <span class="legend-red">Rouge : haut-bas</span>
+            <span class="legend-blue">Bleu : gauche-droite</span>
+          </div>
+        </section>
+      }
+
+    }
+  </section>
+</main>
