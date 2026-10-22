@@ -2,7 +2,6 @@ import { Component, OnDestroy, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import {
   BOARD_CELLS,
-  Difficulty,
   DominoMove,
   IsolaMove,
   IsolaState,
@@ -87,7 +86,6 @@ export class EpiqueDuelsPage implements OnDestroy {
   protected readonly simEdges = SIM_EDGES;
 
   protected readonly mode = signal<DuelMode>('cpu');
-  protected readonly difficulty = signal<Difficulty>('intermediaire');
   protected readonly turn = signal<Player>(1);
   protected readonly winner = signal<Player | null>(null);
   protected readonly resultReason = signal('');
@@ -121,10 +119,6 @@ export class EpiqueDuelsPage implements OnDestroy {
     if (this.mode() === mode) return;
     this.mode.set(mode);
     this.startGame();
-  }
-
-  protected setDifficulty(difficulty: Difficulty): void {
-    this.difficulty.set(difficulty);
   }
 
   protected newGame(): void {
@@ -201,11 +195,6 @@ export class EpiqueDuelsPage implements OnDestroy {
 
   protected gameIsActive(id: EpiqueGameId): boolean {
     return this.id === id;
-  }
-
-  protected wythoffMovesForPile(pileIndex: number): number[] {
-    const pile = this.wythoff()[pileIndex] ?? 0;
-    return Array.from({ length: pile }, (_, index) => index + 1);
   }
 
   protected tokenIndexes(count: number): number[] {
@@ -500,34 +489,34 @@ export class EpiqueDuelsPage implements OnDestroy {
     const player: Player = 2;
     switch (this.id) {
       case 'wythoff': {
-        const move = chooseWythoffMove(this.wythoff(), this.difficulty());
+        const move = chooseWythoffMove(this.wythoff());
         if (move) this.applyWythoff(move, player);
         return;
       }
       case 'nim-emission': {
-        const move = chooseNimEmissionMove(this.nimEmission(), this.difficulty());
+        const move = chooseNimEmissionMove(this.nimEmission());
         if (move) this.applyNimEmission(move, player);
         return;
       }
       case 'isola': {
-        const move = chooseIsolaMove(this.isola(), player, this.difficulty());
+        const move = chooseIsolaMove(this.isola(), player);
         if (move) this.applyIsola(move, player);
         else this.finish(1, 'Le pion du CPU ne peut plus se déplacer.');
         return;
       }
       case 'domineering': {
-        const move = chooseDomineeringMove(this.dominoOccupied(), player, this.difficulty());
+        const move = chooseDomineeringMove(this.dominoOccupied(), player);
         if (move) this.applyDomino(move, player);
         else this.finish(1, 'Le CPU ne peut plus placer de domino vertical.');
         return;
       }
       case 'sim': {
-        const index = chooseSimEdge(this.sim(), player, this.difficulty());
+        const index = chooseSimEdge(this.sim(), player);
         if (index !== null) this.applySimEdge(index, player);
         return;
       }
       case 'hex': {
-        const cell = chooseHexCell(this.hex(), player, this.difficulty());
+        const cell = chooseHexCell(this.hex(), player);
         if (cell !== null) this.applyHexCell(cell, player);
         return;
       }

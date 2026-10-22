@@ -1,8 +1,17 @@
 export type Player = 1 | 2;
-export type Difficulty = 'facile' | 'intermediaire' | 'expert';
 
 function randomItem<T>(items: readonly T[], random: () => number = Math.random): T {
   return items[Math.min(items.length - 1, Math.floor(random() * items.length))];
+}
+
+function chooseCpuMove<T>(moves: readonly T[], expertMoves: readonly T[], random: () => number): T {
+  // Sans coup gagnant ou sûr, toutes les réponses restent ouvertes pour varier les parties.
+  if (expertMoves.length === 0) return randomItem(moves, random);
+
+  const alternatives = moves.filter((move) => !expertMoves.includes(move));
+  // Une erreur sur cinq en moyenne, uniquement si un autre coup est possible.
+  const candidates = alternatives.length > 0 && random() < 0.2 ? alternatives : expertMoves;
+  return randomItem(candidates, random);
 }
 
 export const BOARD_SIZE = 5;
@@ -101,17 +110,13 @@ function isWythoffColdPosition(piles: readonly [number, number]): boolean {
 
 export function chooseWythoffMove(
   piles: readonly [number, number],
-  difficulty: Difficulty,
+  random: () => number = Math.random,
 ): WythoffMove | null {
   const moves = wythoffMoves(piles);
   if (moves.length === 0) return null;
 
-  if (difficulty === 'facile') return moves[0];
-
-  const winningMove = moves.find((move) => isWythoffColdPosition(applyWythoffMove(piles, move)));
-  if (winningMove && difficulty === 'expert') return winningMove;
-  if (winningMove && (piles[0] + piles[1]) % 2 === 0) return winningMove;
-  return moves[0];
+  const winningMoves = moves.filter((move) => isWythoffColdPosition(applyWythoffMove(piles, move)));
+  return chooseCpuMove(moves, winningMoves, random);
 }
 
 export type NimEmissionState = {
@@ -139,10 +144,7 @@ export function applyNimEmissionMove(
   };
 }
 
-export function nimEmissionMoveIsWinning(
-  state: NimEmissionState,
-  move: NimEmissionMove,
-): boolean {
+export function nimEmissionMoveIsWinning(state: NimEmissionState, move: NimEmissionMove): boolean {
   if (
     move.removeCount < 1 ||
     move.removeCount > state.maxRemoval ||
@@ -160,15 +162,12 @@ export function nimEmissionMoveIsWinning(
 
 export function chooseNimEmissionMove(
   state: NimEmissionState,
-  difficulty: Difficulty,
+  random: () => number = Math.random,
 ): NimEmissionMove | null {
   const moves = nimEmissionMoves(state);
   if (moves.length === 0) return null;
-  if (difficulty === 'facile') return moves[0];
-
-  const winningMove = moves.find((move) => nimEmissionMoveIsWinning(state, move));
-  if (winningMove) return winningMove;
-  return moves[moves.length - 1];
+  const winningMoves = moves.filter((move) => nimEmissionMoveIsWinning(state, move));
+  return chooseCpuMove(moves, winningMoves, random);
 }
 
 export type IsolaState = {
@@ -214,11 +213,10 @@ export function applyIsolaMove(state: IsolaState, player: Player, move: IsolaMov
 export function chooseIsolaMove(
   state: IsolaState,
   player: Player,
-  difficulty: Difficulty,
+  random: () => number = Math.random,
 ): IsolaMove | null {
   const moves = isolaMoves(state, player);
   if (moves.length === 0) return null;
-  if (difficulty === 'facile') return moves[0];
 
   const scored = moves.map((move) => {
     const next = applyIsolaMove(state, player, move);
@@ -228,13 +226,18 @@ export function chooseIsolaMove(
     return {
       move,
       score:
-        (opponentMoves === 0 ? 10_000 : 0) - opponentMoves * (difficulty === 'expert' ? 12 : 5) +
-        ownMoves * 2 -
-        distanceToCenter,
+        (opponentMoves === 0 ? 10_000 : 0) - opponentMoves * 12 + ownMoves * 2 - distanceToCenter,
     };
   });
-  scored.sort((first, second) => second.score - first.score || first.move.block - second.move.block);
-  return scored[0].move;
+  scored.sort(
+    (first, second) => second.score - first.score || first.move.block - second.move.block,
+  );
+  const expertMoves = scored.filter((candidate) => candidate.score === scored[0].score);
+  return chooseCpuMove(
+    moves,
+    expertMoves.map((candidate) => candidate.move),
+    random,
+  );
 }
 
 export type DominoMove = {
@@ -273,12 +276,10 @@ export function applyDomineeringMove(occupied: readonly boolean[], move: DominoM
 export function chooseDomineeringMove(
   occupied: readonly boolean[],
   player: Player,
-  difficulty: Difficulty,
   random: () => number = Math.random,
 ): DominoMove | null {
   const moves = domineeringMoves(occupied, player);
   if (moves.length === 0) return null;
-  if (difficulty === 'facile') return randomItem(moves, random);
 
   const scored = moves.map((move) => {
     const next = applyDomineeringMove(occupied, move);
@@ -290,13 +291,16 @@ export function chooseDomineeringMove(
     );
     return {
       move,
-      score:
-        -opponentMoves * (difficulty === 'expert' ? 5 : 2) + ownMoves + (12 - centerDistance),
+      score: -opponentMoves * 5 + ownMoves + (12 - centerDistance),
     };
   });
-  scored.sort((first, second) => second.score - first.score || first.move.cells[0] - second.move.cells[0]);
-  const candidateLimit = difficulty === 'expert' ? 2 : 4;
-  return randomItem(scored.slice(0, candidateLimit), random).move;
+  scored.sort(
+    (first, second) => second.score - first.score || first.move.cells[0] - second.move.cells[0],
+  );
+  const expertMoves = scored
+    .filter((candidate) => candidate.score === scored[0].score)
+    .map((candidate) => candidate.move);
+  return chooseCpuMove(moves, expertMoves, random);
 }
 
 export type SimEdge = {
@@ -345,11 +349,10 @@ export function simHasTriangle(edges: readonly SimEdge[], player: Player): boole
 export function chooseSimEdge(
   edges: readonly SimEdge[],
   player: Player,
-  difficulty: Difficulty,
+  random: () => number = Math.random,
 ): number | null {
   const legal = edges.flatMap((edge, index) => (edge.owner === 0 ? [index] : []));
   if (legal.length === 0) return null;
-  if (difficulty === 'facile') return legal[0];
 
   const safe = legal.filter((index) => {
     const next = edges.map((edge, edgeIndex) =>
@@ -357,8 +360,7 @@ export function chooseSimEdge(
     );
     return !simHasTriangle(next, player);
   });
-  if (safe.length === 0) return legal[0];
-  if (difficulty === 'intermediaire') return safe[0];
+  if (safe.length === 0) return chooseCpuMove(legal, [], random);
 
   const scored = safe.map((index) => {
     const next = edges.map((edge, edgeIndex) =>
@@ -376,7 +378,10 @@ export function chooseSimEdge(
     return { index, score: -opponentSafeChoices };
   });
   scored.sort((first, second) => second.score - first.score || first.index - second.index);
-  return scored[0].index;
+  const expertMoves = scored
+    .filter((candidate) => candidate.score === scored[0].score)
+    .map((candidate) => candidate.index);
+  return chooseCpuMove(legal, expertMoves, random);
 }
 
 export function hexHasConnection(cells: readonly (0 | Player)[], player: Player): boolean {
@@ -401,66 +406,237 @@ export function hexHasConnection(cells: readonly (0 | Player)[], player: Player)
   return false;
 }
 
-function hexPathCost(cells: readonly (0 | Player)[], player: Player): number {
-  const distance = Array.from({ length: BOARD_CELLS.length }, () => Number.POSITIVE_INFINITY);
-  const starts = BOARD_CELLS.filter((cell) =>
-    player === 1 ? cellRow(cell) === 0 : cellColumn(cell) === 0,
-  );
-  for (const start of starts) distance[start] = cells[start] === player ? 0 : cells[start] === 0 ? 1 : 20;
+const HEX_NEIGHBORS = BOARD_CELLS.map(hexAdjacentCells);
+const HEX_EDGES = ([1, 2] as const).map((player) =>
+  [0, BOARD_SIZE - 1].map((edge) =>
+    BOARD_CELLS.filter((cell) => (player === 1 ? cellRow(cell) : cellColumn(cell)) === edge),
+  ),
+);
+const HEX_BRIDGES = BOARD_CELLS.flatMap((first) =>
+  BOARD_CELLS.filter((second) => second > first && !HEX_NEIGHBORS[first].includes(second))
+    .map((second) => ({
+      first,
+      second,
+      carriers: HEX_NEIGHBORS[first].filter((cell) => HEX_NEIGHBORS[second].includes(cell)),
+    }))
+    .filter((bridge) => bridge.carriers.length === 2),
+);
+const HEX_POSITION_WEIGHTS = BOARD_CELLS.map((cell) => 3 ** cell);
+const HEX_UNREACHABLE = BOARD_CELLS.length + 1;
+const HEX_WIN_SCORE = 10_000;
+// Limiter les positions évaluées plutôt que le temps rend la recherche stable et reproductible.
+const HEX_SEARCH_BUDGET = 6_000;
+const HEX_SEARCH_LIMIT = Symbol('hex-search-limit');
 
-  const pending = [...BOARD_CELLS];
-  while (pending.length > 0) {
-    pending.sort((first, second) => distance[first] - distance[second]);
-    const current = pending.shift()!;
-    if (!Number.isFinite(distance[current])) break;
-    for (const neighbor of hexAdjacentCells(current)) {
-      const weight = cells[neighbor] === player ? 0 : cells[neighbor] === 0 ? 1 : 20;
-      const candidate = distance[current] + weight;
-      if (candidate < distance[neighbor]) distance[neighbor] = candidate;
+type HexEvaluation = {
+  score: number;
+  costs: [number, number];
+};
+
+function hexDistances(cells: readonly (0 | Player)[], player: Player, edge: number): number[] {
+  const distance = BOARD_CELLS.map(() => HEX_UNREACHABLE);
+  const pending: number[] = [];
+  for (const cell of HEX_EDGES[player - 1][edge]) {
+    if (cells[cell] === otherPlayer(player)) continue;
+    distance[cell] = cells[cell] === player ? 0 : 1;
+    pending.push(cell);
+  }
+  for (let index = 0; index < pending.length; index += 1) {
+    const current = pending[index];
+    for (const neighbor of HEX_NEIGHBORS[current]) {
+      // Une pierre adverse coupe réellement le chemin : on ne peut pas la traverser.
+      if (cells[neighbor] === otherPlayer(player)) continue;
+      const candidate = distance[current] + (cells[neighbor] === player ? 0 : 1);
+      if (candidate >= distance[neighbor]) continue;
+      distance[neighbor] = candidate;
+      pending.push(neighbor);
     }
   }
+  return distance;
+}
 
-  const targets = BOARD_CELLS.filter((cell) =>
-    player === 1 ? cellRow(cell) === BOARD_SIZE - 1 : cellColumn(cell) === BOARD_SIZE - 1,
+function evaluateHex(cells: readonly (0 | Player)[]): HexEvaluation {
+  const costs: [number, number] = [0, 0];
+  const options = [0, 0];
+  for (const player of [1, 2] as const) {
+    const fromStart = hexDistances(cells, player, 0);
+    const fromEnd = hexDistances(cells, player, 1);
+    const cost = Math.min(...HEX_EDGES[player - 1][1].map((cell) => fromStart[cell]));
+    costs[player - 1] = cost;
+    options[player - 1] = BOARD_CELLS.filter(
+      (cell) => cells[cell] === 0 && fromStart[cell] + fromEnd[cell] - 1 === cost,
+    ).length;
+  }
+  if (costs[0] === 0) return { score: HEX_WIN_SCORE, costs };
+  if (costs[1] === 0) return { score: -HEX_WIN_SCORE, costs };
+
+  let bridges = 0;
+  for (const { first, second, carriers } of HEX_BRIDGES) {
+    const owner = cells[first];
+    if (owner === 0 || owner !== cells[second] || !carriers.every((cell) => cells[cell] === 0)) {
+      continue;
+    }
+    bridges += owner === 1 ? 1 : -1;
+  }
+  let center = 0;
+  for (const cell of BOARD_CELLS) {
+    if (cells[cell] === 0) continue;
+    const value = 4 - Math.abs(cellRow(cell) - 2) - Math.abs(cellColumn(cell) - 2);
+    center += cells[cell] === 1 ? value : -value;
+  }
+  return {
+    score: (costs[1] - costs[0]) * 100 + (options[0] - options[1]) * 3 + bridges * 12 + center,
+    costs,
+  };
+}
+
+function hexWinningCells(
+  cells: (0 | Player)[],
+  player: Player,
+  legal: readonly number[],
+): number[] {
+  return legal.filter((cell) => {
+    cells[cell] = player;
+    const wins = hexHasConnection(cells, player);
+    cells[cell] = 0;
+    return wins;
+  });
+}
+
+function scoreHexMoves(cells: (0 | Player)[], player: Player, legal: readonly number[]): number[] {
+  const evaluations = new Map<number, HexEvaluation>();
+  const exactScores = new Map<number, number>();
+  const position = cells.reduce<number>(
+    (code, owner, cell) => code + owner * HEX_POSITION_WEIGHTS[cell],
+    0,
   );
-  return Math.min(...targets.map((cell) => distance[cell]));
+
+  const evaluation = (code: number): HexEvaluation => {
+    const cached = evaluations.get(code);
+    if (cached) return cached;
+    if (evaluations.size >= HEX_SEARCH_BUDGET) throw HEX_SEARCH_LIMIT;
+    const value = evaluateHex(cells);
+    evaluations.set(code, value);
+    return value;
+  };
+
+  const rankedMoves = (moves: readonly number[], turn: Player, code: number) =>
+    moves
+      .map((cell) => {
+        cells[cell] = turn;
+        let score: number;
+        try {
+          score =
+            evaluation(code + turn * HEX_POSITION_WEIGHTS[cell]).score * (turn === 1 ? 1 : -1);
+        } finally {
+          cells[cell] = 0;
+        }
+        return { cell, score };
+      })
+      .sort((a, b) => b.score - a.score);
+
+  const search = (
+    turn: Player,
+    depth: number,
+    alpha: number,
+    beta: number,
+    code: number,
+  ): number => {
+    const key = code * 64 + depth * 2 + turn - 1;
+    const cached = exactScores.get(key);
+    if (cached !== undefined) return cached;
+    const state = evaluation(code);
+    const sign = turn === 1 ? 1 : -1;
+    if (Math.abs(state.score) === HEX_WIN_SCORE)
+      return state.score * sign + Math.sign(state.score * sign) * depth;
+    // Même en bout de recherche, reconnaître un gain immédiat ou une double menace.
+    if (state.costs[turn - 1] === 1) return HEX_WIN_SCORE + depth;
+
+    const moves = BOARD_CELLS.filter((cell) => cells[cell] === 0);
+    const threats =
+      state.costs[otherPlayer(turn) - 1] === 1
+        ? hexWinningCells(cells, otherPlayer(turn), moves)
+        : [];
+    if (threats.length > 1) return -HEX_WIN_SCORE - depth;
+    if (depth === 0 && threats.length === 0) return state.score * sign;
+
+    const ranked = rankedMoves(threats.length === 1 ? threats : moves, turn, code);
+    const candidates = moves.length <= 8 ? ranked : ranked.slice(0, 8);
+    const initialAlpha = alpha;
+    let best = Number.NEGATIVE_INFINITY;
+    for (const { cell } of candidates) {
+      cells[cell] = turn;
+      let score: number;
+      try {
+        score = -search(
+          otherPlayer(turn),
+          Math.max(0, depth - 1),
+          -beta,
+          -alpha,
+          code + turn * HEX_POSITION_WEIGHTS[cell],
+        );
+      } finally {
+        cells[cell] = 0;
+      }
+      best = Math.max(best, score);
+      alpha = Math.max(alpha, best);
+      if (alpha >= beta) break;
+    }
+    if (best > initialAlpha && best < beta) exactScores.set(key, best);
+    return best;
+  };
+
+  const ranked = rankedMoves(legal, player, position);
+  let completed = ranked.map(({ score }) => score);
+  const maxDepth = legal.length <= 8 ? legal.length : 4;
+  for (let depth = 2; depth <= maxDepth; depth += 1) {
+    const scores: number[] = [];
+    try {
+      for (const { cell } of ranked) {
+        cells[cell] = player;
+        try {
+          scores.push(
+            -search(
+              otherPlayer(player),
+              depth - 1,
+              Number.NEGATIVE_INFINITY,
+              Number.POSITIVE_INFINITY,
+              position + player * HEX_POSITION_WEIGHTS[cell],
+            ),
+          );
+        } finally {
+          cells[cell] = 0;
+        }
+      }
+    } catch (error) {
+      if (error !== HEX_SEARCH_LIMIT) throw error;
+      // Garder uniquement un niveau terminé, afin de comparer tous les coups équitablement.
+      break;
+    }
+    completed = scores;
+  }
+  const best = Math.max(...completed);
+  if (legal.length <= 8 && best <= -HEX_WIN_SCORE) return [];
+  return ranked.filter((_, index) => completed[index] === best).map(({ cell }) => cell);
 }
 
 export function chooseHexCell(
   cells: readonly (0 | Player)[],
   player: Player,
-  difficulty: Difficulty,
+  random: () => number = Math.random,
 ): number | null {
   const legal = BOARD_CELLS.filter((cell) => cells[cell] === 0);
   if (legal.length === 0) return null;
-  if (difficulty === 'facile') return legal[0];
 
+  const board = [...cells];
   const opponent = otherPlayer(player);
-  const immediate = legal.find((cell) => {
-    const next = [...cells] as (0 | Player)[];
-    next[cell] = player;
-    return hexHasConnection(next, player);
-  });
-  if (immediate !== undefined) return immediate;
+  const immediate = hexWinningCells(board, player, legal);
+  if (immediate.length > 0) return chooseCpuMove(legal, immediate, random);
 
-  const opponentImmediate = legal.find((cell) => {
-    const next = [...cells] as (0 | Player)[];
-    next[cell] = opponent;
-    return hexHasConnection(next, opponent);
-  });
-  if (opponentImmediate !== undefined && difficulty === 'expert') return opponentImmediate;
+  const opponentImmediate = hexWinningCells(board, opponent, legal);
+  if (opponentImmediate.length === 1) return chooseCpuMove(legal, opponentImmediate, random);
+  if (opponentImmediate.length > 1) return chooseCpuMove(legal, [], random);
 
-  const scored = legal.map((cell) => {
-    const next = [...cells] as (0 | Player)[];
-    next[cell] = player;
-    const ownPath = hexPathCost(next, player);
-    const opponentPath = hexPathCost(next, opponent);
-    const centerDistance = Math.abs(cellRow(cell) - 2) + Math.abs(cellColumn(cell) - 2);
-    return {
-      cell,
-      score: opponentPath * 2 - ownPath * (difficulty === 'expert' ? 2 : 1) - centerDistance * 0.1,
-    };
-  });
-  scored.sort((first, second) => second.score - first.score || first.cell - second.cell);
-  return scored[0].cell;
+  const expertMoves = scoreHexMoves(board, player, legal);
+  return chooseCpuMove(legal, expertMoves, random);
 }

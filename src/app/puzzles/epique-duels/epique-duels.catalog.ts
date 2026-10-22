@@ -5,7 +5,6 @@ export type EpiqueGameDefinition = {
   title: string;
   kicker: string;
   description: string;
-  shortRules: string;
   objective: string;
   rules: string[];
   tag: string;
@@ -17,7 +16,6 @@ export const EPIQUE_DUELS: EpiqueGameDefinition[] = [
     title: 'Wythoff',
     kicker: 'Stratégie mathématique',
     description: 'Vide les deux piles en trouvant les positions gagnantes.',
-    shortRules: 'Retire des jetons d’une pile, ou le même nombre dans les deux.',
     objective: 'Retirer le dernier jeton pour gagner.',
     rules: [
       'Le plateau commence avec deux piles de 5 à 15 jetons.',
@@ -32,7 +30,6 @@ export const EPIQUE_DUELS: EpiqueGameDefinition[] = [
     title: 'Nim — émission',
     kicker: 'Jeu télévisé',
     description: 'Retire les drapeaux avec la règle surprise de la manche.',
-    shortRules: 'Une seule pile, un maximum tiré au sort et une règle révélée au départ.',
     objective: 'Suivre la règle révélée : prendre le dernier drapeau, ou être celui qui ne le prend pas.',
     rules: [
       'La partie commence avec une seule pile de 18 à 25 drapeaux, tirée au sort.',
@@ -47,7 +44,6 @@ export const EPIQUE_DUELS: EpiqueGameDefinition[] = [
     title: 'Isolation',
     kicker: 'Déplacement et blocage',
     description: 'Déplace ton pion puis coupe une case pour enfermer l’adversaire.',
-    shortRules: 'Un déplacement en huit directions, puis une case retirée du plateau.',
     objective: 'Être le dernier joueur capable de déplacer son pion.',
     rules: [
       'Chaque joueur possède un pion sur une grille de 5 × 5.',
@@ -62,7 +58,6 @@ export const EPIQUE_DUELS: EpiqueGameDefinition[] = [
     title: 'Domineering',
     kicker: 'Placement stratégique',
     description: 'Occupe l’espace avec des dominos horizontaux ou verticaux.',
-    shortRules: 'Joueur 1 pose horizontalement; joueur 2 pose verticalement.',
     objective: 'Jouer le dernier domino légal.',
     rules: [
       'La partie se joue sur une grille de 5 × 5 cases.',
@@ -77,7 +72,6 @@ export const EPIQUE_DUELS: EpiqueGameDefinition[] = [
     title: 'Sim',
     kicker: 'Pièges géométriques',
     description: 'Relie les points sans être le premier à fermer un triangle.',
-    shortRules: 'Chaque arête ne peut être choisie qu’une fois; un triangle de ta couleur perd.',
     objective: 'Éviter de former un triangle entièrement de ta couleur.',
     rules: [
       'Six points sont disposés en cercle et chaque paire de points peut être reliée une seule fois.',
@@ -92,7 +86,6 @@ export const EPIQUE_DUELS: EpiqueGameDefinition[] = [
     title: 'Hex',
     kicker: 'Connexion de chemins',
     description: 'Construis une chaîne continue avant que l’autre couleur ne traverse le plateau.',
-    shortRules: 'Rouge relie haut-bas; bleu relie gauche-droite.',
     objective: 'Relier ses deux côtés opposés avant l’adversaire.',
     rules: [
       'Le plateau est une grille de 5 × 5 cases hexagonales.',

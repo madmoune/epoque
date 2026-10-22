@@ -122,6 +122,7 @@ h2 {
 
 .controls-panel {
   display: flex;
+  box-sizing: border-box;
   flex-wrap: wrap;
   gap: 0.85rem;
   align-items: end;
@@ -179,8 +180,7 @@ button {
   font: inherit;
 }
 
-.restart-button,
-.primary-button {
+.restart-button {
   min-height: 2.35rem;
   padding: 0.45rem 0.85rem;
   border: 1px solid var(--accent);
@@ -241,53 +241,6 @@ button:disabled {
   }
 }
 
-.result-panel {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem;
-  border: 1px solid #c76a64;
-  border-radius: 0.85rem;
-  background: color-mix(in srgb, #6f2424 28%, var(--surface-raised));
-
-  &.win {
-    border-color: #58aa78;
-    background: color-mix(in srgb, #1c6b40 25%, var(--surface-raised));
-  }
-
-  h2 {
-    margin-bottom: 0.25rem;
-  }
-
-  p:last-child {
-    margin: 0;
-    color: var(--muted);
-    line-height: 1.4;
-  }
-}
-
-.rule-strip {
-  display: flex;
-  gap: 0.6rem;
-  align-items: center;
-  padding: 0.7rem 0.85rem;
-  border: 1px dashed var(--border-strong);
-  border-radius: 0.7rem;
-  color: var(--muted);
-
-  p {
-    margin: 0;
-    font-size: 0.8rem;
-    line-height: 1.35;
-  }
-}
-
-.rule-icon {
-  color: var(--accent);
-  font-size: 1.1rem;
-}
-
 .rules-panel {
   border: 1px solid var(--border);
   border-radius: 0.75rem;
@@ -321,7 +274,8 @@ button:disabled {
     color: var(--text);
   }
 
-  ol {
+  ol,
+  ul {
     display: grid;
     gap: 0.35rem;
     margin: 0;
@@ -331,6 +285,19 @@ button:disabled {
   li::marker {
     color: var(--accent);
     font-weight: 900;
+  }
+}
+
+.wythoff-strategy {
+  display: grid;
+  gap: 0.55rem;
+  padding-top: 0.65rem;
+  border-top: 1px dashed var(--border);
+
+  h3 {
+    margin: 0;
+    color: var(--accent);
+    font-size: 0.9rem;
   }
 }
 
@@ -738,7 +705,6 @@ button:disabled {
   }
 }
 
-.pile-actions,
 .both-actions > div,
 .sim-edge-list {
   display: flex;
@@ -746,7 +712,6 @@ button:disabled {
   gap: 0.35rem;
 }
 
-.pile-actions button,
 .both-actions button,
 .sim-edge-list button {
   min-height: 2.1rem;
@@ -760,7 +725,6 @@ button:disabled {
   font-weight: 850;
 }
 
-.pile-actions button:hover:not(:disabled),
 .both-actions button:hover:not(:disabled),
 .sim-edge-list button:hover:not(:disabled) {
   border-color: var(--accent);
@@ -971,86 +935,139 @@ button:disabled {
   background: color-mix(in srgb, #4e9abb 22%, var(--surface-raised));
 }
 
+.hex-section {
+  --hex-red: #dc6b65;
+  --hex-blue: #5aa5cf;
+  --hex-player: var(--hex-red);
+  min-width: 0;
+
+  &.player-two {
+    --hex-player: var(--hex-blue);
+  }
+}
+
+.hex-turn {
+  border-color: var(--hex-player);
+}
+
+.hex-board-frame {
+  width: min(100%, 32rem);
+  box-sizing: border-box;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.9rem;
+  background: var(--surface-soft);
+}
+
 .hex-board {
-  --hex-grid-skew: 26.5deg;
-  --hex-grid-scale: 1;
-  display: grid;
-  grid-template-columns: repeat(5, minmax(3rem, 1fr));
-  width: min(100%, 31rem);
-  aspect-ratio: 1;
-  gap: 0.3rem;
-  padding: 0.7rem;
-  border: 0.4rem solid #d8733e;
-  border-left-color: #4e9abb;
-  border-right-color: #4e9abb;
-  border-radius: 0.8rem;
-  background: color-mix(in srgb, var(--surface-soft) 90%, #4e9abb);
-  transform: skewX(var(--hex-grid-skew)) scaleX(var(--hex-grid-scale));
-  transform-origin: center;
+  --hex-shape: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  position: relative;
+  width: 100%;
+  // Cinq colonnes, avec une demi-case de décalage par rangée et des hexagones réguliers.
+  aspect-ratio: 7 / 4.618802;
+}
+
+.hex-edges {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: none;
+  stroke-width: 6;
+  stroke-linecap: round;
 }
 
 .hex-cell {
+  position: absolute;
+  left: calc((var(--hex-column) + var(--hex-row) * 0.5) * 100% / 7);
+  top: calc(var(--hex-row) * 18.75%);
   display: grid;
-  min-width: 0;
-  min-height: 0;
+  width: calc(100% / 7);
+  height: 25%;
   place-items: center;
   padding: 0;
-  border: 1px solid var(--border-strong);
-  background: var(--surface-raised);
-  color: var(--text);
+  border: 0;
+  background: transparent;
+  color: #fff;
   cursor: pointer;
-  clip-path: polygon(25% 6%, 75% 6%, 100% 50%, 75% 94%, 25% 94%, 0 50%);
-  transform: skewX(calc(-1 * var(--hex-grid-skew)));
+  clip-path: var(--hex-shape);
+  touch-action: manipulation;
 
-  &:not(:disabled):hover {
-    box-shadow: inset 0 0 0 0.25rem color-mix(in srgb, var(--focus) 35%, transparent);
+  &::before,
+  &::after {
+    position: absolute;
+    inset: 1.5px;
+    background: var(--border-strong);
+    clip-path: var(--hex-shape);
+    content: '';
+  }
+
+  &::after {
+    inset: 3px;
+    background: var(--surface-raised);
+  }
+
+  &:is(:hover, :focus-visible):not(:disabled)::before {
+    background: var(--hex-player);
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 1;
   }
 
   span {
-    width: 58%;
+    position: relative;
+    z-index: 1;
+    display: grid;
+    width: 55%;
     aspect-ratio: 1;
+    place-items: center;
     border-radius: 50%;
-    background: transparent;
+    background: var(--hex-stone, transparent);
+    font-size: 0.65rem;
+    line-height: 1;
   }
 
-  &.red span {
-    background: #d8733e;
-    box-shadow: inset -0.15rem -0.15rem 0 rgb(0 0 0 / 18%);
+  &.red {
+    --hex-stone: var(--hex-red);
   }
 
-  &.blue span {
-    background: #4e9abb;
-    box-shadow: inset -0.15rem -0.15rem 0 rgb(0 0 0 / 18%);
+  &.blue {
+    --hex-stone: var(--hex-blue);
   }
+
 }
 
 .hex-legend {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.8rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: min(100%, 32rem);
+  gap: 0.5rem;
   color: var(--muted);
   font-size: 0.75rem;
-  font-weight: 850;
-}
 
-.legend-red::before,
-.legend-blue::before {
-  display: inline-block;
-  width: 0.65rem;
-  height: 0.65rem;
-  margin-right: 0.3rem;
-  border-radius: 50%;
-  content: '';
-  vertical-align: -0.05rem;
-}
+  > span {
+    display: grid;
+    gap: 0.1rem;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 0.6rem;
+    text-align: center;
+  }
 
-.legend-red::before {
-  background: #d8733e;
-}
+  small {
+    font-size: 0.7rem;
+  }
 
-.legend-blue::before {
-  background: #4e9abb;
+  .legend-red {
+    border-top: 3px solid var(--hex-red);
+  }
+
+  .legend-blue {
+    border-top: 3px solid var(--hex-blue);
+  }
 }
 
 @media (max-width: 760px) {
@@ -1075,6 +1092,74 @@ button:disabled {
   .restart-button {
     margin-left: 0;
   }
+
+  .hex-section {
+    gap: 0.75rem;
+    padding: 0.75rem;
+  }
+
+  .hex-board-frame {
+    padding: 0.65rem;
+  }
+
+  .wythoff-section {
+    gap: 0.65rem;
+    padding: 0.65rem;
+
+    .section-heading {
+      gap: 0.4rem;
+    }
+
+    h2 {
+      font-size: 1.05rem;
+    }
+
+    .instruction-pill {
+      padding: 0.2rem 0.45rem;
+    }
+
+    .wythoff-board {
+      gap: 0.5rem;
+    }
+
+    .token-pile {
+      min-height: 0;
+      gap: 0.4rem;
+      padding: 0.6rem;
+      border-radius: 0.65rem;
+    }
+
+    .pile-title strong {
+      font-size: 1.4rem;
+    }
+
+    .token-row {
+      min-height: 0;
+      justify-content: flex-start;
+      gap: 0.25rem;
+      padding-block: 0.1rem;
+    }
+
+    .token {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+
+    .both-actions > div {
+      gap: 0.25rem;
+    }
+
+    .both-actions button {
+      min-width: 2.25rem;
+      min-height: 2.25rem;
+      padding: 0.3rem 0.4rem;
+    }
+
+    .both-actions {
+      gap: 0.4rem;
+      padding-top: 0.5rem;
+    }
+  }
 }
 
 @media (max-width: 560px) {
@@ -1087,9 +1172,7 @@ button:disabled {
     border-radius: 0.95rem;
   }
 
-  .section-heading,
-  .result-panel,
-  .rule-strip {
+  .section-heading {
     align-items: stretch;
     flex-direction: column;
   }
@@ -1149,9 +1232,7 @@ button:disabled {
     height: 2rem;
   }
 
-  .square-board,
-  .hex-board {
-    --hex-grid-scale: 0.72;
+  .square-board {
     gap: 0.2rem;
     padding: 0.25rem;
   }
@@ -1166,9 +1247,5 @@ button:disabled {
     width: 1.7rem;
     height: 1.7rem;
     font-size: 0.6rem;
-  }
-
-  .hex-board {
-    border-width: 0.25rem;
   }
 }

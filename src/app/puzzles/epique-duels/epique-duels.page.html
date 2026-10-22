@@ -44,36 +44,6 @@
         </div>
       </div>
 
-      <div class="control-group">
-        <span class="control-label">Niveau CPU</span>
-        <div class="segmented-control" role="group" aria-label="Niveau du CPU">
-          <button
-            type="button"
-            [class.active]="difficulty() === 'facile'"
-            [disabled]="mode() === 'local'"
-            (click)="setDifficulty('facile')"
-          >
-            Facile
-          </button>
-          <button
-            type="button"
-            [class.active]="difficulty() === 'intermediaire'"
-            [disabled]="mode() === 'local'"
-            (click)="setDifficulty('intermediaire')"
-          >
-            Intermédiaire
-          </button>
-          <button
-            type="button"
-            [class.active]="difficulty() === 'expert'"
-            [disabled]="mode() === 'local'"
-            (click)="setDifficulty('expert')"
-          >
-            Expert
-          </button>
-        </div>
-      </div>
-
       <button type="button" class="restart-button" data-confirm-action="new-game" (click)="newGame()">
         Recommencer
       </button>
@@ -85,34 +55,20 @@
     </section>
 
     @if (winner(); as finalWinner) {
-      @if (finalWinner === 1) {
-        <app-puzzle-success-popup
-          [title]="'Victoire à ' + game.title + ' !'"
-          [message]="resultText()"
-          actionLabel="Nouvelle partie"
-          (action)="newGame()"
-        />
-      } @else {
-        <section class="result-panel" role="alert">
-          <div>
-            <p class="eyebrow">Résultat</p>
-            <h2>{{ resultTitle() }}</h2>
-            <p>{{ resultText() }}</p>
-          </div>
-          <button type="button" class="primary-button" (click)="newGame()">Nouvelle partie</button>
-        </section>
-      }
+      <app-puzzle-success-popup
+        [title]="finalWinner === 1 ? 'Victoire à ' + game.title + ' !' : resultTitle()"
+        [message]="resultText()"
+        [tone]="finalWinner === 1 ? 'success' : 'partial'"
+        actionLabel="Nouvelle partie"
+        (action)="newGame()"
+      />
     }
 
-    <section class="rule-strip">
-      <span class="rule-icon" aria-hidden="true">✦</span>
-      <p>{{ game.shortRules }}</p>
-      @if (canCancelSelection()) {
-        <button type="button" class="cancel-button" (click)="cancelSelection()">Annuler la sélection</button>
-      }
-    </section>
+    @if (canCancelSelection()) {
+      <button type="button" class="cancel-button" (click)="cancelSelection()">Annuler la sélection</button>
+    }
 
-    <details class="rules-panel" open>
+    <details class="rules-panel">
       <summary>Comment jouer à {{ game.title }} ?</summary>
       <div class="rules-content">
         <p><strong>Objectif :</strong> {{ game.objective }}</p>
@@ -121,6 +77,36 @@
             <li>{{ rule }}</li>
           }
         </ol>
+        @if (id === 'wythoff') {
+          <section class="wythoff-strategy" aria-labelledby="wythoff-strategy-title">
+            <h3 id="wythoff-strategy-title">Comment gagner : les positions froides</h3>
+            <p>
+              Une paire indique le nombre de jetons dans chaque pile. Les positions froides sont
+              perdantes pour celui qui doit jouer, si son adversaire joue sans erreur. Le but est
+              donc de laisser une de ces paires à ton adversaire.
+            </p>
+            <ul>
+              <li><strong>(0, 0)</strong> : les deux piles sont vides, tu viens de gagner !</li>
+              <li><strong>(1, 2)</strong> ou <strong>(2, 1)</strong></li>
+              <li><strong>(3, 5)</strong> ou <strong>(5, 3)</strong></li>
+              <li><strong>(4, 7)</strong> ou <strong>(7, 4)</strong></li>
+              <li><strong>(6, 10)</strong> ou <strong>(10, 6)</strong></li>
+              <li><strong>(8, 13)</strong> ou <strong>(13, 8)</strong></li>
+              <li><strong>(9, 15)</strong> ou <strong>(15, 9)</strong></li>
+            </ul>
+            <p>
+              <strong>À chaque tour :</strong> cherche un retrait légal qui ramène les piles sur
+              une position froide. Par exemple, à partir de <strong>(7, 10)</strong>, retire un
+              jeton de la première pile pour laisser <strong>(6, 10)</strong> à l’adversaire.
+              Après son coup, recommence jusqu’à vider les deux piles.
+            </p>
+            <p>
+              Si c’est à toi de jouer sur une position froide, aucun coup ne permet de laisser
+              immédiatement une autre position froide. Il faut alors profiter d’une erreur de
+              l’adversaire pour reprendre l’avantage.
+            </p>
+          </section>
+        }
       </div>
     </details>
 
@@ -151,17 +137,6 @@
                       [attr.aria-label]="'Retirer ' + (pile - token) + ' jeton' + (pile - token > 1 ? 's' : '') + ' de la pile ' + (pileIndex + 1)"
                       (click)="playWythoffToken(pileIndex, token)"
                     ></button>
-                  }
-                </div>
-                <div class="pile-actions">
-                  @for (count of wythoffMovesForPile(pileIndex); track count) {
-                    <button
-                      type="button"
-                      [disabled]="!isHumanTurn()"
-                      (click)="playWythoff(pileIndex, count)"
-                    >
-                      −{{ count }}
-                    </button>
                   }
                 </div>
               </article>
@@ -394,32 +369,41 @@
       }
 
       @case ('hex') {
-        <section class="board-section" aria-labelledby="hex-board-title">
+        <section class="board-section hex-section" [class.player-two]="turn() === 2" aria-labelledby="hex-board-title">
           <div class="section-heading">
             <div>
               <p class="eyebrow">Grille hexagonale 5 × 5</p>
               <h2 id="hex-board-title">Construis ton chemin</h2>
             </div>
-            <span class="instruction-pill">{{ turn() === 1 ? 'Rouge · haut ↕ bas' : 'Bleu · gauche ↔ droite' }}</span>
+            <span class="instruction-pill hex-turn">{{ turn() === 1 ? 'Rouge · haut ↕ bas' : 'Bleu · gauche ↔ droite' }}</span>
           </div>
-          <div class="hex-board" role="grid" aria-label="Plateau de Hex">
-            @for (cell of boardCells; track cell) {
-              <button
-                type="button"
-                class="hex-cell"
-                [class.red]="hexOwner(cell) === 1"
-                [class.blue]="hexOwner(cell) === 2"
-                [disabled]="!hexCellSelectable(cell)"
-                [attr.aria-label]="hexCellLabel(cell)"
-                (click)="playHexCell(cell)"
-              >
-                <span aria-hidden="true"></span>
-              </button>
-            }
+          <div class="hex-board-frame">
+            <div class="hex-board" role="grid" aria-label="Plateau de Hex">
+              <svg class="hex-edges" viewBox="0 0 700 461.88" aria-hidden="true">
+                <path stroke="var(--hex-red)" d="M 50,-10 H 450 M 250,471.88 H 650" />
+                <path stroke="var(--hex-blue)" d="M -8,28.87 L 192,433.01 M 508,28.87 L 708,433.01" />
+              </svg>
+              @for (cell of boardCells; track cell) {
+                <button
+                  type="button"
+                  class="hex-cell"
+                  data-board-cell
+                  [style.--hex-row]="cellRow(cell)"
+                  [style.--hex-column]="cellColumn(cell)"
+                  [class.red]="hexOwner(cell) === 1"
+                  [class.blue]="hexOwner(cell) === 2"
+                  [disabled]="!hexCellSelectable(cell)"
+                  [attr.aria-label]="hexCellLabel(cell)"
+                  (click)="playHexCell(cell)"
+                >
+                  <span aria-hidden="true">{{ hexOwner(cell) === 1 ? '●' : hexOwner(cell) === 2 ? '◆' : '' }}</span>
+                </button>
+              }
+            </div>
           </div>
           <div class="hex-legend">
-            <span class="legend-red">Rouge : haut-bas</span>
-            <span class="legend-blue">Bleu : gauche-droite</span>
+            <span class="legend-red"><strong>Rouge</strong><small>haut ↕ bas</small></span>
+            <span class="legend-blue"><strong>Bleu</strong><small>gauche ↔ droite</small></span>
           </div>
         </section>
       }
