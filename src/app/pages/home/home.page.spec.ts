@@ -105,4 +105,16 @@ describe('HomePage playlist category controls', () => {
     }
     expect(category?.puzzles.some((puzzle) => /rébus|groupe de 4/i.test(puzzle.title))).toBe(false);
   });
+
+  it('propose le Nim à retrait limité dans Duels, les playlists et les routes', () => {
+    const page = TestBed.createComponent(HomePage).componentInstance;
+    const category = page.categories().find((category) => category.id === 'duels-epique');
+
+    expect(category?.puzzles).toContainEqual(expect.objectContaining({
+      title: 'Nim — retrait limité',
+      route: '/nim-limite',
+    }));
+    expect(page.playlistPuzzleOptions().some((puzzle) => puzzle.route === '/nim-limite')).toBe(true);
+    expect(routes.find((route) => route.path === 'nim-limite')?.data?.['game']).toBe('nim-limite');
+  });
 });

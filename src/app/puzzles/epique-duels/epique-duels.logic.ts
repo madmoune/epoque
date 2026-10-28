@@ -119,6 +119,52 @@ export function chooseWythoffMove(
   return chooseCpuMove(moves, winningMoves, random);
 }
 
+export type NimLimitedState = {
+  piles: number[];
+  maxRemoval: 3 | 4 | 5;
+};
+
+export type NimLimitedMove = {
+  pileIndex: number;
+  removeCount: number;
+};
+
+export function nimLimitedMoves(state: NimLimitedState): NimLimitedMove[] {
+  return state.piles.flatMap((pile, pileIndex) =>
+    Array.from({ length: Math.min(pile, state.maxRemoval) }, (_, index) => ({
+      pileIndex,
+      removeCount: index + 1,
+    })),
+  );
+}
+
+export function applyNimLimitedMove(
+  state: NimLimitedState,
+  move: NimLimitedMove,
+): NimLimitedState {
+  return {
+    ...state,
+    piles: state.piles.map((pile, index) =>
+      index === move.pileIndex ? pile - move.removeCount : pile,
+    ),
+  };
+}
+
+export function chooseNimLimitedMove(
+  state: NimLimitedState,
+  random: () => number = Math.random,
+): NimLimitedMove | null {
+  const moves = nimLimitedMoves(state);
+  if (moves.length === 0) return null;
+
+  // Avec un retrait borné, chaque pile vaut son reste modulo (maximum + 1).
+  const winningMoves = moves.filter((move) => {
+    const next = applyNimLimitedMove(state, move);
+    return next.piles.reduce((sum, pile) => sum ^ (pile % (state.maxRemoval + 1)), 0) === 0;
+  });
+  return chooseCpuMove(moves, winningMoves, random);
+}
+
 export type NimEmissionState = {
   flags: number;
   maxRemoval: 3 | 4 | 5;

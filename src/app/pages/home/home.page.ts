@@ -141,7 +141,7 @@ export class HomePage {
     {
       id: 'duels-epique',
       title: 'Duels Épique',
-      description: 'Six jeux de stratégie rapides, à deux joueurs ou contre un CPU.',
+      description: 'Des jeux de stratégie rapides, à deux joueurs ou contre un CPU.',
       puzzles: EPIQUE_DUELS.map((game) => ({
         title: game.title,
         description: game.description,

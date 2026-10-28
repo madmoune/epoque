@@ -27,29 +27,32 @@
       <div class="control-group">
         <span class="control-label">Adversaire</span>
         <div class="segmented-control" role="group" aria-label="Mode de jeu">
-          <button
-            type="button"
-            [class.active]="mode() === 'cpu'"
-            (click)="setMode('cpu')"
-          >
+          <button type="button" [class.active]="mode() === 'cpu'" (click)="setMode('cpu')">
             Contre le CPU
           </button>
-          <button
-            type="button"
-            [class.active]="mode() === 'local'"
-            (click)="setMode('local')"
-          >
+          <button type="button" [class.active]="mode() === 'local'" (click)="setMode('local')">
             Deux joueurs
           </button>
         </div>
       </div>
 
-      <button type="button" class="restart-button" data-confirm-action="new-game" (click)="newGame()">
+      <button
+        type="button"
+        class="restart-button"
+        data-confirm-action="new-game"
+        (click)="newGame()"
+      >
         Recommencer
       </button>
     </section>
 
-    <section class="status-banner" [class.cpu]="cpuThinking()" [class.finished]="winner()" role="status" aria-live="polite">
+    <section
+      class="status-banner"
+      [class.cpu]="cpuThinking()"
+      [class.finished]="winner()"
+      role="status"
+      aria-live="polite"
+    >
       <span class="turn-dot" [class.player-two]="turn() === 2"></span>
       <strong>{{ statusText() }}</strong>
     </section>
@@ -65,7 +68,9 @@
     }
 
     @if (canCancelSelection()) {
-      <button type="button" class="cancel-button" (click)="cancelSelection()">Annuler la sélection</button>
+      <button type="button" class="cancel-button" (click)="cancelSelection()">
+        Annuler la sélection
+      </button>
     }
 
     <details class="rules-panel">
@@ -95,10 +100,10 @@
               <li><strong>(9, 15)</strong> ou <strong>(15, 9)</strong></li>
             </ul>
             <p>
-              <strong>À chaque tour :</strong> cherche un retrait légal qui ramène les piles sur
-              une position froide. Par exemple, à partir de <strong>(7, 10)</strong>, retire un
-              jeton de la première pile pour laisser <strong>(6, 10)</strong> à l’adversaire.
-              Après son coup, recommence jusqu’à vider les deux piles.
+              <strong>À chaque tour :</strong> cherche un retrait légal qui ramène les piles sur une
+              position froide. Par exemple, à partir de <strong>(7, 10)</strong>, retire un jeton de
+              la première pile pour laisser <strong>(6, 10)</strong> à l’adversaire. Après son coup,
+              recommence jusqu’à vider les deux piles.
             </p>
             <p>
               Si c’est à toi de jouer sur une position froide, aucun coup ne permet de laisser
@@ -112,7 +117,10 @@
 
     @switch (id) {
       @case ('wythoff') {
-        <section class="board-section wythoff-section" aria-labelledby="wythoff-board-title">
+        <section
+          class="board-section token-section wythoff-section"
+          aria-labelledby="wythoff-board-title"
+        >
           <div class="section-heading">
             <div>
               <p class="eyebrow">Deux piles · {{ wythoff()[0] + wythoff()[1] }} jetons</p>
@@ -134,7 +142,14 @@
                       type="button"
                       class="token"
                       [disabled]="!isHumanTurn()"
-                      [attr.aria-label]="'Retirer ' + (pile - token) + ' jeton' + (pile - token > 1 ? 's' : '') + ' de la pile ' + (pileIndex + 1)"
+                      [attr.aria-label]="
+                        'Retirer ' +
+                        (pile - token) +
+                        ' jeton' +
+                        (pile - token > 1 ? 's' : '') +
+                        ' de la pile ' +
+                        (pileIndex + 1)
+                      "
                       (click)="playWythoffToken(pileIndex, token)"
                     ></button>
                   }
@@ -156,8 +171,62 @@
         </section>
       }
 
+      @case ('nim-limite') {
+        <section
+          class="board-section token-section nim-limited-section"
+          aria-labelledby="nim-limited-board-title"
+        >
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">{{ nimLimited().piles.length }} piles · Le dernier jeton gagne</p>
+              <h2 id="nim-limited-board-title">Choisis une seule pile</h2>
+            </div>
+            <span class="instruction-pill"
+              >Maximum : {{ nimLimited().maxRemoval }} jetons par tour</span
+            >
+          </div>
+
+          <div class="nim-limited-board">
+            @for (pile of nimLimited().piles; track $index; let pileIndex = $index) {
+              <article class="token-pile" [class.empty]="pile === 0">
+                <div class="pile-title">
+                  <span>Pile {{ pileIndex + 1 }}</span>
+                  <strong>{{ pile }}</strong>
+                </div>
+                <div
+                  class="token-row"
+                  role="group"
+                  [attr.aria-label]="'Jetons de la pile ' + (pileIndex + 1)"
+                >
+                  @for (token of tokenIndexes(pile); track token) {
+                    <button
+                      type="button"
+                      class="token"
+                      [disabled]="!nimLimitedTokenSelectable(pileIndex, token)"
+                      [attr.aria-label]="nimLimitedTokenLabel(pileIndex, token)"
+                      (click)="playNimLimitedToken(pileIndex, token)"
+                    ></button>
+                  }
+                  @if (pile === 0) {
+                    <span class="board-help">Pile vide</span>
+                  }
+                </div>
+              </article>
+            }
+          </div>
+          <p class="board-help">
+            Retire de 1 à {{ nimLimited().maxRemoval }} jetons dans une seule pile. Clique sur un
+            jeton pour le retirer avec tous ceux qui le suivent. Les jetons grisés dépassent le
+            maximum autorisé.
+          </p>
+        </section>
+      }
+
       @case ('nim-emission') {
-        <section class="board-section nim-emission-section" aria-labelledby="nim-emission-board-title">
+        <section
+          class="board-section nim-emission-section"
+          aria-labelledby="nim-emission-board-title"
+        >
           <div class="section-heading">
             <div>
               <p class="eyebrow">Une pile · {{ nimEmission().flags }} drapeaux</p>
@@ -194,14 +263,13 @@
                 </button>
               }
             </div>
-            <div class="nim-emission-actions" aria-label="Nombre de drapeaux à retirer">
+            <div
+              class="pile-actions nim-emission-actions"
+              aria-label="Nombre de drapeaux à retirer"
+            >
               <span>Retirer :</span>
               @for (count of nimEmissionMoveCounts(); track count) {
-                <button
-                  type="button"
-                  [disabled]="!isHumanTurn()"
-                  (click)="playNimEmission(count)"
-                >
+                <button type="button" [disabled]="!isHumanTurn()" (click)="playNimEmission(count)">
                   −{{ count }}
                 </button>
               }
@@ -243,11 +311,15 @@
               >
                 @if (isolaPositionPlayer(cell); as player) {
                   @if (!isolaCellIsPreviewOrigin(cell)) {
-                    <span class="pawn" [class.pawn-two]="player === 2">{{ playerShortLabel(player) }}</span>
+                    <span class="pawn" [class.pawn-two]="player === 2">{{
+                      playerShortLabel(player)
+                    }}</span>
                   }
                 }
                 @if (selectedIsolaDestination() === cell) {
-                  <span class="pawn pawn-preview" aria-hidden="true">{{ playerShortLabel(turn()) }}</span>
+                  <span class="pawn pawn-preview" aria-hidden="true">{{
+                    playerShortLabel(turn())
+                  }}</span>
                 }
                 @if (isolaCellBlocked(cell)) {
                   <span class="blocked-mark" aria-hidden="true">×</span>
@@ -256,14 +328,19 @@
             }
           </div>
           <div class="isola-guide" role="status" aria-live="polite">
-            <span class="isola-guide-icon" aria-hidden="true">{{ isolaStep() === 'move' ? '↗' : '×' }}</span>
+            <span class="isola-guide-icon" aria-hidden="true">{{
+              isolaStep() === 'move' ? '↗' : '×'
+            }}</span>
             <div>
-              <strong>{{ isolaStep() === 'move' ? 'Déplace ton pion' : 'Supprime une cellule' }}</strong>
+              <strong>{{
+                isolaStep() === 'move' ? 'Déplace ton pion' : 'Supprime une cellule'
+              }}</strong>
               <p>
                 @if (isolaStep() === 'move') {
                   Les cases avec un point lumineux sont accessibles. Clique sur l’une d’elles.
                 } @else {
-                  Ta destination est marquée par un pion en pointillés. Clique sur une case avec × pour la supprimer.
+                  Ta destination est marquée par un pion en pointillés. Clique sur une case avec ×
+                  pour la supprimer.
                 }
               </p>
             </div>
@@ -320,7 +397,9 @@
               </button>
             }
           </div>
-          <p class="board-help">Clique une première case, puis la case voisine qui complète le domino.</p>
+          <p class="board-help">
+            Clique une première case, puis la case voisine qui complète le domino.
+          </p>
         </section>
       }
 
@@ -331,7 +410,9 @@
               <p class="eyebrow">Six points · 15 arêtes</p>
               <h2 id="sim-board-title">Évite ton propre triangle</h2>
             </div>
-            <span class="instruction-pill">Ta couleur : {{ turn() === 1 ? 'orange' : 'bleu' }}</span>
+            <span class="instruction-pill"
+              >Ta couleur : {{ turn() === 1 ? 'orange' : 'bleu' }}</span
+            >
           </div>
           <div class="sim-board" aria-label="Plateau de Sim">
             <svg viewBox="0 0 100 100" role="img" aria-label="Six points disposés en cercle">
@@ -347,7 +428,9 @@
               }
               @for (point of simPoints; track $index) {
                 <circle class="sim-point" [attr.cx]="point.x" [attr.cy]="point.y" r="4.2" />
-                <text class="sim-point-label" [attr.x]="point.x" [attr.y]="point.y + 1.5">{{ $index + 1 }}</text>
+                <text class="sim-point-label" [attr.x]="point.x" [attr.y]="point.y + 1.5">
+                  {{ $index + 1 }}
+                </text>
               }
             </svg>
           </div>
@@ -369,19 +452,28 @@
       }
 
       @case ('hex') {
-        <section class="board-section hex-section" [class.player-two]="turn() === 2" aria-labelledby="hex-board-title">
+        <section
+          class="board-section hex-section"
+          [class.player-two]="turn() === 2"
+          aria-labelledby="hex-board-title"
+        >
           <div class="section-heading">
             <div>
               <p class="eyebrow">Grille hexagonale 5 × 5</p>
               <h2 id="hex-board-title">Construis ton chemin</h2>
             </div>
-            <span class="instruction-pill hex-turn">{{ turn() === 1 ? 'Rouge · haut ↕ bas' : 'Bleu · gauche ↔ droite' }}</span>
+            <span class="instruction-pill hex-turn">{{
+              turn() === 1 ? 'Rouge · haut ↕ bas' : 'Bleu · gauche ↔ droite'
+            }}</span>
           </div>
           <div class="hex-board-frame">
             <div class="hex-board" role="grid" aria-label="Plateau de Hex">
               <svg class="hex-edges" viewBox="0 0 700 461.88" aria-hidden="true">
                 <path stroke="var(--hex-red)" d="M 50,-10 H 450 M 250,471.88 H 650" />
-                <path stroke="var(--hex-blue)" d="M -8,28.87 L 192,433.01 M 508,28.87 L 708,433.01" />
+                <path
+                  stroke="var(--hex-blue)"
+                  d="M -8,28.87 L 192,433.01 M 508,28.87 L 708,433.01"
+                />
               </svg>
               @for (cell of boardCells; track cell) {
                 <button
@@ -396,7 +488,9 @@
                   [attr.aria-label]="hexCellLabel(cell)"
                   (click)="playHexCell(cell)"
                 >
-                  <span aria-hidden="true">{{ hexOwner(cell) === 1 ? '●' : hexOwner(cell) === 2 ? '◆' : '' }}</span>
+                  <span aria-hidden="true">{{
+                    hexOwner(cell) === 1 ? '●' : hexOwner(cell) === 2 ? '◆' : ''
+                  }}</span>
                 </button>
               }
             </div>
@@ -407,7 +501,6 @@
           </div>
         </section>
       }
-
     }
   </section>
 </main>

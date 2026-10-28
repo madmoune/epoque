@@ -7,6 +7,8 @@ import {
   IsolaState,
   NimEmissionMove,
   NimEmissionState,
+  NimLimitedMove,
+  NimLimitedState,
   Player,
   SIM_EDGES,
   SIM_POINTS,
@@ -14,6 +16,7 @@ import {
   applyDomineeringMove,
   applyIsolaMove,
   applyNimEmissionMove,
+  applyNimLimitedMove,
   applyWythoffMove,
   cellColumn,
   cellRow,
@@ -21,6 +24,7 @@ import {
   chooseHexCell,
   chooseIsolaMove,
   chooseNimEmissionMove,
+  chooseNimLimitedMove,
   chooseSimEdge,
   chooseWythoffMove,
   domineeringMoves,
@@ -29,6 +33,7 @@ import {
   isolaMovableCells,
   isolaMoves,
   nimEmissionMoves,
+  nimLimitedMoves,
   otherPlayer,
   simHasTriangle,
   wythoffMoves,
@@ -92,6 +97,10 @@ export class EpiqueDuelsPage implements OnDestroy {
   protected readonly cpuThinking = signal(false);
 
   protected readonly wythoff = signal<[number, number]>([7, 10]);
+  protected readonly nimLimited = signal<NimLimitedState>({
+    piles: [4, 7, 10],
+    maxRemoval: 3,
+  });
   protected readonly nimEmission = signal<NimEmissionState>({
     flags: 20,
     maxRemoval: 3,
@@ -229,6 +238,34 @@ export class EpiqueDuelsPage implements OnDestroy {
     this.playWythoff(0, removeCount, true);
   }
 
+  protected nimLimitedTokenSelectable(pileIndex: number, tokenIndex: number): boolean {
+    const removeCount = (this.nimLimited().piles[pileIndex] ?? 0) - tokenIndex;
+    return (
+      this.isHumanTurn() &&
+      this.id === 'nim-limite' &&
+      removeCount >= 1 &&
+      removeCount <= this.nimLimited().maxRemoval
+    );
+  }
+
+  protected nimLimitedTokenLabel(pileIndex: number, tokenIndex: number): string {
+    const removeCount = this.nimLimited().piles[pileIndex] - tokenIndex;
+    const label = `Retirer ${removeCount} jeton${removeCount > 1 ? 's' : ''} de la pile ${pileIndex + 1}`;
+    return removeCount > this.nimLimited().maxRemoval
+      ? `${label} : maximum de ${this.nimLimited().maxRemoval}`
+      : label;
+  }
+
+  protected playNimLimitedToken(pileIndex: number, tokenIndex: number): void {
+    const removeCount = (this.nimLimited().piles[pileIndex] ?? 0) - tokenIndex;
+    if (!this.isHumanTurn() || this.id !== 'nim-limite') return;
+    const move = nimLimitedMoves(this.nimLimited()).find(
+      (candidate) => candidate.pileIndex === pileIndex && candidate.removeCount === removeCount,
+    );
+    if (!move) return;
+    this.applyNimLimited(move, this.turn());
+  }
+
   protected nimEmissionMoveCounts(): number[] {
     return nimEmissionMoves(this.nimEmission()).map((move) => move.removeCount);
   }
@@ -329,10 +366,7 @@ export class EpiqueDuelsPage implements OnDestroy {
       !state.blocked[cell] &&
       cell !== state.positions[otherPlayer(player)]
     ) {
-      this.applyIsola(
-        { to: this.selectedIsolaDestination()!, block: cell },
-        player,
-      );
+      this.applyIsola({ to: this.selectedIsolaDestination()!, block: cell }, player);
     }
   }
 
@@ -367,9 +401,7 @@ export class EpiqueDuelsPage implements OnDestroy {
     if (selected !== null) {
       const move = moves.find(
         (candidate) =>
-          candidate.cells.includes(selected) &&
-          candidate.cells.includes(cell) &&
-          selected !== cell,
+          candidate.cells.includes(selected) && candidate.cells.includes(cell) && selected !== cell,
       );
       if (move) {
         this.applyDomino(move, this.turn());
@@ -390,7 +422,11 @@ export class EpiqueDuelsPage implements OnDestroy {
 
   protected simEdgeClass(index: number): string {
     const owner = this.simEdgeOwner(index);
-    return owner === 1 ? 'sim-line-player-one' : owner === 2 ? 'sim-line-player-two' : 'sim-line-free';
+    return owner === 1
+      ? 'sim-line-player-one'
+      : owner === 2
+        ? 'sim-line-player-two'
+        : 'sim-line-free';
   }
 
   protected simPoint(index: number): { x: number; y: number } {
@@ -456,6 +492,10 @@ export class EpiqueDuelsPage implements OnDestroy {
     this.sim.set(createSimEdges());
     this.hex.set(createHexCells());
     this.wythoff.set([...WYTHOFF_PRESETS[(this.round - 1) % WYTHOFF_PRESETS.length]]);
+    this.nimLimited.set({
+      piles: Array.from({ length: this.randomInt(3, 5) }, () => this.randomInt(4, 12)),
+      maxRemoval: [3, 4, 5][this.randomInt(0, 2)] as NimLimitedState['maxRemoval'],
+    });
     this.nimEmission.set({
       flags: this.randomInt(18, 25),
       maxRemoval: [3, 4, 5][this.randomInt(0, 2)] as NimEmissionState['maxRemoval'],
@@ -493,6 +533,11 @@ export class EpiqueDuelsPage implements OnDestroy {
         if (move) this.applyWythoff(move, player);
         return;
       }
+      case 'nim-limite': {
+        const move = chooseNimLimitedMove(this.nimLimited());
+        if (move) this.applyNimLimited(move, player);
+        return;
+      }
       case 'nim-emission': {
         const move = chooseNimEmissionMove(this.nimEmission());
         if (move) this.applyNimEmission(move, player);
@@ -523,10 +568,24 @@ export class EpiqueDuelsPage implements OnDestroy {
     }
   }
 
-  private applyWythoff(move: { pileIndex: 0 | 1; removeCount: number; both: boolean }, player: Player): void {
+  private applyWythoff(
+    move: { pileIndex: 0 | 1; removeCount: number; both: boolean },
+    player: Player,
+  ): void {
     const next = applyWythoffMove(this.wythoff(), move);
     this.wythoff.set(next);
     if (next[0] === 0 && next[1] === 0) {
+      this.finish(player, `${this.playerLabel(player)} retire le dernier jeton.`);
+      return;
+    }
+    this.advanceTurn(player);
+    this.scheduleCpu();
+  }
+
+  private applyNimLimited(move: NimLimitedMove, player: Player): void {
+    const next = applyNimLimitedMove(this.nimLimited(), move);
+    this.nimLimited.set(next);
+    if (next.piles.every((pile) => pile === 0)) {
       this.finish(player, `${this.playerLabel(player)} retire le dernier jeton.`);
       return;
     }
@@ -573,7 +632,12 @@ export class EpiqueDuelsPage implements OnDestroy {
     this.domineering.set({ owners: nextOwners });
     this.selectedDominoCell.set(null);
     this.advanceTurn(player);
-    if (domineeringMoves(nextOwners.map((owner) => owner !== 0), otherPlayer(player)).length === 0) {
+    if (
+      domineeringMoves(
+        nextOwners.map((owner) => owner !== 0),
+        otherPlayer(player),
+      ).length === 0
+    ) {
       this.finish(player, `${this.playerLabel(otherPlayer(player))} ne peut plus poser de domino.`);
       return;
     }
@@ -586,7 +650,10 @@ export class EpiqueDuelsPage implements OnDestroy {
     );
     this.sim.set(next);
     if (simHasTriangle(next, player)) {
-      this.finish(otherPlayer(player), `${this.playerLabel(player)} a fermé un triangle de sa couleur.`);
+      this.finish(
+        otherPlayer(player),
+        `${this.playerLabel(player)} a fermé un triangle de sa couleur.`,
+      );
       return;
     }
     this.advanceTurn(player);

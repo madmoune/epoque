@@ -631,11 +631,23 @@ button:disabled {
   background: var(--surface-soft);
 }
 
-.wythoff-board {
+.wythoff-board,
+.nim-limited-board {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
   width: min(100%, 42rem);
+}
+
+.wythoff-board {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.nim-limited-board {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+}
+
+.nim-limited-board :disabled {
+  opacity: 0.3;
 }
 
 .pile-title,
@@ -842,7 +854,7 @@ button:disabled {
   }
 }
 
-.nim-emission-actions {
+.pile-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
@@ -1076,7 +1088,9 @@ button:disabled {
   }
 
   .game-switcher {
-    grid-template-columns: repeat(6, minmax(5.5rem, 1fr));
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(5.5rem, 1fr);
     overflow-x: auto;
     padding-bottom: 0.25rem;
   }
@@ -1102,7 +1116,7 @@ button:disabled {
     padding: 0.65rem;
   }
 
-  .wythoff-section {
+  .token-section {
     gap: 0.65rem;
     padding: 0.65rem;
 

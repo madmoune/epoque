@@ -150,6 +150,7 @@ export class PuzzleSuccessPopupComponent implements OnInit {
     'play/color-chain': 'enigmes',
     'play/syllabic-rotation': 'enigmes',
     wythoff: 'duels-epique',
+    'nim-limite': 'duels-epique',
     'nim-emission': 'duels-epique',
     isola: 'duels-epique',
     domineering: 'duels-epique',

@@ -1,4 +1,11 @@
-export type EpiqueGameId = 'wythoff' | 'nim-emission' | 'isola' | 'domineering' | 'sim' | 'hex';
+export type EpiqueGameId =
+  | 'wythoff'
+  | 'nim-limite'
+  | 'nim-emission'
+  | 'isola'
+  | 'domineering'
+  | 'sim'
+  | 'hex';
 
 export type EpiqueGameDefinition = {
   id: EpiqueGameId;
@@ -24,6 +31,21 @@ export const EPIQUE_DUELS: EpiqueGameDefinition[] = [
       'Tu dois retirer au moins un jeton. Le joueur qui retire le dernier jeton gagne.',
     ],
     tag: 'Calcul',
+  },
+  {
+    id: 'nim-limite',
+    title: 'Nim — retrait limité',
+    kicker: 'Stratégie mathématique',
+    description: 'Vide les piles en respectant le maximum de jetons autorisé par tour.',
+    objective: 'Retirer le dernier jeton pour gagner.',
+    rules: [
+      'La partie commence avec 3 à 5 piles contenant chacune de 4 à 12 jetons.',
+      'Le maximum de jetons à retirer par tour est tiré au sort : 3, 4 ou 5. Il reste le même pendant toute la partie.',
+      'À ton tour, retire au moins un jeton sans dépasser le maximum indiqué, dans une seule pile. Tu ne peux pas prendre dans plusieurs piles à la fois.',
+      'Clique sur un jeton pour le retirer avec tous ceux placés après lui, ou utilise les boutons de retrait de sa pile.',
+      'Le joueur qui retire le dernier jeton gagne.',
+    ],
+    tag: 'Jetons',
   },
   {
     id: 'nim-emission',

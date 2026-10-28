@@ -3,16 +3,19 @@ import {
   DominoMove,
   IsolaState,
   NimEmissionState,
+  NimLimitedState,
   Player,
   SimEdge,
   applyDomineeringMove,
   applyIsolaMove,
   applyNimEmissionMove,
+  applyNimLimitedMove,
   applyWythoffMove,
   chooseDomineeringMove,
   chooseHexCell,
   chooseIsolaMove,
   chooseNimEmissionMove,
+  chooseNimLimitedMove,
   chooseSimEdge,
   chooseWythoffMove,
   domineeringMoves,
@@ -21,6 +24,7 @@ import {
   isolaMoves,
   nimEmissionMoveIsWinning,
   nimEmissionMoves,
+  nimLimitedMoves,
   simHasTriangle,
   SIM_EDGES,
   wythoffMoves,
@@ -37,6 +41,61 @@ describe('Épreuves de duel Épique', () => {
     const low = Math.min(...next);
     const difference = Math.abs(next[0] - next[1]);
     expect(low).toBe(Math.floor(difference * ((1 + Math.sqrt(5)) / 2)));
+  });
+
+  describe('Nim à retrait limité', () => {
+    it.each([3, 4, 5] as const)('borne les retraits à %i jetons dans une seule pile', (maxRemoval) => {
+      const state: NimLimitedState = { piles: [0, 2, 12], maxRemoval };
+      const before = structuredClone(state);
+      const moves = nimLimitedMoves(state);
+
+      expect(moves).toHaveLength(2 + maxRemoval);
+      for (const move of moves) {
+        expect(move.removeCount).toBeGreaterThanOrEqual(1);
+        expect(move.removeCount).toBeLessThanOrEqual(maxRemoval);
+        const next = applyNimLimitedMove(state, move);
+        expect(next.piles[move.pileIndex]).toBe(state.piles[move.pileIndex] - move.removeCount);
+        expect(next.piles.filter((pile, index) => pile !== state.piles[index])).toHaveLength(1);
+        expect(next.maxRemoval).toBe(maxRemoval);
+      }
+      expect(state).toEqual(before);
+      expect(chooseNimLimitedMove({ piles: [0, 0, 0], maxRemoval })).toBeNull();
+    });
+
+    it.each([3, 4, 5] as const)('vérifie la stratégie CPU par recherche exhaustive, maximum %i', (maxRemoval) => {
+      const memo = new Map<string, boolean>();
+      function canWin(piles: number[]): boolean {
+        const key = piles.join(',');
+        if (memo.has(key)) return memo.get(key)!;
+        for (let pileIndex = 0; pileIndex < piles.length; pileIndex += 1) {
+          for (let count = 1; count <= Math.min(maxRemoval, piles[pileIndex]); count += 1) {
+            const next = [...piles];
+            next[pileIndex] -= count;
+            if (!canWin(next)) {
+              memo.set(key, true);
+              return true;
+            }
+          }
+        }
+        memo.set(key, false);
+        return false;
+      }
+
+      for (let first = 0; first <= 7; first += 1) {
+        for (let second = 0; second <= 7; second += 1) {
+          for (let third = 0; third <= 7; third += 1) {
+            const state: NimLimitedState = { piles: [first, second, third], maxRemoval };
+            const move = chooseNimLimitedMove(state, () => 0.5);
+            if (move) {
+              expect(nimLimitedMoves(state)).toContainEqual(move);
+              expect(canWin(applyNimLimitedMove(state, move).piles)).toBe(!canWin(state.piles));
+            } else {
+              expect(state.piles).toEqual([0, 0, 0]);
+            }
+          }
+        }
+      }
+    });
   });
 
   it('gère la pile unique de Nim avec la règle dernier drapeau', () => {
@@ -280,6 +339,11 @@ describe('Épreuves de duel Épique', () => {
         name: 'Wythoff',
         choose: (random: () => number) => chooseWythoffMove([7, 10], random),
         legal: wythoffMoves([7, 10]),
+      },
+      {
+        name: 'Nim à retrait limité',
+        choose: (random: () => number) => chooseNimLimitedMove({ piles: [4, 7, 10], maxRemoval: 3 }, random),
+        legal: nimLimitedMoves({ piles: [4, 7, 10], maxRemoval: 3 }),
       },
       {
         name: 'Nim',
