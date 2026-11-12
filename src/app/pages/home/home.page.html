@@ -50,8 +50,8 @@
     <div class="playlists-heading">
       <div>
         <p class="eyebrow">À ton rythme</p>
-        <h2 id="playlists-title">Mes playlists</h2>
-        <p>Crée des parcours personnalisés et joue les jeux dans l’ordre choisi.</p>
+        <h2 id="playlists-title">Playlists</h2>
+        <p>Joue un parcours officiel ou crée ton propre ordre de jeux.</p>
       </div>
 
       <form class="playlist-create" (submit)="$event.preventDefault(); createPlaylist()">
@@ -75,6 +75,9 @@
           <article class="playlist-card">
             <div class="playlist-card-copy">
               <h3>{{ playlist.name }}</h3>
+              @if (playlist.isStatic) {
+                <span class="playlist-static-label">Disponible pour tout le monde</span>
+              }
               <span
                 >{{ playlist.routes.length }} jeu{{ playlist.routes.length === 1 ? '' : 'x' }}</span
               >
@@ -107,16 +110,18 @@
                   playlistProgress(playlist) ? 'Recommencer aléatoirement' : 'Jouer aléatoirement'
                 }}
               </button>
-              <button type="button" class="secondary-button" (click)="editPlaylist(playlist.id)">
-                Modifier
-              </button>
-              <button
-                type="button"
-                class="text-button"
-                (click)="requestDeletePlaylist(playlist.id)"
-              >
-                Supprimer
-              </button>
+              @if (!playlist.isStatic) {
+                <button type="button" class="secondary-button" (click)="editPlaylist(playlist.id)">
+                  Modifier
+                </button>
+                <button
+                  type="button"
+                  class="text-button"
+                  (click)="requestDeletePlaylist(playlist.id)"
+                >
+                  Supprimer
+                </button>
+              }
             </div>
           </article>
         }

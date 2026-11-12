@@ -1,5 +1,10 @@
 import { TestBed } from '@angular/core/testing';
-import { PuzzlePlaylist, PuzzlePlaylistService } from './puzzle-playlist.service';
+import {
+  FINALE_PLAYLIST_ID,
+  FINALE_PLAYLIST_ROUTES,
+  PuzzlePlaylist,
+  PuzzlePlaylistService,
+} from './puzzle-playlist.service';
 
 describe('PuzzlePlaylistService progress', () => {
   const progressStorageKey = 'epique-puzzle-playlist-progress';
@@ -48,6 +53,76 @@ describe('PuzzlePlaylistService progress', () => {
     expect(secondProgress?.previousRoute).toBe(
       '/first?from=playlist&playlist=progress-test&playlistIndex=0',
     );
+  });
+
+  it('always exposes the static Finale playlist without persisting it as a user playlist', () => {
+    const service = TestBed.inject(PuzzlePlaylistService);
+    const finale = service.find(FINALE_PLAYLIST_ID);
+
+    expect(finale).toEqual(
+      expect.objectContaining({
+        id: FINALE_PLAYLIST_ID,
+        name: 'Finale',
+        isStatic: true,
+        routes: [...FINALE_PLAYLIST_ROUTES],
+      }),
+    );
+    expect(finale?.routes.at(-1)).toBe('/quick-arithmetic');
+
+    service.update(FINALE_PLAYLIST_ID, { routes: ['/changed'] });
+    service.remove(FINALE_PLAYLIST_ID);
+
+    expect(service.find(FINALE_PLAYLIST_ID)?.routes).toEqual([...FINALE_PLAYLIST_ROUTES]);
+
+    service.create('Locale');
+
+    expect(
+      (
+        JSON.parse(localStorage.getItem('epique-puzzle-playlists') ?? '[]') as PuzzlePlaylist[]
+      ).some((storedPlaylist) => storedPlaylist.id === FINALE_PLAYLIST_ID),
+    ).toBe(false);
+  });
+
+  it.each(['ordered', 'shuffled'])('resumes an older %s Finale run', (mode) => {
+    const routes = FINALE_PLAYLIST_ROUTES.slice(0, -1);
+    const order = routes.map((_, index) => index);
+    if (mode === 'shuffled') {
+      order.reverse();
+    }
+    const index = order.length - 1;
+    const currentRoute = routes[order[index]];
+    const legacyParams = new URLSearchParams({
+      from: 'playlist',
+      playlist: FINALE_PLAYLIST_ID,
+      playlistIndex: String(index),
+    });
+    if (mode === 'shuffled') {
+      legacyParams.set('playlistOrder', order.join(','));
+    }
+    localStorage.setItem(
+      progressStorageKey,
+      JSON.stringify({ [FINALE_PLAYLIST_ID]: { index, order, routes } }),
+    );
+
+    const service = TestBed.inject(PuzzlePlaylistService);
+    const finale = service.find(FINALE_PLAYLIST_ID)!;
+    const resumedUrl = service.startUrl(finale)!;
+    const resumedProgress = service.progressFromUrl(resumedUrl)!;
+    const legacyProgress = service.progressFromUrl(`${currentRoute}?${legacyParams}`)!;
+
+    expect(resumedUrl.split('?')[0]).toBe(currentRoute);
+    expect(resumedProgress.order).toEqual([...order, order.length]);
+    expect(resumedProgress.index).toBe(index);
+    expect(legacyProgress).toEqual(resumedProgress);
+    expect(resumedProgress.nextRoute?.split('?')[0]).toBe('/quick-arithmetic');
+
+    service.complete(legacyProgress);
+    const finalUrl = service.startUrl(finale)!;
+    expect(finalUrl).toBe(resumedProgress.nextRoute);
+    const finalProgress = service.progressFromUrl(finalUrl)!;
+    expect(finalProgress.nextRoute).toBeNull();
+    service.complete(finalProgress);
+    expect(service.progressFor(finale)).toBeNull();
   });
 
   it('keeps a random order while the playlist is in progress', () => {

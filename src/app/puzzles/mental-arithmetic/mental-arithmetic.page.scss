@@ -207,6 +207,13 @@ h1 {
   scrollbar-width: thin;
 }
 
+.quick-problem {
+  padding-block: 0.75rem;
+  font-size: clamp(1.5rem, 5.5vw, 3rem);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
 .equation-help {
   margin: 0.35rem 0 0;
   color: #6f4c1c;

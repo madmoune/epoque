@@ -2,7 +2,52 @@ import { describe, expect, it } from 'vitest';
 import {
   MENTAL_ARITHMETIC_TEMPLATE_COUNT,
   createArithmeticProblem,
+  createQuickArithmeticProblem,
 } from './mental-arithmetic-problem';
+
+describe('createQuickArithmeticProblem', () => {
+  it('varies operand lengths and adjustments while keeping all divisions exact', () => {
+    let state = 0x42cafe;
+    const random = (): number => {
+      state = (Math.imul(state, 1_664_525) + 1_013_904_223) >>> 0;
+      return state / 0x1_0000_0000;
+    };
+    const factorLengths = new Set<number>();
+    const dividendLengths = new Set<number>();
+    const adjustmentOperators = new Set<string>();
+
+    for (let index = 0; index < 500; index += 1) {
+      const { expression, answer } = createQuickArithmeticProblem(random);
+      const match = expression.match(/^([1-9]\d{0,2}) ([x/]) ([1-9]\d{0,2})(?: ([+-]) (\d+))?$/);
+      expect(match).not.toBeNull();
+      const [, left, operator, right, adjustmentOperator = '', adjustment = '0'] = match!;
+      expect([left.length, right.length]).toContain(2);
+
+      const a = Number(left);
+      const b = Number(right);
+      if (operator === '/') {
+        expect(a % b).toBe(0);
+        dividendLengths.add(left.length);
+      } else {
+        expect(left).toHaveLength(2);
+        factorLengths.add(right.length);
+      }
+
+      const offset = Number(adjustment);
+      if (adjustmentOperator) {
+        expect(offset).toBeGreaterThanOrEqual(1);
+        expect(offset).toBeLessThanOrEqual(20);
+      }
+      adjustmentOperators.add(adjustmentOperator);
+      const base = operator === '/' ? a / b : a * b;
+      expect(answer).toBe(base + (adjustmentOperator === '-' ? -offset : offset));
+    }
+
+    expect(factorLengths).toEqual(new Set([1, 2, 3]));
+    expect(dividendLengths).toEqual(new Set([2, 3]));
+    expect(adjustmentOperators).toEqual(new Set(['', '+', '-']));
+  });
+});
 
 describe('createArithmeticProblem', () => {
   it('keeps every advanced template exact and integer-valued', () => {

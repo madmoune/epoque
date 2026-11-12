@@ -346,10 +346,18 @@ export class HomePage {
           tag: 'Contraintes',
         },
         {
-          title: 'Arithmétique mentale',
-          description: 'Résous des calculs courts et rapides en gardant le rythme.',
-          route: '/mental-arithmetic',
+          title: 'Calcul rapide',
+          description:
+            'Enchaîne des multiplications et des divisions exactes, parfois suivies d’une addition ou d’une soustraction.',
+          route: '/quick-arithmetic',
           tag: 'Vitesse',
+        },
+        {
+          title: 'Arithmétique mentale',
+          description:
+            'Résous des calculs avancés avec des parenthèses, des puissances et des racines.',
+          route: '/mental-arithmetic',
+          tag: 'Priorités',
         },
         {
           title: 'Nim',
@@ -544,13 +552,18 @@ export class HomePage {
 
   createPlaylist(): void {
     const name = this.newPlaylistName().trim();
-    const playlist = this.playlistService.create(name || `Playlist ${this.playlists().length + 1}`);
+    const userPlaylistCount = this.playlists().filter((playlist) => !playlist.isStatic).length;
+    const playlist = this.playlistService.create(name || `Playlist ${userPlaylistCount + 1}`);
 
     this.newPlaylistName.set('');
     this.editingPlaylistId.set(playlist.id);
   }
 
   editPlaylist(playlistId: string): void {
+    if (this.playlistService.find(playlistId)?.isStatic) {
+      return;
+    }
+
     this.editingPlaylistId.set(playlistId);
   }
 
@@ -650,7 +663,9 @@ export class HomePage {
   }
 
   requestDeletePlaylist(playlistId: string): void {
-    if (this.playlistService.find(playlistId)) {
+    const playlist = this.playlistService.find(playlistId);
+
+    if (playlist && !playlist.isStatic) {
       this.pendingPlaylistDeletionId.set(playlistId);
     }
   }

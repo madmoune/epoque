@@ -5,6 +5,7 @@ export type PuzzlePlaylist = {
   id: string;
   name: string;
   routes: string[];
+  isStatic?: boolean;
   lastCompletedAt?: number | null;
 };
 
@@ -20,6 +21,45 @@ export type PlaylistProgress = {
   order: number[];
   previousRoute?: string | null;
   nextRoute: string | null;
+};
+
+export const FINALE_PLAYLIST_ID = 'finale';
+const ORIGINAL_FINALE_ROUTES = [
+  '/cryptarithms',
+  '/drop-quote',
+  '/nim-emission',
+  '/isola',
+  '/hex',
+  '/anagrams',
+  '/cryptograms',
+  '/hidden-phrase',
+  '/ciphers/pigpen',
+  '/ciphers/morse',
+  '/ciphers/braille',
+  '/memory-pieces',
+  '/symbol-pairs',
+  '/sequences',
+  '/crossmath',
+  '/magic-square',
+  '/count-is-good',
+  '/knights-and-knaves',
+  '/hanging-weights',
+  '/mastermind',
+  '/zebra',
+  '/jigsaw-grid',
+  '/jigsaw-blocks',
+  '/sliding-puzzle',
+  '/rush-hour',
+] as const;
+
+export const FINALE_PLAYLIST_ROUTES = [...ORIGINAL_FINALE_ROUTES, '/quick-arithmetic'] as const;
+
+export const FINALE_PLAYLIST: PuzzlePlaylist = {
+  id: FINALE_PLAYLIST_ID,
+  name: 'Finale',
+  routes: [...FINALE_PLAYLIST_ROUTES],
+  isStatic: true,
+  lastCompletedAt: null,
 };
 
 @Injectable({
@@ -53,6 +93,7 @@ export class PuzzlePlaylistService {
       id: this.createId(),
       name: name.trim() || 'Nouvelle playlist',
       routes: [],
+      isStatic: false,
       lastCompletedAt: null,
     };
 
@@ -62,6 +103,11 @@ export class PuzzlePlaylistService {
 
   update(id: string, changes: Partial<Pick<PuzzlePlaylist, 'name' | 'routes'>>): void {
     const currentPlaylist = this.find(id);
+
+    if (currentPlaylist?.isStatic) {
+      return;
+    }
+
     this.setPlaylists(
       this.playlists().map((playlist) =>
         playlist.id === id
@@ -84,6 +130,10 @@ export class PuzzlePlaylistService {
   }
 
   remove(id: string): void {
+    if (this.find(id)?.isStatic) {
+      return;
+    }
+
     this.setPlaylists(this.playlists().filter((playlist) => playlist.id !== id));
     this.clearProgress(id);
   }
@@ -115,14 +165,24 @@ export class PuzzlePlaylistService {
   progressFor(playlist: PuzzlePlaylist): PlaylistProgressSnapshot | null {
     const savedProgress = this.progress()[playlist.id];
 
-    if (!savedProgress || !this.isProgressForPlaylist(savedProgress, playlist)) {
+    if (
+      !savedProgress ||
+      savedProgress.index >= savedProgress.order.length ||
+      !this.arraysEqual(savedProgress.routes, playlist.routes.slice(0, savedProgress.routes.length))
+    ) {
+      return null;
+    }
+
+    const order = this.orderForPlaylist(savedProgress.order, playlist);
+
+    if (!order) {
       return null;
     }
 
     return {
       index: savedProgress.index,
-      order: [...savedProgress.order],
-      routes: [...savedProgress.routes],
+      order,
+      routes: [...playlist.routes],
     };
   }
 
@@ -137,7 +197,7 @@ export class PuzzlePlaylistService {
 
     const playlist = this.find(params.get('playlist') ?? '');
     const index = Number(params.get('playlistIndex'));
-    const order = this.orderFromParam(params.get('playlistOrder'), playlist?.routes.length ?? 0);
+    const order = playlist && this.orderFromParam(params.get('playlistOrder'), playlist);
 
     if (
       !playlist ||
@@ -211,25 +271,22 @@ export class PuzzlePlaylistService {
     return order;
   }
 
-  private orderFromParam(value: string | null, length: number): number[] | null {
-    const ordered = this.createOrderedOrder(length);
-
+  private orderFromParam(value: string | null, playlist: PuzzlePlaylist): number[] | null {
     if (value === null) {
-      return ordered;
+      return this.createOrderedOrder(playlist.routes.length);
     }
 
-    const order = value.split(',').map((item) => Number(item));
-    const isValid =
-      order.length === length &&
-      order.every(
-        (routeIndex, index) =>
-          Number.isInteger(routeIndex) &&
-          routeIndex >= 0 &&
-          routeIndex < length &&
-          order.indexOf(routeIndex) === index,
-      );
+    return this.orderForPlaylist(value.split(',').map(Number), playlist);
+  }
 
-    return isValid ? order : null;
+  private orderForPlaylist(order: readonly number[], playlist: PuzzlePlaylist): number[] | null {
+    const isOriginalFinaleOrder =
+      playlist.id === FINALE_PLAYLIST_ID &&
+      order.length === ORIGINAL_FINALE_ROUTES.length &&
+      this.arraysEqual(playlist.routes, FINALE_PLAYLIST_ROUTES);
+    const currentOrder = isOriginalFinaleOrder ? [...order, order.length] : [...order];
+
+    return this.isValidOrder(currentOrder, playlist.routes.length) ? currentOrder : null;
   }
 
   private isOrderedOrder(order: number[]): boolean {
@@ -291,21 +348,25 @@ export class PuzzlePlaylistService {
       const parsed: unknown = stored ? JSON.parse(stored) : [];
 
       if (!Array.isArray(parsed)) {
-        return [];
+        return [this.createFinalePlaylist()];
       }
 
-      return parsed
+      const userPlaylists = parsed
         .filter((value): value is PuzzlePlaylist => this.isPlaylist(value))
+        .filter((playlist) => playlist.id !== FINALE_PLAYLIST_ID)
         .map((playlist) => ({
           id: playlist.id,
           name: playlist.name.trim() || 'Playlist',
           routes: [...new Set(playlist.routes.filter((route) => route.startsWith('/')))],
+          isStatic: false,
           lastCompletedAt: this.isValidCompletionTimestamp(playlist.lastCompletedAt)
             ? playlist.lastCompletedAt
             : null,
         }));
+
+      return [this.createFinalePlaylist(), ...userPlaylists];
     } catch {
-      return [];
+      return [this.createFinalePlaylist()];
     }
   }
 
@@ -328,10 +389,18 @@ export class PuzzlePlaylistService {
 
   private writePlaylists(playlists: PuzzlePlaylist[]): void {
     try {
-      this.storage.set(this.storageKey, JSON.stringify(playlists));
+      const userPlaylists = playlists.filter((playlist) => playlist.id !== FINALE_PLAYLIST_ID);
+      this.storage.set(this.storageKey, JSON.stringify(userPlaylists));
     } catch {
       // Les playlists restent disponibles pendant la session si le stockage est indisponible.
     }
+  }
+
+  private createFinalePlaylist(): PuzzlePlaylist {
+    return {
+      ...FINALE_PLAYLIST,
+      routes: [...FINALE_PLAYLIST_ROUTES],
+    };
   }
 
   private isPlaylist(value: unknown): value is PuzzlePlaylist {
@@ -372,17 +441,6 @@ export class PuzzlePlaylistService {
       candidate.order.length === candidate.routes.length &&
       candidate.routes.every((route) => typeof route === 'string') &&
       this.isValidOrder(candidate.order, candidate.routes.length)
-    );
-  }
-
-  private isProgressForPlaylist(
-    progress: PlaylistProgressSnapshot,
-    playlist: PuzzlePlaylist,
-  ): boolean {
-    return (
-      this.arraysEqual(progress.routes, playlist.routes) &&
-      progress.index < progress.order.length &&
-      this.isValidOrder(progress.order, playlist.routes.length)
     );
   }
 

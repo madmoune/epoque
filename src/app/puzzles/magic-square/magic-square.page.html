@@ -10,14 +10,74 @@
       </p>
     </header>
 
-    <section class="target-panel" aria-label="Somme cible">
-      <span>Somme cible</span>
-      <strong>{{ puzzle().targetSum }}</strong>
-    </section>
+    <div class="game-controls">
+      <div class="toolbar" role="group" aria-label="Taille de la grille">
+        @for (size of sizes; track size) {
+          <button
+            type="button"
+            class="secondary-button compact-button"
+            [class.active]="puzzle().size === size"
+            [attr.aria-pressed]="puzzle().size === size"
+            (click)="setSize(size)"
+          >
+            {{ size }}×{{ size }}
+          </button>
+        }
+      </div>
 
-    <div class="game-layout">
+      <section class="target-panel" aria-label="Somme cible">
+        <span>Somme cible</span>
+        <strong>{{ puzzle().targetSum }}</strong>
+      </section>
+    </div>
+
+    <div class="game-layout" [style.--magic-size]="puzzle().size">
+      @if (puzzle().size === 4) {
+        <details class="solution-guide">
+          <summary>Méthode de résolution</summary>
+          <div class="solution-guide-content">
+            <ol>
+              <li>
+                <strong>Complète les cases opposées.</strong> Dans la solution générée, deux
+                cases en miroir par rapport au centre totalisent la moitié de la somme cible.
+                Avec une cible de 54 et un 21 dans un coin, le coin opposé vaut 27 − 21 = 6.
+              </li>
+              <li>
+                <strong>Repère les nombres en trop.</strong> La solution utilise 16 nombres
+                consécutifs. Le plus petit vaut (somme cible − 30) ÷ 4. Garde ce nombre et
+                les 15 suivants.
+              </li>
+              <li>
+                <strong>Complète les lignes les plus remplies.</strong> Dans une ligne, une
+                colonne ou une grande diagonale, soustrais de la cible la somme des nombres
+                placés. S’il manque une case, le reste est sa valeur. S’il en manque deux,
+                cherche les paires disponibles qui donnent ce reste et vérifie leur placement
+                avec les autres lignes, colonnes ou diagonales.
+              </li>
+            </ol>
+            <p>
+              Si plusieurs placements restent possibles, fais un essai et reviens en arrière dès
+              qu’une somme devient impossible.
+            </p>
+            <p>
+              <a
+                href="https://www.magischvierkant.com/two-dimensional-eng/4x4/explanation/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Explication du carré 4×4 sur Magisch vierkant (en anglais)
+              </a>
+            </p>
+          </div>
+        </details>
+      }
+
       <div class="board-area">
-        <div class="magic-grid" aria-label="Carré magique 3 par 3">
+        <div
+          class="magic-grid"
+          role="group"
+          [attr.aria-label]="'Carré magique ' + puzzle().size + ' par ' + puzzle().size"
+        >
           @for (row of puzzle().cells; track $index) {
             @for (cell of row; track cell.row + ':' + cell.col) {
               <button

@@ -3,6 +3,51 @@ export type ArithmeticProblem = {
   answer: number;
 };
 
+export function createQuickArithmeticProblem(random: () => number = Math.random): ArithmeticProblem {
+  const randomInt = (min: number, max: number): number =>
+    min + Math.floor(random() * (max - min + 1));
+  const roll = randomInt(0, 9);
+  let problem: ArithmeticProblem;
+
+  if (roll < 2) {
+    const twoDigitDividend = roll === 0;
+    const divisor = twoDigitDividend ? randomInt(2, 24) : randomInt(10, 99);
+    const minDividend = twoDigitDividend ? 10 : 100;
+    const maxDividend = twoDigitDividend ? 99 : 999;
+    const quotient = randomInt(
+      Math.max(2, Math.ceil(minDividend / divisor)),
+      Math.floor(maxDividend / divisor),
+    );
+
+    problem = { expression: `${quotient * divisor} / ${divisor}`, answer: quotient };
+  } else {
+    const factor = randomInt(10, 99);
+    let otherFactor: number;
+
+    if (roll < 7) {
+      otherFactor = randomInt(2, 9);
+    } else if (roll < 9) {
+      otherFactor = randomInt(10, 99);
+    } else {
+      otherFactor = randomInt(100, 999);
+    }
+
+    problem = { expression: `${factor} x ${otherFactor}`, answer: factor * otherFactor };
+  }
+
+  if (random() >= 1 / 3) {
+    return problem;
+  }
+
+  const adjustment = randomInt(1, 20);
+  const add = random() < 0.5;
+
+  return {
+    expression: `${problem.expression} ${add ? '+' : '-'} ${adjustment}`,
+    answer: problem.answer + (add ? adjustment : -adjustment),
+  };
+}
+
 export const MENTAL_ARITHMETIC_TEMPLATE_COUNT = 12;
 
 export function createArithmeticProblem(random: () => number = Math.random): ArithmeticProblem {

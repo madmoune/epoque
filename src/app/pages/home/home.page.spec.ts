@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { PuzzlePlaylistService } from '../../puzzle-playlist.service';
+import { FINALE_PLAYLIST_ID, PuzzlePlaylistService } from '../../puzzle-playlist.service';
 import { FirebasePuzzleCatalogService } from '../../shared/firebase/firebase-puzzle-catalog.service';
 import { HomePage } from './home.page';
 import { NEW_GAME_ROUTES } from '../../puzzles/new-games/new-games.catalog';
@@ -72,6 +72,32 @@ describe('HomePage playlist category controls', () => {
     expect(playlistService.find(playlist.id)).toBeUndefined();
   });
 
+  it('shows Finale for everyone without edit or delete actions', () => {
+    const fixture = TestBed.createComponent(HomePage);
+    fixture.detectChanges();
+
+    const finaleCard = [...fixture.nativeElement.querySelectorAll('.playlist-card')].find(
+      (card: HTMLElement) => card.querySelector('h3')?.textContent?.trim() === 'Finale',
+    );
+
+    expect(finaleCard).toBeDefined();
+    expect(finaleCard?.textContent).toContain('Disponible pour tout le monde');
+    expect(finaleCard?.querySelector('.playlist-card-actions')?.textContent).toContain('Jouer');
+    expect(finaleCard?.querySelector('.playlist-card-actions')?.textContent).not.toContain(
+      'Modifier',
+    );
+    expect(finaleCard?.querySelector('.playlist-card-actions')?.textContent).not.toContain(
+      'Supprimer',
+    );
+
+    const page = fixture.componentInstance;
+    page.editPlaylist(FINALE_PLAYLIST_ID);
+    page.requestDeletePlaylist(FINALE_PLAYLIST_ID);
+
+    expect(page.editingPlaylist()).toBeNull();
+    expect(page.pendingPlaylistDeletion()).toBeNull();
+  });
+
   it('filters the home game cards by name without hiding playlist options', () => {
     const fixture = TestBed.createComponent(HomePage);
     const page = fixture.componentInstance;
@@ -110,11 +136,15 @@ describe('HomePage playlist category controls', () => {
     const page = TestBed.createComponent(HomePage).componentInstance;
     const category = page.categories().find((category) => category.id === 'duels-epique');
 
-    expect(category?.puzzles).toContainEqual(expect.objectContaining({
-      title: 'Nim — retrait limité',
-      route: '/nim-limite',
-    }));
-    expect(page.playlistPuzzleOptions().some((puzzle) => puzzle.route === '/nim-limite')).toBe(true);
+    expect(category?.puzzles).toContainEqual(
+      expect.objectContaining({
+        title: 'Nim — retrait limité',
+        route: '/nim-limite',
+      }),
+    );
+    expect(page.playlistPuzzleOptions().some((puzzle) => puzzle.route === '/nim-limite')).toBe(
+      true,
+    );
     expect(routes.find((route) => route.path === 'nim-limite')?.data?.['game']).toBe('nim-limite');
   });
 });

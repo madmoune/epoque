@@ -8,7 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import katex from 'katex';
 import {
   CustomKeyboardComponent,
@@ -19,7 +19,11 @@ import {
   ArithmeticExpressionPart,
   arithmeticExpressionToInteractiveLatex,
 } from './mental-arithmetic-expression';
-import { ArithmeticProblem, createArithmeticProblem } from './mental-arithmetic-problem';
+import {
+  ArithmeticProblem,
+  createArithmeticProblem,
+  createQuickArithmeticProblem,
+} from './mental-arithmetic-problem';
 
 @Component({
   selector: 'app-mental-arithmetic-page',
@@ -33,6 +37,7 @@ export class MentalArithmeticPage {
 
   private readonly sanitizer = inject(DomSanitizer);
 
+  protected readonly isQuickGame = inject(ActivatedRoute).snapshot.data['mode'] === 'quick';
   protected readonly problem = signal<ArithmeticProblem>(this.createProblem());
   protected readonly answer = signal('');
   protected readonly isSolved = signal(false);
@@ -56,6 +61,9 @@ export class MentalArithmeticPage {
   );
   protected readonly displayExpression = computed<SafeHtml>(() =>
     this.renderExpression(this.interactiveExpression().latex),
+  );
+  protected readonly quickExpression = computed(() =>
+    this.problem().expression.replace(' x ', ' × ').replace(' / ', ' ÷ ').replace(' - ', ' − '),
   );
   protected readonly selectedSubresult = signal<ArithmeticExpressionPart | null>(null);
   protected readonly answerHint = computed(() => {
@@ -197,7 +205,7 @@ export class MentalArithmeticPage {
   }
 
   private createProblem(): ArithmeticProblem {
-    return createArithmeticProblem();
+    return this.isQuickGame ? createQuickArithmeticProblem() : createArithmeticProblem();
   }
 
   private measureExpressionWeight(expression: string): number {

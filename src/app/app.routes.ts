@@ -189,6 +189,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'quick-arithmetic',
+    data: { mode: 'quick' },
+    loadComponent: () =>
+      import('./puzzles/mental-arithmetic/mental-arithmetic.page').then(
+        (m) => m.MentalArithmeticPage,
+      ),
+  },
+  {
     path: 'mnemonic',
     loadComponent: () => import('./puzzles/mnemonic/mnemonic.page').then((m) => m.MnemonicPage),
   },

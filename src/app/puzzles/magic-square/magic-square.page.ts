@@ -2,6 +2,8 @@ import { Component, HostListener, computed, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
 
+type MagicSquareSize = 3 | 4;
+
 type MagicCell = {
   row: number;
   col: number;
@@ -10,61 +12,28 @@ type MagicCell = {
 };
 
 type MagicPuzzle = {
+  size: MagicSquareSize;
   cells: MagicCell[][];
+  lines: MagicCell[][];
   targetSum: number;
   numberBank: number[];
 };
 
 type LineState = 'empty' | 'partial' | 'wrong' | 'correct';
 
-const BASE_SQUARE = [
-  [8, 1, 6],
-  [3, 5, 7],
-  [4, 9, 2],
-];
-
-const LINES = [
-  [
-    [0, 0],
-    [0, 1],
-    [0, 2],
+const BASE_SQUARES = {
+  3: [
+    [8, 1, 6],
+    [3, 5, 7],
+    [4, 9, 2],
   ],
-  [
-    [1, 0],
-    [1, 1],
-    [1, 2],
+  4: [
+    [16, 2, 3, 13],
+    [5, 11, 10, 8],
+    [9, 7, 6, 12],
+    [4, 14, 15, 1],
   ],
-  [
-    [2, 0],
-    [2, 1],
-    [2, 2],
-  ],
-  [
-    [0, 0],
-    [1, 0],
-    [2, 0],
-  ],
-  [
-    [0, 1],
-    [1, 1],
-    [2, 1],
-  ],
-  [
-    [0, 2],
-    [1, 2],
-    [2, 2],
-  ],
-  [
-    [0, 0],
-    [1, 1],
-    [2, 2],
-  ],
-  [
-    [0, 2],
-    [1, 1],
-    [2, 0],
-  ],
-] as const;
+};
 
 @Component({
   selector: 'app-magic-square-page',
@@ -73,7 +42,8 @@ const LINES = [
   styleUrl: './magic-square.page.scss',
 })
 export class MagicSquarePage {
-  protected readonly puzzle = signal<MagicPuzzle>(this.createPuzzle());
+  protected readonly sizes = [3, 4] as const;
+  protected readonly puzzle = signal<MagicPuzzle>(this.createPuzzle(4));
   protected readonly answers = signal<(number | null)[][]>(this.createEmptyAnswers());
   protected readonly selectedCell = signal<{ row: number; col: number } | null>(null);
   protected readonly draggedNumber = signal<number | null>(null);
@@ -94,26 +64,29 @@ export class MagicSquarePage {
     () => this.isGridFilled() && this.lineStates().every((state) => state === 'correct'),
   );
 
-  protected readonly lineStates = computed<LineState[]>(() =>
-    LINES.map((line) => {
-      const values = line.map(([row, col]) => this.cellValue(row, col));
+  protected readonly lineStates = computed<LineState[]>(() => {
+    const { lines, targetSum } = this.puzzle();
+    return lines.map((line) => {
+      const values = line.map(({ row, col }) => this.cellValue(row, col));
 
       if (values.every((value) => value === null)) return 'empty';
       if (values.some((value) => value === null)) return 'partial';
 
-      return values.reduce<number>((sum, value) => sum + (value ?? 0), 0) ===
-        this.puzzle().targetSum
+      return values.reduce<number>((sum, value) => sum + (value ?? 0), 0) === targetSum
         ? 'correct'
         : 'wrong';
-    }),
-  );
+    });
+  });
 
-  protected newPuzzle(): void {
-    this.puzzle.set(this.createPuzzle());
-    this.answers.set(this.createEmptyAnswers());
-    this.selectedCell.set(null);
-    this.draggedNumber.set(null);
-    this.draggedSource = null;
+  protected setSize(size: MagicSquareSize): void {
+    if (this.puzzle().size === size) return;
+
+    this.newPuzzle(size);
+  }
+
+  protected newPuzzle(size = this.puzzle().size): void {
+    this.puzzle.set(this.createPuzzle(size));
+    this.resetPuzzle();
   }
 
   protected resetPuzzle(): void {
@@ -121,6 +94,7 @@ export class MagicSquarePage {
     this.selectedCell.set(null);
     this.draggedNumber.set(null);
     this.draggedSource = null;
+    this.completedDrop = false;
   }
 
   protected selectCell(row: number, col: number): void {
@@ -320,39 +294,40 @@ export class MagicSquarePage {
   }
 
   protected columnState(col: number): LineState {
-    return this.lineStates()[3 + col];
+    return this.lineStates()[this.puzzle().size + col];
   }
 
   protected diagonalState(index: 0 | 1): LineState {
-    return this.lineStates()[6 + index];
+    return this.lineStates()[2 * this.puzzle().size + index];
   }
 
-  private createPuzzle(): MagicPuzzle {
+  private createPuzzle(size: MagicSquareSize): MagicPuzzle {
     const offset = this.randomInt(0, 15);
-    const transformed = this.transformSquare(BASE_SQUARE).map((row) =>
-      row.map((value) => value + offset),
-    );
-    const givenCount = this.randomInt(1, 3);
-    const givenPositions = new Set(this.createGivenPositions(givenCount));
-    const cells = transformed.map((row, rowIndex) =>
+    const cells = this.transformSquare(BASE_SQUARES[size]).map((row, rowIndex) =>
       row.map((value, colIndex) => ({
         row: rowIndex,
         col: colIndex,
-        value,
-        given: givenPositions.has(this.positionKey(rowIndex, colIndex)),
+        value: value + offset,
+        given: false,
       })),
     );
+    const lines = [
+      ...cells,
+      ...cells[0].map((_, col) => cells.map((row) => row[col])),
+      cells.map((row, index) => row[index]),
+      cells.map((row, index) => row[size - 1 - index]),
+    ];
 
-    const solutionNumbers = transformed.flat();
-    const missingNumbers = solutionNumbers.filter((value, index) => {
-      const row = Math.floor(index / 3);
-      const col = index % 3;
-      return !givenPositions.has(this.positionKey(row, col));
-    });
+    const allCells = cells.flat();
+    this.setGivenCells(allCells, lines, size);
+    const solutionNumbers = allCells.map((cell) => cell.value);
+    const missingNumbers = allCells.filter((cell) => !cell.given).map((cell) => cell.value);
 
     return {
+      size,
       cells,
-      targetSum: 15 + offset * 3,
+      lines,
+      targetSum: cells[0].reduce((sum, cell) => sum + cell.value, 0),
       numberBank: this.shuffle([...missingNumbers, ...this.createDistractors(solutionNumbers)]),
     };
   }
@@ -364,35 +339,37 @@ export class MagicSquarePage {
   }
 
   private isCellInWrongCompletedLine(row: number, col: number): boolean {
-    return LINES.some((line, index) => {
-      const includesCell = line.some(([lineRow, lineCol]) => lineRow === row && lineCol === col);
-
-      return includesCell && this.lineStates()[index] === 'wrong';
-    });
+    const { cells, lines } = this.puzzle();
+    const states = this.lineStates();
+    return lines.some((line, index) => states[index] === 'wrong' && line.includes(cells[row][col]));
   }
 
-  private createGivenPositions(count: number): string[] {
-    const positions = this.shuffle(this.createPositions());
-    const selected: string[] = [];
+  private setGivenCells(cells: MagicCell[], lines: MagicCell[][], size: MagicSquareSize): void {
+    const givenCount = size === 3 ? this.randomInt(1, 3) : this.randomInt(4, 6);
+    const maxGivensPerLine = size === 3 ? 1 : size - 1;
+    const shuffledCells = this.shuffle(cells);
 
-    for (const position of positions) {
-      const candidate = [...selected, position];
+    // A locally valid clue can block the remaining choices, such as the center of a 3×3.
+    const placeGivens = (start: number, remaining: number): boolean => {
+      if (remaining === 0) return true;
 
-      if (this.hasLineWithTwoGivenCells(candidate)) continue;
+      for (let index = start; index <= shuffledCells.length - remaining; index += 1) {
+        const cell = shuffledCells[index];
+        cell.given = true;
+        if (
+          lines.every(
+            (line) => line.filter((candidate) => candidate.given).length <= maxGivensPerLine,
+          ) &&
+          placeGivens(index + 1, remaining - 1)
+        ) {
+          return true;
+        }
+        cell.given = false;
+      }
+      return false;
+    };
 
-      selected.push(position);
-      if (selected.length === count) return selected;
-    }
-
-    return selected;
-  }
-
-  private hasLineWithTwoGivenCells(positions: string[]): boolean {
-    const selected = new Set(positions);
-
-    return LINES.some(
-      (line) => line.filter(([row, col]) => selected.has(this.positionKey(row, col))).length >= 2,
-    );
+    placeGivens(0, givenCount);
   }
 
   private createDistractors(solutionNumbers: number[]): number[] {
@@ -428,17 +405,7 @@ export class MagicSquarePage {
   }
 
   private createEmptyAnswers(): (number | null)[][] {
-    return Array.from({ length: 3 }, () => Array.from({ length: 3 }, () => null));
-  }
-
-  private createPositions(): string[] {
-    return Array.from({ length: 9 }, (_, index) =>
-      this.positionKey(Math.floor(index / 3), index % 3),
-    );
-  }
-
-  private positionKey(row: number, col: number): string {
-    return `${row}:${col}`;
+    return this.puzzle().cells.map((row) => row.map(() => null));
   }
 
   private randomInt(min: number, max: number): number {
