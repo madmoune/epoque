@@ -93,7 +93,7 @@ export class SequencesService {
     this.withGenre('recurrence', () => this.createJacobsthalLikeSequence()),
     this.withGenre('recurrence', () => this.createTwoPreviousMinusConstantSequence()),
     this.withGenre('recurrence', () => this.createPreviousPlusThirdBackSequence()),
-    this.withGenre('recurrence', () => this.createTwoPreviousPlusPositionSequence()),
+    this.withGenre('recurrence', () => this.createTwoPreviousSumSequence()),
     this.withGenre('recurrence', () => this.createAlternatingRecurrenceSequence()),
     this.withGenre('recurrence', () => this.createWeightedTwoPreviousMinusConstantSequence()),
 
@@ -1747,21 +1747,19 @@ export class SequencesService {
     );
   }
 
-  private createTwoPreviousPlusPositionSequence(): MathSequencePuzzle {
+  private createTwoPreviousSumSequence(): MathSequencePuzzle {
     const first = this.randomInt(1, 6);
     const second = this.randomInt(3, 9);
     const length = 7;
     const sequence = [first, second];
 
     while (sequence.length < length) {
-      const position = sequence.length + 1;
-
-      sequence.push(sequence[sequence.length - 1] + sequence[sequence.length - 2] + position);
+      sequence.push(sequence[sequence.length - 1] + sequence[sequence.length - 2]);
     }
 
     return this.createPuzzleFromSequence(
       sequence,
-      'Additionne les deux nombres précédents, puis ajoute la position du nouveau terme.',
+      'Additionne les deux nombres précédents.',
     );
   }
 

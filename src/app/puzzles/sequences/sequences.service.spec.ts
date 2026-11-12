@@ -11,11 +11,26 @@ type ServiceHarness = {
   templateDeck: TemplateHarness[];
   lastGenre: string | null;
   drawTemplate: () => TemplateHarness;
+  createTwoPreviousSumSequence: () => MathSequencePuzzle;
   isPerfectCube: (value: number) => boolean;
   isTooSimpleSequence: (sequence: number[]) => boolean;
 };
 
 describe('SequencesService', () => {
+  it('sums the two previous numbers without adding the term position', () => {
+    const service = new SequencesService();
+    const harness = service as unknown as ServiceHarness;
+    const puzzle = harness.createTwoPreviousSumSequence();
+
+    expect(
+      puzzle.sequence
+        .slice(2)
+        .every((value, index) => value === puzzle.sequence[index] + puzzle.sequence[index + 1]),
+    ).toBe(true);
+    expect(puzzle.hint).toBe('Additionne les deux nombres précédents.');
+    expect(puzzle.hint).not.toContain('position');
+  });
+
   it('contains 82 distinct sequence templates', () => {
     const service = new SequencesService();
     const harness = service as unknown as ServiceHarness;
