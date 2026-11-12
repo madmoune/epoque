@@ -1,7 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import {
-  FINALE_PLAYLIST_ID,
-  FINALE_PLAYLIST_ROUTES,
+  FINALE_1_PLAYLIST_ID,
+  FINALE_1_PLAYLIST_ROUTES,
+  FINALE_2_PLAYLIST_ID,
+  FINALE_2_PLAYLIST_ROUTES,
   PuzzlePlaylist,
   PuzzlePlaylistService,
 } from './puzzle-playlist.service';
@@ -55,68 +57,67 @@ describe('PuzzlePlaylistService progress', () => {
     );
   });
 
-  it('always exposes the static Finale playlist without persisting it as a user playlist', () => {
+  it('always exposes both static Finale playlists without persisting them as user playlists', () => {
     const service = TestBed.inject(PuzzlePlaylistService);
-    const finale = service.find(FINALE_PLAYLIST_ID);
+    const finale1 = service.find(FINALE_1_PLAYLIST_ID);
+    const finale2 = service.find(FINALE_2_PLAYLIST_ID);
 
-    expect(finale).toEqual(
+    expect(finale1).toEqual(
       expect.objectContaining({
-        id: FINALE_PLAYLIST_ID,
-        name: 'Finale',
+        id: FINALE_1_PLAYLIST_ID,
+        name: 'Finale 1',
         isStatic: true,
-        routes: [...FINALE_PLAYLIST_ROUTES],
+        routes: [...FINALE_1_PLAYLIST_ROUTES],
       }),
     );
-    expect(finale?.routes.at(-1)).toBe('/quick-arithmetic');
+    expect(finale2).toEqual(
+      expect.objectContaining({
+        id: FINALE_2_PLAYLIST_ID,
+        name: 'Finale 2',
+        isStatic: true,
+        routes: [...FINALE_2_PLAYLIST_ROUTES],
+      }),
+    );
+    expect(finale1?.routes.at(-1)).toBe('/quick-arithmetic');
+    expect(finale2?.routes.at(-1)).toBe('/puzzle-a-cadenas');
 
-    service.update(FINALE_PLAYLIST_ID, { routes: ['/changed'] });
-    service.remove(FINALE_PLAYLIST_ID);
+    service.update(FINALE_1_PLAYLIST_ID, { routes: ['/changed'] });
+    service.remove(FINALE_2_PLAYLIST_ID);
 
-    expect(service.find(FINALE_PLAYLIST_ID)?.routes).toEqual([...FINALE_PLAYLIST_ROUTES]);
+    expect(service.find(FINALE_1_PLAYLIST_ID)?.routes).toEqual([...FINALE_1_PLAYLIST_ROUTES]);
+    expect(service.find(FINALE_2_PLAYLIST_ID)?.routes).toEqual([...FINALE_2_PLAYLIST_ROUTES]);
 
     service.create('Locale');
 
-    expect(
-      (
-        JSON.parse(localStorage.getItem('epique-puzzle-playlists') ?? '[]') as PuzzlePlaylist[]
-      ).some((storedPlaylist) => storedPlaylist.id === FINALE_PLAYLIST_ID),
-    ).toBe(false);
+    const storedPlaylists = JSON.parse(
+      localStorage.getItem('epique-puzzle-playlists') ?? '[]',
+    ) as PuzzlePlaylist[];
+    expect(storedPlaylists.some((playlist) => playlist.isStatic)).toBe(false);
   });
 
-  it.each(['ordered', 'shuffled'])('resumes an older %s Finale run', (mode) => {
-    const routes = FINALE_PLAYLIST_ROUTES.slice(0, -1);
+  it.each([
+    ['Finale 1', FINALE_1_PLAYLIST_ID, FINALE_1_PLAYLIST_ROUTES],
+    ['Finale 2', FINALE_2_PLAYLIST_ID, FINALE_2_PLAYLIST_ROUTES],
+  ] as const)('resumes a saved %s run', (_name, playlistId, routes) => {
     const order = routes.map((_, index) => index);
-    if (mode === 'shuffled') {
-      order.reverse();
-    }
-    const index = order.length - 1;
+    const index = order.length - 2;
     const currentRoute = routes[order[index]];
-    const legacyParams = new URLSearchParams({
-      from: 'playlist',
-      playlist: FINALE_PLAYLIST_ID,
-      playlistIndex: String(index),
-    });
-    if (mode === 'shuffled') {
-      legacyParams.set('playlistOrder', order.join(','));
-    }
     localStorage.setItem(
       progressStorageKey,
-      JSON.stringify({ [FINALE_PLAYLIST_ID]: { index, order, routes } }),
+      JSON.stringify({ [playlistId]: { index, order, routes } }),
     );
 
     const service = TestBed.inject(PuzzlePlaylistService);
-    const finale = service.find(FINALE_PLAYLIST_ID)!;
+    const finale = service.find(playlistId)!;
     const resumedUrl = service.startUrl(finale)!;
     const resumedProgress = service.progressFromUrl(resumedUrl)!;
-    const legacyProgress = service.progressFromUrl(`${currentRoute}?${legacyParams}`)!;
 
     expect(resumedUrl.split('?')[0]).toBe(currentRoute);
-    expect(resumedProgress.order).toEqual([...order, order.length]);
+    expect(resumedProgress.order).toEqual(order);
     expect(resumedProgress.index).toBe(index);
-    expect(legacyProgress).toEqual(resumedProgress);
-    expect(resumedProgress.nextRoute?.split('?')[0]).toBe('/quick-arithmetic');
+    expect(resumedProgress.nextRoute?.split('?')[0]).toBe(routes.at(-1));
 
-    service.complete(legacyProgress);
+    service.complete(resumedProgress);
     const finalUrl = service.startUrl(finale)!;
     expect(finalUrl).toBe(resumedProgress.nextRoute);
     const finalProgress = service.progressFromUrl(finalUrl)!;

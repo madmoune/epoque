@@ -1,0 +1,891 @@
+:host {
+  --panel: var(--surface-soft, #f2f5f3);
+  --raised: var(--surface-raised, #fff);
+  --line: var(--border, #d5dcda);
+  --copy: var(--text, #1f2926);
+  --quiet: var(--muted, #5f6d68);
+}
+
+.page {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: var(--copy);
+  font-weight: 800;
+}
+
+.card {
+  display: grid;
+  gap: 1.5rem;
+  padding: 2rem;
+  border: 1px solid var(--line);
+  border-radius: 1.25rem;
+  background: var(--raised);
+  box-shadow: 0 0.75rem 2rem var(--shadow, rgb(0 0 0 / 8%));
+}
+
+.header {
+  text-align: center;
+}
+
+.eyebrow,
+.section-label {
+  margin: 0;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.eyebrow {
+  margin-bottom: 0.5rem;
+}
+
+h1,
+h2,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 0;
+  font-size: clamp(2rem, 6vw, 3rem);
+}
+
+.intro {
+  max-width: 38rem;
+  margin: 0.75rem auto 0;
+  color: var(--quiet);
+  line-height: 1.5;
+}
+
+.collection-layout {
+  display: grid;
+  grid-template-columns: minmax(14rem, 17rem) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.sidebar,
+.puzzle-content {
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: var(--panel);
+}
+
+.puzzle-content {
+  scroll-margin-top: 1rem;
+}
+
+.sidebar {
+  position: sticky;
+  top: 1rem;
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.sidebar-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.sidebar-heading h2 {
+  margin: 0.25rem 0 0;
+  color: var(--copy);
+  font-size: 1.15rem;
+}
+
+.collection-count {
+  display: grid;
+  place-items: center;
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  padding: 0 0.45rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-size: 0.85rem;
+  font-weight: 900;
+}
+
+.puzzle-nav {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.puzzle-entry {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.6rem;
+  align-items: center;
+  width: 100%;
+  padding: 0.65rem;
+  border: 1px solid transparent;
+  border-radius: 0.75rem;
+  background: transparent;
+  color: var(--copy);
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  transition:
+    border-color 120ms ease,
+    background 120ms ease,
+    transform 120ms ease;
+}
+
+.puzzle-entry:hover,
+.puzzle-entry:focus-visible {
+  border-color: var(--line);
+  background: var(--raised);
+  transform: translateX(1px);
+}
+
+.puzzle-entry.active {
+  border-color: var(--focus);
+  background: var(--raised);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--focus) 13%, transparent);
+}
+
+.puzzle-number {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex: 0 0 auto;
+  border-radius: 0.65rem;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-size: 0.85rem;
+  font-weight: 900;
+}
+
+.puzzle-entry-copy {
+  display: grid;
+  gap: 0.18rem;
+  min-width: 0;
+}
+
+.puzzle-entry-copy strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.puzzle-entry-copy strong {
+  color: var(--copy);
+  font-size: 0.88rem;
+}
+
+.puzzle-entry-status {
+  display: inline-flex;
+  gap: 0.25rem;
+  align-items: center;
+  color: var(--quiet);
+  font-size: 1.1rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.puzzle-entry-status.resolved {
+  display: grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 50%;
+  background: var(--success, #2e9b5f);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--success, #2e9b5f) 22%, transparent);
+  color: #fff;
+  font-size: 1rem;
+}
+
+.status-icon {
+  line-height: 1;
+}
+
+.puzzle-content {
+  display: grid;
+  gap: 0.9rem;
+  min-width: 0;
+  padding: 1.25rem;
+}
+
+.puzzle-heading {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.puzzle-heading-copy {
+  min-width: 0;
+}
+
+.puzzle-heading h2 {
+  margin: 0.2rem 0 0;
+  color: var(--copy);
+  font-size: 1.35rem;
+}
+
+.solved-label {
+  padding: 0.3rem 0.55rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
+.instructions {
+  margin: 0;
+  color: var(--quiet);
+  line-height: 1.5;
+}
+
+.puzzle-display {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  background: linear-gradient(145deg, var(--raised), var(--panel));
+  color: var(--copy);
+}
+
+.display-heading,
+.display-line,
+.signal-block,
+.number-grids-block,
+.symbol-grids-block,
+.table-block,
+.token-block,
+.diagram-block,
+.cube-net-block,
+.rotation-block,
+.shape-block,
+.domino-block {
+  grid-column: 1 / -1;
+}
+
+.display-heading {
+  margin: 0.25rem 0 0;
+  color: var(--quiet);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.display-line {
+  padding: 0.7rem 0.8rem;
+  overflow-x: auto;
+  border: 1px solid color-mix(in srgb, var(--line) 75%, transparent);
+  border-radius: 0.65rem;
+  background: color-mix(in srgb, var(--raised) 78%, transparent);
+  font:
+    0.9rem/1.5 'IBM Plex Mono',
+    'Cascadia Mono',
+    'Courier New',
+    monospace;
+  white-space: pre-wrap;
+}
+
+.display-block {
+  min-width: 0;
+  padding: 0.8rem;
+  border: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--raised) 74%, transparent);
+}
+
+.block-label {
+  display: block;
+  margin-bottom: 0;
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.block-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.grid-result {
+  color: var(--accent);
+  font-size: 1.05rem;
+  font-weight: 950;
+  white-space: nowrap;
+}
+
+.number-grids-list,
+.symbol-grids-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.number-grid-card,
+.symbol-grid-card {
+  display: grid;
+  gap: 0.55rem;
+  min-width: 7rem;
+  padding: 0.65rem;
+  border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+  border-radius: 0.65rem;
+  background: color-mix(in srgb, var(--raised) 68%, transparent);
+}
+
+.number-grid-visual {
+  display: grid;
+  gap: 0.25rem;
+  width: max-content;
+  padding: 0.25rem;
+  border: 1px solid var(--line);
+  border-radius: 0.45rem;
+  background: var(--panel);
+}
+
+.number-grid-row {
+  display: grid;
+  grid-auto-columns: 2rem;
+  grid-auto-flow: column;
+  gap: 0.25rem;
+}
+
+.number-grid-cell {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 50%, var(--line));
+  border-radius: 0.35rem;
+  background: color-mix(in srgb, var(--raised) 82%, transparent);
+  color: var(--copy);
+  font:
+    900 1rem/1 'IBM Plex Mono',
+    'Cascadia Mono',
+    'Courier New',
+    monospace;
+}
+
+.number-grid-cell.missing {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 16%, var(--raised));
+  color: var(--accent);
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+.logic-table {
+  width: 100%;
+  min-width: 28rem;
+  border-collapse: collapse;
+  color: var(--copy);
+  font-size: 0.9rem;
+}
+
+.logic-table th,
+.logic-table td {
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--line);
+  text-align: center;
+}
+
+.logic-table th {
+  color: var(--accent);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.logic-table td {
+  font:
+    900 1rem/1 'IBM Plex Mono',
+    'Cascadia Mono',
+    'Courier New',
+    monospace;
+}
+
+.token-visual {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.token-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 32%, var(--line));
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--raised) 86%, transparent);
+  color: var(--copy);
+  font:
+    800 0.92rem/1 'IBM Plex Mono',
+    'Cascadia Mono',
+    'Courier New',
+    monospace;
+  white-space: pre;
+}
+
+.diagram-block {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.diagram-visual {
+  width: 100%;
+  margin: 0;
+  padding: 0.85rem 1rem;
+  overflow-x: auto;
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--line));
+  border-radius: 0.65rem;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--accent) 7%, var(--panel)), transparent 46%),
+    var(--panel);
+  color: var(--copy);
+  font:
+    700 0.9rem/1.55 'IBM Plex Mono',
+    'Cascadia Mono',
+    'Courier New',
+    monospace;
+  letter-spacing: 0.02em;
+  white-space: pre;
+}
+
+.diagram-result {
+  justify-self: end;
+}
+
+.cube-net-block,
+.rotation-block {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.cube-net-visual {
+  display: grid;
+  gap: 0.2rem;
+  width: max-content;
+  margin: 0 auto;
+}
+
+.cube-net-row {
+  display: grid;
+  grid-template-columns: repeat(4, 2rem);
+  gap: 0.2rem;
+}
+
+.cube-net-row.single {
+  grid-template-columns: repeat(4, 2rem);
+}
+
+.cube-net-row.single .cube-face {
+  grid-column: 2;
+}
+
+.cube-face {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 58%, var(--line));
+  border-radius: 0.4rem;
+  background: color-mix(in srgb, var(--accent) 10%, var(--raised));
+  color: var(--copy);
+  font:
+    900 1rem/1 'IBM Plex Mono',
+    'Cascadia Mono',
+    'Courier New',
+    monospace;
+}
+
+.cube-net-block > .display-result {
+  justify-self: center;
+}
+
+.rotation-visual {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.rotation-arrow {
+  color: var(--accent);
+  font-size: 1.7rem;
+  font-weight: 900;
+}
+
+.shape-visual {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.shape-grid,
+.shape-row {
+  display: grid;
+  gap: 0.22rem;
+  width: max-content;
+  padding: 0.35rem;
+  border: 1px solid var(--line);
+  border-radius: 0.55rem;
+  background: var(--panel);
+}
+
+.shape-grid-row {
+  display: grid;
+  grid-auto-columns: 1.35rem;
+  grid-auto-flow: column;
+  gap: 0.22rem;
+}
+
+.shape-row {
+  grid-auto-columns: 1.35rem;
+  grid-auto-flow: column;
+}
+
+.shape-cell {
+  display: block;
+  width: 1.35rem;
+  aspect-ratio: 1;
+  border: 1px solid color-mix(in srgb, var(--accent) 42%, var(--line));
+  border-radius: 0.22rem;
+  background: color-mix(in srgb, var(--raised) 78%, transparent);
+}
+
+.shape-operator {
+  color: var(--quiet);
+  font-size: 1.25rem;
+  font-weight: 900;
+}
+
+.domino-visual {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.domino-piece {
+  display: inline-grid;
+  grid-template-columns: repeat(2, 2.15rem);
+  overflow: hidden;
+  border: 1px solid var(--accent);
+  border-radius: 0.45rem;
+  background: var(--panel);
+}
+
+.domino-piece span {
+  display: grid;
+  place-items: center;
+  min-height: 2.15rem;
+  color: var(--copy);
+  font:
+    900 1rem/1 'IBM Plex Mono',
+    'Cascadia Mono',
+    'Courier New',
+    monospace;
+}
+
+.domino-piece span + span {
+  border-left: 1px solid var(--accent);
+}
+
+.domino-operator {
+  color: var(--quiet);
+  font-size: 1.2rem;
+  font-weight: 900;
+}
+
+.grid-visual {
+  display: grid;
+  gap: 0.22rem;
+  width: max-content;
+  padding: 0.35rem;
+  border: 1px solid var(--line);
+  border-radius: 0.55rem;
+  background: var(--panel);
+}
+
+.grid-row {
+  display: grid;
+  grid-auto-columns: 1.35rem;
+  grid-auto-flow: column;
+  gap: 0.22rem;
+}
+
+.grid-cell {
+  display: grid;
+  place-items: center;
+  width: 1.35rem;
+  aspect-ratio: 1;
+  border: 1px solid color-mix(in srgb, var(--accent) 42%, var(--line));
+  border-radius: 0.22rem;
+  background: color-mix(in srgb, var(--raised) 78%, transparent);
+  color: var(--copy);
+  font:
+    900 0.82rem/1 'IBM Plex Mono',
+    'Cascadia Mono',
+    'Courier New',
+    monospace;
+}
+
+.grid-cell.has-mark {
+  color: var(--accent);
+}
+
+.puzzle-display .grid-cell.filled {
+  border-color: var(--accent);
+  background: var(--accent);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent-contrast) 14%, transparent);
+}
+
+// The global theme styles normalize every .grid-cell with !important. Keep the
+// filled state visually distinct in this puzzle's diagram cards.
+.puzzle-display .grid-cell.filled {
+  border-color: var(--accent) !important;
+  background: var(--accent) !important;
+}
+
+.signal-visual {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+  min-height: 2rem;
+}
+
+.signal-dot {
+  display: block;
+  width: 0.95rem;
+  height: 0.95rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 52%, var(--line));
+  border-radius: 50%;
+  background: transparent;
+}
+
+.signal-dot.filled {
+  border-color: var(--accent);
+  background: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.signal-divider {
+  width: 1px;
+  height: 1.35rem;
+  margin: 0 0.2rem;
+  background: var(--line);
+}
+
+.display-result {
+  margin-left: 0.35rem;
+  color: var(--accent);
+  font:
+    900 0.95rem/1 'IBM Plex Mono',
+    'Cascadia Mono',
+    'Courier New',
+    monospace;
+}
+
+.answer-area {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.answer-area label {
+  color: var(--copy);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.answer-row {
+  display: flex;
+  gap: 0.65rem;
+}
+
+.answer-row input {
+  width: 8rem;
+  min-height: 2.75rem;
+  padding: 0.4rem 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  background: var(--raised);
+  color: var(--copy);
+  font:
+    900 1.15rem/1 'IBM Plex Mono',
+    'Cascadia Mono',
+    'Courier New',
+    monospace;
+  letter-spacing: 0.25em;
+  text-align: center;
+}
+
+.answer-row input:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--focus) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.answer-hint {
+  margin: 0;
+  color: var(--quiet);
+  font-size: 0.8rem;
+}
+
+.hint-actions {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.hint-button {
+  min-height: 2.5rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 0.65rem;
+  font: inherit;
+  font-weight: 850;
+}
+
+.hint-button:disabled {
+  cursor: default;
+  opacity: 0.62;
+}
+
+.hint-card {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 52%, var(--line));
+  border-left: 0.3rem solid var(--accent);
+  border-radius: 0.7rem;
+  background: color-mix(in srgb, var(--accent) 10%, var(--raised));
+  color: var(--copy);
+}
+
+.hint-card p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.hint-card .hint-label {
+  margin-bottom: 0.25rem;
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.feedback {
+  margin: 0;
+  color: var(--danger, #b42318);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.feedback.success {
+  color: var(--accent);
+}
+
+.success-actions {
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+}
+
+.next-button {
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--accent);
+  border-radius: 0.65rem;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.next-button:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--focus) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.collection-complete {
+  margin: 0;
+  color: var(--accent);
+  font-weight: 900;
+}
+
+@media (max-width: 700px) {
+  .page {
+    padding: 0.75rem;
+  }
+
+  .card {
+    padding: 1rem;
+  }
+
+  .collection-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: static;
+  }
+
+  .puzzle-nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .puzzle-content {
+    padding: 1rem;
+  }
+
+  .puzzle-display {
+    grid-template-columns: 1fr;
+  }
+
+  .puzzle-heading {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .solved-label {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .answer-row {
+    flex-wrap: wrap;
+  }
+
+  .answer-row input {
+    flex: 1 1 7rem;
+  }
+}
+
+@media (max-width: 440px) {
+  .puzzle-nav {
+    grid-template-columns: 1fr;
+  }
+}

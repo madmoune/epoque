@@ -189,6 +189,11 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'puzzle-a-cadenas',
+    loadComponent: () =>
+      import('./puzzles/puzzle-a-cadenas/puzzle-a-cadenas.page').then((m) => m.PuzzleACadenasPage),
+  },
+  {
     path: 'quick-arithmetic',
     data: { mode: 'quick' },
     loadComponent: () =>

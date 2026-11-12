@@ -1,6 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { FINALE_PLAYLIST_ID, PuzzlePlaylistService } from '../../puzzle-playlist.service';
+import {
+  FINALE_1_PLAYLIST_ID,
+  FINALE_2_PLAYLIST_ID,
+  PuzzlePlaylistService,
+} from '../../puzzle-playlist.service';
 import { FirebasePuzzleCatalogService } from '../../shared/firebase/firebase-puzzle-catalog.service';
 import { HomePage } from './home.page';
 import { NEW_GAME_ROUTES } from '../../puzzles/new-games/new-games.catalog';
@@ -72,27 +76,36 @@ describe('HomePage playlist category controls', () => {
     expect(playlistService.find(playlist.id)).toBeUndefined();
   });
 
-  it('shows Finale for everyone without edit or delete actions', () => {
+  it('shows both Finale playlists for everyone without edit or delete actions', () => {
     const fixture = TestBed.createComponent(HomePage);
     fixture.detectChanges();
 
-    const finaleCard = [...fixture.nativeElement.querySelectorAll('.playlist-card')].find(
-      (card: HTMLElement) => card.querySelector('h3')?.textContent?.trim() === 'Finale',
+    const finaleCards = [...fixture.nativeElement.querySelectorAll('.playlist-card')].filter(
+      (card: HTMLElement) =>
+        /^Finale [12]$/.test(card.querySelector('h3')?.textContent?.trim() ?? ''),
     );
 
-    expect(finaleCard).toBeDefined();
-    expect(finaleCard?.textContent).toContain('Disponible pour tout le monde');
-    expect(finaleCard?.querySelector('.playlist-card-actions')?.textContent).toContain('Jouer');
-    expect(finaleCard?.querySelector('.playlist-card-actions')?.textContent).not.toContain(
-      'Modifier',
-    );
-    expect(finaleCard?.querySelector('.playlist-card-actions')?.textContent).not.toContain(
-      'Supprimer',
-    );
+    expect(finaleCards).toHaveLength(2);
+    for (const finaleCard of finaleCards) {
+      expect(finaleCard.textContent).toContain('Disponible pour tout le monde');
+      expect(finaleCard.querySelector('.playlist-card-actions')?.textContent).toContain('Jouer');
+      expect(finaleCard.querySelector('.playlist-card-actions')?.textContent).not.toContain(
+        'Modifier',
+      );
+      expect(finaleCard.querySelector('.playlist-card-actions')?.textContent).not.toContain(
+        'Supprimer',
+      );
+    }
 
     const page = fixture.componentInstance;
-    page.editPlaylist(FINALE_PLAYLIST_ID);
-    page.requestDeletePlaylist(FINALE_PLAYLIST_ID);
+    page.editPlaylist(FINALE_1_PLAYLIST_ID);
+    page.requestDeletePlaylist(FINALE_1_PLAYLIST_ID);
+
+    expect(page.editingPlaylist()).toBeNull();
+    expect(page.pendingPlaylistDeletion()).toBeNull();
+
+    page.editPlaylist(FINALE_2_PLAYLIST_ID);
+    page.requestDeletePlaylist(FINALE_2_PLAYLIST_ID);
 
     expect(page.editingPlaylist()).toBeNull();
     expect(page.pendingPlaylistDeletion()).toBeNull();

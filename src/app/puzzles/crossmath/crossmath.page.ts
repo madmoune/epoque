@@ -232,14 +232,14 @@ export class CrossmathPage {
         for (let attempt = 0; attempt < config.attempts; attempt += 1) {
           const puzzle = this.createPuzzleCandidate(size, givenCount, config.maxLineGivens);
 
-          if (this.countSolutions(puzzle) === 1) {
+          if (this.isSolvableByDeduction(puzzle)) {
             return puzzle;
           }
         }
       }
     }
 
-    return this.createPuzzleCandidate(size, size * size - 1, size - 1);
+    return this.createFallbackPuzzle(size);
   }
 
   private createPuzzleCandidate(
@@ -252,6 +252,39 @@ export class CrossmathPage {
     const columnOperators = Array.from({ length: size }, () => this.createOperators(size));
     const givenPositions = this.pickGivenPositions(size, givenCount, maxLineGivens);
 
+    return this.buildPuzzle(size, values, rowOperators, columnOperators, givenPositions);
+  }
+
+  private createFallbackPuzzle(size: CrossmathSize): CrossmathPuzzle {
+    const givenPositions = new Set<string>();
+    for (let row = 0; row < size; row += 1) {
+      for (let col = 0; col < size; col += 1) {
+        if (col !== row && col !== row + 1) {
+          givenPositions.add(this.positionKey(row, col));
+        }
+      }
+    }
+
+    // The blanks form a chain. Each sum at the end of the chain has one missing digit.
+    const operators = Array.from({ length: size }, () =>
+      Array<CrossmathOperator>(size - 1).fill('+'),
+    );
+    return this.buildPuzzle(
+      size,
+      this.createSolutionValues(size),
+      operators,
+      operators,
+      givenPositions,
+    );
+  }
+
+  private buildPuzzle(
+    size: CrossmathSize,
+    values: number[][],
+    rowOperators: CrossmathOperator[][],
+    columnOperators: CrossmathOperator[][],
+    givenPositions: Set<string>,
+  ): CrossmathPuzzle {
     const cells = values.map((row, rowIndex) =>
       row.map((value, colIndex) => ({
         row: rowIndex,
@@ -408,55 +441,65 @@ export class CrossmathPage {
     }, values[0]);
   }
 
-  private countSolutions(puzzle: CrossmathPuzzle): number {
-    const rowCandidates = puzzle.cells.map((row, rowIndex) =>
-      this.createRowCandidates(row, puzzle.rowOperators[rowIndex], puzzle.rowTargets[rowIndex]),
+  private isSolvableByDeduction(puzzle: CrossmathPuzzle): boolean {
+    const lines = [
+      ...puzzle.cells.map((cells, row) => ({
+        cells,
+        operators: puzzle.rowOperators[row],
+        target: puzzle.rowTargets[row],
+      })),
+      ...puzzle.columnTargets.map((target, col) => ({
+        cells: puzzle.cells.map((row) => row[col]),
+        operators: puzzle.columnOperators[col],
+        target,
+      })),
+    ].map(({ cells, operators, target }) => ({
+      cells,
+      candidates: this.createLineCandidates(cells, operators, target),
+    }));
+    const possibleDigits = puzzle.cells.map((row) =>
+      row.map((cell) => new Set(cell.given ? [cell.value] : CROSSMATH_DIGITS)),
     );
-    const selectedRows: number[][] = [];
-    let solutionCount = 0;
 
-    const search = (rowIndex: number): void => {
-      if (solutionCount > 1) {
-        return;
-      }
-
-      if (rowIndex === puzzle.size) {
-        const columnsAreCorrect = puzzle.columnTargets.every((target, colIndex) => {
-          const columnValues = selectedRows.map((row) => row[colIndex]);
-
-          return this.evaluate(columnValues, puzzle.columnOperators[colIndex]) === target;
-        });
-
-        if (columnsAreCorrect) {
-          solutionCount += 1;
+    // A digit must occur in a valid combination in both its row and its column.
+    let changed: boolean;
+    do {
+      changed = false;
+      for (const line of lines) {
+        line.candidates = line.candidates.filter((candidate) =>
+          line.cells.every(({ row, col }, index) => possibleDigits[row][col].has(candidate[index])),
+        );
+        if (line.candidates.length === 0) {
+          return false;
         }
 
-        return;
+        for (const [index, { row, col }] of line.cells.entries()) {
+          if (possibleDigits[row][col].size === 1) {
+            continue;
+          }
+
+          const supportedDigits = new Set(line.candidates.map((candidate) => candidate[index]));
+          if (supportedDigits.size < possibleDigits[row][col].size) {
+            possibleDigits[row][col] = supportedDigits;
+            changed = true;
+          }
+        }
       }
+    } while (changed);
 
-      for (const candidate of rowCandidates[rowIndex]) {
-        selectedRows[rowIndex] = candidate;
-        search(rowIndex + 1);
-      }
-
-      selectedRows.pop();
-    };
-
-    search(0);
-
-    return solutionCount;
+    return possibleDigits.every((row) => row.every((digits) => digits.size === 1));
   }
 
-  private createRowCandidates(
-    row: CrossmathCell[],
+  private createLineCandidates(
+    cells: CrossmathCell[],
     operators: CrossmathOperator[],
     target: number,
   ): number[][] {
     const candidates: number[][] = [];
     const currentValues: number[] = [];
 
-    const search = (colIndex: number): void => {
-      if (colIndex === row.length) {
+    const search = (index: number): void => {
+      if (index === cells.length) {
         if (this.evaluate(currentValues, operators) === target) {
           candidates.push([...currentValues]);
         }
@@ -464,12 +507,12 @@ export class CrossmathPage {
         return;
       }
 
-      const cell = row[colIndex];
+      const cell = cells[index];
       const possibleValues = cell.given ? [cell.value] : CROSSMATH_DIGITS;
 
       for (const value of possibleValues) {
-        currentValues[colIndex] = value;
-        search(colIndex + 1);
+        currentValues[index] = value;
+        search(index + 1);
       }
 
       currentValues.pop();

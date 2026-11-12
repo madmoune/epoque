@@ -1,0 +1,407 @@
+<main class="page">
+  <a routerLink="/" fragment="collections" class="back-link">Retour au menu</a>
+
+  <section class="card">
+    <header class="header">
+      <p class="eyebrow">Collection de puzzles</p>
+      <h1>Puzzle à Cadenas</h1>
+      <p class="intro">
+        Résous les {{ puzzles.length }} énigmes et entre chaque réponse sous la forme d’un code à
+        quatre chiffres.
+      </p>
+    </header>
+
+    <div class="collection-layout">
+      <aside class="sidebar" aria-label="Liste des puzzles">
+        <div class="sidebar-heading">
+          <div>
+            <p class="section-label">Progression</p>
+            <h2>Les cadenas</h2>
+          </div>
+          <span class="collection-count">{{ completedCount() }}/{{ puzzles.length }}</span>
+        </div>
+
+        <nav class="puzzle-nav" aria-label="Choisir un puzzle">
+          @for (puzzle of puzzles; track puzzle.id; let index = $index) {
+            <button
+              type="button"
+              class="puzzle-entry"
+              [class.active]="selectedPuzzleId() === puzzle.id"
+              [class.solved]="isSolved(puzzle.id)"
+              [attr.aria-current]="selectedPuzzleId() === puzzle.id ? 'page' : null"
+              (click)="selectPuzzle(puzzle.id)"
+            >
+              <span class="puzzle-number" aria-hidden="true">{{ puzzleNumber(index) }}</span>
+              <span class="puzzle-entry-copy">
+                <strong>{{ puzzleLabel(index) }}</strong>
+              </span>
+              @if (isSolved(puzzle.id)) {
+                <span class="puzzle-entry-status resolved" aria-label="Résolu" title="Résolu">
+                  <span class="status-icon" aria-hidden="true">✓</span>
+                </span>
+              } @else {
+                <span class="puzzle-entry-status" aria-hidden="true">›</span>
+              }
+            </button>
+          }
+        </nav>
+      </aside>
+
+      @let puzzle = selectedPuzzle();
+      <section id="selected-puzzle" class="puzzle-content" aria-labelledby="selected-puzzle-title">
+        <header class="puzzle-heading">
+          <span class="puzzle-number" aria-hidden="true">{{
+            puzzleNumber(puzzles.indexOf(puzzle))
+          }}</span>
+          <div class="puzzle-heading-copy">
+            <h2 id="selected-puzzle-title">{{ puzzleLabel(puzzles.indexOf(puzzle)) }}</h2>
+          </div>
+          @if (isSolved(puzzle.id)) {
+            <span class="solved-label">Ouvert</span>
+          }
+        </header>
+
+        <div class="puzzle-display" aria-label="Énoncé du puzzle">
+          @for (block of displayBlocks(puzzle); track $index) {
+            @if (block.type === 'heading') {
+              <h3 class="display-heading">{{ block.text }}</h3>
+            } @else if (block.type === 'number-grids') {
+              <article class="display-block number-grids-block">
+                <div class="number-grids-list">
+                  @for (grid of block.grids; track $index) {
+                    <div class="number-grid-card">
+                      @if (grid.label) {
+                        <span class="block-label">{{ grid.label }}</span>
+                      }
+                      <div
+                        class="number-grid-visual"
+                        role="img"
+                        [attr.aria-label]="grid.label || 'Grille numérique'"
+                      >
+                        @for (row of grid.rows; track $index) {
+                          <div class="number-grid-row">
+                            @for (cell of row; track $index) {
+                              <span class="number-grid-cell" [class.missing]="cell === '?'">{{
+                                cell
+                              }}</span>
+                            }
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              </article>
+            } @else if (block.type === 'symbol-grids') {
+              <article class="display-block symbol-grids-block">
+                <div class="symbol-grids-list">
+                  @for (grid of block.grids; track $index) {
+                    <div class="symbol-grid-card">
+                      @if (grid.label) {
+                        <div class="block-heading">
+                          <span class="block-label">{{ grid.label }}</span>
+                          @if (grid.result; as result) {
+                            <span class="grid-result">→ {{ result }}</span>
+                          }
+                        </div>
+                      }
+                      <div
+                        class="grid-visual"
+                        role="img"
+                        [attr.aria-label]="grid.label || 'Grille de symboles'"
+                      >
+                        @for (row of grid.rows; track $index) {
+                          <div class="grid-row">
+                            @for (cell of gridCells(row); track $index) {
+                              <span
+                                class="grid-cell"
+                                [class.filled]="isFilledGridCell(cell)"
+                                [class.has-mark]="gridCellLabel(cell)"
+                              >
+                                {{ gridCellLabel(cell) }}
+                              </span>
+                            }
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              </article>
+            } @else if (block.type === 'table') {
+              <article class="display-block table-block">
+                <div class="table-scroll">
+                  <table class="logic-table">
+                    <thead>
+                      <tr>
+                        @for (header of block.headers; track $index) {
+                          <th scope="col">{{ header }}</th>
+                        }
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (row of block.rows; track $index) {
+                        <tr>
+                          @for (value of row; track $index) {
+                            <td>{{ value }}</td>
+                          }
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </article>
+            } @else if (block.type === 'tokens') {
+              <article class="display-block token-block">
+                @if (block.label) {
+                  <span class="block-label">{{ block.label }}</span>
+                }
+                <div class="token-visual">
+                  @for (token of block.tokens; track $index) {
+                    <span class="token-chip">{{ token }}</span>
+                  }
+                  @if (block.result; as result) {
+                    <span class="display-result">→ {{ result }}</span>
+                  }
+                </div>
+              </article>
+            } @else if (block.type === 'diagram') {
+              <article class="display-block diagram-block">
+                @if (block.label) {
+                  <span class="block-label">{{ block.label }}</span>
+                }
+                <pre
+                  class="diagram-visual"
+                  role="img"
+                  [attr.aria-label]="block.label || 'Schéma du puzzle'"
+                  >{{ block.lines.join('\n') }}</pre
+                >
+                @if (block.result; as result) {
+                  <span class="display-result diagram-result">→ {{ result }}</span>
+                }
+              </article>
+            } @else if (block.type === 'cube-net') {
+              <article class="display-block cube-net-block">
+                <span class="block-label">{{ block.label }}</span>
+                <div class="cube-net-visual" role="img" aria-label="Patron de cube">
+                  <div class="cube-net-row single">
+                    <span class="cube-face">{{ block.top }}</span>
+                  </div>
+                  <div class="cube-net-row">
+                    @for (value of block.row; track $index) {
+                      <span class="cube-face">{{ value }}</span>
+                    }
+                  </div>
+                  <div class="cube-net-row single">
+                    <span class="cube-face">{{ block.bottom }}</span>
+                  </div>
+                </div>
+                <span class="display-result">{{ block.query }} → {{ block.result }}</span>
+              </article>
+            } @else if (block.type === 'rotation') {
+              <article class="display-block rotation-block">
+                <span class="block-label">{{ block.label }}</span>
+                <div class="rotation-visual">
+                  <div class="grid-visual" role="img" aria-label="Mosaïque de départ">
+                    @for (row of block.before; track $index) {
+                      <div class="grid-row">
+                        @for (cell of gridCells(row); track $index) {
+                          <span
+                            class="grid-cell"
+                            [class.filled]="isFilledGridCell(cell)"
+                            [class.has-mark]="gridCellLabel(cell)"
+                          >
+                            {{ gridCellLabel(cell) }}
+                          </span>
+                        }
+                      </div>
+                    }
+                  </div>
+                  <span class="rotation-arrow" aria-hidden="true">↻</span>
+                  <div class="grid-visual" role="img" aria-label="Mosaïque d’arrivée">
+                    @for (row of block.after; track $index) {
+                      <div class="grid-row">
+                        @for (cell of gridCells(row); track $index) {
+                          <span
+                            class="grid-cell"
+                            [class.filled]="isFilledGridCell(cell)"
+                            [class.has-mark]="gridCellLabel(cell)"
+                          >
+                            {{ gridCellLabel(cell) }}
+                          </span>
+                        }
+                      </div>
+                    }
+                  </div>
+                  <span class="display-result">→ {{ block.result }}</span>
+                </div>
+              </article>
+            } @else if (block.type === 'shape') {
+              <article class="display-block shape-block">
+                @if (block.label) {
+                  <span class="block-label">{{ block.label }}</span>
+                }
+                <div class="shape-visual">
+                  @if (block.grid; as grid) {
+                    <div class="shape-grid" role="img" aria-label="Grille de carrés">
+                      @for (row of grid; track $index) {
+                        <div class="shape-grid-row">
+                          @for (cell of row; track $index) {
+                            <span class="shape-cell" aria-hidden="true"></span>
+                          }
+                        </div>
+                      }
+                    </div>
+                  } @else if (block.row; as row) {
+                    <div class="shape-row" role="img" aria-label="Ligne de carrés">
+                      @for (cell of row; track $index) {
+                        <span class="shape-cell" aria-hidden="true"></span>
+                      }
+                    </div>
+                  }
+                  @if (block.operator) {
+                    <span class="shape-operator" aria-hidden="true">{{ block.operator }}</span>
+                  }
+                  @if (block.extraRow; as extraRow) {
+                    <div class="shape-row" role="img" aria-label="Ligne de carrés supplémentaire">
+                      @for (cell of extraRow; track $index) {
+                        <span class="shape-cell" aria-hidden="true"></span>
+                      }
+                    </div>
+                  }
+                  <span class="display-result">→ {{ block.result }}</span>
+                </div>
+              </article>
+            } @else if (block.type === 'domino') {
+              <article class="display-block domino-block">
+                @if (block.label) {
+                  <span class="block-label">{{ block.label }}</span>
+                }
+                <div class="domino-visual">
+                  <span class="domino-piece">
+                    <span>{{ block.left[0] }}</span>
+                    <span>{{ block.left[1] }}</span>
+                  </span>
+                  <span class="domino-operator" aria-hidden="true">−</span>
+                  <span class="domino-piece">
+                    <span>{{ block.right[0] }}</span>
+                    <span>{{ block.right[1] }}</span>
+                  </span>
+                  <span class="display-result">= {{ block.result }}</span>
+                </div>
+              </article>
+            } @else if (block.type === 'grid') {
+              <article class="display-block grid-block">
+                <div class="block-heading">
+                  <span class="block-label">{{ block.label }}</span>
+                  @if (block.result; as result) {
+                    <span class="grid-result" [attr.aria-label]="'Résultat : ' + result">
+                      → {{ result }}
+                    </span>
+                  }
+                </div>
+                <div class="grid-visual" role="img" [attr.aria-label]="block.label + ', grille'">
+                  @for (row of block.rows; track $index) {
+                    <div class="grid-row">
+                      @for (cell of gridCells(row); track $index) {
+                        <span
+                          class="grid-cell"
+                          [class.filled]="isFilledGridCell(cell)"
+                          [class.has-mark]="gridCellLabel(cell)"
+                        >
+                          {{ gridCellLabel(cell) }}
+                        </span>
+                      }
+                    </div>
+                  }
+                </div>
+              </article>
+            } @else if (block.type === 'signals') {
+              <article class="display-block signal-block">
+                <div class="signal-visual" role="img" aria-label="Motif de signaux">
+                  @for (token of block.tokens; track $index) {
+                    @if (token === '|') {
+                      <span class="signal-divider" aria-hidden="true"></span>
+                    } @else {
+                      <span
+                        class="signal-dot"
+                        [class.filled]="token === '■' || token === '●'"
+                        aria-hidden="true"
+                      ></span>
+                    }
+                  }
+                  <span class="display-result">→ {{ block.result }}</span>
+                </div>
+              </article>
+            } @else {
+              <div class="display-line">{{ block.text }}</div>
+            }
+          }
+        </div>
+
+        <div class="answer-area">
+          <label [for]="'code-' + puzzle.id">Code à 4 chiffres</label>
+          <div class="answer-row">
+            <input
+              [id]="'code-' + puzzle.id"
+              [value]="attemptFor(puzzle.id)"
+              (input)="updateAttempt(puzzle.id, $any($event.target).value)"
+              [disabled]="isSolved(puzzle.id)"
+              type="text"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              maxlength="4"
+              autocomplete="off"
+              aria-label="Réponse à quatre chiffres"
+            />
+          </div>
+          <p class="answer-hint">La validation se lance automatiquement au quatrième chiffre.</p>
+        </div>
+
+        <div class="hint-actions">
+          <button
+            type="button"
+            class="secondary-button hint-button"
+            data-confirm-action="hint"
+            (click)="revealHint(puzzle.id)"
+            [disabled]="isSolved(puzzle.id) || isHintVisible(puzzle.id)"
+          >
+            {{ isHintVisible(puzzle.id) ? 'Indice affiché' : 'Indice' }}
+          </button>
+        </div>
+
+        @if (isHintVisible(puzzle.id)) {
+          <aside class="hint-card" aria-live="polite">
+            <p class="hint-label">Indice</p>
+            <p>{{ puzzle.instructions }}</p>
+          </aside>
+        }
+
+        @if (feedbackFor(puzzle.id)) {
+          <p class="feedback" [class.success]="isSolved(puzzle.id)" role="status">
+            {{ feedbackFor(puzzle.id) }}
+          </p>
+        }
+
+        @if (isSolved(puzzle.id)) {
+          <div class="success-actions">
+            @if (nextUnsolvedPuzzle(); as nextPuzzle) {
+              <button
+                type="button"
+                class="next-button"
+                (click)="goToNextUnsolved()"
+                [attr.aria-label]="
+                  'Ouvrir l’énigme suivante : ' + puzzleLabel(puzzles.indexOf(nextPuzzle))
+                "
+              >
+                Suivant <span aria-hidden="true">→</span>
+              </button>
+            } @else {
+              <p class="collection-complete">Tous les cadenas sont ouverts !</p>
+            }
+          </div>
+        }
+      </section>
+    </div>
+  </section>
+</main>

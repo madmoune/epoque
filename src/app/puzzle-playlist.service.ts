@@ -23,24 +23,30 @@ export type PlaylistProgress = {
   nextRoute: string | null;
 };
 
-export const FINALE_PLAYLIST_ID = 'finale';
-const ORIGINAL_FINALE_ROUTES = [
-  '/cryptarithms',
+export const FINALE_1_PLAYLIST_ID = 'finale-1';
+export const FINALE_2_PLAYLIST_ID = 'finale-2';
+
+export const FINALE_1_PLAYLIST_ROUTES = [
   '/drop-quote',
+  '/anagrams',
+  '/cryptograms',
+  '/sequences',
+  '/crossmath',
+  '/magic-square',
+  '/quick-arithmetic',
+] as const;
+
+export const FINALE_2_PLAYLIST_ROUTES = [
+  '/cryptarithms',
   '/nim-emission',
   '/isola',
   '/hex',
-  '/anagrams',
-  '/cryptograms',
   '/hidden-phrase',
   '/ciphers/pigpen',
   '/ciphers/morse',
   '/ciphers/braille',
   '/memory-pieces',
   '/symbol-pairs',
-  '/sequences',
-  '/crossmath',
-  '/magic-square',
   '/count-is-good',
   '/knights-and-knaves',
   '/hanging-weights',
@@ -50,17 +56,33 @@ const ORIGINAL_FINALE_ROUTES = [
   '/jigsaw-blocks',
   '/sliding-puzzle',
   '/rush-hour',
+  '/puzzle-a-cadenas',
 ] as const;
 
-export const FINALE_PLAYLIST_ROUTES = [...ORIGINAL_FINALE_ROUTES, '/quick-arithmetic'] as const;
-
-export const FINALE_PLAYLIST: PuzzlePlaylist = {
-  id: FINALE_PLAYLIST_ID,
-  name: 'Finale',
-  routes: [...FINALE_PLAYLIST_ROUTES],
+export const FINALE_1_PLAYLIST: PuzzlePlaylist = {
+  id: FINALE_1_PLAYLIST_ID,
+  name: 'Finale 1',
+  routes: [...FINALE_1_PLAYLIST_ROUTES],
   isStatic: true,
   lastCompletedAt: null,
 };
+
+export const FINALE_2_PLAYLIST: PuzzlePlaylist = {
+  id: FINALE_2_PLAYLIST_ID,
+  name: 'Finale 2',
+  routes: [...FINALE_2_PLAYLIST_ROUTES],
+  isStatic: true,
+  lastCompletedAt: null,
+};
+
+export const FINALE_PLAYLISTS = [FINALE_1_PLAYLIST, FINALE_2_PLAYLIST] as const;
+
+/** @deprecated Use FINALE_1_PLAYLIST_ID. */
+export const FINALE_PLAYLIST_ID = FINALE_1_PLAYLIST_ID;
+/** @deprecated Use FINALE_1_PLAYLIST_ROUTES. */
+export const FINALE_PLAYLIST_ROUTES = FINALE_1_PLAYLIST_ROUTES;
+/** @deprecated Use FINALE_1_PLAYLIST. */
+export const FINALE_PLAYLIST = FINALE_1_PLAYLIST;
 
 @Injectable({
   providedIn: 'root',
@@ -68,6 +90,11 @@ export const FINALE_PLAYLIST: PuzzlePlaylist = {
 export class PuzzlePlaylistService {
   private readonly storageKey = 'epique-puzzle-playlists';
   private readonly progressStorageKey = 'epique-puzzle-playlist-progress';
+  private readonly staticPlaylistIds = new Set([
+    FINALE_1_PLAYLIST_ID,
+    FINALE_2_PLAYLIST_ID,
+    'finale',
+  ]);
   private readonly storage = inject(AppStorageService);
   readonly playlists = signal<PuzzlePlaylist[]>(this.readPlaylists());
   readonly progress = signal<Record<string, PlaylistProgressSnapshot>>(this.readProgress());
@@ -280,13 +307,7 @@ export class PuzzlePlaylistService {
   }
 
   private orderForPlaylist(order: readonly number[], playlist: PuzzlePlaylist): number[] | null {
-    const isOriginalFinaleOrder =
-      playlist.id === FINALE_PLAYLIST_ID &&
-      order.length === ORIGINAL_FINALE_ROUTES.length &&
-      this.arraysEqual(playlist.routes, FINALE_PLAYLIST_ROUTES);
-    const currentOrder = isOriginalFinaleOrder ? [...order, order.length] : [...order];
-
-    return this.isValidOrder(currentOrder, playlist.routes.length) ? currentOrder : null;
+    return this.isValidOrder(order, playlist.routes.length) ? [...order] : null;
   }
 
   private isOrderedOrder(order: number[]): boolean {
@@ -348,12 +369,12 @@ export class PuzzlePlaylistService {
       const parsed: unknown = stored ? JSON.parse(stored) : [];
 
       if (!Array.isArray(parsed)) {
-        return [this.createFinalePlaylist()];
+        return this.createStaticPlaylists();
       }
 
       const userPlaylists = parsed
         .filter((value): value is PuzzlePlaylist => this.isPlaylist(value))
-        .filter((playlist) => playlist.id !== FINALE_PLAYLIST_ID)
+        .filter((playlist) => !this.staticPlaylistIds.has(playlist.id))
         .map((playlist) => ({
           id: playlist.id,
           name: playlist.name.trim() || 'Playlist',
@@ -364,9 +385,9 @@ export class PuzzlePlaylistService {
             : null,
         }));
 
-      return [this.createFinalePlaylist(), ...userPlaylists];
+      return [...this.createStaticPlaylists(), ...userPlaylists];
     } catch {
-      return [this.createFinalePlaylist()];
+      return this.createStaticPlaylists();
     }
   }
 
@@ -389,18 +410,20 @@ export class PuzzlePlaylistService {
 
   private writePlaylists(playlists: PuzzlePlaylist[]): void {
     try {
-      const userPlaylists = playlists.filter((playlist) => playlist.id !== FINALE_PLAYLIST_ID);
+      const userPlaylists = playlists.filter(
+        (playlist) => !this.staticPlaylistIds.has(playlist.id),
+      );
       this.storage.set(this.storageKey, JSON.stringify(userPlaylists));
     } catch {
       // Les playlists restent disponibles pendant la session si le stockage est indisponible.
     }
   }
 
-  private createFinalePlaylist(): PuzzlePlaylist {
-    return {
-      ...FINALE_PLAYLIST,
-      routes: [...FINALE_PLAYLIST_ROUTES],
-    };
+  private createStaticPlaylists(): PuzzlePlaylist[] {
+    return FINALE_PLAYLISTS.map((playlist) => ({
+      ...playlist,
+      routes: [...playlist.routes],
+    }));
   }
 
   private isPlaylist(value: unknown): value is PuzzlePlaylist {

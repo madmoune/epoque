@@ -150,6 +150,19 @@ export class HomePage {
       })),
     },
     {
+      id: 'collections',
+      title: 'Collections',
+      description: 'Des séries de puzzles réunies sous un même thème.',
+      puzzles: [
+        {
+          title: 'Puzzle à Cadenas',
+          description: 'Parcours une collection de puzzles à déverrouiller au fil des défis.',
+          route: '/puzzle-a-cadenas',
+          tag: 'Collection',
+        },
+      ],
+    },
+    {
       id: 'mots-langage',
       title: 'Mots et langage',
       description: 'Jeux de lettres, de phrases et de déchiffrement.',
