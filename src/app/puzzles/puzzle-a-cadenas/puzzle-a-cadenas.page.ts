@@ -42,6 +42,13 @@ type DisplayBlock =
       interactive?: boolean;
     }
   | {
+      type: 'nonogram';
+      label?: string;
+      rowClues: string[];
+      columnClues: string[];
+      result: string;
+    }
+  | {
       type: 'shape';
       label?: string;
       grid?: string[][];
@@ -114,6 +121,7 @@ export class PuzzleACadenasPage {
   protected readonly solved = signal<Set<string>>(this.readSolved());
   protected readonly fleetSelections = signal<Record<string, number[]>>({});
   protected readonly hitoriSelections = signal<Record<string, number[]>>({});
+  protected readonly visibleHints = signal<Set<string>>(new Set());
   protected readonly feedback = signal<Record<string, string>>({});
   protected readonly selectedPuzzleId = signal(this.readSelectedPuzzleId());
   protected readonly selectedPuzzle = computed(
@@ -215,6 +223,18 @@ export class PuzzleACadenasPage {
 
   protected isSolved(id: string): boolean {
     return this.solved().has(id);
+  }
+
+  protected revealHint(id: string): void {
+    if (!this.puzzles.some((puzzle) => puzzle.id === id) || this.isSolved(id)) {
+      return;
+    }
+
+    this.visibleHints.update((hints) => new Set([...hints, id]));
+  }
+
+  protected isHintVisible(id: string): boolean {
+    return this.visibleHints().has(id);
   }
 
   protected attemptFor(id: string): string {
@@ -456,10 +476,18 @@ export class PuzzleACadenasPage {
         }
       }
 
+      const nonogram = this.parseNonogramLine(text);
+
+      if (nonogram) {
+        blocks.push(nonogram);
+        continue;
+      }
+
       const signalMatch = text.match(/[■●·|]/g);
       const separatorIndex = text.search(/[→=]/);
+      const isNonogramLine = /^(?:(?:Exemple \d+|[ABCD])\s+)?L:/.test(text);
 
-      if (signalMatch && signalMatch.length >= 4 && separatorIndex >= 0) {
+      if (!isNonogramLine && signalMatch && signalMatch.length >= 4 && separatorIndex >= 0) {
         blocks.push({
           type: 'signals',
           tokens: signalMatch,
@@ -739,6 +767,40 @@ export class PuzzleACadenasPage {
       tokens,
       result: result || undefined,
     };
+  }
+
+  private parseNonogramLine(text: string): Extract<DisplayBlock, { type: 'nonogram' }> | null {
+    const match = text.match(
+      /^(?:(Exemple \d+|[ABCD])\s+)?L:(.+?)\s+·\s+C:(.+?)\s+→\s*([?\d])$/,
+    );
+
+    if (!match) {
+      return null;
+    }
+
+    const rowClues = match[2].split(',').map((clue) => clue.trim());
+    const columnClues = match[3].split(',').map((clue) => clue.trim());
+
+    if (
+      rowClues.length !== 4 ||
+      columnClues.length !== 4 ||
+      rowClues.some((clue) => !clue) ||
+      columnClues.some((clue) => !clue)
+    ) {
+      return null;
+    }
+
+    return {
+      type: 'nonogram',
+      label: match[1],
+      rowClues,
+      columnClues,
+      result: match[4],
+    };
+  }
+
+  protected formatNonogramClue(clue: string): string {
+    return clue.replaceAll('·', ' · ');
   }
 
   private parseFleetLine(text: string): Extract<DisplayBlock, { type: 'fleet' }> | null {
@@ -1117,8 +1179,13 @@ export class PuzzleACadenasPage {
 
   protected puzzleRule(puzzle: PuzzleACadenasEntry): string {
     const rule = puzzle.instructions
+      .trim()
       .replace(
         /,\s*puis\s+lis(?:\s+le)?\s+(?:code[^.]*|A\s+à\s+D|les\s+quatre\s+cases\s+finales|la\s+chaise[^.]*|le\s+chiffre[^.]*|la\s+case[^.]*)\.?$/i,
+        '',
+      )
+      .replace(
+        /\s+(?:puis\s+)?lis\s+(?:le\s+code[^.]*|A\s+à\s+D|les\s+quatre\s+cases\s+finales|la\s+case[^.]*)\.?$/i,
         '',
       )
       .replace(/,\s*puis\s+lis-le\s+directement\.?$/i, '')

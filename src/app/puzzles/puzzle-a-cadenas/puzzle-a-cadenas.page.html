@@ -283,6 +283,45 @@
                   }
                 </div>
               </article>
+            } @else if (block.type === 'nonogram') {
+              <article class="display-block nonogram-block">
+                <div class="block-heading">
+                  @if (block.label) {
+                    <span class="block-label">{{ block.label }}</span>
+                  }
+                  <span class="diagram-type">Nonogramme</span>
+                </div>
+                <div
+                  class="nonogram-board"
+                  role="img"
+                  [attr.aria-label]="block.label || 'Nonogramme'"
+                >
+                  <div class="nonogram-column-clues">
+                    <span class="nonogram-corner">L/C</span>
+                    @for (clue of block.columnClues; track $index) {
+                      <span class="nonogram-clue">{{ formatNonogramClue(clue) }}</span>
+                    }
+                  </div>
+                  <div class="nonogram-grid-wrap">
+                    <div class="nonogram-row-clues">
+                      @for (clue of block.rowClues; track $index) {
+                        <span class="nonogram-clue">{{ formatNonogramClue(clue) }}</span>
+                      }
+                    </div>
+                    <div class="nonogram-grid">
+                      @for (row of [0, 1, 2, 3]; track row) {
+                        @for (cell of [0, 1, 2, 3]; track cell) {
+                          <span class="nonogram-cell" aria-hidden="true"></span>
+                        }
+                      }
+                    </div>
+                  </div>
+                </div>
+                <p class="diagram-caption">
+                  L = indices des lignes · C = indices des colonnes · le point sépare deux groupes.
+                </p>
+                <span class="display-result diagram-result">→ {{ block.result }}</span>
+              </article>
             } @else if (block.type === 'diagram') {
               <article class="display-block diagram-block">
                 <div class="block-heading">
@@ -650,8 +689,30 @@
               aria-label="Réponse à quatre chiffres"
             />
           </div>
+          <p class="answer-hint extraction-hint">
+            Résous les lignes A, B, C et D : leurs quatre résultats, dans cet ordre, forment le code.
+          </p>
           <p class="answer-hint">La validation se lance automatiquement au quatrième chiffre.</p>
         </div>
+
+        <div class="hint-actions">
+          <button
+            type="button"
+            class="secondary-button hint-button"
+            data-confirm-action="hint"
+            (click)="revealHint(puzzle.id)"
+            [disabled]="isSolved(puzzle.id) || isHintVisible(puzzle.id)"
+          >
+            {{ isHintVisible(puzzle.id) ? 'Indice affiché' : 'Indice' }}
+          </button>
+        </div>
+
+        @if (isHintVisible(puzzle.id)) {
+          <aside class="hint-card" aria-live="polite">
+            <p class="hint-label">Indice</p>
+            <p>{{ puzzleRule(puzzle) }}</p>
+          </aside>
+        }
 
         @if (feedbackFor(puzzle.id)) {
           <p class="feedback" [class.success]="isSolved(puzzle.id)" role="status">

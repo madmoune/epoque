@@ -34,6 +34,17 @@ describe('Puzzle à Cadenas display', () => {
     );
   });
 
+  it('keeps the extraction cue separate from the Latin-square rule', () => {
+    const page = TestBed.createComponent(PuzzleACadenasPage).componentInstance;
+    const puzzle = PUZZLE_A_CADENAS.find(
+      (entry) => entry.id === 'nouveaux-68-carre-quatre-familles',
+    )!;
+
+    expect(page['puzzleRule'](puzzle)).toBe(
+      'Complète la grille 4 × 4 pour que chaque ligne et chaque colonne contienne 1, 2, 3 et 4 une fois.',
+    );
+  });
+
   it('renders fleet row and column codes as a readable grid', () => {
     const page = TestBed.createComponent(PuzzleACadenasPage).componentInstance;
     const puzzle = PUZZLE_A_CADENAS.find((entry) => entry.id === 'nouveaux-75-flotte-silencieuse')!;
@@ -80,6 +91,7 @@ describe('Puzzle à Cadenas display', () => {
     )!;
     const paths = PUZZLE_A_CADENAS.find((entry) => entry.id === 'nouveaux-48-reseau-peages')!;
     const graph = PUZZLE_A_CADENAS.find((entry) => entry.id === 'nouveaux-49-boucles-independantes')!;
+    const nonogram = PUZZLE_A_CADENAS.find((entry) => entry.id === 'nouveaux-67-fenetres-cachees')!;
     const grid = PUZZLE_A_CADENAS.find((entry) => entry.id === 'nouveaux-68-carre-quatre-familles')!;
 
     expect(page['displayBlocks'](hitori).filter((block) => block.type === 'diagram')[0]).toMatchObject({
@@ -104,6 +116,13 @@ describe('Puzzle à Cadenas display', () => {
       type: 'diagram',
       kind: 'graph',
     });
+    expect(page['displayBlocks'](nonogram).find((block) => block.type === 'nonogram')).toMatchObject({
+      type: 'nonogram',
+      label: 'A',
+      rowClues: ['3', '3', '1', '1'],
+      columnClues: ['1', '2', '2', '1·2'],
+      result: '2',
+    });
     expect(page['displayBlocks'](grid).find((block) => block.type === 'diagram')).toMatchObject({
       type: 'diagram',
       kind: 'grid',
@@ -122,5 +141,19 @@ describe('Puzzle à Cadenas display', () => {
 
     page['clearHitoriSelection'](puzzleId, 'A');
     expect(page['isHitoriCellSelected'](puzzleId, 'A', 0)).toBe(false);
+  });
+
+  it('reveals a hint only for an unsolved puzzle', () => {
+    const page = TestBed.createComponent(PuzzleACadenasPage).componentInstance;
+    const puzzleId = 'nouveaux-75-flotte-silencieuse';
+
+    expect(page['isHintVisible'](puzzleId)).toBe(false);
+
+    page['revealHint'](puzzleId);
+    expect(page['isHintVisible'](puzzleId)).toBe(true);
+
+    page['solved'].set(new Set([puzzleId, 'nouveaux-74-rectangles-sur-mesure']));
+    page['revealHint']('nouveaux-74-rectangles-sur-mesure');
+    expect(page['isHintVisible']('nouveaux-74-rectangles-sur-mesure')).toBe(false);
   });
 });

@@ -17,6 +17,24 @@ describe('Puzzle à Cadenas catalog', () => {
     expect(PUZZLE_A_CADENAS.every((puzzle) => /^\d{4}$/.test(puzzle.answer))).toBe(true);
   });
 
+  it('keeps four resolvable A–D lines in each of the last 50 puzzles', () => {
+    for (const puzzle of PUZZLE_A_CADENAS_NEW_50) {
+      const targetDisplay = puzzle.display.split('\nÀ résoudre\n')[1] ?? '';
+
+      expect(targetDisplay.match(/(?:^|\n)(?:@diagram\s+)?[ABCD](?=\s|$)/g)).toHaveLength(4);
+      expect(targetDisplay.match(/(?:@result|→)\s*\?/g)).toHaveLength(4);
+    }
+  });
+
+  it('uses an explicit separator for nonogram runs', () => {
+    const puzzle = PUZZLE_A_CADENAS_NEW_50.find(
+      (entry) => entry.id === 'nouveaux-67-fenetres-cachees',
+    );
+
+    expect(puzzle?.display).not.toMatch(/\d\.\d/);
+    expect(puzzle?.display).toContain('C:1,2,2,1·2');
+  });
+
   it('provides four numeric results for every 3x3 grid example', () => {
     const gridPuzzleIds = PUZZLE_A_CADENAS.filter((puzzle) =>
       /Exemple 1\n[■·]{3}\n[■·]{3}\n[■·]{3}/.test(puzzle.display),
