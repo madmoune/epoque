@@ -632,19 +632,392 @@ button.fleet-cell:active {
   gap: 0.6rem;
 }
 
-.diagram-visual {
+.diagram-type {
+  justify-self: end;
+  padding: 0.25rem 0.45rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line));
+  border-radius: 999px;
+  color: var(--accent);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hitori-visual-wrap {
+  display: grid;
+  gap: 0.5rem;
   width: 100%;
+  max-width: 100%;
+}
+
+.hitori-visual,
+.diagram-grid-visual {
+  display: grid;
+  gap: 0.28rem;
+  width: max-content;
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 0.55rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--line));
+  border-radius: 0.65rem;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--accent) 7%, var(--panel)), transparent 46%),
+    var(--panel);
+}
+
+.hitori-visual {
+  grid-template-columns: repeat(3, minmax(2.8rem, 3.35rem));
+}
+
+.diagram-grid-visual {
+  gap: 0.35rem;
+}
+
+.diagram-grid-row {
+  display: grid;
+  grid-auto-columns: minmax(2rem, 2.8rem);
+  grid-auto-flow: column;
+  gap: 0.28rem;
+}
+
+.logic-grid-cell,
+.diagram-cell {
+  display: grid;
+  place-items: center;
+  min-width: 2.45rem;
+  height: 2.45rem;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line));
+  border-radius: 0.42rem;
+  background: color-mix(in srgb, var(--raised) 82%, transparent);
+  color: var(--copy);
+  font:
+    900 1rem/1 'IBM Plex Mono',
+    'Cascadia Mono',
+    'Courier New',
+    monospace;
+}
+
+.diagram-cell {
+  padding: 0 0.35rem;
+  min-width: 2rem;
+  height: 2rem;
+}
+
+button.logic-grid-cell {
+  cursor: pointer;
+  transition:
+    background 120ms ease,
+    border-color 120ms ease,
+    transform 120ms ease;
+}
+
+button.logic-grid-cell:hover,
+button.logic-grid-cell:focus-visible {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--raised));
+}
+
+button.logic-grid-cell:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--focus) 45%, transparent);
+  outline-offset: 2px;
+}
+
+button.logic-grid-cell:active {
+  transform: scale(0.96);
+}
+
+.hitori-cell {
+  position: relative;
+}
+
+.hitori-cell.marked {
+  border-color: var(--accent);
+  background:
+    linear-gradient(135deg, transparent 43%, color-mix(in srgb, var(--accent-contrast) 66%, transparent) 44% 48%, transparent 49%),
+    var(--accent);
+  color: var(--accent-contrast);
+}
+
+.hitori-cell.marked::after {
+  content: '×';
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: color-mix(in srgb, var(--accent-contrast) 82%, transparent);
+  font-size: 1.45rem;
+  line-height: 1;
+}
+
+.hitori-cell.marked > span {
+  opacity: 0.34;
+}
+
+.diagram-cell.missing {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 16%, var(--raised));
+  color: var(--accent);
+}
+
+.diagram-cell.filled {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.diagram-caption {
   margin: 0;
-  padding: 0.85rem 1rem;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  color: var(--quiet);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.diagram-clear {
+  justify-self: start;
+  min-height: 2rem;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 0.45rem;
+  background: var(--raised);
+  color: var(--copy);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.diagram-clear:hover,
+.diagram-clear:focus-visible {
+  border-color: var(--accent);
+}
+
+.diagram-clear:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--focus) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.path-visual,
+.graph-visual,
+.interval-visual,
+.sequence-visual,
+.diagram-lines {
+  min-width: 0;
+  padding: 0.75rem;
   overflow-x: auto;
   border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--line));
   border-radius: 0.65rem;
   background:
     linear-gradient(135deg, color-mix(in srgb, var(--accent) 7%, var(--panel)), transparent 46%),
     var(--panel);
+}
+
+.path-visual {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.path-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: max-content;
+  gap: 0.2rem;
+}
+
+.path-node {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 13%, var(--raised));
   color: var(--copy);
   font:
-    700 0.9rem/1.55 'IBM Plex Mono',
+    900 0.9rem/1 'IBM Plex Mono',
+    'Cascadia Mono',
+    'Courier New',
+    monospace;
+}
+
+.path-edge {
+  display: inline-flex;
+  align-items: center;
+  min-width: 3rem;
+  color: var(--accent);
+}
+
+.path-edge-line {
+  flex: 1 1 auto;
+  height: 0.15rem;
+  background: color-mix(in srgb, var(--accent) 66%, var(--line));
+}
+
+.path-weight {
+  display: grid;
+  place-items: center;
+  min-width: 1.35rem;
+  padding: 0.15rem 0.25rem;
+  border-radius: 0.35rem;
+  background: color-mix(in srgb, var(--accent) 16%, var(--raised));
+  font:
+    900 0.8rem/1 'IBM Plex Mono',
+    'Cascadia Mono',
+    'Courier New',
+    monospace;
+}
+
+.graph-visual {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.graph-row {
+  display: grid;
+  grid-template-columns: 4.8rem minmax(0, 1fr);
+  gap: 0.65rem;
+  align-items: start;
+}
+
+.graph-label {
+  padding-top: 0.35rem;
+  color: var(--quiet);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.graph-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.graph-chip,
+.sequence-stage {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 32%, var(--line));
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--raised) 86%, transparent);
+  color: var(--copy);
+  font:
+    800 0.88rem/1 'IBM Plex Mono',
+    'Cascadia Mono',
+    'Courier New',
+    monospace;
+}
+
+.vertex-chip {
+  min-width: 2rem;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.edge-chip {
+  color: var(--accent);
+}
+
+.interval-visual {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.interval-axis {
+  display: flex;
+  justify-content: space-between;
+  margin-left: 1.8rem;
+  color: var(--quiet);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+}
+
+.interval-row {
+  display: grid;
+  grid-template-columns: 1.3rem minmax(0, 1fr);
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.interval-label {
+  color: var(--accent);
+  font:
+    900 0.85rem/1 'IBM Plex Mono',
+    'Cascadia Mono',
+    'Courier New',
+    monospace;
+}
+
+.interval-track {
+  position: relative;
+  min-width: 0;
+  height: 2.35rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.interval-bar {
+  position: absolute;
+  top: 1.35rem;
+  left: 0;
+  display: block;
+  height: 0.7rem;
+  min-width: 0.3rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--focus) 80%, var(--accent)));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.interval-values {
+  position: absolute;
+  top: 0.05rem;
+  right: 0;
+  color: var(--quiet);
+  font:
+    700 0.78rem/1 'IBM Plex Mono',
+    'Cascadia Mono',
+    'Courier New',
+    monospace;
+  white-space: nowrap;
+}
+
+.sequence-visual {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.sequence-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.sequence-arrow {
+  color: var(--accent);
+  font-size: 1.2rem;
+  font-weight: 900;
+}
+
+.diagram-lines {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.diagram-line {
+  min-width: max-content;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
+  border-radius: 0.45rem;
+  background: color-mix(in srgb, var(--raised) 78%, transparent);
+  color: var(--copy);
+  font:
+    700 0.88rem/1.45 'IBM Plex Mono',
     'Cascadia Mono',
     'Courier New',
     monospace;

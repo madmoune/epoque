@@ -28,7 +28,19 @@ type DisplayBlock =
       solution?: number[];
     }
   | { type: 'tokens'; label?: string; tokens: string[]; result?: string }
-  | { type: 'diagram'; label?: string; lines: string[]; result?: string }
+  | {
+      type: 'diagram';
+      label?: string;
+      lines: string[];
+      result?: string;
+      kind: DiagramKind;
+      grid?: string[][];
+      paths?: DiagramPath[];
+      graph?: DiagramGraph;
+      intervals?: DiagramInterval[];
+      sequence?: string[][];
+      interactive?: boolean;
+    }
   | {
       type: 'shape';
       label?: string;
@@ -68,6 +80,24 @@ type SymbolGrid = {
   result?: string;
 };
 
+type DiagramKind = 'grid' | 'hitori' | 'paths' | 'graph' | 'intervals' | 'sequence' | 'lines';
+
+type DiagramPath = {
+  nodes: string[];
+  weights: string[];
+};
+
+type DiagramGraph = {
+  vertices: string[];
+  edges: string[];
+};
+
+type DiagramInterval = {
+  label: string;
+  start: number;
+  end: number;
+};
+
 @Component({
   selector: 'app-puzzle-a-cadenas-page',
   imports: [RouterLink],
@@ -83,6 +113,7 @@ export class PuzzleACadenasPage {
   protected readonly attempts = signal<Record<string, string>>({});
   protected readonly solved = signal<Set<string>>(this.readSolved());
   protected readonly fleetSelections = signal<Record<string, number[]>>({});
+  protected readonly hitoriSelections = signal<Record<string, number[]>>({});
   protected readonly feedback = signal<Record<string, string>>({});
   protected readonly selectedPuzzleId = signal(this.readSelectedPuzzleId());
   protected readonly selectedPuzzle = computed(
@@ -248,6 +279,67 @@ export class PuzzleACadenasPage {
     });
   }
 
+  protected isHitoriCellSelected(
+    puzzleId: string,
+    label: string | undefined,
+    index: number,
+  ): boolean {
+    return this.hitoriSelections()[this.hitoriSelectionKey(puzzleId, label)]?.includes(index) ?? false;
+  }
+
+  protected hitoriSelectionCount(puzzleId: string, label: string | undefined): number {
+    return this.hitoriSelections()[this.hitoriSelectionKey(puzzleId, label)]?.length ?? 0;
+  }
+
+  protected toggleHitoriCell(puzzleId: string, label: string | undefined, index: number): void {
+    const key = this.hitoriSelectionKey(puzzleId, label);
+
+    this.hitoriSelections.update((selections) => {
+      const selected = new Set(selections[key] ?? []);
+
+      if (selected.has(index)) {
+        selected.delete(index);
+      } else {
+        selected.add(index);
+      }
+
+      return {
+        ...selections,
+        [key]: [...selected].sort((left, right) => left - right),
+      };
+    });
+  }
+
+  protected clearHitoriSelection(puzzleId: string, label: string | undefined): void {
+    const key = this.hitoriSelectionKey(puzzleId, label);
+
+    this.hitoriSelections.update((selections) => {
+      const next = { ...selections };
+      delete next[key];
+      return next;
+    });
+  }
+
+  protected diagramCellIndex(rowIndex: number, columnIndex: number, columnCount: number): number {
+    return rowIndex * columnCount + columnIndex;
+  }
+
+  protected intervalStartOffset(intervals: DiagramInterval[], start: number): number {
+    const minimum = Math.min(...intervals.map((interval) => interval.start));
+    const maximum = Math.max(...intervals.map((interval) => interval.end));
+    const span = Math.max(maximum - minimum, 1);
+
+    return ((start - minimum) / span) * 100;
+  }
+
+  protected intervalSpanWidth(intervals: DiagramInterval[], start: number, end: number): number {
+    const minimum = Math.min(...intervals.map((interval) => interval.start));
+    const maximum = Math.max(...intervals.map((interval) => interval.end));
+    const span = Math.max(maximum - minimum, 1);
+
+    return Math.max(((end - start) / span) * 100, 4);
+  }
+
   protected displayBlocks(puzzle: PuzzleACadenasEntry): DisplayBlock[] {
     const lines = puzzle.display.split('\n');
     const blocks: DisplayBlock[] = [];
@@ -264,7 +356,7 @@ export class PuzzleACadenasPage {
         continue;
       }
 
-      const diagram = this.parseDiagram(lines, index);
+      const diagram = this.parseDiagram(lines, index, puzzle.id);
 
       if (diagram) {
         blocks.push(diagram.block);
@@ -752,9 +844,14 @@ export class PuzzleACadenasPage {
     return `${puzzleId}:${label ?? ''}`;
   }
 
+  private hitoriSelectionKey(puzzleId: string, label: string | undefined): string {
+    return `${puzzleId}:${label ?? ''}`;
+  }
+
   private parseDiagram(
     lines: string[],
     startIndex: number,
+    puzzleId: string,
   ): { block: Extract<DisplayBlock, { type: 'diagram' }>; endIndex: number } | null {
     const marker = lines[startIndex]?.trim().match(/^@diagram(?:\s+(.+))?$/);
 
@@ -784,9 +881,161 @@ export class PuzzleACadenasPage {
         label: marker[1]?.trim() || undefined,
         lines: diagramLines,
         result: result || undefined,
+        ...this.classifyDiagram(diagramLines, result, puzzleId),
       },
       endIndex: resultIndex,
     };
+  }
+
+  private classifyDiagram(
+    lines: string[],
+    result: string,
+    puzzleId: string,
+  ): {
+    kind: DiagramKind;
+    grid?: string[][];
+    paths?: DiagramPath[];
+    graph?: DiagramGraph;
+    intervals?: DiagramInterval[];
+    sequence?: string[][];
+    interactive?: boolean;
+  } {
+    const grid = this.parseLooseGrid(lines);
+
+    if (grid) {
+      return {
+        kind: puzzleId === 'nouveaux-71-suppression-interdite' ? 'hitori' : 'grid',
+        grid,
+        interactive: puzzleId === 'nouveaux-71-suppression-interdite' && result === '?',
+      };
+    }
+
+    const graph = this.parseGraph(lines);
+
+    if (graph) {
+      return { kind: 'graph', graph };
+    }
+
+    const paths = this.parseWeightedPaths(lines);
+
+    if (paths) {
+      return { kind: 'paths', paths };
+    }
+
+    const intervals = this.parseIntervals(lines);
+
+    if (intervals) {
+      return { kind: 'intervals', intervals };
+    }
+
+    const sequence = this.parseSequence(lines);
+
+    if (sequence) {
+      return { kind: 'sequence', sequence };
+    }
+
+    return { kind: 'lines' };
+  }
+
+  private parseLooseGrid(lines: string[]): string[][] | null {
+    const spacedRows = lines.map((line) => line.trim().split(/\s+/).filter(Boolean));
+    const spacedColumnCount = spacedRows[0]?.length ?? 0;
+
+    if (
+      spacedColumnCount >= 2 &&
+      spacedRows.every(
+        (row) => row.length === spacedColumnCount && row.every((cell) => this.isDiagramGridToken(cell)),
+      )
+    ) {
+      return spacedRows;
+    }
+
+    const compactRows = lines.map((line) => [...line.trim()]);
+    const compactColumnCount = compactRows[0]?.length ?? 0;
+
+    if (
+      compactColumnCount >= 2 &&
+      compactRows.every(
+        (row) =>
+          row.length === compactColumnCount && row.every((cell) => this.isDiagramGridToken(cell)),
+      )
+    ) {
+      return compactRows;
+    }
+
+    return null;
+  }
+
+  private isDiagramGridToken(value: string): boolean {
+    return /^[?0-9A-Za-z·.#oOxX■●○□▣▤▱▲△◆◇◯◉▪▫◦▁▂▃▄▅▆▇]+$/.test(value);
+  }
+
+  private parseGraph(lines: string[]): DiagramGraph | null {
+    const verticesLine = lines.find((line) => /^Sommets\s*:/i.test(line.trim()));
+    const edgesLine = lines.find((line) => /^Arêtes\s*:/i.test(line.trim()));
+
+    if (!verticesLine || !edgesLine) {
+      return null;
+    }
+
+    const vertices = verticesLine
+      .replace(/^Sommets\s*:\s*/i, '')
+      .split(/\s+/)
+      .filter(Boolean);
+    const edges = edgesLine
+      .replace(/^Arêtes\s*:\s*/i, '')
+      .split(/\s*·\s*/)
+      .map((edge) => edge.trim())
+      .filter(Boolean);
+
+    return vertices.length > 0 && edges.length > 0 ? { vertices, edges } : null;
+  }
+
+  private parseWeightedPaths(lines: string[]): DiagramPath[] | null {
+    if (!lines.every((line) => /^[A-Z]/.test(line.trim()) && /─{2,}\d+─{2,}/.test(line))) {
+      return null;
+    }
+
+    const paths = lines.map((line) => {
+      const tokens = [...line.matchAll(/[A-Z]|\d+/g)].map((match) => match[0]);
+      return {
+        nodes: tokens.filter((token) => /^[A-Z]$/.test(token)),
+        weights: tokens.filter((token) => /^\d+$/.test(token)),
+      };
+    });
+
+    return paths.every((path) => path.nodes.length >= 2 && path.weights.length > 0) ? paths : null;
+  }
+
+  private parseIntervals(lines: string[]): DiagramInterval[] | null {
+    const intervals = lines.map((line) =>
+      line
+        .trim()
+        .match(/^(\d+)\s*:\s*\[\s*(-?\d+)\s*;\s*(-?\d+)\s*\]$/),
+    );
+
+    if (intervals.some((match) => !match)) {
+      return null;
+    }
+
+    return intervals.map((match) => ({
+      label: match![1],
+      start: Number(match![2]),
+      end: Number(match![3]),
+    }));
+  }
+
+  private parseSequence(lines: string[]): string[][] | null {
+    if (!lines.some((line) => line.includes('→'))) {
+      return null;
+    }
+
+    return lines.map((line) =>
+      line
+        .split('→')
+        .map((stage) => stage.trim())
+        .filter(Boolean),
+    );
   }
 
   private parseShape(

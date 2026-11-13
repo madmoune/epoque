@@ -72,4 +72,55 @@ describe('Puzzle à Cadenas display', () => {
     page['clearFleetSelection']('nouveaux-75-flotte-silencieuse', 'A');
     expect(page['isFleetCellSelected']('nouveaux-75-flotte-silencieuse', 'A', 0)).toBe(false);
   });
+
+  it('classifies diagram data into visual structures', () => {
+    const page = TestBed.createComponent(PuzzleACadenasPage).componentInstance;
+    const hitori = PUZZLE_A_CADENAS.find(
+      (entry) => entry.id === 'nouveaux-71-suppression-interdite',
+    )!;
+    const paths = PUZZLE_A_CADENAS.find((entry) => entry.id === 'nouveaux-48-reseau-peages')!;
+    const graph = PUZZLE_A_CADENAS.find((entry) => entry.id === 'nouveaux-49-boucles-independantes')!;
+    const grid = PUZZLE_A_CADENAS.find((entry) => entry.id === 'nouveaux-68-carre-quatre-familles')!;
+
+    expect(page['displayBlocks'](hitori).filter((block) => block.type === 'diagram')[0]).toMatchObject({
+      type: 'diagram',
+      kind: 'hitori',
+      grid: [
+        ['2', '4', '3'],
+        ['1', '4', '4'],
+      ],
+      interactive: false,
+    });
+    expect(page['displayBlocks'](hitori).filter((block) => block.type === 'diagram').at(-1)).toMatchObject({
+      type: 'diagram',
+      kind: 'hitori',
+      interactive: true,
+    });
+    expect(page['displayBlocks'](paths).find((block) => block.type === 'diagram')).toMatchObject({
+      type: 'diagram',
+      kind: 'paths',
+    });
+    expect(page['displayBlocks'](graph).find((block) => block.type === 'diagram')).toMatchObject({
+      type: 'diagram',
+      kind: 'graph',
+    });
+    expect(page['displayBlocks'](grid).find((block) => block.type === 'diagram')).toMatchObject({
+      type: 'diagram',
+      kind: 'grid',
+    });
+  });
+
+  it('allows marking and clearing cells on a Hitori target grid', () => {
+    const page = TestBed.createComponent(PuzzleACadenasPage).componentInstance;
+    const puzzleId = 'nouveaux-71-suppression-interdite';
+
+    expect(page['isHitoriCellSelected'](puzzleId, 'A', 0)).toBe(false);
+
+    page['toggleHitoriCell'](puzzleId, 'A', 0);
+    expect(page['isHitoriCellSelected'](puzzleId, 'A', 0)).toBe(true);
+    expect(page['hitoriSelectionCount'](puzzleId, 'A')).toBe(1);
+
+    page['clearHitoriSelection'](puzzleId, 'A');
+    expect(page['isHitoriCellSelected'](puzzleId, 'A', 0)).toBe(false);
+  });
 });

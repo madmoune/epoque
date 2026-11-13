@@ -285,15 +285,192 @@
               </article>
             } @else if (block.type === 'diagram') {
               <article class="display-block diagram-block">
-                @if (block.label) {
-                  <span class="block-label">{{ block.label }}</span>
+                <div class="block-heading">
+                  @if (block.label) {
+                    <span class="block-label">{{ block.label }}</span>
+                  }
+                  @if (block.kind === 'hitori') {
+                    <span class="diagram-type">Hitori</span>
+                  } @else if (block.kind === 'graph' || block.kind === 'paths') {
+                    <span class="diagram-type">Réseau</span>
+                  } @else if (block.kind === 'intervals') {
+                    <span class="diagram-type">Intervalles</span>
+                  }
+                </div>
+                @if (block.kind === 'hitori' && block.grid; as grid) {
+                  <div class="hitori-visual-wrap">
+                    <div
+                      class="hitori-visual"
+                      [attr.role]="block.interactive ? 'grid' : 'img'"
+                      [attr.aria-label]="
+                        block.label ? 'Grille Hitori ' + block.label : 'Grille Hitori'
+                      "
+                    >
+                      @for (row of grid; track $index; let rowIndex = $index) {
+                        @for (cell of row; track $index; let columnIndex = $index) {
+                          @let cellIndex = diagramCellIndex(rowIndex, columnIndex, row.length);
+                          @if (block.interactive) {
+                            <button
+                              type="button"
+                              class="logic-grid-cell hitori-cell"
+                              [class.marked]="
+                                isHitoriCellSelected(puzzle.id, block.label, cellIndex)
+                              "
+                              [attr.aria-label]="
+                                'Ligne ' +
+                                (rowIndex + 1) +
+                                ', colonne ' +
+                                (columnIndex + 1) +
+                                ', valeur ' +
+                                cell +
+                                (isHitoriCellSelected(puzzle.id, block.label, cellIndex)
+                                  ? ', case noircie'
+                                  : ', case blanche')
+                              "
+                              [attr.aria-pressed]="
+                                isHitoriCellSelected(puzzle.id, block.label, cellIndex)
+                              "
+                              (click)="
+                                toggleHitoriCell(puzzle.id, block.label, cellIndex)
+                              "
+                            >
+                              <span>{{ cell }}</span>
+                            </button>
+                          } @else {
+                            <span class="logic-grid-cell hitori-cell" aria-hidden="true">{{
+                              cell
+                            }}</span>
+                          }
+                        }
+                      }
+                    </div>
+                    <p class="diagram-caption">
+                      @if (block.interactive) {
+                        Clique les cases à noircir. Les nombres restent visibles pour vérifier les
+                        doublons.
+                      } @else {
+                        Grille d’exemple : les nombres indiquent les cases à comparer sur les lignes
+                        et les colonnes.
+                      }
+                    </p>
+                  </div>
+                  @if (
+                    block.interactive && hitoriSelectionCount(puzzle.id, block.label) > 0
+                  ) {
+                    <button
+                      type="button"
+                      class="diagram-clear"
+                      (click)="clearHitoriSelection(puzzle.id, block.label)"
+                    >
+                      Effacer les cases noircies
+                    </button>
+                  }
+                } @else if (block.kind === 'grid' && block.grid; as grid) {
+                  <div
+                    class="diagram-grid-visual"
+                    role="img"
+                    [attr.aria-label]="block.label || 'Grille du puzzle'"
+                  >
+                    @for (row of grid; track $index) {
+                      <div class="diagram-grid-row">
+                        @for (cell of row; track $index) {
+                          <span
+                            class="diagram-cell"
+                            [class.missing]="cell === '?'"
+                            [class.filled]="isFilledGridCell(cell)"
+                          >
+                            {{ cell }}
+                          </span>
+                        }
+                      </div>
+                    }
+                  </div>
+                } @else if (block.kind === 'paths' && block.paths; as paths) {
+                  <div class="path-visual" role="img" aria-label="Chemins pondérés">
+                    @for (path of paths; track $index) {
+                      <div class="path-row">
+                        @for (node of path.nodes; track $index; let nodeIndex = $index) {
+                          <span class="path-node">{{ node }}</span>
+                          @if (path.weights[nodeIndex]; as weight) {
+                            <span class="path-edge">
+                              <span class="path-edge-line" aria-hidden="true"></span>
+                              <span class="path-weight">{{ weight }}</span>
+                              <span class="path-edge-line" aria-hidden="true"></span>
+                            </span>
+                          }
+                        }
+                      </div>
+                    }
+                  </div>
+                } @else if (block.kind === 'graph' && block.graph; as graph) {
+                  <div class="graph-visual" role="img" aria-label="Réseau de sommets et d’arêtes">
+                    <div class="graph-row">
+                      <span class="graph-label">Sommets</span>
+                      <div class="graph-chips">
+                        @for (vertex of graph.vertices; track $index) {
+                          <span class="graph-chip vertex-chip">{{ vertex }}</span>
+                        }
+                      </div>
+                    </div>
+                    <div class="graph-row">
+                      <span class="graph-label">Arêtes</span>
+                      <div class="graph-chips">
+                        @for (edge of graph.edges; track $index) {
+                          <span class="graph-chip edge-chip">{{ edge }}</span>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                } @else if (block.kind === 'intervals' && block.intervals; as intervals) {
+                  <div class="interval-visual" role="img" aria-label="Bandes d’intervalles">
+                    <div class="interval-axis" aria-hidden="true">
+                      <span>début</span>
+                      <span>fin</span>
+                    </div>
+                    @for (interval of intervals; track $index) {
+                      <div class="interval-row">
+                        <span class="interval-label">{{ interval.label }}</span>
+                        <div class="interval-track">
+                          <span
+                            class="interval-bar"
+                            [style.left.%]="
+                              intervalStartOffset(intervals, interval.start)
+                            "
+                            [style.width.%]="
+                              intervalSpanWidth(intervals, interval.start, interval.end)
+                            "
+                          ></span>
+                          <span class="interval-values"
+                            >[{{ interval.start }} ; {{ interval.end }}]</span
+                          >
+                        </div>
+                      </div>
+                    }
+                  </div>
+                } @else if (block.kind === 'sequence' && block.sequence; as sequence) {
+                  <div class="sequence-visual" role="img" aria-label="Étapes successives">
+                    @for (stages of sequence; track $index) {
+                      <div class="sequence-row">
+                        @for (stage of stages; track $index; let stageIndex = $index) {
+                          <span class="sequence-stage">{{ stage }}</span>
+                          @if (stageIndex < stages.length - 1) {
+                            <span class="sequence-arrow" aria-hidden="true">→</span>
+                          }
+                        }
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <div
+                    class="diagram-lines"
+                    role="img"
+                    [attr.aria-label]="block.label || 'Schéma du puzzle'"
+                  >
+                    @for (line of block.lines; track $index) {
+                      <div class="diagram-line">{{ line }}</div>
+                    }
+                  </div>
                 }
-                <pre
-                  class="diagram-visual"
-                  role="img"
-                  [attr.aria-label]="block.label || 'Schéma du puzzle'"
-                  >{{ block.lines.join('\n') }}</pre
-                >
                 @if (block.result; as result) {
                   <span class="display-result diagram-result">→ {{ result }}</span>
                 }
