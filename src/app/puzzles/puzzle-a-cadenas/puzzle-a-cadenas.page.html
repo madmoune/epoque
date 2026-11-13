@@ -71,9 +71,27 @@
         </aside>
 
         <div class="puzzle-display" aria-label="Énoncé du puzzle">
+          <p class="display-guide" role="note">
+            <strong>Lecture :</strong> les <em>exemples résolus</em> montrent déjà leur résultat ;
+            les éléments sous <em>À résoudre</em> sont les réponses à trouver.
+          </p>
           @for (block of displayBlocks(puzzle); track $index) {
             @if (block.type === 'heading') {
-              <h3 class="display-heading">{{ block.text }}</h3>
+              <h3
+                class="display-heading"
+                [class.examples-heading]="block.text === 'Exemples'"
+                [class.solve-heading]="block.text === 'À résoudre'"
+              >
+                @if (block.text === 'Exemples') {
+                  <span class="display-heading-marker" aria-hidden="true">✓</span>
+                  <span>Exemples résolus</span>
+                } @else if (block.text === 'À résoudre') {
+                  <span class="display-heading-marker" aria-hidden="true">?</span>
+                  <span>À résoudre</span>
+                } @else {
+                  <span>{{ block.text }}</span>
+                }
+              </h3>
             } @else if (block.type === 'number-grids') {
               <article class="display-block number-grids-block">
                 <div class="number-grids-list">

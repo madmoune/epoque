@@ -17,6 +17,13 @@ describe('Puzzle à Cadenas catalog', () => {
     expect(PUZZLE_A_CADENAS.every((puzzle) => /^\d{4}$/.test(puzzle.answer))).toBe(true);
   });
 
+  it('labels the example and answer sections throughout the collection', () => {
+    for (const puzzle of PUZZLE_A_CADENAS) {
+      expect(puzzle.display).toMatch(/(?:^|\n)(?:Exemples|Indices)\n/);
+      expect(puzzle.display).toContain('\nÀ résoudre\n');
+    }
+  });
+
   it('keeps four resolvable A–D lines in each of the last 50 puzzles', () => {
     for (const puzzle of PUZZLE_A_CADENAS_NEW_50) {
       const targetDisplay = puzzle.display.split('\nÀ résoudre\n')[1] ?? '';

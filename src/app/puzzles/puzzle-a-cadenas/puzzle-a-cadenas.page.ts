@@ -384,7 +384,13 @@ export class PuzzleACadenasPage {
         continue;
       }
 
-      if (text === 'Exemples' || text === 'À résoudre') {
+      if (
+        text === 'Exemples' ||
+        text === 'À résoudre' ||
+        text === 'Indices' ||
+        text === 'Ordre du code' ||
+        text === 'Grille de référence'
+      ) {
         blocks.push({ type: 'heading', text });
         continue;
       }

@@ -19,10 +19,12 @@ const PUZZLE_A_CADENAS_INITIAL: readonly PuzzleACadenasEntry[] = [
     instructions:
       'Chaque symbole représente toujours le même chiffre. Déduis la valeur de chaque symbole, puis lis le code dans l’ordre demandé.',
     display: [
+      'Exemples',
       '△  □  ⬠  ⬡  →  3456',
       '⬡  △  □  ⬠  →  6345',
       '□  ⬠  ⬡  △  →  4563',
       '',
+      'À résoudre',
       '⬠  □  ⬡  △  →  ????',
     ].join('\n'),
     answer: '5463',
@@ -34,11 +36,13 @@ const PUZZLE_A_CADENAS_INITIAL: readonly PuzzleACadenasEntry[] = [
     instructions:
       'Compte les boucles fermées à l’intérieur de chaque chiffre. Additionne-les pour chaque ligne.',
     display: [
+      'Exemples',
       '8800  →  6',
       '1608  →  4',
       '1237  →  0',
       '9098  →  5',
       '',
+      'À résoudre',
       'A  6801  →  ?',
       'B  8880  →  ?',
       'C  1172  →  ?',
@@ -53,10 +57,12 @@ const PUZZLE_A_CADENAS_INITIAL: readonly PuzzleACadenasEntry[] = [
     instructions:
       'Compte les descentes, c’est-à-dire les fois où un nombre est plus petit que celui qui le précède.',
     display: [
+      'Exemples',
       '1  2  3  4  5  →  0',
       '5  4  3  2  1  →  4',
       '3  5  1  4  2  →  2',
       '',
+      'À résoudre',
       'A  9  7  5  3  1  →  ?',
       'B  1  2  4  6  8  →  ?',
       'C  7  4  8  3  1  →  ?',
@@ -78,6 +84,7 @@ const PUZZLE_A_CADENAS_INITIAL: readonly PuzzleACadenasEntry[] = [
       '│ 4 │ 8 │  │ 1 │ 6 │  │ 2 │ 5 │',
       '└───┴───┘  └───┴───┘  └───┴───┘',
       '',
+      'À résoudre',
       'A       B       C       D',
       '┌───┬───┐  ┌───┬───┐  ┌───┬───┐  ┌───┬───┐',
       '│ 2 │ 5 │  │ 3 │ 8 │  │ 4 │ 6 │  │ 1 │ 5 │',
@@ -94,6 +101,7 @@ const PUZZLE_A_CADENAS_INITIAL: readonly PuzzleACadenasEntry[] = [
     instructions:
       'Déplace-toi dans la grille 3 × 3. Les flèches indiquent la case voisine à atteindre, puis lis les quatre cases finales.',
     display: [
+      'Grille de référence',
       '┌───┬───┬───┐',
       '│ 1 │ 2 │ 3 │',
       '├───┼───┼───┤',
@@ -102,8 +110,10 @@ const PUZZLE_A_CADENAS_INITIAL: readonly PuzzleACadenasEntry[] = [
       '│ 7 │ 8 │ 9 │',
       '└───┴───┴───┘',
       '',
-      'Exemples : 5 + ↑ = 2   ·   5 + ↘ = 9   ·   5 + ← puis ↑ = 1',
+      'Exemples',
+      '5 + ↑ = 2   ·   5 + ↘ = 9   ·   5 + ← puis ↑ = 1',
       '',
+      'À résoudre',
       'A  5 : ↑ puis →',
       'B  5 : ↓ puis ←',
       'C  2 : ↓ puis ↓',
@@ -118,10 +128,12 @@ const PUZZLE_A_CADENAS_INITIAL: readonly PuzzleACadenasEntry[] = [
     instructions:
       'Pour chaque paire, multiplie les deux nombres du premier domino, puis retire le produit du second domino.',
     display: [
+      'Exemples',
       '(2│3) − (1│4) = 2',
       '(3│3) − (2│1) = 7',
       '(2│4) − (1│5) = 3',
       '',
+      'À résoudre',
       'A  (2│4) − (2│2) = ?',
       'B  (3│4) − (1│5) = ?',
       'C  (2│3) − (1│5) = ?',
@@ -136,12 +148,17 @@ const PUZZLE_A_CADENAS_INITIAL: readonly PuzzleACadenasEntry[] = [
     instructions:
       'Chaque symbole vaut un chiffre différent. Résous les égalités, puis lis les valeurs dans l’ordre indiqué.',
     display: [
+      'Indices',
       '▲ + ▲ + ● = 7',
       '▲ + ■ = 7',
       '● + ■ = 8',
       '◆ + ▲ = 9',
       '',
-      'Code dans cet ordre :  ◆  ▲  ■  ●',
+      'À résoudre',
+      'Déduis la valeur de chaque symbole.',
+      '',
+      'Ordre du code',
+      '◆  ▲  ■  ●',
     ].join('\n'),
     answer: '7253',
   },
@@ -152,7 +169,8 @@ const PUZZLE_A_CADENAS_INITIAL: readonly PuzzleACadenasEntry[] = [
     instructions:
       'Superpose les deux plaques. Pour chaque ligne, compte les cases noires présentes sur les deux plaques à la même position.',
     display: [
-      'Exemple : chaque ligne donne un chiffre',
+      'Exemples',
+      'Chaque ligne donne un chiffre.',
       '■■··  |  ■■··  →  2',
       '·■■·  |  ■··■  →  0',
       '■■■·  |  ■■·■  →  2',
@@ -180,6 +198,7 @@ const PUZZLE_A_CADENAS_INITIAL: readonly PuzzleACadenasEntry[] = [
       '├─┼─┤  →  5',
       '└─┴─┘',
       '',
+      'À résoudre',
       'A  □ □ □  →  ?',
       'B  ┌─┬─┐  +  □ □ □  →  ?',
       '   ├─┼─┤',
@@ -196,6 +215,7 @@ const PUZZLE_A_CADENAS_INITIAL: readonly PuzzleACadenasEntry[] = [
     instructions:
       'Le code contient quatre chiffres différents. « Bien placé » signifie que le chiffre est à la bonne position ; « mal placé » signifie qu’il appartient au code, mais ailleurs.',
     display: [
+      'Indices',
       'Essai    Bien placés    Mal placés',
       '1234          1              1',
       '5079          1              1',
@@ -203,6 +223,7 @@ const PUZZLE_A_CADENAS_INITIAL: readonly PuzzleACadenasEntry[] = [
       '1740          1              1',
       '5621          2              0',
       '',
+      'À résoudre',
       'Quel est l’unique code compatible ?',
     ].join('\n'),
     answer: '5731',
@@ -221,6 +242,7 @@ const PUZZLE_A_CADENAS_INITIAL: readonly PuzzleACadenasEntry[] = [
       '····    ····    ····',
       '  1       2       4',
       '',
+      'À résoudre',
       'A       B       C       D',
       '■·■·    ■■··    ■··■    ■■■■',
       '····    ··■■    ■■··    ■■■■',
@@ -237,9 +259,10 @@ const PUZZLE_A_CADENAS_INITIAL: readonly PuzzleACadenasEntry[] = [
     instructions:
       'Les quatre voyants valent respectivement 1, 2, 4 et 8. Additionne la valeur des voyants allumés.',
     display: [
+      'Indices',
       'Voyants :  [1]  [2]  [4]  [8]',
       '',
-      'Exemples :',
+      'Exemples',
       '● ○ ○ ○  →  1',
       '○ ● ○ ○  →  2',
       '○ ○ ● ○  →  4',
@@ -247,6 +270,7 @@ const PUZZLE_A_CADENAS_INITIAL: readonly PuzzleACadenasEntry[] = [
       '● ○ ● ○  →  5',
       '● ● ○ ○  →  3',
       '',
+      'À résoudre',
       'A  ● ● ● ○  →  ?',
       'B  ● ● ○ ○  →  ?',
       'C  ○ ● ● ○  →  ?',

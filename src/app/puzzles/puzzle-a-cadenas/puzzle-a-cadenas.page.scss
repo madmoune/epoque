@@ -310,6 +310,7 @@ h1 {
 }
 
 .display-heading,
+.display-guide,
 .display-line,
 .signal-block,
 .number-grids-block,
@@ -327,11 +328,59 @@ h1 {
 }
 
 .display-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
   margin: 0.25rem 0 0;
-  color: var(--quiet);
-  font-size: 0.78rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 0.6rem;
+  background: color-mix(in srgb, var(--panel) 82%, transparent);
+  color: var(--copy);
+  font-size: 0.82rem;
+  font-weight: 900;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+}
+
+.display-heading.examples-heading {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+}
+
+.display-heading.solve-heading {
+  border-color: color-mix(in srgb, var(--accent) 70%, var(--line));
+  background: color-mix(in srgb, var(--accent) 10%, var(--panel));
+}
+
+.display-heading-marker {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-size: 0.8rem;
+  letter-spacing: 0;
+}
+
+.display-guide {
+  margin: 0;
+  padding: 0.65rem 0.8rem;
+  border-left: 0.25rem solid var(--accent);
+  border-radius: 0.45rem;
+  background: color-mix(in srgb, var(--accent) 7%, var(--panel));
+  color: var(--quiet);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.display-guide strong,
+.display-guide em {
+  color: var(--copy);
+  font-style: normal;
+  font-weight: 900;
 }
 
 .display-line {
