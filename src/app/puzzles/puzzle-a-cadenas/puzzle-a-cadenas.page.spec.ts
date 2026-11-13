@@ -119,6 +119,17 @@ describe('Puzzle à Cadenas display', () => {
     });
   });
 
+  it('keeps example fleet cards compact without explanatory captions', () => {
+    const fixture = TestBed.createComponent(PuzzleACadenasPage);
+    fixture.componentInstance['selectedPuzzleId'].set('nouveaux-75-flotte-silencieuse');
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelectorAll('.fleet-caption')).toHaveLength(4);
+    expect(fixture.nativeElement.textContent).not.toContain(
+      'Exemple : les deux cases colorées qui se touchent',
+    );
+  });
+
   it('allows marking and clearing cells on a fleet target grid', () => {
     const page = TestBed.createComponent(PuzzleACadenasPage).componentInstance;
 

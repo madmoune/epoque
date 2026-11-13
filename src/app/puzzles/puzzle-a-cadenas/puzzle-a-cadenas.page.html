@@ -257,12 +257,6 @@
                       Clique les cases pour marquer les bateaux. L = lignes à gauche · C = colonnes
                       en haut.
                     </p>
-                  } @else {
-                    <p class="fleet-caption">
-                      Exemple : les deux cases colorées qui se touchent forment le bateau de 2 cases.
-                      La case isolée est le bateau seul : le nombre après la flèche est son numéro de
-                      colonne (ici {{ block.result }}). L = lignes · C = colonnes.
-                    </p>
                   }
                 </div>
                 <div class="fleet-key">
@@ -396,15 +390,12 @@
                         }
                       }
                     </div>
-                    <p class="diagram-caption">
-                      @if (block.interactive) {
+                    @if (block.interactive) {
+                      <p class="diagram-caption">
                         Clique les cases à noircir. Les nombres restent visibles pour vérifier les
                         doublons.
-                      } @else {
-                        Grille d’exemple : les nombres indiquent les cases à comparer sur les lignes
-                        et les colonnes.
-                      }
-                    </p>
+                      </p>
+                    }
                   </div>
                   @if (
                     block.interactive && hitoriSelectionCount(puzzle.id, block.label) > 0
