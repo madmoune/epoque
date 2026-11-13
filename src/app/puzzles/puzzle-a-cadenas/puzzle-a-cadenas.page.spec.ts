@@ -17,6 +17,7 @@ describe('Puzzle à Cadenas display', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('.puzzle-rule')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.display-guide')).toBeNull();
     expect(fixture.nativeElement.querySelector('.puzzle-difficulty')).not.toBeNull();
   });
 

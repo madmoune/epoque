@@ -66,10 +66,6 @@
         </header>
 
         <div class="puzzle-display" aria-label="Énoncé du puzzle">
-          <p class="display-guide" role="note">
-            <strong>Lecture :</strong> les <em>exemples résolus</em> montrent déjà leur résultat ;
-            les éléments sous <em>À résoudre</em> sont les réponses à trouver.
-          </p>
           @for (block of displayBlocks(puzzle); track $index) {
             @if (block.type === 'heading') {
               <h3

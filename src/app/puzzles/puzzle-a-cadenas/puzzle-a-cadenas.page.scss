@@ -285,7 +285,6 @@ h1 {
 }
 
 .display-heading,
-.display-guide,
 .display-line,
 .signal-block,
 .number-grids-block,
@@ -338,24 +337,6 @@ h1 {
   color: var(--accent-contrast);
   font-size: 0.8rem;
   letter-spacing: 0;
-}
-
-.display-guide {
-  margin: 0;
-  padding: 0.65rem 0.8rem;
-  border-left: 0.25rem solid var(--accent);
-  border-radius: 0.45rem;
-  background: color-mix(in srgb, var(--accent) 7%, var(--panel));
-  color: var(--quiet);
-  font-size: 0.82rem;
-  line-height: 1.45;
-}
-
-.display-guide strong,
-.display-guide em {
-  color: var(--copy);
-  font-style: normal;
-  font-weight: 900;
 }
 
 .display-line {
