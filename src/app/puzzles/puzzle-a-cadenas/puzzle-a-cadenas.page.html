@@ -57,20 +57,13 @@
             <h2 id="selected-puzzle-title">{{ puzzleLabel(puzzles.indexOf(puzzle)) }}</h2>
             <p class="puzzle-title">{{ puzzle.title }}</p>
           </div>
-          @if (isSolved(puzzle.id)) {
-            <span class="solved-label">Ouvert</span>
-          }
+          <div class="puzzle-heading-meta">
+            <span class="puzzle-difficulty">{{ puzzle.difficulty }}</span>
+            @if (isSolved(puzzle.id)) {
+              <span class="solved-label">Ouvert</span>
+            }
+          </div>
         </header>
-
-        @if (puzzleRule(puzzle); as rule) {
-          <aside class="puzzle-rule" aria-labelledby="puzzle-rule-title">
-            <div class="rule-heading">
-              <span class="rule-kicker" id="puzzle-rule-title">Explication</span>
-              <span class="puzzle-difficulty">{{ puzzle.difficulty }}</span>
-            </div>
-            <p>{{ rule }}</p>
-          </aside>
-        }
 
         <div class="puzzle-display" aria-label="Énoncé du puzzle">
           <p class="display-guide" role="note">

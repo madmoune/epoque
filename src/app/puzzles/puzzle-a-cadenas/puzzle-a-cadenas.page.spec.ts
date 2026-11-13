@@ -11,6 +11,15 @@ describe('Puzzle à Cadenas display', () => {
     }).compileComponents();
   });
 
+  it('does not render a resolution explanation by default', () => {
+    const fixture = TestBed.createComponent(PuzzleACadenasPage);
+    fixture.componentInstance['selectedPuzzleId'].set('dominos-numeriques');
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.puzzle-rule')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.puzzle-difficulty')).not.toBeNull();
+  });
+
   it('keeps a trailing movement arrow in the directions puzzle', () => {
     const page = TestBed.createComponent(PuzzleACadenasPage).componentInstance;
     const puzzle = PUZZLE_A_CADENAS.find((entry) => entry.id === 'directions-secretes')!;
