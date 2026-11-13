@@ -447,22 +447,30 @@
                   </div>
                 } @else if (block.kind === 'graph' && block.graph; as graph) {
                   <div class="graph-visual" role="img" aria-label="Réseau de sommets et d’arêtes">
-                    <div class="graph-row">
-                      <span class="graph-label">Sommets</span>
-                      <div class="graph-chips">
-                        @for (vertex of graph.vertices; track $index) {
-                          <span class="graph-chip vertex-chip">{{ vertex }}</span>
-                        }
-                      </div>
-                    </div>
-                    <div class="graph-row">
-                      <span class="graph-label">Arêtes</span>
-                      <div class="graph-chips">
-                        @for (edge of graph.edges; track $index) {
-                          <span class="graph-chip edge-chip">{{ edge }}</span>
-                        }
-                      </div>
-                    </div>
+                    <svg
+                      class="graph-canvas"
+                      viewBox="0 0 320 220"
+                      preserveAspectRatio="xMidYMid meet"
+                      aria-hidden="true"
+                    >
+                      @for (edge of graph.edges; track $index) {
+                        @let points = graphEdgePoints(graph.vertices, edge);
+                        <line
+                          class="graph-edge"
+                          [attr.x1]="points.x1"
+                          [attr.y1]="points.y1"
+                          [attr.x2]="points.x2"
+                          [attr.y2]="points.y2"
+                        />
+                      }
+                      @for (vertex of graph.vertices; track $index) {
+                        @let point = graphNodePosition(graph.vertices, vertex);
+                        <g class="graph-node">
+                          <circle [attr.cx]="point.x" [attr.cy]="point.y" r="21" />
+                          <text [attr.x]="point.x" [attr.y]="point.y">{{ vertex }}</text>
+                        </g>
+                      }
+                    </svg>
                   </div>
                 } @else if (block.kind === 'intervals' && block.intervals; as intervals) {
                   <div class="interval-visual" role="img" aria-label="Bandes d’intervalles">

@@ -105,6 +105,18 @@ type DiagramInterval = {
   end: number;
 };
 
+type GraphPoint = {
+  x: number;
+  y: number;
+};
+
+type GraphEdgePoints = {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+};
+
 @Component({
   selector: 'app-puzzle-a-cadenas-page',
   imports: [RouterLink],
@@ -371,6 +383,25 @@ export class PuzzleACadenasPage {
     const span = Math.max(maximum - minimum, 1);
 
     return Math.max(((end - start) / span) * 100, 4);
+  }
+
+  protected graphNodePosition(vertices: string[], vertex: string): GraphPoint {
+    const index = Math.max(vertices.indexOf(vertex), 0);
+    const count = Math.max(vertices.length, 1);
+    const angle = -Math.PI / 2 + (index * Math.PI * 2) / count;
+
+    return {
+      x: 160 + Math.cos(angle) * 105,
+      y: 110 + Math.sin(angle) * 75,
+    };
+  }
+
+  protected graphEdgePoints(vertices: string[], edge: string): GraphEdgePoints {
+    const [from, to] = edge.split(/\s*[–—-]\s*/);
+    const start = this.graphNodePosition(vertices, from ?? '');
+    const end = this.graphNodePosition(vertices, to ?? '');
+
+    return { x1: start.x, y1: start.y, x2: end.x, y2: end.y };
   }
 
   protected displayBlocks(puzzle: PuzzleACadenasEntry): DisplayBlock[] {

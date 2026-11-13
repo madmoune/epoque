@@ -188,6 +188,18 @@ describe('Puzzle à Cadenas display', () => {
     });
   });
 
+  it('renders graph puzzles as connected drawings', () => {
+    const fixture = TestBed.createComponent(PuzzleACadenasPage);
+    fixture.componentInstance['selectedPuzzleId'].set('nouveaux-49-boucles-independantes');
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelectorAll('.graph-canvas')).toHaveLength(16);
+    expect(fixture.nativeElement.querySelectorAll('.graph-node')).toHaveLength(80);
+    expect(fixture.nativeElement.querySelectorAll('.graph-edge').length).toBeGreaterThan(0);
+    expect(fixture.nativeElement.textContent).not.toContain('SOMMETS');
+    expect(fixture.nativeElement.textContent).not.toContain('ARÊTES');
+  });
+
   it('allows marking and clearing cells on a Hitori target grid', () => {
     const page = TestBed.createComponent(PuzzleACadenasPage).componentInstance;
     const puzzleId = 'nouveaux-71-suppression-interdite';

@@ -940,31 +940,42 @@ button.logic-grid-cell:active {
 
 .graph-visual {
   display: grid;
-  gap: 0.65rem;
+  place-items: center;
+  padding: 0.35rem;
 }
 
-.graph-row {
-  display: grid;
-  grid-template-columns: 4.8rem minmax(0, 1fr);
-  gap: 0.65rem;
-  align-items: start;
+.graph-canvas {
+  display: block;
+  width: 100%;
+  min-width: 16rem;
+  height: auto;
+  aspect-ratio: 320 / 220;
 }
 
-.graph-label {
-  padding-top: 0.35rem;
-  color: var(--quiet);
-  font-size: 0.78rem;
-  font-weight: 900;
-  text-transform: uppercase;
+.graph-edge {
+  stroke: color-mix(in srgb, var(--accent) 58%, var(--line));
+  stroke-width: 3;
+  stroke-linecap: round;
 }
 
-.graph-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
+.graph-node circle {
+  fill: var(--panel);
+  stroke: var(--accent);
+  stroke-width: 2.5;
 }
 
-.graph-chip,
+.graph-node text {
+  fill: var(--copy);
+  font:
+    900 1rem/1 'IBM Plex Mono',
+    'Cascadia Mono',
+    'Courier New',
+    monospace;
+  text-anchor: middle;
+  dominant-baseline: central;
+  user-select: none;
+}
+
 .sequence-stage {
   display: inline-flex;
   align-items: center;
@@ -979,16 +990,6 @@ button.logic-grid-cell:active {
     'Cascadia Mono',
     'Courier New',
     monospace;
-}
-
-.vertex-chip {
-  min-width: 2rem;
-  justify-content: center;
-  border-radius: 50%;
-}
-
-.edge-chip {
-  color: var(--accent);
 }
 
 .interval-visual {
