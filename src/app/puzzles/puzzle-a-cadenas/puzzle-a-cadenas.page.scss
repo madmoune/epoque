@@ -220,13 +220,9 @@ h1 {
 
 .puzzle-heading {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr);
   gap: 0.75rem;
   align-items: center;
-}
-
-.puzzle-heading-copy {
-  min-width: 0;
 }
 
 .puzzle-heading-meta {
@@ -235,19 +231,6 @@ h1 {
   gap: 0.45rem 0.65rem;
   align-items: center;
   justify-content: flex-end;
-}
-
-.puzzle-heading h2 {
-  margin: 0.2rem 0 0;
-  color: var(--copy);
-  font-size: 1.35rem;
-}
-
-.puzzle-title {
-  margin: 0.18rem 0 0;
-  color: var(--quiet);
-  font-size: 0.95rem;
-  font-weight: 800;
 }
 
 .solved-label {

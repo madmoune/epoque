@@ -48,15 +48,15 @@
       </aside>
 
       @let puzzle = selectedPuzzle();
-      <section id="selected-puzzle" class="puzzle-content" aria-labelledby="selected-puzzle-title">
+      <section
+        id="selected-puzzle"
+        class="puzzle-content"
+        [attr.aria-label]="'Puzzle ' + puzzleNumber(puzzles.indexOf(puzzle))"
+      >
         <header class="puzzle-heading">
           <span class="puzzle-number" aria-hidden="true">{{
             puzzleNumber(puzzles.indexOf(puzzle))
           }}</span>
-          <div class="puzzle-heading-copy">
-            <h2 id="selected-puzzle-title">{{ puzzleLabel(puzzles.indexOf(puzzle)) }}</h2>
-            <p class="puzzle-title">{{ puzzle.title }}</p>
-          </div>
           <div class="puzzle-heading-meta">
             <span class="puzzle-difficulty">{{ puzzle.difficulty }}</span>
             @if (isSolved(puzzle.id)) {

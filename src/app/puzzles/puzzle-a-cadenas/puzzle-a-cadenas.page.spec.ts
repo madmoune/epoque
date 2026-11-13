@@ -21,6 +21,19 @@ describe('Puzzle à Cadenas display', () => {
     expect(fixture.nativeElement.querySelector('.puzzle-difficulty')).not.toBeNull();
   });
 
+  it('does not render puzzle titles in the selected header', () => {
+    const fixture = TestBed.createComponent(PuzzleACadenasPage);
+    fixture.componentInstance['selectedPuzzleId'].set('dominos-numeriques');
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.puzzle-heading-copy')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.puzzle-title')).toBeNull();
+    expect(fixture.nativeElement.querySelector('#selected-puzzle-title')).toBeNull();
+    expect(fixture.nativeElement.querySelector('#selected-puzzle').getAttribute('aria-label')).toBe(
+      'Puzzle 06',
+    );
+  });
+
   it('keeps a trailing movement arrow in the directions puzzle', () => {
     const page = TestBed.createComponent(PuzzleACadenasPage).componentInstance;
     const puzzle = PUZZLE_A_CADENAS.find((entry) => entry.id === 'directions-secretes')!;
