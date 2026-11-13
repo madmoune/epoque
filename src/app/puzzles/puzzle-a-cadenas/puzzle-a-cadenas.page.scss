@@ -1483,6 +1483,11 @@ button.logic-grid-cell:active {
 
   .puzzle-nav {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-height: min(18rem, 42svh);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 0.2rem;
+    scrollbar-gutter: stable;
   }
 
   .puzzle-content {
@@ -1505,11 +1510,5 @@ button.logic-grid-cell:active {
 
   .answer-row input {
     flex: 1 1 7rem;
-  }
-}
-
-@media (max-width: 440px) {
-  .puzzle-nav {
-    grid-template-columns: 1fr;
   }
 }
