@@ -256,6 +256,19 @@ export class PuzzleACadenasPage {
     return block.solution?.includes(index) ?? false;
   }
 
+  protected isFleetExampleSingle(
+    block: Extract<DisplayBlock, { type: 'fleet' }>,
+    index: number,
+  ): boolean {
+    if (!block.solution?.includes(index)) {
+      return false;
+    }
+
+    return !block.solution.some(
+      (other) => other !== index && this.fleetCellsTouch(index, other),
+    );
+  }
+
   protected isFleetCellSelected(
     puzzleId: string,
     label: string | undefined,

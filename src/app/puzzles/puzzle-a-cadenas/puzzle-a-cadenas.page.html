@@ -234,6 +234,9 @@
                                 fleetCellIndex(rowIndex, columnIndex)
                               )
                             "
+                            [class.single]="
+                              isFleetExampleSingle(block, fleetCellIndex(rowIndex, columnIndex))
+                            "
                             aria-hidden="true"
                           ></span>
                         }
@@ -247,8 +250,9 @@
                     </p>
                   } @else {
                     <p class="fleet-caption">
-                      Exemple : les cases colorées montrent un placement possible. L = lignes · C =
-                      colonnes.
+                      Exemple : les deux cases colorées qui se touchent forment le bateau de 2 cases.
+                      La case isolée est le bateau seul : le nombre après la flèche est son numéro de
+                      colonne (ici {{ block.result }}). L = lignes · C = colonnes.
                     </p>
                   }
                 </div>

@@ -60,6 +60,8 @@ describe('Puzzle à Cadenas display', () => {
       interactive: false,
       solution: [1, 5, 14],
     });
+    expect(page['isFleetExampleSingle'](fleetBlocks[0], 1)).toBe(false);
+    expect(page['isFleetExampleSingle'](fleetBlocks[0], 14)).toBe(true);
     expect(fleetBlocks.at(-1)).toMatchObject({
       type: 'fleet',
       label: 'D',

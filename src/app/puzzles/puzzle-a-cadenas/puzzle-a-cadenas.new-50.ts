@@ -2044,7 +2044,7 @@ export const PUZZLE_A_CADENAS_NEW_50: readonly PuzzleACadenasEntry[] = [
     'nouveaux-75-flotte-silencieuse',
     'Bataille navale silencieuse',
     'Difficile',
-    'Bataille navale sur une grille 4 × 4 : place un bateau de 2 cases et un bateau seul de 1 case. Les nombres L à gauche donnent le total de chaque ligne et les nombres C en haut celui de chaque colonne. Les bateaux ne se touchent pas, même en diagonale. Le chiffre de chaque ligne est la colonne du bateau seul.',
+    'Bataille navale sur une grille 4 × 4 : place un bateau de 2 cases et un bateau seul de 1 case. Les nombres L à gauche donnent le total de chaque ligne et les nombres C en haut celui de chaque colonne. Les bateaux ne se touchent pas, même en diagonale. Pour chaque grille, le chiffre à extraire est le numéro de la colonne où se trouve le bateau seul.',
     [
       example(
         '3113',
