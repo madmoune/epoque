@@ -1,4 +1,7 @@
 :host {
+  display: block;
+  max-width: 100%;
+  overflow-x: clip;
   --panel: var(--surface-soft, #f2f5f3);
   --raised: var(--surface-raised, #fff);
   --line: var(--border, #d5dcda);
@@ -6,10 +9,16 @@
   --quiet: var(--muted, #5f6d68);
 }
 
+.page,
+.page * {
+  box-sizing: border-box;
+}
+
 .page {
   max-width: 1180px;
   margin: 0 auto;
   padding: 2rem;
+  overflow-x: clip;
 }
 
 .back-link {
@@ -1469,6 +1478,17 @@ button.logic-grid-cell:active {
     padding: 0.75rem;
   }
 
+  .card,
+  .collection-layout,
+  .sidebar,
+  .puzzle-content,
+  .puzzle-display,
+  .display-block,
+  .diagram-block {
+    min-width: 0;
+    max-width: 100%;
+  }
+
   .card {
     padding: 1rem;
   }
@@ -1488,6 +1508,60 @@ button.logic-grid-cell:active {
     overscroll-behavior: contain;
     padding-right: 0.2rem;
     scrollbar-gutter: stable;
+  }
+
+  .display-line,
+  .table-scroll,
+  .nonogram-board,
+  .hitori-visual,
+  .diagram-grid-visual,
+  .path-visual,
+  .graph-visual,
+  .interval-visual,
+  .sequence-visual,
+  .diagram-lines {
+    overflow-x: clip;
+  }
+
+  .display-line,
+  .diagram-line {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    white-space: pre-wrap;
+  }
+
+  .logic-table {
+    min-width: 0;
+    table-layout: fixed;
+    font-size: 0.78rem;
+  }
+
+  .logic-table th,
+  .logic-table td {
+    padding: 0.4rem 0.25rem;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .path-row {
+    min-width: 0;
+    flex-wrap: wrap;
+  }
+
+  .path-edge {
+    min-width: 1.75rem;
+  }
+
+  .graph-canvas {
+    min-width: 0;
+  }
+
+  .number-grid-visual,
+  .cube-net-visual,
+  .shape-grid,
+  .grid-visual {
+    max-width: 100%;
+    overflow-x: clip;
   }
 
   .puzzle-content {
