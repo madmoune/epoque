@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { canSnapPiece } from './memory-pieces.generator';
+import { canSnapPiece, createMemoryPiecesPuzzle } from './memory-pieces.generator';
 import { MEMORY_SNAP_DISTANCE, MemoryPuzzlePiece } from './memory-pieces.model';
 import { MemoryPiecesPage } from './memory-pieces.page';
 
@@ -57,7 +57,7 @@ describe('MemoryPiecesPage', () => {
     expect(page['isSolved']()).toBe(false);
   });
 
-  it('lets pieces move freely and succeeds only when all five reach their targets', () => {
+  it('lets pieces move freely and recognizes an exact assembly', () => {
     const { fixture, page, root } = createPage();
     enterAssembly(page);
     fixture.detectChanges();
@@ -90,6 +90,38 @@ describe('MemoryPiecesPage', () => {
     expect(root.querySelector('app-puzzle-success-popup')?.textContent).toContain(
       'Casse-tête complété!',
     );
+  });
+
+  it('accepts a shifted star with small gaps once all five pieces line up', () => {
+    const { fixture, page, root } = createPage();
+    const puzzle = createMemoryPiecesPuzzle(() => 0.83);
+    page['puzzle'].set(puzzle);
+    enterAssembly(page);
+
+    const [lastPiece, ...otherPieces] = puzzle.pieces;
+    for (const [index, piece] of otherPieces.entries()) {
+      const center = centerOf(piece);
+      page['selectPiece'](piece.id);
+      page['attemptPlacement']({ x: center.x + 14, y: center.y + 4 + (index % 2) });
+    }
+    expect(page['isSolved']()).toBe(false);
+
+    const lastCenter = centerOf(lastPiece);
+    page['selectPiece'](lastPiece.id);
+    page['attemptPlacement'](lastCenter);
+    expect(page['placedIds']().size).toBe(5);
+    expect(page['isSolved']()).toBe(false);
+
+    const alignedCenter = { x: lastCenter.x + 9, y: lastCenter.y + 2 };
+    expect(canSnapPiece(lastPiece, alignedCenter)).toBe(true);
+    page['selectPlacedPiece'](lastPiece.id);
+    page['previewCenter'].set(alignedCenter);
+    expect(page['isSolved']()).toBe(false);
+    page['handleBoardKey'](new KeyboardEvent('keydown', { key: 'Enter' }));
+    fixture.detectChanges();
+    expect(page['isSolved']()).toBe(true);
+    expect(page['placedCenters']()[lastPiece.id]).toEqual(alignedCenter);
+    expect(root.querySelector('app-puzzle-success-popup')).not.toBeNull();
   });
 
   it('magnetizes a nearby drop and recognizes it without locking the piece', () => {

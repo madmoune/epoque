@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { canSnapPiece, createMemoryPiecesPuzzle } from './memory-pieces.generator';
-import { MEMORY_SNAP_DISTANCE, MemoryPiecesPuzzle, PiecePoint } from './memory-pieces.model';
+import {
+  MEMORY_SNAP_DISTANCE,
+  MemoryPieceShape,
+  MemoryPiecesPuzzle,
+  PiecePoint,
+} from './memory-pieces.model';
 
 describe('memory pieces generation', () => {
   const samples = Array.from({ length: 120 }, (_, index) =>
@@ -17,11 +22,21 @@ describe('memory pieces generation', () => {
       for (const piece of puzzle.studyPieces) {
         expect(puzzle.choices.find((choice) => choice.id === piece.id)?.path).toBe(piece.path);
       }
-      for (const piece of puzzle.pieces) {
-        const decoy = puzzle.choices.find(
-          (choice) => choice.id === piece.id.replace('piece-', 'decoy-'),
-        )!;
-        expect(decoy.width / decoy.height).not.toBeCloseTo(piece.width / piece.height, 3);
+    }
+  });
+
+  it('keeps decoy silhouettes distinct even at the same width and height', () => {
+    for (const puzzle of samples) {
+      const choices = puzzle.choices.map((piece) => ({ id: piece.id, mask: sampleContour(piece) }));
+      for (const [index, first] of choices.entries()) {
+        for (const second of choices.slice(index + 1)) {
+          if (first.id.startsWith('piece-') && second.id.startsWith('piece-')) continue;
+          const union = first.mask.filter((inside, cell) => inside || second.mask[cell]).length;
+          const difference = first.mask.filter(
+            (inside, cell) => inside !== second.mask[cell],
+          ).length;
+          expect(difference / union, `${first.id} vs ${second.id}`).toBeGreaterThanOrEqual(0.15);
+        }
       }
     }
   });
@@ -196,6 +211,16 @@ function polygonArea(points: PiecePoint[]): number {
         return area + point.x * next.y - next.x * point.y;
       }, 0),
     ) / 2
+  );
+}
+
+function sampleContour(piece: MemoryPieceShape): boolean[] {
+  const resolution = 32;
+  return Array.from({ length: resolution ** 2 }, (_, index) =>
+    containsPoint(piece.points, {
+      x: (((index % resolution) + 0.5) * piece.width) / resolution,
+      y: ((Math.floor(index / resolution) + 0.5) * piece.height) / resolution,
+    }),
   );
 }
 

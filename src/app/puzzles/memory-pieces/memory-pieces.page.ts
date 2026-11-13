@@ -18,6 +18,9 @@ type PieceDrag = {
   active: boolean;
 };
 
+// Limit how far two pieces can drift apart from their intended alignment.
+const ASSEMBLY_TOLERANCE = MEMORY_BOARD_SIZE * 0.06;
+
 @Component({
   selector: 'app-memory-pieces-page',
   imports: [RouterLink, PuzzleSuccessPopupComponent],
@@ -55,14 +58,7 @@ export class MemoryPiecesPage {
     this.steps.findIndex((step) => step.phase === this.phase()),
   );
   protected readonly isSolved = computed(
-    () =>
-      this.phase() === 'assemble' &&
-      this.placedIds().size === MEMORY_PIECE_COUNT &&
-      this.snappedIds().size === MEMORY_PIECE_COUNT &&
-      this.puzzle().pieces.every((piece) => {
-        const center = this.placedCenters()[piece.id];
-        return center ? canSnapPiece(piece, center) : false;
-      }),
+    () => this.phase() === 'assemble' && this.isAssemblyAligned(this.placedCenters()),
   );
   protected readonly assemblyPieces = computed(() =>
     this.puzzle().choices.flatMap((choice) => {
@@ -302,15 +298,16 @@ export class MemoryPiecesPage {
   protected attemptPlacement(center: PiecePoint): void {
     const piece = this.selectedPiece();
     if (this.phase() !== 'assemble' || !piece || this.isSolved()) return;
-    const targetCenter = this.targetCenter(piece);
-    const isNearTarget = canSnapPiece(piece, center);
-    const finalCenter = isNearTarget ? targetCenter : center;
     const wasPlaced = this.placedIds().has(piece.id);
+    const centers = { ...this.placedCenters(), [piece.id]: center };
+    const shouldSnap = canSnapPiece(piece, center) && !this.isAssemblyAligned(centers);
+    if (shouldSnap) centers[piece.id] = this.targetCenter(piece);
+
+    this.placedCenters.set(centers);
     this.placedIds.update((ids) => new Set([...ids, piece.id]));
-    this.placedCenters.update((centers) => ({ ...centers, [piece.id]: finalCenter }));
     this.snappedIds.update((ids) => {
       const next = new Set(ids);
-      if (isNearTarget) next.add(piece.id);
+      if (shouldSnap) next.add(piece.id);
       else next.delete(piece.id);
       return next;
     });
@@ -320,7 +317,7 @@ export class MemoryPiecesPage {
       return;
     }
     this.setFeedback(
-      isNearTarget
+      shouldSnap
         ? `Morceau reconnu! Il s’est aimanté à sa place. ${this.snappedIds().size} sur ${MEMORY_PIECE_COUNT}.`
         : `${wasPlaced ? 'Morceau déplacé.' : 'Morceau placé.'} ${this.snappedIds().size} sur ${MEMORY_PIECE_COUNT} reconnus.`,
     );
@@ -388,6 +385,26 @@ export class MemoryPiecesPage {
     this.pointerOverBoard.set(false);
     this.suppressTrayClick = false;
     this.setFeedback('');
+  }
+
+  private isAssemblyAligned(centers: Record<string, PiecePoint>): boolean {
+    // A translation of the whole puzzle adds the same offset to every piece.
+    const offsets: PiecePoint[] = [];
+    for (const piece of this.puzzle().pieces) {
+      const center = centers[piece.id];
+      if (!center || !Number.isFinite(center.x) || !Number.isFinite(center.y)) return false;
+      const target = this.targetCenter(piece);
+      const offset = { x: center.x - target.x, y: center.y - target.y };
+      if (
+        offsets.some(
+          (other) => Math.hypot(offset.x - other.x, offset.y - other.y) > ASSEMBLY_TOLERANCE,
+        )
+      ) {
+        return false;
+      }
+      offsets.push(offset);
+    }
+    return true;
   }
 
   private boardPoint(point: PiecePoint): PiecePoint | null {

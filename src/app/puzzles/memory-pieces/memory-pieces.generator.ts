@@ -28,6 +28,9 @@ const SILHOUETTES: readonly MemorySilhouette[] = [
   'rounded',
 ];
 const LAYOUTS: readonly MemoryPieceLayout[] = ['fan', 'center', 'staggered', 'bands', 'scattered'];
+const CONTOUR_RESOLUTION = 24;
+// Minimum fraction of the combined filled area where the contours disagree.
+const MIN_CONTOUR_DIFFERENCE = 0.18;
 
 export function createMemoryPiecesPuzzle(
   random: RandomSource = Math.random,
@@ -37,7 +40,7 @@ export function createMemoryPiecesPuzzle(
   const layout = chooseDifferent(LAYOUTS, previous?.layout, random);
   const partition = createPartition(silhouette, layout, random);
   const pieces = partition.cells.map((points, index) => createPiece(points, `piece-${index}`));
-  const decoys = pieces.map((piece, index) => createDecoy(piece, index, random));
+  const decoys = createDecoys(pieces, silhouette, layout, random);
 
   return {
     silhouette,
@@ -392,20 +395,70 @@ function createPiece(points: PiecePoint[], id: string): MemoryPuzzlePiece {
   };
 }
 
-function createDecoy(
-  piece: MemoryPuzzlePiece,
-  index: number,
+function createDecoys(
+  pieces: MemoryPuzzlePiece[],
+  silhouette: MemorySilhouette,
+  layout: MemoryPieceLayout,
   random: RandomSource,
-): MemoryPieceShape {
-  // Alter the proportions, rather than the color or orientation: a decoy is
-  // a different silhouette but remains visually plausible beside the originals.
-  const stretch = between(0.62, 0.78, random);
-  const points = piece.points.map((point) => ({
-    x: point.x * (index % 2 === 0 ? stretch : 1),
-    y: point.y * (index % 2 === 0 ? 1 : stretch),
-  }));
-  const { target: _target, ...shape } = createPiece(points, `decoy-${index}`);
-  return shape;
+): MemoryPieceShape[] {
+  const contours = pieces.map(sampleContour);
+  const decoys: MemoryPieceShape[] = [];
+  const layouts = LAYOUTS.filter((candidate) => candidate !== layout);
+  const alternatives = SILHOUETTES.filter((candidate) => candidate !== silhouette).flatMap(
+    (silhouette) => layouts.map((layout) => ({ silhouette, layout })),
+  );
+
+  for (const alternative of shuffle(alternatives, random)) {
+    const { cells } = createPartition(alternative.silhouette, alternative.layout, random);
+    for (const points of cells) {
+      const { target: _target, ...shape } = createPiece(points, `decoy-${decoys.length}`);
+      const contour = sampleContour(shape);
+      if (contours.some((other) => contourDifference(contour, other) < MIN_CONTOUR_DIFFERENCE)) {
+        continue;
+      }
+      contours.push(contour);
+      decoys.push(shape);
+      if (decoys.length === pieces.length) return decoys;
+    }
+  }
+
+  throw new Error('Could not generate enough distinct memory pieces.');
+}
+
+function sampleContour({ points, width, height }: MemoryPieceShape): Uint8Array {
+  // Use the same bounding box for every shape so that resizing either axis
+  // leaves the sampled contour unchanged.
+  const mask = new Uint8Array(CONTOUR_RESOLUTION ** 2);
+  const columnWidth = width / CONTOUR_RESOLUTION;
+  for (let row = 0; row < CONTOUR_RESOLUTION; row++) {
+    const y = ((row + 0.5) * height) / CONTOUR_RESOLUTION;
+    const crossings: number[] = [];
+    let start = points[points.length - 1];
+    for (const end of points) {
+      if (start.y > y !== end.y > y) {
+        crossings.push(start.x + ((y - start.y) * (end.x - start.x)) / (end.y - start.y));
+      }
+      start = end;
+    }
+    crossings.sort((first, second) => first - second);
+    const rowOffset = row * CONTOUR_RESOLUTION;
+    for (let index = 0; index < crossings.length; index += 2) {
+      const firstColumn = Math.ceil(crossings[index] / columnWidth - 0.5);
+      const endColumn = Math.ceil(crossings[index + 1] / columnWidth - 0.5);
+      mask.fill(1, rowOffset + firstColumn, rowOffset + endColumn);
+    }
+  }
+  return mask;
+}
+
+function contourDifference(first: Uint8Array, second: Uint8Array): number {
+  let union = 0;
+  let difference = 0;
+  for (let index = 0; index < first.length; index++) {
+    if (first[index] || second[index]) union++;
+    if (first[index] !== second[index]) difference++;
+  }
+  return difference / union;
 }
 
 function pointKey(point: PiecePoint): string {
