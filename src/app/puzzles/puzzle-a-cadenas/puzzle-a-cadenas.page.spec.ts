@@ -19,6 +19,9 @@ describe('Puzzle à Cadenas display', () => {
     expect(fixture.nativeElement.querySelector('.puzzle-rule')).toBeNull();
     expect(fixture.nativeElement.querySelector('.display-guide')).toBeNull();
     expect(fixture.nativeElement.querySelector('.puzzle-difficulty')).not.toBeNull();
+    expect(fixture.nativeElement.textContent).not.toContain(
+      'La validation se lance automatiquement au quatrième chiffre.',
+    );
   });
 
   it('does not render puzzle titles in the selected header', () => {
