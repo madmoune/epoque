@@ -55,11 +55,20 @@
           }}</span>
           <div class="puzzle-heading-copy">
             <h2 id="selected-puzzle-title">{{ puzzleLabel(puzzles.indexOf(puzzle)) }}</h2>
+            <p class="puzzle-title">{{ puzzle.title }}</p>
           </div>
           @if (isSolved(puzzle.id)) {
             <span class="solved-label">Ouvert</span>
           }
         </header>
+
+        <aside class="puzzle-rule" aria-labelledby="puzzle-rule-title">
+          <div class="rule-heading">
+            <span class="rule-kicker" id="puzzle-rule-title">Fonctionnement</span>
+            <span class="puzzle-difficulty">{{ puzzle.difficulty }}</span>
+          </div>
+          <p>{{ puzzleRule(puzzle) }}</p>
+        </aside>
 
         <div class="puzzle-display" aria-label="Énoncé du puzzle">
           @for (block of displayBlocks(puzzle); track $index) {
@@ -158,7 +167,7 @@
                 }
                 <div
                   class="fleet-visual"
-                  role="img"
+                  [attr.role]="block.interactive ? 'grid' : 'img'"
                   [attr.aria-label]="'Grille de flotte ' + (block.label ? block.label : '')"
                 >
                   <div class="fleet-grid">
@@ -170,25 +179,94 @@
                         >{{ total }}</span
                       >
                     }
-                    @for (total of block.rowTotals; track $index) {
+                    @for (total of block.rowTotals; track $index; let rowIndex = $index) {
                       <span
                         class="fleet-total"
-                        [attr.aria-label]="'Somme de la ligne ' + ($index + 1)"
+                        [attr.aria-label]="'Somme de la ligne ' + (rowIndex + 1)"
                         >{{ total }}</span
                       >
-                      @for (cell of fleetCells; track cell) {
-                        <span class="fleet-cell" aria-hidden="true"></span>
+                      @for (cell of fleetCells; track cell; let columnIndex = $index) {
+                        @if (block.interactive) {
+                          <button
+                            type="button"
+                            class="fleet-cell"
+                            [class.selected]="
+                              isFleetCellSelected(
+                                puzzle.id,
+                                block.label,
+                                fleetCellIndex(rowIndex, columnIndex)
+                              )
+                            "
+                            [attr.aria-label]="
+                              'Ligne ' +
+                              (rowIndex + 1) +
+                              ', colonne ' +
+                              (columnIndex + 1) +
+                              (isFleetCellSelected(
+                                puzzle.id,
+                                block.label,
+                                fleetCellIndex(rowIndex, columnIndex)
+                              )
+                                ? ', case occupée'
+                                : ', case vide')
+                            "
+                            [attr.aria-pressed]="
+                              isFleetCellSelected(
+                                puzzle.id,
+                                block.label,
+                                fleetCellIndex(rowIndex, columnIndex)
+                              )
+                            "
+                            (click)="
+                              toggleFleetCell(
+                                puzzle.id,
+                                block.label,
+                                fleetCellIndex(rowIndex, columnIndex)
+                              )
+                            "
+                          ></button>
+                        } @else {
+                          <span
+                            class="fleet-cell"
+                            [class.occupied]="
+                              isFleetExampleCellOccupied(
+                                block,
+                                fleetCellIndex(rowIndex, columnIndex)
+                              )
+                            "
+                            aria-hidden="true"
+                          ></span>
+                        }
                       }
                     }
                   </div>
-                  <p class="fleet-caption">
-                    L = sommes des lignes à gauche · C = sommes des colonnes en haut
-                  </p>
+                  @if (block.interactive) {
+                    <p class="fleet-caption">
+                      Clique les cases pour marquer les bateaux. L = lignes à gauche · C = colonnes
+                      en haut.
+                    </p>
+                  } @else {
+                    <p class="fleet-caption">
+                      Exemple : les cases colorées montrent un placement possible. L = lignes · C =
+                      colonnes.
+                    </p>
+                  }
                 </div>
                 <div class="fleet-key">
                   <span class="fleet-key-cell" aria-hidden="true"></span>
-                  <span>Cases à remplir pour placer les bateaux</span>
+                  <span>{{
+                    block.interactive ? 'Case marquée comme occupée' : 'Case occupée par un bateau'
+                  }}</span>
                 </div>
+                @if (block.interactive && fleetSelectionCount(puzzle.id, block.label) > 0) {
+                  <button
+                    type="button"
+                    class="fleet-clear"
+                    (click)="clearFleetSelection(puzzle.id, block.label)"
+                  >
+                    Effacer les cases
+                  </button>
+                }
                 <span class="display-result fleet-result">→ {{ block.result }}</span>
               </article>
             } @else if (block.type === 'tokens') {
@@ -397,25 +475,6 @@
           </div>
           <p class="answer-hint">La validation se lance automatiquement au quatrième chiffre.</p>
         </div>
-
-        <div class="hint-actions">
-          <button
-            type="button"
-            class="secondary-button hint-button"
-            data-confirm-action="hint"
-            (click)="revealHint(puzzle.id)"
-            [disabled]="isSolved(puzzle.id) || isHintVisible(puzzle.id)"
-          >
-            {{ isHintVisible(puzzle.id) ? 'Indice affiché' : 'Indice' }}
-          </button>
-        </div>
-
-        @if (isHintVisible(puzzle.id)) {
-          <aside class="hint-card" aria-live="polite">
-            <p class="hint-label">Indice</p>
-            <p>{{ puzzle.instructions }}</p>
-          </aside>
-        }
 
         @if (feedbackFor(puzzle.id)) {
           <p class="feedback" [class.success]="isSolved(puzzle.id)" role="status">

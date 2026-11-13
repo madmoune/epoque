@@ -24,6 +24,8 @@ type DisplayBlock =
       rowTotals: string[];
       columnTotals: string[];
       result: string;
+      interactive: boolean;
+      solution?: number[];
     }
   | { type: 'tokens'; label?: string; tokens: string[]; result?: string }
   | { type: 'diagram'; label?: string; lines: string[]; result?: string }
@@ -80,7 +82,7 @@ export class PuzzleACadenasPage {
   private readonly storage = inject(AppStorageService);
   protected readonly attempts = signal<Record<string, string>>({});
   protected readonly solved = signal<Set<string>>(this.readSolved());
-  protected readonly visibleHints = signal<Set<string>>(new Set());
+  protected readonly fleetSelections = signal<Record<string, number[]>>({});
   protected readonly feedback = signal<Record<string, string>>({});
   protected readonly selectedPuzzleId = signal(this.readSelectedPuzzleId());
   protected readonly selectedPuzzle = computed(
@@ -184,24 +186,66 @@ export class PuzzleACadenasPage {
     return this.solved().has(id);
   }
 
-  protected revealHint(id: string): void {
-    if (!this.puzzles.some((puzzle) => puzzle.id === id) || this.isSolved(id)) {
-      return;
-    }
-
-    this.visibleHints.update((hints) => new Set([...hints, id]));
-  }
-
-  protected isHintVisible(id: string): boolean {
-    return this.visibleHints().has(id);
-  }
-
   protected attemptFor(id: string): string {
     return this.attempts()[id] ?? '';
   }
 
   protected feedbackFor(id: string): string {
     return this.feedback()[id] ?? '';
+  }
+
+  protected fleetCellIndex(rowIndex: number, columnIndex: number): number {
+    return rowIndex * 4 + columnIndex;
+  }
+
+  protected isFleetExampleCellOccupied(
+    block: Extract<DisplayBlock, { type: 'fleet' }>,
+    index: number,
+  ): boolean {
+    return block.solution?.includes(index) ?? false;
+  }
+
+  protected isFleetCellSelected(
+    puzzleId: string,
+    label: string | undefined,
+    index: number,
+  ): boolean {
+    return (
+      this.fleetSelections()[this.fleetSelectionKey(puzzleId, label)]?.includes(index) ?? false
+    );
+  }
+
+  protected fleetSelectionCount(puzzleId: string, label: string | undefined): number {
+    return this.fleetSelections()[this.fleetSelectionKey(puzzleId, label)]?.length ?? 0;
+  }
+
+  protected toggleFleetCell(puzzleId: string, label: string | undefined, index: number): void {
+    const key = this.fleetSelectionKey(puzzleId, label);
+
+    this.fleetSelections.update((selections) => {
+      const selected = new Set(selections[key] ?? []);
+
+      if (selected.has(index)) {
+        selected.delete(index);
+      } else {
+        selected.add(index);
+      }
+
+      return {
+        ...selections,
+        [key]: [...selected].sort((left, right) => left - right),
+      };
+    });
+  }
+
+  protected clearFleetSelection(puzzleId: string, label: string | undefined): void {
+    const key = this.fleetSelectionKey(puzzleId, label);
+
+    this.fleetSelections.update((selections) => {
+      const next = { ...selections };
+      delete next[key];
+      return next;
+    });
   }
 
   protected displayBlocks(puzzle: PuzzleACadenasEntry): DisplayBlock[] {
@@ -614,13 +658,98 @@ export class PuzzleACadenasPage {
       return null;
     }
 
+    const result = match[4];
+
     return {
       type: 'fleet',
       label: match[1],
       rowTotals: match[2].split(','),
       columnTotals: match[3].split(','),
-      result: match[4],
+      result,
+      interactive: result === '?',
+      solution:
+        result === '?'
+          ? undefined
+          : this.solveFleet(match[2].split(','), match[3].split(','), Number(result)),
     };
+  }
+
+  private solveFleet(
+    rowTotals: string[],
+    columnTotals: string[],
+    isolatedColumn: number,
+  ): number[] | undefined {
+    const expectedRows = rowTotals.map(Number);
+    const expectedColumns = columnTotals.map(Number);
+
+    for (let row = 0; row < 4; row += 1) {
+      for (let column = 0; column < 4; column += 1) {
+        const first = this.fleetCellIndex(row, column);
+        const neighbours = [
+          [row, column + 1],
+          [row + 1, column],
+        ] as const;
+
+        for (const [secondRow, secondColumn] of neighbours) {
+          if (secondRow >= 4 || secondColumn >= 4) {
+            continue;
+          }
+
+          const second = this.fleetCellIndex(secondRow, secondColumn);
+
+          for (let singleRow = 0; singleRow < 4; singleRow += 1) {
+            for (let singleColumn = 0; singleColumn < 4; singleColumn += 1) {
+              if (singleColumn + 1 !== isolatedColumn) {
+                continue;
+              }
+
+              const single = this.fleetCellIndex(singleRow, singleColumn);
+
+              if (
+                single === first ||
+                single === second ||
+                this.fleetCellsTouch(single, first) ||
+                this.fleetCellsTouch(single, second)
+              ) {
+                continue;
+              }
+
+              const actualRows = [0, 0, 0, 0];
+              const actualColumns = [0, 0, 0, 0];
+
+              for (const cell of [first, second, single]) {
+                const cellRow = Math.floor(cell / 4);
+                const cellColumn = cell % 4;
+                actualRows[cellRow] += 1;
+                actualColumns[cellColumn] += 1;
+              }
+
+              if (
+                actualRows.every((value, index) => value === expectedRows[index]) &&
+                actualColumns.every((value, index) => value === expectedColumns[index])
+              ) {
+                return [first, second, single].sort((left, right) => left - right);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return undefined;
+  }
+
+  private fleetCellsTouch(first: number, second: number): boolean {
+    const firstRow = Math.floor(first / 4);
+    const firstColumn = first % 4;
+    const secondRow = Math.floor(second / 4);
+    const secondColumn = second % 4;
+
+    return Math.abs(firstRow - secondRow) <= 1 && Math.abs(firstColumn - secondColumn) <= 1;
+  }
+
+  private fleetSelectionKey(puzzleId: string, label: string | undefined): string {
+    return `${puzzleId}:${label ?? ''}`;
   }
 
   private parseDiagram(
@@ -735,6 +864,20 @@ export class PuzzleACadenasPage {
 
   protected puzzleLabel(index: number): string {
     return `Puzzle ${index + 1}`;
+  }
+
+  protected puzzleRule(puzzle: PuzzleACadenasEntry): string {
+    const rule = puzzle.instructions
+      .replace(
+        /,\s*puis\s+lis(?:\s+le)?\s+(?:code[^.]*|A\s+à\s+D|les\s+quatre\s+cases\s+finales|la\s+chaise[^.]*|le\s+chiffre[^.]*|la\s+case[^.]*)\.?$/i,
+        '',
+      )
+      .replace(/,\s*puis\s+lis-le\s+directement\.?$/i, '')
+      .replace(/;\s*son\s+numéro\s+constitue\s+la\s+réponse\.?$/i, '')
+      .replace(/\s*Le\s+code\s+est\s+le\s+nombre\s+de\s+cases\s+noires\.?$/i, '')
+      .trim();
+
+    return /[.!?]$/.test(rule) ? rule : `${rule}.`;
   }
 
   private scrollToSelectedPuzzle(): void {

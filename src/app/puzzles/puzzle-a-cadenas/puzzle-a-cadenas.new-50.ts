@@ -2042,9 +2042,9 @@ export const PUZZLE_A_CADENAS_NEW_50: readonly PuzzleACadenasEntry[] = [
   ),
   makePuzzle(
     'nouveaux-75-flotte-silencieuse',
-    'La flotte silencieuse',
+    'Bataille navale silencieuse',
     'Difficile',
-    'Place un bateau de 2 cases et un bateau isolé de 1 case dans une grille 4 × 4, sans contact même diagonal. Les sommes L/C indiquent les cases occupées ; lis la colonne du bateau isolé.',
+    'Bataille navale sur une grille 4 × 4 : place un bateau de 2 cases et un bateau seul de 1 case. Les nombres L à gauche donnent le total de chaque ligne et les nombres C en haut celui de chaque colonne. Les bateaux ne se touchent pas, même en diagonale.',
     [
       example(
         '3113',

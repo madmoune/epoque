@@ -25,11 +25,18 @@ describe('Puzzle à Cadenas display', () => {
     });
   });
 
+  it('shows the puzzle rule without exposing the code-reading step', () => {
+    const page = TestBed.createComponent(PuzzleACadenasPage).componentInstance;
+    const puzzle = PUZZLE_A_CADENAS.find((entry) => entry.id === 'symboles-mysterieux')!;
+
+    expect(page['puzzleRule'](puzzle)).toBe(
+      'Chaque symbole représente toujours le même chiffre. Déduis la valeur de chaque symbole.',
+    );
+  });
+
   it('renders fleet row and column codes as a readable grid', () => {
     const page = TestBed.createComponent(PuzzleACadenasPage).componentInstance;
-    const puzzle = PUZZLE_A_CADENAS.find(
-      (entry) => entry.id === 'nouveaux-75-flotte-silencieuse',
-    )!;
+    const puzzle = PUZZLE_A_CADENAS.find((entry) => entry.id === 'nouveaux-75-flotte-silencieuse')!;
     const fleetBlocks = page['displayBlocks'](puzzle).filter((block) => block.type === 'fleet');
 
     expect(fleetBlocks).toHaveLength(16);
@@ -39,6 +46,8 @@ describe('Puzzle à Cadenas display', () => {
       rowTotals: ['1', '1', '0', '1'],
       columnTotals: ['0', '2', '1', '0'],
       result: '3',
+      interactive: false,
+      solution: [1, 5, 14],
     });
     expect(fleetBlocks.at(-1)).toMatchObject({
       type: 'fleet',
@@ -46,6 +55,21 @@ describe('Puzzle à Cadenas display', () => {
       rowTotals: ['2', '0', '0', '1'],
       columnTotals: ['1', '1', '0', '1'],
       result: '?',
+      interactive: true,
+      solution: undefined,
     });
+  });
+
+  it('allows marking and clearing cells on a fleet target grid', () => {
+    const page = TestBed.createComponent(PuzzleACadenasPage).componentInstance;
+
+    expect(page['isFleetCellSelected']('nouveaux-75-flotte-silencieuse', 'A', 0)).toBe(false);
+
+    page['toggleFleetCell']('nouveaux-75-flotte-silencieuse', 'A', 0);
+    expect(page['isFleetCellSelected']('nouveaux-75-flotte-silencieuse', 'A', 0)).toBe(true);
+    expect(page['fleetSelectionCount']('nouveaux-75-flotte-silencieuse', 'A')).toBe(1);
+
+    page['clearFleetSelection']('nouveaux-75-flotte-silencieuse', 'A');
+    expect(page['isFleetCellSelected']('nouveaux-75-flotte-silencieuse', 'A', 0)).toBe(false);
   });
 });
