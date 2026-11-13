@@ -3,12 +3,14 @@ import {
   PUZZLE_A_CADENAS,
   PUZZLE_A_CADENAS_GRID_EXAMPLE_RESULTS,
 } from './puzzle-a-cadenas.catalog';
+import { PUZZLE_A_CADENAS_NEW_50 } from './puzzle-a-cadenas.new-50';
 
 describe('Puzzle à Cadenas catalog', () => {
-  it('contains the original twelve puzzles plus puzzles 13 to 125', () => {
-    expect(PUZZLE_A_CADENAS).toHaveLength(125);
-    expect(PUZZLE_A_CADENAS.slice(12)).toHaveLength(113);
-    expect(new Set(PUZZLE_A_CADENAS.map((puzzle) => puzzle.id)).size).toBe(125);
+  it('contains the original puzzles plus the 50 new PDF puzzles', () => {
+    expect(PUZZLE_A_CADENAS).toHaveLength(175);
+    expect(PUZZLE_A_CADENAS.slice(12)).toHaveLength(163);
+    expect(PUZZLE_A_CADENAS_NEW_50).toHaveLength(50);
+    expect(new Set(PUZZLE_A_CADENAS.map((puzzle) => puzzle.id)).size).toBe(175);
   });
 
   it('keeps a four-digit answer for every puzzle, including leading zeroes', () => {

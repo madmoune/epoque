@@ -6,7 +6,7 @@ import {
 } from './mental-arithmetic-problem';
 
 describe('createQuickArithmeticProblem', () => {
-  it('varies operand lengths and adjustments while keeping all divisions exact', () => {
+  it('keeps quick divisions simple while varying multiplication lengths and adjustments', () => {
     let state = 0x42cafe;
     const random = (): number => {
       state = (Math.imul(state, 1_664_525) + 1_013_904_223) >>> 0;
@@ -40,11 +40,15 @@ describe('createQuickArithmeticProblem', () => {
       }
       adjustmentOperators.add(adjustmentOperator);
       const base = operator === '/' ? a / b : a * b;
+      if (operator === '/') {
+        expect(left).toHaveLength(2);
+        expect(right).toHaveLength(1);
+      }
       expect(answer).toBe(base + (adjustmentOperator === '-' ? -offset : offset));
     }
 
     expect(factorLengths).toEqual(new Set([1, 2, 3]));
-    expect(dividendLengths).toEqual(new Set([2, 3]));
+    expect(dividendLengths).toEqual(new Set([2]));
     expect(adjustmentOperators).toEqual(new Set(['', '+', '-']));
   });
 });

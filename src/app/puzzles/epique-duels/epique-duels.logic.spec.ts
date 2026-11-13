@@ -20,6 +20,8 @@ import {
   chooseWythoffMove,
   domineeringMoves,
   hexHasConnection,
+  isNimEmissionWinningPosition,
+  isNimLimitedWinningPosition,
   isolaMovableCells,
   isolaMoves,
   nimEmissionMoveIsWinning,
@@ -96,6 +98,17 @@ describe('Épreuves de duel Épique', () => {
         }
       }
     });
+
+    it.each([3, 4, 5] as const)('reconnaît une position de départ gagnante, maximum %i', (maxRemoval) => {
+      expect(isNimLimitedWinningPosition({ piles: [4, 7, 10], maxRemoval })).toBe(true);
+      const losingPileSize = maxRemoval + 1;
+      expect(
+        isNimLimitedWinningPosition({
+          piles: [losingPileSize, losingPileSize, losingPileSize],
+          maxRemoval,
+        }),
+      ).toBe(false);
+    });
   });
 
   it('gère la pile unique de Nim avec la règle dernier drapeau', () => {
@@ -113,6 +126,21 @@ describe('Épreuves de duel Épique', () => {
     expect(misereMove).toEqual({ removeCount: 1 });
     expect(nimEmissionMoveIsWinning(misere, misereMove!)).toBe(true);
     expect(nimEmissionMoveIsWinning(misere, { removeCount: 2 })).toBe(false);
+  });
+
+  it('identifie les positions gagnantes de Nim émission', () => {
+    expect(isNimEmissionWinningPosition({ flags: 20, maxRemoval: 5, lastFlagLoses: false })).toBe(
+      true,
+    );
+    expect(isNimEmissionWinningPosition({ flags: 24, maxRemoval: 5, lastFlagLoses: false })).toBe(
+      false,
+    );
+    expect(isNimEmissionWinningPosition({ flags: 20, maxRemoval: 5, lastFlagLoses: true })).toBe(
+      true,
+    );
+    expect(isNimEmissionWinningPosition({ flags: 19, maxRemoval: 5, lastFlagLoses: true })).toBe(
+      false,
+    );
   });
 
   it('déplace et retire une case dans Isolation', () => {

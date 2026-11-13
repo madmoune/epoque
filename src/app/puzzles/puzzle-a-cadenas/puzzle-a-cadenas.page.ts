@@ -578,13 +578,15 @@ export class PuzzleACadenasPage {
       return null;
     }
 
-    const tokens = match[2].trim().split(/\s+/).filter(Boolean);
+    const result = match[3].trim();
+    const tokenText = result ? match[2].trim() : `${match[2].trim()} →`;
+    const tokens = tokenText.split(/\s+/).filter(Boolean);
 
     return {
       type: 'tokens',
       label: match[1],
       tokens,
-      result: match[3].trim() || undefined,
+      result: result || undefined,
     };
   }
 

@@ -255,6 +255,7 @@ h1 {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.75rem;
   margin: 0;
+  min-width: 0;
   padding: 1rem;
   border: 1px solid var(--line);
   border-radius: 0.75rem;
@@ -286,8 +287,10 @@ h1 {
 }
 
 .display-line {
+  min-width: 0;
   padding: 0.7rem 0.8rem;
   overflow-x: auto;
+  overflow-wrap: anywhere;
   border: 1px solid color-mix(in srgb, var(--line) 75%, transparent);
   border-radius: 0.65rem;
   background: color-mix(in srgb, var(--raised) 78%, transparent);

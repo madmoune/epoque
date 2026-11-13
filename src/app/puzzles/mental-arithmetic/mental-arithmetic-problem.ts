@@ -10,10 +10,9 @@ export function createQuickArithmeticProblem(random: () => number = Math.random)
   let problem: ArithmeticProblem;
 
   if (roll < 2) {
-    const twoDigitDividend = roll === 0;
-    const divisor = twoDigitDividend ? randomInt(2, 24) : randomInt(10, 99);
-    const minDividend = twoDigitDividend ? 10 : 100;
-    const maxDividend = twoDigitDividend ? 99 : 999;
+    const divisor = randomInt(2, 9);
+    const minDividend = 10;
+    const maxDividend = 99;
     const quotient = randomInt(
       Math.max(2, Math.ceil(minDividend / divisor)),
       Math.floor(maxDividend / divisor),

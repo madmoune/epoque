@@ -30,6 +30,8 @@ import {
   domineeringMoves,
   hexAdjacentCells,
   hexHasConnection,
+  isNimEmissionWinningPosition,
+  isNimLimitedWinningPosition,
   isolaMovableCells,
   isolaMoves,
   nimEmissionMoves,
@@ -492,15 +494,8 @@ export class EpiqueDuelsPage implements OnDestroy {
     this.sim.set(createSimEdges());
     this.hex.set(createHexCells());
     this.wythoff.set([...WYTHOFF_PRESETS[(this.round - 1) % WYTHOFF_PRESETS.length]]);
-    this.nimLimited.set({
-      piles: Array.from({ length: this.randomInt(3, 5) }, () => this.randomInt(4, 12)),
-      maxRemoval: [3, 4, 5][this.randomInt(0, 2)] as NimLimitedState['maxRemoval'],
-    });
-    this.nimEmission.set({
-      flags: this.randomInt(18, 25),
-      maxRemoval: [3, 4, 5][this.randomInt(0, 2)] as NimEmissionState['maxRemoval'],
-      lastFlagLoses: this.randomInt(0, 1) === 1,
-    });
+    this.nimLimited.set(this.createNimLimitedStart());
+    this.nimEmission.set(this.createNimEmissionStart());
   }
 
   private isCpuTurn(): boolean {
@@ -694,6 +689,32 @@ export class EpiqueDuelsPage implements OnDestroy {
 
   private dominoOccupied(): boolean[] {
     return this.domineering().owners.map((owner) => owner !== 0);
+  }
+
+  private createNimLimitedStart(): NimLimitedState {
+    const state: NimLimitedState = {
+      piles: Array.from({ length: this.randomInt(3, 5) }, () => this.randomInt(4, 12)),
+      maxRemoval: [3, 4, 5][this.randomInt(0, 2)] as NimLimitedState['maxRemoval'],
+    };
+
+    if (isNimLimitedWinningPosition(state)) return state;
+
+    const adjustedPiles = [...state.piles];
+    adjustedPiles[0] += adjustedPiles[0] > 4 ? -1 : 1;
+    return { ...state, piles: adjustedPiles };
+  }
+
+  private createNimEmissionStart(): NimEmissionState {
+    const state: NimEmissionState = {
+      flags: this.randomInt(18, 25),
+      maxRemoval: [3, 4, 5][this.randomInt(0, 2)] as NimEmissionState['maxRemoval'],
+      lastFlagLoses: this.randomInt(0, 1) === 1,
+    };
+
+    if (isNimEmissionWinningPosition(state)) return state;
+
+    const adjustedFlags = state.flags > 18 ? state.flags - 1 : state.flags + 1;
+    return { ...state, flags: adjustedFlags };
   }
 
   private randomInt(min: number, max: number): number {

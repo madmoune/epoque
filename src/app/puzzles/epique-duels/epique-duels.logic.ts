@@ -150,6 +150,14 @@ export function applyNimLimitedMove(
   };
 }
 
+export function isNimLimitedWinningPosition(state: NimLimitedState): boolean {
+  if (state.piles.every((pile) => pile === 0)) return false;
+
+  return (
+    state.piles.reduce((sum, pile) => sum ^ (pile % (state.maxRemoval + 1)), 0) !== 0
+  );
+}
+
 export function chooseNimLimitedMove(
   state: NimLimitedState,
   random: () => number = Math.random,
@@ -160,7 +168,7 @@ export function chooseNimLimitedMove(
   // Avec un retrait borné, chaque pile vaut son reste modulo (maximum + 1).
   const winningMoves = moves.filter((move) => {
     const next = applyNimLimitedMove(state, move);
-    return next.piles.reduce((sum, pile) => sum ^ (pile % (state.maxRemoval + 1)), 0) === 0;
+    return !isNimLimitedWinningPosition(next);
   });
   return chooseCpuMove(moves, winningMoves, random);
 }
@@ -204,6 +212,10 @@ export function nimEmissionMoveIsWinning(state: NimEmissionState, move: NimEmiss
 
   const targetRemainder = state.lastFlagLoses ? 1 : 0;
   return remaining % (state.maxRemoval + 1) === targetRemainder;
+}
+
+export function isNimEmissionWinningPosition(state: NimEmissionState): boolean {
+  return nimEmissionMoves(state).some((move) => nimEmissionMoveIsWinning(state, move));
 }
 
 export function chooseNimEmissionMove(

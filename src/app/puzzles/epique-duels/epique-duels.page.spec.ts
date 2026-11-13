@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { EpiqueDuelsPage } from './epique-duels.page';
+import { isNimLimitedWinningPosition } from './epique-duels.logic';
 
 describe('Nim à retrait limité dans Duels', () => {
   beforeEach(async () => {
@@ -106,9 +107,11 @@ describe('Nim à retrait limité dans Duels', () => {
     vi.spyOn(Math, 'random').mockReturnValue(0.999);
 
     page['newGame']();
-    expect(page['nimLimited']()).toEqual({ piles: [12, 12, 12, 12, 12], maxRemoval: 5 });
+    expect(isNimLimitedWinningPosition(page['nimLimited']())).toBe(true);
+    expect(page['nimLimited']()).toEqual({ piles: [11, 12, 12, 12, 12], maxRemoval: 5 });
     vi.advanceTimersByTime(520);
-    expect(page['nimLimited']().piles).toEqual([12, 12, 12, 12, 12]);
+    expect(isNimLimitedWinningPosition(page['nimLimited']())).toBe(true);
+    expect(page['nimLimited']().piles).toEqual([11, 12, 12, 12, 12]);
     expect(page['turn']()).toBe(1);
     expect(page['winner']()).toBeNull();
     expect(page['cpuThinking']()).toBe(false);

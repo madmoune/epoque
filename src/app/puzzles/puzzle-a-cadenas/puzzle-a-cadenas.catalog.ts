@@ -1,5 +1,6 @@
 import { PUZZLE_A_CADENAS_REVISED } from './puzzle-a-cadenas.revised';
 import { PUZZLE_A_CADENAS_CODES } from './puzzle-a-cadenas.codes';
+import { PUZZLE_A_CADENAS_NEW_50 } from './puzzle-a-cadenas.new-50';
 
 export type PuzzleACadenasEntry = {
   id: string;
@@ -1553,4 +1554,5 @@ export const PUZZLE_A_CADENAS: readonly PuzzleACadenasEntry[] = [
   ...PUZZLE_A_CADENAS_39_56,
   ...PUZZLE_A_CADENAS_REVISED,
   ...PUZZLE_A_CADENAS_CODES,
+  ...PUZZLE_A_CADENAS_NEW_50,
 ] as const satisfies readonly PuzzleACadenasEntry[];
