@@ -18,6 +18,13 @@ type DisplayBlock =
   | { type: 'number-grids'; grids: NumberGrid[] }
   | { type: 'symbol-grids'; grids: SymbolGrid[] }
   | { type: 'table'; headers: string[]; rows: string[][] }
+  | {
+      type: 'fleet';
+      label?: string;
+      rowTotals: string[];
+      columnTotals: string[];
+      result: string;
+    }
   | { type: 'tokens'; label?: string; tokens: string[]; result?: string }
   | { type: 'diagram'; label?: string; lines: string[]; result?: string }
   | {
@@ -67,6 +74,7 @@ type SymbolGrid = {
 })
 export class PuzzleACadenasPage {
   protected readonly puzzles = PUZZLE_A_CADENAS;
+  protected readonly fleetCells = [0, 1, 2, 3] as const;
 
   private readonly playHistory = inject(PuzzlePlayHistoryService);
   private readonly storage = inject(AppStorageService);
@@ -287,6 +295,13 @@ export class PuzzleACadenasPage {
 
       if (domino) {
         blocks.push(domino);
+        continue;
+      }
+
+      const fleet = this.parseFleetLine(text);
+
+      if (fleet) {
+        blocks.push(fleet);
         continue;
       }
 
@@ -587,6 +602,24 @@ export class PuzzleACadenasPage {
       label: match[1],
       tokens,
       result: result || undefined,
+    };
+  }
+
+  private parseFleetLine(text: string): Extract<DisplayBlock, { type: 'fleet' }> | null {
+    const match = text.match(
+      /^(?:(Exemple \d+|[ABCD])\s+)?L:([0-9]+(?:,[0-9]+){3})\s+C:([0-9]+(?:,[0-9]+){3})\s+→\s*([?\d])$/,
+    );
+
+    if (!match) {
+      return null;
+    }
+
+    return {
+      type: 'fleet',
+      label: match[1],
+      rowTotals: match[2].split(','),
+      columnTotals: match[3].split(','),
+      result: match[4],
     };
   }
 

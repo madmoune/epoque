@@ -24,4 +24,28 @@ describe('Puzzle à Cadenas display', () => {
       tokens: ['5', ':', '↑', 'puis', '→'],
     });
   });
+
+  it('renders fleet row and column codes as a readable grid', () => {
+    const page = TestBed.createComponent(PuzzleACadenasPage).componentInstance;
+    const puzzle = PUZZLE_A_CADENAS.find(
+      (entry) => entry.id === 'nouveaux-75-flotte-silencieuse',
+    )!;
+    const fleetBlocks = page['displayBlocks'](puzzle).filter((block) => block.type === 'fleet');
+
+    expect(fleetBlocks).toHaveLength(16);
+    expect(fleetBlocks[0]).toMatchObject({
+      type: 'fleet',
+      label: 'A',
+      rowTotals: ['1', '1', '0', '1'],
+      columnTotals: ['0', '2', '1', '0'],
+      result: '3',
+    });
+    expect(fleetBlocks.at(-1)).toMatchObject({
+      type: 'fleet',
+      label: 'D',
+      rowTotals: ['2', '0', '0', '1'],
+      columnTotals: ['1', '1', '0', '1'],
+      result: '?',
+    });
+  });
 });

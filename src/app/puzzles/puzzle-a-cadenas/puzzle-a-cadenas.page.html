@@ -151,6 +151,46 @@
                   </table>
                 </div>
               </article>
+            } @else if (block.type === 'fleet') {
+              <article class="display-block fleet-block">
+                @if (block.label) {
+                  <span class="block-label">{{ block.label }}</span>
+                }
+                <div
+                  class="fleet-visual"
+                  role="img"
+                  [attr.aria-label]="'Grille de flotte ' + (block.label ? block.label : '')"
+                >
+                  <div class="fleet-grid">
+                    <span class="fleet-corner" aria-hidden="true">L/C</span>
+                    @for (total of block.columnTotals; track $index) {
+                      <span
+                        class="fleet-total"
+                        [attr.aria-label]="'Somme de la colonne ' + ($index + 1)"
+                        >{{ total }}</span
+                      >
+                    }
+                    @for (total of block.rowTotals; track $index) {
+                      <span
+                        class="fleet-total"
+                        [attr.aria-label]="'Somme de la ligne ' + ($index + 1)"
+                        >{{ total }}</span
+                      >
+                      @for (cell of fleetCells; track cell) {
+                        <span class="fleet-cell" aria-hidden="true"></span>
+                      }
+                    }
+                  </div>
+                  <p class="fleet-caption">
+                    L = sommes des lignes à gauche · C = sommes des colonnes en haut
+                  </p>
+                </div>
+                <div class="fleet-key">
+                  <span class="fleet-key-cell" aria-hidden="true"></span>
+                  <span>Cases à remplir pour placer les bateaux</span>
+                </div>
+                <span class="display-result fleet-result">→ {{ block.result }}</span>
+              </article>
             } @else if (block.type === 'tokens') {
               <article class="display-block token-block">
                 @if (block.label) {
