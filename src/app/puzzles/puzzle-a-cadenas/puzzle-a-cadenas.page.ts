@@ -1196,23 +1196,29 @@ export class PuzzleACadenasPage {
     return `Puzzle ${index + 1}`;
   }
 
-  protected puzzleRule(puzzle: PuzzleACadenasEntry): string {
-    const rule = puzzle.instructions
-      .trim()
-      .replace(
-        /,\s*puis\s+lis(?:\s+le)?\s+(?:code[^.]*|A\s+à\s+D|les\s+quatre\s+cases\s+finales|la\s+chaise[^.]*|le\s+chiffre[^.]*|la\s+case[^.]*)\.?$/i,
-        '',
-      )
-      .replace(
-        /\s+(?:puis\s+)?lis\s+(?:le\s+code[^.]*|A\s+à\s+D|les\s+quatre\s+cases\s+finales|la\s+case[^.]*)\.?$/i,
-        '',
-      )
-      .replace(/,\s*puis\s+lis-le\s+directement\.?$/i, '')
-      .replace(/;\s*son\s+numéro\s+constitue\s+la\s+réponse\.?$/i, '')
-      .replace(/\s*Le\s+code\s+est\s+le\s+nombre\s+de\s+cases\s+noires\.?$/i, '')
-      .trim();
+  protected puzzleRule(puzzle: PuzzleACadenasEntry): string | null {
+    const rule = [
+      /,\s*puis\s+lis(?:\s+le)?\s+(?:code[^.]*|A\s+à\s+D|les\s+quatre\s+cases\s+finales|la\s+chaise[^.]*|le\s+chiffre[^.]*|la\s+case[^.]*)\.?$/i,
+      /\s+(?:,?\s*)?(?:puis\s+)?lis\s+(?:le\s+)?(?:code[^.]*|A\s+à\s+D|les\s+quatre\s+cases\s+finales|la\s+chaise[^.]*|le\s+chiffre[^.]*|la\s+case[^.]*|la\s+position[^.]*|la\s+valeur[^.]*|la\s+face[^.]*|le\s+reste[^.]*|bas\s+à\s+droite[^.]*|x\s+modulo[^.]*)\.?$/i,
+      /,\s*puis\s+lis-le\s+directement\.?$/i,
+      /;\s*son\s+numéro\s+constitue\s+la\s+réponse\.?$/i,
+      /\s*(?:Pour\s+chaque\s+grille,\s*)?(?:Le|La)\s+[^.!?]*(?:est|constitue|donne|forme)\s+(?:le|la)\s+(?:chiffre|code|réponse|résultat|numéro|colonne|position|valeur)\b[^.!?]*[.!?]?$/i,
+      /\s+(?:Le|La)\s+(?:résultat|code|chiffre|nombre|réponse)\b[^.!?]*[.!?]?$/i,
+      /\s+(?:,\s*)?(?:puis\s+)?(?:garde|retiens|conserve)\s+(?:seulement\s+)?[^.!?]*(?:chiffre|unité|longueur|position|valeur|résultat|réponse)[^.!?]*[.!?]?$/i,
+    ].reduce((value, pattern) => value.replace(pattern, ''), puzzle.instructions.trim());
 
-    return /[.!?]$/.test(rule) ? rule : `${rule}.`;
+    const cleanedRule = rule.trim();
+
+    if (
+      !cleanedRule ||
+      /^(?:Le\s+code|Le\s+résultat|La\s+réponse|Le\s+chiffre\s+à\s+extraire|Lis\s+(?:le\s+)?(?:la\s+case|la\s+position|la\s+valeur|le\s+reste|la\s+face|bas\s+à\s+droite|x\s+modulo)|Garde\s+(?:le|la)\s+)/i.test(
+        cleanedRule,
+      )
+    ) {
+      return null;
+    }
+
+    return /[.!?]$/.test(cleanedRule) ? cleanedRule : `${cleanedRule}.`;
   }
 
   private scrollToSelectedPuzzle(): void {

@@ -62,13 +62,15 @@
           }
         </header>
 
-        <aside class="puzzle-rule" aria-labelledby="puzzle-rule-title">
-          <div class="rule-heading">
-            <span class="rule-kicker" id="puzzle-rule-title">Fonctionnement</span>
-            <span class="puzzle-difficulty">{{ puzzle.difficulty }}</span>
-          </div>
-          <p>{{ puzzleRule(puzzle) }}</p>
-        </aside>
+        @if (puzzleRule(puzzle); as rule) {
+          <aside class="puzzle-rule" aria-labelledby="puzzle-rule-title">
+            <div class="rule-heading">
+              <span class="rule-kicker" id="puzzle-rule-title">Explication</span>
+              <span class="puzzle-difficulty">{{ puzzle.difficulty }}</span>
+            </div>
+            <p>{{ rule }}</p>
+          </aside>
+        }
 
         <div class="puzzle-display" aria-label="Énoncé du puzzle">
           <p class="display-guide" role="note">

@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { PUZZLE_A_CADENAS } from './puzzle-a-cadenas.catalog';
+import { PUZZLE_A_CADENAS, type PuzzleACadenasEntry } from './puzzle-a-cadenas.catalog';
 import { PuzzleACadenasPage } from './puzzle-a-cadenas.page';
 
 describe('Puzzle à Cadenas display', () => {
@@ -43,6 +43,26 @@ describe('Puzzle à Cadenas display', () => {
     expect(page['puzzleRule'](puzzle)).toBe(
       'Complète la grille 4 × 4 pour que chaque ligne et chaque colonne contienne 1, 2, 3 et 4 une fois.',
     );
+  });
+
+  it('keeps a real explanation but hides direct answer instructions', () => {
+    const page = TestBed.createComponent(PuzzleACadenasPage).componentInstance;
+    const dominos = PUZZLE_A_CADENAS.find((entry) => entry.id === 'dominos-numeriques')!;
+    const fleet = PUZZLE_A_CADENAS.find(
+      (entry) => entry.id === 'nouveaux-75-flotte-silencieuse',
+    )!;
+    const directAnswerRule: PuzzleACadenasEntry = {
+      ...dominos,
+      instructions: 'Le résultat est le nombre de cases noires.',
+    };
+
+    expect(page['puzzleRule'](dominos)).toBe(
+      'Pour chaque paire, multiplie les deux nombres du premier domino, puis retire le produit du second domino.',
+    );
+    expect(page['puzzleRule'](fleet)).toBe(
+      'Bataille navale sur une grille 4 × 4 : place un bateau de 2 cases et un bateau seul de 1 case. Les nombres L à gauche donnent le total de chaque ligne et les nombres C en haut celui de chaque colonne. Les bateaux ne se touchent pas, même en diagonale.',
+    );
+    expect(page['puzzleRule'](directAnswerRule)).toBeNull();
   });
 
   it('renders fleet row and column codes as a readable grid', () => {
