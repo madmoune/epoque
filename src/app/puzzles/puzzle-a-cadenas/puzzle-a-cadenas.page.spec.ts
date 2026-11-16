@@ -1,5 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { RouterTestingHarness } from '@angular/router/testing';
+import { PuzzlePlayHistoryService } from '../../puzzle-play-history.service';
+import {
+  FINALE_2_PLAYLIST_ID,
+  FINALE_2_PLAYLIST_ROUTES,
+  PuzzlePlaylistService,
+} from '../../puzzle-playlist.service';
 import { PUZZLE_A_CADENAS, type PuzzleACadenasEntry } from './puzzle-a-cadenas.catalog';
 import { PuzzleACadenasPage } from './puzzle-a-cadenas.page';
 
@@ -226,5 +233,86 @@ describe('Puzzle à Cadenas display', () => {
     page['solved'].set(new Set([puzzleId, 'nouveaux-74-rectangles-sur-mesure']));
     page['revealHint']('nouveaux-74-rectangles-sur-mesure');
     expect(page['isHintVisible']('nouveaux-74-rectangles-sur-mesure')).toBe(false);
+  });
+});
+
+describe('Puzzle à Cadenas in Finale 2', () => {
+  const solvedStorageKey = 'epique-puzzle-a-cadenas-solved';
+  const progressStorageKey = 'epique-puzzle-playlist-progress';
+  const completionStorageKey = 'epique-puzzle-playlist-completed-at-finale-2';
+  const index = FINALE_2_PLAYLIST_ROUTES.length - 1;
+  const finalUrl = `/puzzle-a-cadenas?from=playlist&playlist=${FINALE_2_PLAYLIST_ID}&playlistIndex=${index}`;
+  const completedAt = Date.UTC(2026, 10, 16, 13);
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([{ path: 'puzzle-a-cadenas', component: PuzzleACadenasPage }]),
+        { provide: PuzzlePlayHistoryService, useValue: { markSolved: vi.fn() } },
+      ],
+    });
+    vi.spyOn(Date, 'now').mockReturnValue(completedAt);
+  });
+
+  afterEach(() => {
+    localStorage.removeItem(solvedStorageKey);
+    localStorage.removeItem(progressStorageKey);
+    localStorage.removeItem(completionStorageKey);
+    vi.restoreAllMocks();
+  });
+
+  function saveProgressAtFinale(): void {
+    localStorage.setItem(
+      progressStorageKey,
+      JSON.stringify({
+        [FINALE_2_PLAYLIST_ID]: {
+          index,
+          order: FINALE_2_PLAYLIST_ROUTES.map((_, routeIndex) => routeIndex),
+          routes: FINALE_2_PLAYLIST_ROUTES,
+        },
+      }),
+    );
+  }
+
+  it('completes the playlist when the last lock is opened', async () => {
+    const [lastLock, ...openedLocks] = PUZZLE_A_CADENAS;
+    localStorage.setItem(solvedStorageKey, JSON.stringify(openedLocks.map(({ id }) => id)));
+    saveProgressAtFinale();
+
+    const harness = await RouterTestingHarness.create(finalUrl);
+    const playlists = TestBed.inject(PuzzlePlaylistService);
+    const finale = playlists.find(FINALE_2_PLAYLIST_ID)!;
+    expect(finale.lastCompletedAt).toBeNull();
+
+    const input = harness.routeNativeElement!.querySelector<HTMLInputElement>('.answer-row input')!;
+    input.value = lastLock.answer;
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    harness.detectChanges();
+
+    expect(playlists.find(finale.id)?.lastCompletedAt).toBe(completedAt);
+    expect(playlists.progressFor(finale)).toBeNull();
+  });
+
+  it('counts the previously opened collection when an active run reaches it', async () => {
+    localStorage.setItem(solvedStorageKey, JSON.stringify(PUZZLE_A_CADENAS.map(({ id }) => id)));
+    saveProgressAtFinale();
+
+    await RouterTestingHarness.create(finalUrl);
+
+    const playlists = TestBed.inject(PuzzlePlaylistService);
+    const finale = playlists.find(FINALE_2_PLAYLIST_ID)!;
+    expect(finale.lastCompletedAt).toBe(completedAt);
+    expect(playlists.progressFor(finale)).toBeNull();
+  });
+
+  it('preserves the completion date when reopening a finished run', async () => {
+    const savedCompletion = completedAt - 60_000;
+    localStorage.setItem(solvedStorageKey, JSON.stringify(PUZZLE_A_CADENAS.map(({ id }) => id)));
+    localStorage.setItem(completionStorageKey, String(savedCompletion));
+
+    await RouterTestingHarness.create(finalUrl);
+
+    const playlists = TestBed.inject(PuzzlePlaylistService);
+    expect(playlists.find(FINALE_2_PLAYLIST_ID)?.lastCompletedAt).toBe(savedCompletion);
   });
 });

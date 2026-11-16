@@ -31,12 +31,12 @@ describe('SequencesService', () => {
     expect(puzzle.hint).not.toContain('position');
   });
 
-  it('contains 82 distinct sequence templates', () => {
+  it('contains 80 distinct sequence templates', () => {
     const service = new SequencesService();
     const harness = service as unknown as ServiceHarness;
 
-    expect(harness.templates).toHaveLength(82);
-    expect(new Set(harness.templates.map((template) => template.create)).size).toBe(82);
+    expect(harness.templates).toHaveLength(80);
+    expect(new Set(harness.templates.map((template) => template.create)).size).toBe(80);
   });
 
   it('can produce an accepted puzzle from every template', () => {

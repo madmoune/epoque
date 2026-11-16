@@ -2,6 +2,10 @@ import { Injectable, effect, inject, signal } from '@angular/core';
 import { User } from 'firebase/auth';
 import { DataSnapshot, get, onValue, ref, serverTimestamp, update } from 'firebase/database';
 
+import {
+  STATIC_PLAYLIST_COMPLETION_STORAGE_PREFIX,
+  parseStoredPlaylistCompletion,
+} from '../../puzzle-playlist.service';
 import { FirebaseAuthService } from './firebase-auth.service';
 import { FirebaseClientService } from './firebase-client.service';
 import { AppStorageService } from '../storage/app-storage.service';
@@ -239,6 +243,22 @@ export class FirebaseUserDataSyncService {
 
     if (mergedPlaylists) {
       merged[PLAYLISTS_KEY] = mergedPlaylists;
+    }
+
+    for (const [key, value] of Object.entries(localValues)) {
+      if (!key.startsWith(STATIC_PLAYLIST_COMPLETION_STORAGE_PREFIX)) {
+        continue;
+      }
+
+      const localCompletion = parseStoredPlaylistCompletion(value);
+      const remoteCompletion = parseStoredPlaylistCompletion(remoteValues[key]);
+
+      if (
+        localCompletion !== null &&
+        (remoteCompletion === null || localCompletion > remoteCompletion)
+      ) {
+        merged[key] = value;
+      }
     }
 
     const mergedPlaylistProgress = this.mergePlaylistProgress(

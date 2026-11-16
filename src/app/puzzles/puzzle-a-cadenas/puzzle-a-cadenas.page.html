@@ -753,3 +753,11 @@
     </div>
   </section>
 </main>
+
+@if (showPlaylistSuccess()) {
+  <app-puzzle-success-popup
+    title="Tous les cadenas sont ouverts !"
+    [showAction]="false"
+    [showMenuLink]="false"
+  />
+}

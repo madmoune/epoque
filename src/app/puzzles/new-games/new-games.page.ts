@@ -540,7 +540,23 @@ export class NewGamesPage {
     if (/^[a-zA-Z]$/.test(event.key)) {
       event.preventDefault();
       this.placeDropLetter(cell % puzzle.width, event.key.toUpperCase());
-    } else if (event.key === 'Backspace' || event.key === 'Delete') {
+    } else if (event.key === 'Backspace') {
+      event.preventDefault();
+      if (this.droppedLetters()[cell]) {
+        this.removeDropLetter();
+      } else {
+        const editableCells = Object.keys(puzzle.solution)
+          .map(Number)
+          .filter((candidate) => !this.lockedKeys().has(String(candidate)));
+        const currentIndex = editableCells.indexOf(cell);
+        const previousCell = currentIndex > 0 ? editableCells[currentIndex - 1] : undefined;
+
+        if (previousCell !== undefined) {
+          this.selectedDropCell.set(previousCell);
+          this.removeDropLetter();
+        }
+      }
+    } else if (event.key === 'Delete') {
       event.preventDefault();
       this.removeDropLetter();
     } else if (event.key.startsWith('Arrow')) {

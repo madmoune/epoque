@@ -52,13 +52,11 @@ export class SequencesService {
     this.withGenre('geometric', () => this.createMultiplyThenAddIncreasingOffsetSequence()),
     this.withGenre('interleaved', () => this.createInterleavedFibonacciAndSquaresSequence()),
     this.withGenre('recurrence', () => this.createPreviousTwoDifferencePlusPositionSequence()),
-    this.withGenre('arithmetic', () => this.createSecondDifferenceCycleSequence()),
 
     // Écarts et opérations faciles à expliquer.
     this.withGenre('arithmetic', () => this.createSmallThenGrowingLargeDifferenceSequence()),
     this.withGenre('arithmetic', () => this.createGrowingSubtractionSequence()),
     this.withGenre('arithmetic', () => this.createDoubleMinusOneDifferencesSequence()),
-    this.withGenre('arithmetic', () => this.createAlternatingDifferenceGrowthSequence()),
     this.withGenre('operations', () => this.createDoubleMinusGrowingAmountSequence()),
     this.withGenre('operations', () => this.createDoubleThenHalfPlusSequence()),
     this.withGenre('operations', () => this.createTripleThenThirdPlusSequence()),
@@ -1113,31 +1111,6 @@ export class SequencesService {
     return this.createPuzzleFromSequence(
       sequence,
       'Chaque nombre est l’écart entre les deux nombres précédents, plus sa position.',
-    );
-  }
-
-  private createSecondDifferenceCycleSequence(): MathSequencePuzzle {
-    const start = this.randomInt(5, 30);
-    const firstDifference = this.randomInt(3, 10);
-    const secondDifferenceCycle = this.getRandomDistinctItems([2, 3, 4, 5, 6], 3);
-    const length = this.randomInt(7, 9);
-    const sequence = [start];
-    const differences = [firstDifference];
-
-    while (differences.length < length - 1) {
-      const secondDifference =
-        secondDifferenceCycle[(differences.length - 1) % secondDifferenceCycle.length];
-
-      differences.push(differences[differences.length - 1] + secondDifference);
-    }
-
-    while (sequence.length < length) {
-      sequence.push(sequence[sequence.length - 1] + differences[sequence.length - 1]);
-    }
-
-    return this.createPuzzleFromSequence(
-      sequence,
-      `Observe les écarts, puis les écarts entre ceux-ci. Les écarts de second niveau suivent ce cycle : ${secondDifferenceCycle.join(', ')}.`,
     );
   }
 
@@ -2203,34 +2176,6 @@ export class SequencesService {
     return this.createPuzzleFromSequence(
       sequence,
       'Chaque écart vaut le double du précédent, moins 1 : ' +
-        differences.slice(0, 6).join(', ') +
-        '...',
-    );
-  }
-
-  private createAlternatingDifferenceGrowthSequence(): MathSequencePuzzle {
-    const start = this.randomInt(1, 20);
-    const firstDifference = this.randomInt(3, 6);
-    const smallGrowth = this.randomInt(1, 2);
-    const largeGrowth = this.randomInt(3, 5);
-    const length = 8;
-    const sequence = [start];
-    const differences: number[] = [];
-    let difference = firstDifference;
-
-    while (sequence.length < length) {
-      differences.push(difference);
-      sequence.push(sequence[sequence.length - 1] + difference);
-      difference += differences.length % 2 === 1 ? smallGrowth : largeGrowth;
-    }
-
-    return this.createPuzzleFromSequence(
-      sequence,
-      'Les écarts augmentent alternativement de ' +
-        smallGrowth +
-        ' puis de ' +
-        largeGrowth +
-        ' : ' +
         differences.slice(0, 6).join(', ') +
         '...',
     );

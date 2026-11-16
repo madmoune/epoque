@@ -7,9 +7,12 @@ import {
   PuzzlePlaylist,
   PuzzlePlaylistService,
 } from './puzzle-playlist.service';
+import { AppStorageService } from './shared/storage/app-storage.service';
 
 describe('PuzzlePlaylistService progress', () => {
   const progressStorageKey = 'epique-puzzle-playlist-progress';
+  const finale1CompletionKey = 'epique-puzzle-playlist-completed-at-finale-1';
+  const finale2CompletionKey = 'epique-puzzle-playlist-completed-at-finale-2';
   const playlist: PuzzlePlaylist = {
     id: 'progress-test',
     name: 'Progression',
@@ -28,6 +31,8 @@ describe('PuzzlePlaylistService progress', () => {
   afterEach(() => {
     localStorage.removeItem('epique-puzzle-playlists');
     localStorage.removeItem(progressStorageKey);
+    localStorage.removeItem(finale1CompletionKey);
+    localStorage.removeItem(finale2CompletionKey);
     vi.restoreAllMocks();
   });
 
@@ -98,7 +103,9 @@ describe('PuzzlePlaylistService progress', () => {
   it.each([
     ['Finale 1', FINALE_1_PLAYLIST_ID, FINALE_1_PLAYLIST_ROUTES],
     ['Finale 2', FINALE_2_PLAYLIST_ID, FINALE_2_PLAYLIST_ROUTES],
-  ] as const)('resumes a saved %s run', (_name, playlistId, routes) => {
+  ] as const)('persists completion after resuming %s', (_name, playlistId, routes) => {
+    const completedAt = Date.UTC(2026, 10, 16, 13);
+    vi.spyOn(Date, 'now').mockReturnValue(completedAt);
     const order = routes.map((_, index) => index);
     const index = order.length - 2;
     const currentRoute = routes[order[index]];
@@ -118,12 +125,32 @@ describe('PuzzlePlaylistService progress', () => {
     expect(resumedProgress.nextRoute?.split('?')[0]).toBe(routes.at(-1));
 
     service.complete(resumedProgress);
+    expect(service.find(playlistId)?.lastCompletedAt).toBeNull();
     const finalUrl = service.startUrl(finale)!;
     expect(finalUrl).toBe(resumedProgress.nextRoute);
     const finalProgress = service.progressFromUrl(finalUrl)!;
     expect(finalProgress.nextRoute).toBeNull();
     service.complete(finalProgress);
     expect(service.progressFor(finale)).toBeNull();
+
+    const reloadedService = TestBed.runInInjectionContext(() => new PuzzlePlaylistService());
+    expect(reloadedService.find(playlistId)?.lastCompletedAt).toBe(completedAt);
+  });
+
+  it('refreshes each static completion date when account data is applied', () => {
+    const service = TestBed.inject(PuzzlePlaylistService);
+    const storage = TestBed.inject(AppStorageService);
+    const firstCompletion = Date.UTC(2026, 10, 15);
+    const secondCompletion = Date.UTC(2026, 10, 16);
+
+    storage.replace({
+      ...storage.snapshot(),
+      [finale1CompletionKey]: String(firstCompletion),
+      [finale2CompletionKey]: String(secondCompletion),
+    });
+
+    expect(service.find(FINALE_1_PLAYLIST_ID)?.lastCompletedAt).toBe(firstCompletion);
+    expect(service.find(FINALE_2_PLAYLIST_ID)?.lastCompletedAt).toBe(secondCompletion);
   });
 
   it('keeps a random order while the playlist is in progress', () => {

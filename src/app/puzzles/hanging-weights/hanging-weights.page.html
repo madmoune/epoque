@@ -199,7 +199,7 @@
                         [disabled]="isSolved() || isHinted(weight.id)"
                         [attr.aria-label]="'Poids ' + weight.label + ' en kilogrammes'"
                         (focus)="activateAnswerInput(weight.id, $event)"
-                        (click)="$event.stopPropagation()"
+                        (click)="$event.stopPropagation(); activateAnswerInput(weight.id, $event)"
                         (input)="updateAnswer(weight.id, $event)"
                       />
                       <small>kg</small>

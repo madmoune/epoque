@@ -1,7 +1,9 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { PuzzlePlayHistoryService } from '../../puzzle-play-history.service';
+import { PuzzlePlaylistService } from '../../puzzle-playlist.service';
 import { AppStorageService } from '../../shared/storage/app-storage.service';
+import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
 import {
   PUZZLE_A_CADENAS,
   PUZZLE_A_CADENAS_GRID_EXAMPLE_RESULTS,
@@ -119,7 +121,7 @@ type GraphEdgePoints = {
 
 @Component({
   selector: 'app-puzzle-a-cadenas-page',
-  imports: [RouterLink],
+  imports: [RouterLink, PuzzleSuccessPopupComponent],
   templateUrl: './puzzle-a-cadenas.page.html',
   styleUrl: './puzzle-a-cadenas.page.scss',
 })
@@ -128,6 +130,8 @@ export class PuzzleACadenasPage {
   protected readonly fleetCells = [0, 1, 2, 3] as const;
 
   private readonly playHistory = inject(PuzzlePlayHistoryService);
+  private readonly playlistService = inject(PuzzlePlaylistService);
+  private readonly router = inject(Router);
   private readonly storage = inject(AppStorageService);
   protected readonly attempts = signal<Record<string, string>>({});
   protected readonly solved = signal<Set<string>>(this.readSolved());
@@ -135,6 +139,7 @@ export class PuzzleACadenasPage {
   protected readonly hitoriSelections = signal<Record<string, number[]>>({});
   protected readonly visibleHints = signal<Set<string>>(new Set());
   protected readonly feedback = signal<Record<string, string>>({});
+  protected readonly showPlaylistSuccess = signal(false);
   protected readonly selectedPuzzleId = signal(this.readSelectedPuzzleId());
   protected readonly selectedPuzzle = computed(
     () => this.puzzles.find((puzzle) => puzzle.id === this.selectedPuzzleId()) ?? this.puzzles[0],
@@ -169,6 +174,15 @@ export class PuzzleACadenasPage {
 
     if (this.solved().size === this.puzzles.length) {
       this.playHistory.markSolved('/puzzle-a-cadenas');
+
+      const progress = this.playlistService.progressFromUrl(this.router.url);
+      if (progress) {
+        const savedProgress = this.playlistService.progressFor(progress.playlist);
+        this.showPlaylistSuccess.set(
+          savedProgress?.index === progress.index &&
+            savedProgress.order.every((routeIndex, index) => routeIndex === progress.order[index]),
+        );
+      }
     }
   }
 
@@ -230,6 +244,7 @@ export class PuzzleACadenasPage {
 
     if (nextSolved.size === this.puzzles.length) {
       this.playHistory.markSolved('/puzzle-a-cadenas');
+      this.showPlaylistSuccess.set(this.playlistService.progressFromUrl(this.router.url) !== null);
     }
   }
 

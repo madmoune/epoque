@@ -25,6 +25,7 @@ export type PlaylistProgress = {
 
 export const FINALE_1_PLAYLIST_ID = 'finale-1';
 export const FINALE_2_PLAYLIST_ID = 'finale-2';
+export const STATIC_PLAYLIST_COMPLETION_STORAGE_PREFIX = 'epique-puzzle-playlist-completed-at-';
 
 export const FINALE_1_PLAYLIST_ROUTES = [
   '/drop-quote',
@@ -84,6 +85,15 @@ export const FINALE_PLAYLIST_ROUTES = FINALE_1_PLAYLIST_ROUTES;
 /** @deprecated Use FINALE_1_PLAYLIST. */
 export const FINALE_PLAYLIST = FINALE_1_PLAYLIST;
 
+export function parseStoredPlaylistCompletion(value: string | null | undefined): number | null {
+  const timestamp = Number(value?.trim() || NaN);
+  return isValidCompletionTimestamp(timestamp) ? timestamp : null;
+}
+
+function isValidCompletionTimestamp(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -105,7 +115,10 @@ export class PuzzlePlaylistService {
         return;
       }
 
-      if (change.key === this.storageKey) {
+      if (
+        change.key === this.storageKey ||
+        change.key.startsWith(STATIC_PLAYLIST_COMPLETION_STORAGE_PREFIX)
+      ) {
         this.playlists.set(this.readPlaylists());
       }
 
@@ -252,15 +265,23 @@ export class PuzzlePlaylistService {
       return;
     }
 
+    const playlistId = progress.playlist.id;
     const completedAt = Date.now();
-    this.setPlaylists(
-      this.playlists().map((playlist) =>
-        playlist.id === progress.playlist.id
-          ? { ...playlist, lastCompletedAt: completedAt }
-          : playlist,
-      ),
+    const playlists = this.playlists().map((playlist) =>
+      playlist.id === playlistId ? { ...playlist, lastCompletedAt: completedAt } : playlist,
     );
-    this.clearProgress(progress.playlist.id);
+
+    if (this.find(playlistId)?.isStatic) {
+      this.playlists.set(playlists);
+      this.storage.set(
+        `${STATIC_PLAYLIST_COMPLETION_STORAGE_PREFIX}${playlistId}`,
+        String(completedAt),
+      );
+    } else {
+      this.setPlaylists(playlists);
+    }
+
+    this.clearProgress(playlistId);
   }
 
   private playUrl(playlist: PuzzlePlaylist, index: number, order: number[]): string {
@@ -380,7 +401,7 @@ export class PuzzlePlaylistService {
           name: playlist.name.trim() || 'Playlist',
           routes: [...new Set(playlist.routes.filter((route) => route.startsWith('/')))],
           isStatic: false,
-          lastCompletedAt: this.isValidCompletionTimestamp(playlist.lastCompletedAt)
+          lastCompletedAt: isValidCompletionTimestamp(playlist.lastCompletedAt)
             ? playlist.lastCompletedAt
             : null,
         }));
@@ -423,6 +444,9 @@ export class PuzzlePlaylistService {
     return FINALE_PLAYLISTS.map((playlist) => ({
       ...playlist,
       routes: [...playlist.routes],
+      lastCompletedAt: parseStoredPlaylistCompletion(
+        this.storage.get(`${STATIC_PLAYLIST_COMPLETION_STORAGE_PREFIX}${playlist.id}`),
+      ),
     }));
   }
 
@@ -440,12 +464,8 @@ export class PuzzlePlaylistService {
       candidate.routes.every((route) => typeof route === 'string') &&
       (candidate.lastCompletedAt === undefined ||
         candidate.lastCompletedAt === null ||
-        this.isValidCompletionTimestamp(candidate.lastCompletedAt))
+        isValidCompletionTimestamp(candidate.lastCompletedAt))
     );
-  }
-
-  private isValidCompletionTimestamp(value: unknown): value is number {
-    return typeof value === 'number' && Number.isFinite(value) && value >= 0;
   }
 
   private isProgressSnapshot(value: unknown): value is PlaylistProgressSnapshot {

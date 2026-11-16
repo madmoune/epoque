@@ -1,5 +1,5 @@
 @if (keyboardVisible) {
-  <div class="custom-keyboard" aria-label="Clavier du jeu">
+  <div class="custom-keyboard" aria-label="Clavier du jeu" (pointerdown)="$event.preventDefault()">
     @for (row of rows(); track $index) {
       <div class="keyboard-row">
         @for (key of row; track key) {
@@ -8,7 +8,6 @@
             class="keyboard-key"
             [class]="keyClass(key)"
             [disabled]="disabled()"
-            (pointerdown)="$event.preventDefault()"
             (click)="pressKey(key)"
           >
             {{ keyLabel(key) }}

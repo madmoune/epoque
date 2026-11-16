@@ -368,6 +368,25 @@ describe('NewGamesPage interactions', () => {
     expect(page['selectedDropCell']()).toBe(cells.find((cell) => cell > punctuation));
   });
 
+  it('clears the previous dropped letter when backspace is pressed on an empty cell', async () => {
+    const fixture = await createPage('drop-quote');
+    const page = fixture.componentInstance;
+    const puzzle = createDropQuote('Au cœur du défi, l’équipe garde son calme malgré le bruit');
+    const cells = Object.keys(puzzle.solution).map(Number);
+    const previousCell = cells[0];
+    const emptyCell = cells[1];
+
+    page['dropQuote'].set(puzzle);
+    page['droppedLetters'].set({ [previousCell]: puzzle.solution[previousCell] });
+    page['selectDropCell'](emptyCell);
+
+    page['handleBoardKey'](new KeyboardEvent('keydown', { key: 'Backspace' }));
+
+    expect(page['droppedLetters']()[previousCell]).toBeUndefined();
+    expect(page['selectedDropCell']()).toBe(previousCell);
+    fixture.destroy();
+  });
+
   it('can give a drop-letter hint even if its letter was used in a wrong cell', async () => {
     const fixture = await createPage('drop-quote');
     const page = fixture.componentInstance;
