@@ -62,6 +62,8 @@ type MobileWeightLayout = {
 type HangingMobileLayout = {
   width: number;
   height: number;
+  widthPerWeight: number;
+  widthPerRowHeight: number;
   ceilingY: number;
   rootX: number;
   rootBarY: number;
@@ -671,9 +673,8 @@ function createHangingMobileLayout(root: HangingWeightBranchNode): HangingMobile
   const width = 760;
   const ceilingY = 28;
   const rootBarY = 102;
-  const levelGap = 138;
-  const leafDrop = 56;
-  const weightBoxHeight = 46;
+  const levelGap = 160;
+  const leafDrop = 44;
   const horizontalPadding = 62;
   const rawBars: RawMobileBarLayout[] = [];
   const rawConnectors: MobileConnectorLayout[] = [];
@@ -754,11 +755,27 @@ function createHangingMobileLayout(root: HangingWeightBranchNode): HangingMobile
     x: mapX(connector.x),
   }));
   const weights = rawWeights.map((weight) => ({ ...weight, x: mapX(weight.x) }));
-  const height = Math.max(...weights.map((weight) => weight.y)) + weightBoxHeight + 38;
+  const rowHeight = levelGap - leafDrop;
+  const height = Math.max(...weights.map((weight) => weight.y)) + rowHeight;
+
+  // Leave room for full-size controls between neighboring weights and at either edge.
+  let weightSpacing = horizontalPadding * 2;
+  const previousWeightXByRow = new Map<number, number>();
+  for (const { x, y } of [...weights].sort((first, second) => first.x - second.x)) {
+    const previousX = previousWeightXByRow.get(y);
+
+    if (previousX !== undefined) {
+      weightSpacing = Math.min(weightSpacing, x - previousX);
+    }
+
+    previousWeightXByRow.set(y, x);
+  }
 
   return {
     width,
     height,
+    widthPerWeight: width / weightSpacing,
+    widthPerRowHeight: width / rowHeight,
     ceilingY,
     rootX: mapX(0),
     rootBarY,
