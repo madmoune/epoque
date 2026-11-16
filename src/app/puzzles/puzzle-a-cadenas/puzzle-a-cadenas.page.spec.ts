@@ -255,6 +255,26 @@ describe('Puzzle à Cadenas display', () => {
       'Ouvrir le prochain',
     );
   });
+
+  it('renders previous and next navigation above the selected puzzle', () => {
+    const fixture = TestBed.createComponent(PuzzleACadenasPage);
+    const page = fixture.componentInstance;
+    localStorage.removeItem('epique-puzzle-a-cadenas-selected');
+    page['selectedPuzzleId'].set(PUZZLE_A_CADENAS[1].id);
+    fixture.detectChanges();
+
+    const selectedPuzzle = fixture.nativeElement.querySelector('#selected-puzzle');
+    const navigation = selectedPuzzle.querySelector('.puzzle-top-nav');
+
+    expect(selectedPuzzle.firstElementChild?.classList.contains('puzzle-top-nav')).toBe(true);
+    expect(navigation.querySelector('.previous')?.textContent).toContain('Puzzle 1');
+    expect(navigation.querySelector('.following')?.textContent).toContain('Puzzle 3');
+    expect(navigation.querySelector('.puzzle-top-nav-progress')?.textContent).toContain('02');
+
+    navigation.querySelector('.following')?.click();
+    expect(page['selectedPuzzleId']()).toBe(PUZZLE_A_CADENAS[2].id);
+    localStorage.removeItem('epique-puzzle-a-cadenas-selected');
+  });
 });
 
 describe('Puzzle à Cadenas in Finale 2', () => {

@@ -144,6 +144,19 @@ export class PuzzleACadenasPage {
   protected readonly selectedPuzzle = computed(
     () => this.puzzles.find((puzzle) => puzzle.id === this.selectedPuzzleId()) ?? this.puzzles[0],
   );
+  protected readonly selectedPuzzleIndex = computed(() =>
+    this.puzzles.findIndex((puzzle) => puzzle.id === this.selectedPuzzleId()),
+  );
+  protected readonly previousPuzzle = computed(() => {
+    const index = this.selectedPuzzleIndex();
+
+    return index > 0 ? this.puzzles[index - 1] : null;
+  });
+  protected readonly followingPuzzle = computed(() => {
+    const index = this.selectedPuzzleIndex();
+
+    return index >= 0 && index < this.puzzles.length - 1 ? this.puzzles[index + 1] : null;
+  });
   protected readonly nextUnsolvedPuzzle = computed(() => {
     const currentIndex = this.puzzles.findIndex((puzzle) => puzzle.id === this.selectedPuzzleId());
     const followingPuzzles =

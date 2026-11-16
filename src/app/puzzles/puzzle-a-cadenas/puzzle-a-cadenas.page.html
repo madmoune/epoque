@@ -54,6 +54,52 @@
         [class.solved-puzzle]="isSolved(puzzle.id)"
         [attr.aria-label]="'Puzzle ' + puzzleNumber(puzzles.indexOf(puzzle))"
       >
+        <nav class="puzzle-top-nav" aria-label="Navigation des puzzles">
+          @if (previousPuzzle(); as previous) {
+            <button
+              type="button"
+              class="puzzle-top-nav-button previous"
+              (click)="selectPuzzle(previous.id)"
+              [attr.aria-label]="
+                'Ouvrir le puzzle précédent : ' + puzzleLabel(puzzles.indexOf(previous))
+              "
+            >
+              <span class="puzzle-top-nav-arrow" aria-hidden="true">←</span>
+              <span class="puzzle-top-nav-copy">
+                <span class="puzzle-top-nav-direction">Précédent</span>
+                <strong>{{ puzzleLabel(puzzles.indexOf(previous)) }}</strong>
+              </span>
+            </button>
+          } @else {
+            <span class="puzzle-top-nav-placeholder" aria-hidden="true"></span>
+          }
+
+          <span class="puzzle-top-nav-progress" aria-live="polite">
+            <span>Puzzle</span>
+            <strong>{{ puzzleNumber(selectedPuzzleIndex()) }}</strong>
+            <span>/ {{ puzzles.length }}</span>
+          </span>
+
+          @if (followingPuzzle(); as following) {
+            <button
+              type="button"
+              class="puzzle-top-nav-button following"
+              (click)="selectPuzzle(following.id)"
+              [attr.aria-label]="
+                'Ouvrir le puzzle suivant : ' + puzzleLabel(puzzles.indexOf(following))
+              "
+            >
+              <span class="puzzle-top-nav-copy">
+                <span class="puzzle-top-nav-direction">Suivant</span>
+                <strong>{{ puzzleLabel(puzzles.indexOf(following)) }}</strong>
+              </span>
+              <span class="puzzle-top-nav-arrow" aria-hidden="true">→</span>
+            </button>
+          } @else {
+            <span class="puzzle-top-nav-placeholder" aria-hidden="true"></span>
+          }
+        </nav>
+
         <header class="puzzle-heading">
           <span class="puzzle-number" aria-hidden="true">{{
             puzzleNumber(puzzles.indexOf(puzzle))
