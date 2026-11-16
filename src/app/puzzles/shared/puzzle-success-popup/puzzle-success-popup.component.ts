@@ -13,7 +13,7 @@ import {
 import { Router, RouterLink } from '@angular/router';
 import { PuzzlePlayHistoryService } from '../../../puzzle-play-history.service';
 import { PuzzlePlaylistService } from '../../../puzzle-playlist.service';
-import { puzzleMenuFragment } from '../../puzzle-catalog';
+import { HIDDEN_PUZZLE_ROUTES, puzzleMenuFragment } from '../../puzzle-catalog';
 import { NEW_GAME_ROUTES } from '../../new-games/new-games.catalog';
 
 export type PuzzlePopupTone = 'success' | 'partial';
@@ -86,7 +86,7 @@ export class PuzzleSuccessPopupComponent implements OnInit {
     '/play/segment-phrase',
     '/play/color-chain',
     '/play/syllabic-rotation',
-  ];
+  ].filter((route) => !HIDDEN_PUZZLE_ROUTES.has(route));
 
   private readonly router = inject(Router);
   private readonly playHistory = inject(PuzzlePlayHistoryService);

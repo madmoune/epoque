@@ -13,6 +13,7 @@ import {
 } from '../../shared/firebase/firebase-puzzle-catalog.service';
 import { AppStorageService } from '../../shared/storage/app-storage.service';
 import {
+  HIDDEN_PUZZLE_ROUTES,
   PUZZLE_CATEGORIES,
   type PuzzleCard,
   type PuzzleCategory,
@@ -76,13 +77,15 @@ export class HomePage {
       showSolvedStatus: true,
     };
 
-    return [...PUZZLE_CATEGORIES, labCategory].map((category) => ({
-      ...category,
-      puzzles:
-        this.sortMode() === 'oldest' && category.sortable !== false
-          ? [...category.puzzles].sort((first, second) => this.compareByOldestPlayed(first, second))
-          : category.puzzles,
-    }));
+    return [...PUZZLE_CATEGORIES, labCategory].map((category) => {
+      const puzzles = category.puzzles.filter((puzzle) => !HIDDEN_PUZZLE_ROUTES.has(puzzle.route));
+
+      if (this.sortMode() === 'oldest' && category.sortable !== false) {
+        puzzles.sort((first, second) => this.compareByOldestPlayed(first, second));
+      }
+
+      return { ...category, puzzles };
+    });
   });
   readonly visibleCategories = computed<PuzzleCategory[]>(() => {
     const query = this.normalizeSearch(this.searchQuery());
@@ -298,13 +301,20 @@ export class HomePage {
   }
 
   playlistPuzzleTitle(route: string): string {
-    return this.playlistPuzzleOptions().find((puzzle) => puzzle.route === route)?.title ?? route;
+    return (
+      this.playlistPuzzleOptions().find((puzzle) => puzzle.route === route)?.title ??
+      PUZZLE_CATEGORIES.flatMap((category) => category.puzzles).find(
+        (puzzle) => puzzle.route === route,
+      )?.title ??
+      route
+    );
   }
 
   playRandomOldestPuzzle(): void {
     const puzzles = PUZZLE_CATEGORIES
       .filter((category) => category.sortable !== false && category.id !== 'multijoueurs')
-      .flatMap((category) => category.puzzles);
+      .flatMap((category) => category.puzzles)
+      .filter((puzzle) => !HIDDEN_PUZZLE_ROUTES.has(puzzle.route));
 
     if (puzzles.length === 0) {
       return;

@@ -1,6 +1,9 @@
 import { EPIQUE_DUELS } from './epique-duels/epique-duels.catalog';
 import { NEW_GAMES, type NewGameId } from './new-games/new-games.catalog';
 
+// Les jeux masqués restent accessibles par leur lien et les playlists existantes.
+export const HIDDEN_PUZZLE_ROUTES: ReadonlySet<string> = new Set(['/mnemonic']);
+
 export type PuzzleCard = {
   title: string;
   description: string;

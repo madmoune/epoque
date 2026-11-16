@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
+import { PuzzlePlayHistoryService } from '../../puzzle-play-history.service';
 import {
   FINALE_1_PLAYLIST_ID,
   FINALE_2_PLAYLIST_ID,
@@ -158,6 +159,28 @@ describe('HomePage playlist category controls', () => {
       );
     }
     expect(playlistOptions.some((puzzle) => /rébus|groupe de 4/i.test(puzzle.title))).toBe(false);
+  });
+
+  it('hides Mnémotechnique from discovery and keeps its saved playlist entry playable', () => {
+    const page = TestBed.createComponent(HomePage).componentInstance;
+    const playlists = TestBed.inject(PuzzlePlaylistService);
+    const playlist = playlists.create('Parcours existant');
+    playlists.update(playlist.id, { routes: ['/mnemonic'] });
+
+    page.searchQuery.set('mnemotechnique');
+    expect(page.visibleCategories()).toEqual([]);
+    expect(page.playlistPuzzleOptions().some((puzzle) => puzzle.route === '/mnemonic')).toBe(false);
+    expect(playlists.find(playlist.id)?.routes).toEqual(['/mnemonic']);
+    expect(page.playlistPuzzleTitle('/mnemonic')).toBe('Mnémotechnique');
+
+    vi.spyOn(TestBed.inject(PuzzlePlayHistoryService), 'lastPlayedAt').mockImplementation(
+      (route) => (route === '/mnemonic' ? 0 : route === '/memory-grid' ? 1 : 2),
+    );
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    page.playRandomOldestPuzzle();
+
+    expect(navigate).toHaveBeenCalledWith('/memory-grid?from=random');
+    expect(routes.find((route) => route.path === 'mnemonic')?.loadComponent).toBeDefined();
   });
 
   it('propose le Nim à retrait limité dans Duels, les playlists et les routes', () => {

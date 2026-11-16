@@ -7,6 +7,7 @@ import {
     PlayerMemoryGridCell,
 } from '../../puzzles/memory-grid/memory-grid.model';
 import { MemoryGridService } from '../../puzzles/memory-grid/memory-grid.service';
+import { HIDDEN_PUZZLE_ROUTES } from '../puzzle-catalog';
 import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
 
 type GamePhase = 'memorize' | 'play';
@@ -33,6 +34,7 @@ export class MemoryGridPage {
 
     protected readonly colors = this.memoryGridService.colors;
     protected readonly shapes = this.memoryGridService.shapes;
+    protected readonly showMnemonicLegend = !HIDDEN_PUZZLE_ROUTES.has('/mnemonic');
 
     protected readonly colorMnemonics: MnemonicLegendItem[] = [
         {
