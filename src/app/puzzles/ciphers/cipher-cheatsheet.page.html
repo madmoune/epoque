@@ -4,15 +4,14 @@
   </div>
 
   <header class="hero">
-    <p class="eyebrow">Ciphers</p>
-    <h1>Cheatsheet des légendes</h1>
+    <p class="eyebrow">Codes et déchiffrement</p>
+    <h1>Fiche des codes</h1>
     <p class="intro">
-      Toutes les correspondances utiles pour décoder les dix ciphers du site, regroupées au même
-      endroit.
+      Retrouve les correspondances utiles pour déchiffrer les dix codes du site.
     </p>
   </header>
 
-  <nav class="cheatsheet-tabs" role="tablist" aria-label="Sections de la cheatsheet">
+  <nav class="cheatsheet-tabs" role="tablist" aria-label="Sections de la fiche des codes">
     <button
       type="button"
       role="tab"
@@ -48,7 +47,7 @@
         <p class="eyebrow">Outil</p>
         <h2 id="transformer-title">Transformer du texte</h2>
         <p>
-          Ajoute plusieurs ciphers, puis place-les dans l’ordre où tu veux les appliquer au texte.
+          Ajoute plusieurs codes, puis place-les dans l’ordre où tu veux les appliquer au texte.
         </p>
       </header>
 
@@ -59,14 +58,14 @@
             <textarea
               id="transformer-source"
               rows="4"
-              placeholder="Écris ou colle ton texte ici..."
+              placeholder="Écris ou colle ton texte ici…"
               [value]="transformInput()"
               (input)="updateTransformInput($event)"
             ></textarea>
           </label>
 
           <div class="transformer-picker">
-            <h3>Ajouter un cipher</h3>
+            <h3>Ajouter un code</h3>
             <div class="transformer-cipher-list">
               @for (cipher of ciphers; track cipher.id) {
                 <button type="button" (click)="addTransformStep(cipher.id)">
@@ -138,7 +137,7 @@
               }
             </ol>
           } @else {
-            <p class="transformer-empty">Ajoute un cipher pour commencer la transformation.</p>
+            <p class="transformer-empty">Ajoute un code pour commencer la transformation.</p>
           }
         </section>
       </div>
@@ -179,7 +178,7 @@
         </ol>
         <p class="transformer-note">
           Les accents sont simplifiés automatiquement, sauf pendant la transcription sonore crie.
-          Les ciphers visuels utilisent une notation textuelle pour pouvoir être enchaînés.
+          Les codes visuels utilisent une notation textuelle pour pouvoir être enchaînés.
         </p>
       </section>
     </section>
@@ -191,7 +190,7 @@
         }
       </nav>
 
-      <section class="legend-list" aria-label="Légendes des ciphers">
+      <section class="legend-list" aria-label="Légendes des codes">
         @for (cipher of ciphers; track cipher.id) {
           <article class="legend-card" [id]="cipher.id">
             <header class="legend-card-header">
@@ -204,7 +203,7 @@
 
             @switch (cipher.id) {
               @case ('caesar') {
-                <div class="alphabet-reference" aria-label="Exemple de décalage César de un">
+                <div class="alphabet-reference" aria-label="Exemple du code César avec un décalage d’une lettre">
                   <div class="alphabet-row">
                     <span class="row-label">Alphabet</span>
                     @for (letter of alphabet; track letter) {

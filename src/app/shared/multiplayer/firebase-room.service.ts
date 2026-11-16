@@ -85,7 +85,7 @@ export class FirebaseRoomService {
     const roomSnapshot = await get(ref(database, `rooms/${normalizedRoomCode}`));
 
     if (!roomSnapshot.exists()) {
-      throw new Error('Room not found.');
+      throw new Error('Aucune salle ne correspond à ce code.');
     }
 
     await update(ref(database, `rooms/${normalizedRoomCode}`), {
@@ -215,7 +215,7 @@ export class FirebaseRoomService {
       }
     }
 
-    throw new Error('Could not create a unique room code.');
+    throw new Error('Impossible de créer un code de salle. Réessaie dans un instant.');
   }
 
   private generateRoomCode(): string {

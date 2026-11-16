@@ -239,12 +239,12 @@ export class DescribeSymbolsPage implements OnDestroy {
     () => this.guessers().length > 0 && this.submittedGuessCount() >= this.guessers().length,
   );
   protected readonly statusText = computed(() => {
-    if (!this.room()) return 'Cree une salle ou rejoins un code.';
+    if (!this.room()) return 'Crée une salle ou rejoins-en une avec son code.';
     if (this.phase() === 'lobby') return 'Invite les joueurs, puis lance la partie.';
-    if (this.phase() === 'reveal') return 'Reponse envoyee.';
+    if (this.phase() === 'reveal') return 'Réponse envoyée.';
     if (this.isDescriber()) return 'Décris le symbole sans montrer ton écran.';
     return this.hasGuessed()
-      ? 'Choix verrouille. Attends la revelation.'
+      ? 'Choix verrouillé. Attends que la réponse soit dévoilée.'
       : 'Écoute la description, puis choisis le bon symbole.';
   });
 
@@ -365,7 +365,7 @@ export class DescribeSymbolsPage implements OnDestroy {
       selectedSymbolId: null,
       lastSubmission: isCorrect
         ? {
-            title: 'Bonne reponse',
+            title: 'Bonne réponse',
             message: 'Le bon symbole a été trouvé.',
             tone: 'success',
           }
@@ -416,7 +416,7 @@ export class DescribeSymbolsPage implements OnDestroy {
       await navigator.clipboard.writeText(code);
       this.copyStatus.set('Copie');
     } catch {
-      this.copyStatus.set('Selectionne le code');
+      this.copyStatus.set('Sélectionne le code');
     }
 
     window.setTimeout(() => this.copyStatus.set(null), 1600);

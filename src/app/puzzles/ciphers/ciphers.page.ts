@@ -106,7 +106,7 @@ export class CiphersPage implements OnDestroy {
   protected readonly selectedCipherLabel = computed(
     () =>
       this.ciphersService.cipherOptions.find((option) => option.type === this.selectedCipher())
-        ?.label ?? 'Cipher',
+        ?.label ?? 'Code',
   );
 
   protected readonly isNatoLetterMode = computed(
@@ -120,7 +120,7 @@ export class CiphersPage implements OnDestroy {
 
   protected readonly introText = computed(() => {
     if (this.isNatoLetterMode()) {
-      return 'Trouve le mot-code de l’alphabet radio NATO correspondant à la lettre affichée.';
+      return 'Trouve le mot de l’alphabet radio de l’OTAN qui correspond à la lettre affichée.';
     }
 
     if (this.isCreeSyllabics()) {
@@ -129,7 +129,7 @@ export class CiphersPage implements OnDestroy {
         : 'Retrouve le mot français transcrit à l’oreille avec les caractères syllabiques cris.';
     }
 
-    return 'Retrouve le mot de la liste après transformation par un cipher simple.';
+    return 'Déchiffre le message pour retrouver le mot d’origine.';
   });
 
   protected readonly cipherLegend = computed(() =>

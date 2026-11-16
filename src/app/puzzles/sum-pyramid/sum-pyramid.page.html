@@ -6,14 +6,15 @@
       <p class="eyebrow">Sommes</p>
       <h1>Pyramide de sommes</h1>
       <p class="intro">
-        Complete la pyramide: deux cases collees s'additionnent dans la case juste au-dessus.
+        Complète la pyramide. Additionne les nombres de deux cases voisines pour remplir celle qui
+        se trouve juste au-dessus.
       </p>
     </header>
 
     @if (isSolved()) {
       <app-puzzle-success-popup
-        title="Pyramide complete!"
-        message="Chaque case correspond a la somme des deux cases en dessous."
+        title="Pyramide complète !"
+        message="Au-dessus de la base, chaque case contient la somme des deux nombres juste en dessous."
         actionLabel="Nouvelle pyramide"
         (action)="newPuzzle()"
       />
@@ -44,7 +45,7 @@
                     (focus)="activateInput(cell.row, cell.col, $event)"
                     (click)="activateInput(cell.row, cell.col, $event)"
                     (input)="updateAnswer(cell.row, cell.col, $any($event.target).value)"
-                    aria-label="Case de reponse"
+                    aria-label="Case de réponse"
                   />
                 }
               </div>

@@ -1360,7 +1360,7 @@ export const PUZZLE_A_CADENAS_NEW_50: readonly PuzzleACadenasEntry[] = [
     'nouveaux-56-tiroir-du-milieu',
     'Le tiroir du milieu',
     'Moyen',
-    'Dans l’intervalle 1 à 15, teste le milieu de l’intervalle restant jusqu’à trouver la cible. Compte les essais.',
+    'Dans l’intervalle de 1 à 15, teste le milieu de l’intervalle restant jusqu’à trouver la cible. Compte les essais.',
     [
       example(
         '3234',
@@ -1504,7 +1504,7 @@ export const PUZZLE_A_CADENAS_NEW_50: readonly PuzzleACadenasEntry[] = [
     'nouveaux-60-quai-wagons',
     'Le quai des wagons',
     'Moyen',
-    'La file est FIFO : S sort la tête, E# ajoute # à la fin. Lis la valeur en tête après les commandes.',
+    'La file est de type FIFO : S retire l’élément en tête et E# ajoute # à la fin. Lis la valeur en tête après les commandes.',
     [
       example(
         '8179',
@@ -1792,7 +1792,7 @@ export const PUZZLE_A_CADENAS_NEW_50: readonly PuzzleACadenasEntry[] = [
     'nouveaux-68-carre-quatre-familles',
     'Le carré des quatre familles',
     'Difficile',
-    'Complète la grille 4 × 4 pour que chaque ligne et chaque colonne contienne 1, 2, 3 et 4 une fois. Lis la case ?. ',
+    'Complète la grille 4 × 4 pour que chaque ligne et chaque colonne contienne 1, 2, 3 et 4 une fois. Lis la case « ? ».',
     [
       example(
         '1334',
@@ -1864,7 +1864,7 @@ export const PUZZLE_A_CADENAS_NEW_50: readonly PuzzleACadenasEntry[] = [
     'nouveaux-70-sommes-croisees',
     'Les sommes croisées',
     'Moyen',
-    'Reconstitue le carré 2 × 2 à partir des sommes des lignes, des colonnes et du chiffre en haut à gauche. Lis bas à droite.',
+    'Reconstitue le carré 2 × 2 à partir des sommes des lignes, des sommes des colonnes et du chiffre en haut à gauche. Lis la case en bas à droite.',
     [
       example(
         '9385',

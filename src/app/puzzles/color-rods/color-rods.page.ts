@@ -42,7 +42,7 @@ export class ColorRodsPage {
   private readonly dragMimeType = 'application/x-color-rods';
   protected readonly feedback = signal<Feedback>({
     tone: 'info',
-    text: 'Clique une tige, puis clique une position pour la placer.',
+    text: 'Clique sur une tige, puis sur la case où tu veux la placer.',
   });
 
   protected readonly placedRods = computed<(ColoredRod | null)[]>(() => {
@@ -170,7 +170,7 @@ export class ColorRodsPage {
         this.selectedSlotIndex.set(index);
         this.feedback.set({
           tone: 'info',
-          text: 'Tige sélectionnée. Clique sur une autre position pour la déplacer ou l’interchanger.',
+          text: 'Tige sélectionnée. Clique sur une autre case pour la déplacer ou l’échanger avec une autre tige.',
         });
       } else {
         this.feedback.set({
@@ -414,7 +414,7 @@ export class ColorRodsPage {
     this.clearSelection();
     this.feedback.set({
       tone: 'info',
-      text: 'La chaîne est vide. Clique une tige pour la prendre.',
+      text: 'La chaîne est vide. Clique sur une tige pour la prendre.',
     });
   }
 

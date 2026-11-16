@@ -84,7 +84,7 @@ export const EPIQUE_DUELS: EpiqueGameDefinition[] = [
     rules: [
       'La partie se joue sur une grille de 5 × 5 cases.',
       'Le joueur 1 pose uniquement des dominos horizontaux; le joueur 2 pose uniquement des dominos verticaux.',
-      'Clique une première case puis la case voisine pour placer un domino. Les dominos ne peuvent pas se chevaucher.',
+      'Clique sur une première case, puis sur la case voisine pour placer un domino. Les dominos ne peuvent pas se chevaucher.',
       'Le joueur qui ne peut plus placer son domino perd.',
     ],
     tag: 'Placement',

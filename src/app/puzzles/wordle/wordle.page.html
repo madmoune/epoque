@@ -5,10 +5,10 @@
     <header class="wordle-header">
       <div class="header-title-row">
         <div>
-          <p class="eyebrow">Mots et langage · Wordle</p>
+          <p class="eyebrow">Mots et phrases · Wordle</p>
           <h1>Le mot mystère</h1>
         </div>
-        <span class="attempts-pill" [attr.aria-label]="attemptsLabel() + ' essais utilisés'">
+        <span class="attempts-pill" [attr.aria-label]="'Essais utilisés : ' + attemptsLabel()">
           <strong>{{ guesses().length }}</strong> / {{ maxAttempts }}
         </span>
       </div>
@@ -17,7 +17,7 @@
         placées, présentes ailleurs ou absentes.
       </p>
       <p class="word-pool-note">
-        Liste partagée avec les word-ladders · {{ wordPoolCount() }} mots acceptés · accents
+        Liste partagée avec le jeu « Échelle de mots » · {{ wordPoolCount() }} mots acceptés · accents
         facultatifs
       </p>
     </header>
@@ -109,7 +109,7 @@
               {{ currentFeedback.text }}
             </p>
           } @else if (!isFinished()) {
-            <p class="feedback feedback-muted">Choisis un mot dans la liste des word-ladders.</p>
+            <p class="feedback feedback-muted">Choisis un mot de la liste commune aux deux jeux.</p>
           }
         </div>
 

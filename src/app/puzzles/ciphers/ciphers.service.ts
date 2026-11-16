@@ -443,7 +443,7 @@ export class CiphersService {
       normalizedAnswer: this.normalizeComparableAnswer(answer),
       cipher: 'nato',
       encoded: [letter.toUpperCase()],
-      note: 'Écris le mot-code NATO correspondant à la lettre affichée.',
+      note: 'Écris le mot de l’alphabet radio de l’OTAN qui correspond à la lettre affichée.',
       caesarShift: null,
     };
   }
@@ -501,7 +501,7 @@ export class CiphersService {
     if (cipher === 'atbash')
       return 'Alphabet inverse : A devient Z, B devient Y, et ainsi de suite.';
     if (cipher === 'tap-code')
-      return 'Chaque code indique la ligne et la colonne dans une grille 5 x 5. I et J partagent la même case.';
+      return 'Chaque code indique la ligne et la colonne dans une grille de 5 × 5 cases. I et J partagent la même case.';
     if (cipher === 'semaphore') return 'Chaque lettre est montrée par deux positions de drapeaux.';
     if (cipher === 'cree-syllabics') {
       return creeMode === 'symbol'
@@ -509,8 +509,8 @@ export class CiphersService {
         : 'Lis les syllabes à l’oreille : le mot français est rapproché des sons du cri oriental du Sud.';
     }
     return natoMode === 'letter-to-code'
-      ? 'Écris le mot-code NATO correspondant à la lettre affichée.'
-      : 'Chaque lettre est remplacée par son mot de l’alphabet radio NATO.';
+      ? 'Écris le mot de l’alphabet radio de l’OTAN qui correspond à la lettre affichée.'
+      : 'Chaque lettre est remplacée par le mot qui lui correspond dans l’alphabet radio de l’OTAN.';
   }
 
   private readonly morseCodes: Record<string, string> = {

@@ -6,15 +6,15 @@
       <p class="eyebrow">Grille calculée</p>
       <h1>KenKen / Calcudoku</h1>
       <p class="intro">
-        Place les nombres de 1 à 5 une seule fois par ligne et colonne. Dans chaque cage, additionne
-        ou multiplie toutes les cases ; pour - et /, fais grand moins petit ou grand divise par
-        petit. Touche une case pour surligner sa cage.
+        Place les nombres de 1 à 5 une seule fois par ligne et par colonne. Dans chaque cage,
+        applique l’opération indiquée. Pour une soustraction ou une division, prends le plus grand
+        nombre en premier. Touche une case pour surligner sa cage.
       </p>
     </header>
 
     @if (isSolved()) {
       <app-puzzle-success-popup
-        title="Grille complete!"
+        title="Grille complète !"
         message="Toutes les lignes, colonnes et cages sont correctes."
         actionLabel="Nouvelle grille"
         (action)="newPuzzle()"
@@ -25,7 +25,7 @@
       <div
         class="calcudoku-grid"
         role="grid"
-        aria-label="Grille Calcudoku. Touchez une case pour surligner sa cage."
+        aria-label="Grille de Calcudoku. Touche une case pour surligner sa cage."
       >
         @for (row of gridIndexes; track row) {
           @for (col of gridIndexes; track col) {

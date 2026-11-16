@@ -111,7 +111,7 @@ export class CornerCubePage {
 
   protected readonly placedPieces = signal<PlacedPiece[]>([]);
   protected readonly selectedPieceId = signal<string | null>(null);
-  protected readonly message = signal('Choisis une piece, puis touche une case du cube.');
+  protected readonly message = signal('Choisis un morceau, puis touche une case du cube.');
   protected readonly dragPosition = signal<DragPosition | null>(null);
   protected readonly hoveredPositionId = signal<string | null>(null);
   protected readonly isDraggingPiece = signal(false);
@@ -144,7 +144,7 @@ export class CornerCubePage {
 
   protected selectPiece(pieceId: string): void {
     this.selectedPieceId.set(pieceId);
-    this.message.set('Place la piece sur n’importe quel emplacement du cube.');
+    this.message.set('Place le morceau sur n’importe quel emplacement du cube.');
   }
 
   protected startPieceDrag(pieceId: string, event: PointerEvent): void {
@@ -223,7 +223,7 @@ export class CornerCubePage {
     if (!target) {
       this.dragPosition.set(null);
       this.hoveredPositionId.set(null);
-      this.message.set('Morceau garde en main. Clique une case ou glisse-le sur le cube.');
+      this.message.set('Morceau en main. Clique sur une case ou fais glisser le morceau sur le cube.');
       this.suppressNextCellClick = true;
       return;
     }
@@ -282,7 +282,7 @@ export class CornerCubePage {
     );
 
     if (!hintPosition) {
-      this.message.set('Retire un morceau mal place pour liberer le prochain indice.');
+      this.message.set('Retire un morceau mal placé pour pouvoir utiliser un autre indice.');
       return;
     }
 
@@ -300,7 +300,7 @@ export class CornerCubePage {
       this.selectedPieceId.set(null);
     }
 
-    this.message.set('Indice place: observe comment ce morceau touche ses faces.');
+    this.message.set('Indice placé : observe comment le morceau s’aligne sur les faces du cube.');
   }
 
   protected resetPuzzle(): void {
@@ -309,7 +309,7 @@ export class CornerCubePage {
     this.dragPosition.set(null);
     this.hoveredPositionId.set(null);
     this.isDraggingPiece.set(false);
-    this.message.set('Choisis une piece, puis touche une case du cube.');
+    this.message.set('Choisis un morceau, puis touche une case du cube.');
   }
 
   protected newCube(): void {
@@ -463,7 +463,7 @@ export class CornerCubePage {
     }
 
     if (this.getPlacedPieceForPosition(position.id)?.locked) {
-      this.message.set('Cette piece est verrouillee par un indice.');
+      this.message.set('Ce morceau est verrouillé par un indice.');
       this.clearDragState();
       return;
     }
@@ -473,7 +473,7 @@ export class CornerCubePage {
     );
 
     if (previousSelectedPiecePlacement?.locked) {
-      this.message.set('Cette piece est verrouillee par un indice.');
+      this.message.set('Ce morceau est verrouillé par un indice.');
       this.clearDragState();
       return;
     }
@@ -497,16 +497,16 @@ export class CornerCubePage {
     this.clearDragState();
 
     if (this.isSolved()) {
-      this.message.set('Cube complete: le trajet est continu sur les trois faces.');
+      this.message.set('Le cube est complet : le trajet est continu sur les trois faces.');
       return;
     }
 
     this.message.set(
       selectedPiece.id === position.id
-        ? 'Bon morceau: ses fragments alignent les faces du cube.'
+        ? 'Bon morceau : ses fragments s’alignent avec les faces du cube.'
         : replacedPiece
-          ? 'Le morceau a ete remplace. L’ancien morceau reste selectionne.'
-          : 'Le morceau est place. Les faces visibles s’ajustent a cet emplacement.',
+          ? 'Le morceau a été remplacé. Le morceau retiré reste sélectionné.'
+          : 'Le morceau est placé. Ses faces visibles s’ajustent à cet emplacement.',
     );
   }
 

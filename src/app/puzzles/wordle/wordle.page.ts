@@ -194,7 +194,7 @@ export class WordlePage {
     const candidate = this.wordLadderService.resolveWord(candidateInput);
 
     if (!candidate || this.wordLadderService.normalizedLength(candidate) !== this.wordLength) {
-      this.showError('Ce mot ne fait pas partie de la liste des word-ladders.');
+      this.showError('Ce mot ne fait pas partie de la liste des mots acceptés.');
       return;
     }
 

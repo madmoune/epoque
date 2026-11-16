@@ -8,8 +8,8 @@
     [class.zebra-level-5]="level() === 5"
   >
     <header class="hero">
-      <p class="eyebrow">Deduction</p>
-      <h1>Zebra logique</h1>
+      <p class="eyebrow">Déduction</p>
+      <h1>Zebra Puzzle</h1>
       <p class="intro">{{ puzzle().intro }}</p>
 
       <div class="level-switch" aria-label="Niveau du puzzle">
@@ -42,8 +42,8 @@
 
     @if (isSolved()) {
       <app-puzzle-success-popup
-        title="Puzzle resolu!"
-        message="La grille de deduction contient toutes les bonnes associations."
+        title="Puzzle résolu !"
+        message="La grille de déduction contient toutes les bonnes associations."
         actionLabel="Nouveau jeu"
         (action)="newPuzzle()"
       />
@@ -89,9 +89,9 @@
         </div>
       </aside>
 
-      <section class="deduction-panel" aria-label="Grille de deduction">
+      <section class="deduction-panel" aria-label="Grille de déduction">
         <div class="section-heading">
-          <h2>Grille de deduction</h2>
+          <h2>Grille de déduction</h2>
         </div>
 
         <div class="logic-grid-wrap">

@@ -11,8 +11,8 @@
     </header>
 
     <section class="game-layout">
-      <div class="cube-stage" aria-label="Coin de cube a trois faces">
-        <svg class="corner-board" viewBox="0 0 420 330" role="img" aria-label="Cube a trois faces">
+      <div class="cube-stage" aria-label="Coin du cube">
+        <svg class="corner-board" viewBox="0 0 420 330" role="img" aria-label="Cube à trois faces visibles">
           <defs>
             @for (face of faces; track face) {
             @for (cell of getFaceCells(face); track cell.face + cell.positionId) {
@@ -104,8 +104,12 @@
     </div>
 
     @if (isSolved()) {
-    <app-puzzle-success-popup title="Cube complete!" message="Le trajet est continu sur les trois faces du cube."
-      actionLabel="Rejouer" (action)="resetPuzzle()" />
+      <app-puzzle-success-popup
+        title="Cube reconstitué !"
+        message="Le trajet est continu sur les trois faces du cube."
+        actionLabel="Rejouer"
+        (action)="resetPuzzle()"
+      />
     }
   </section>
 

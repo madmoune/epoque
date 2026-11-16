@@ -661,7 +661,7 @@ const PUZZLE_A_CADENAS_REVISED: readonly PuzzleACadenasEntry[] = [
     '88-reveil-digital',
     'Le réveil digital',
     'Facile',
-    'Reconstruis mentalement la forme du chiffre sur un afficheur digital à sept segments, puis lis-le directement.',
+    'Reconstruis mentalement la forme du chiffre sur un afficheur numérique à sept segments, puis lis-le directement.',
     [
       grouped('###', '·#·', '##·', '###'),
       grouped('·#·', '###', '··#', '·#·'),
@@ -866,7 +866,7 @@ const PUZZLE_A_CADENAS_REVISED: readonly PuzzleACadenasEntry[] = [
     '99-tour-des-disques',
     'La tour des disques',
     'Moyen',
-    'Pour les tours de Hanoï, le minimum respecte 2^N−1 mouvements. Si le total a deux chiffres, garde seulement l’unité.',
+    'Pour les tours de Hanoï, le nombre minimal de déplacements est 2^N − 1. Si le total a deux chiffres, garde seulement celui des unités.',
     [
       exampleLine(1, '1', 1),
       exampleLine(2, '2', 3),

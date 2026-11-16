@@ -37,7 +37,7 @@ describe('CiphersService NATO modes', () => {
       normalizedAnswer: 'alpha',
       cipher: 'nato',
       encoded: ['A'],
-      note: 'Écris le mot-code NATO correspondant à la lettre affichée.',
+      note: 'Écris le mot de l’alphabet radio de l’OTAN qui correspond à la lettre affichée.',
       caesarShift: null,
     });
   });

@@ -99,7 +99,7 @@ const PUZZLE_A_CADENAS_INITIAL: readonly PuzzleACadenasEntry[] = [
     title: 'Les directions secrètes',
     difficulty: 'Moyen',
     instructions:
-      'Déplace-toi dans la grille 3 × 3. Les flèches indiquent la case voisine à atteindre, puis lis les quatre cases finales.',
+    'Déplace-toi dans la grille de 3 × 3 cases. Suis chaque flèche jusqu’à la case voisine, puis lis les quatre cases finales.',
     display: [
       'Grille de référence',
       '┌───┬───┬───┐',
@@ -793,7 +793,7 @@ const PUZZLE_A_CADENAS_39_56: readonly PuzzleACadenasEntry[] = [
     '46-balance-a-completer',
     'La balance à compléter',
     'Facile',
-    'Trouve ? pour que les deux côtés de l’égalité donnent la même somme.',
+    'Trouve le nombre manquant pour que les deux côtés de l’égalité donnent la même somme.',
     ['2 + 8 = 8 + ? → 2', '1 + 4 = 5 + ? → 0', '2 + 7 = 8 + ? → 1', '5 + 5 = 5 + ? → 5'],
     [
       'A  8 + 3 = 6 + ? → ?',
@@ -950,7 +950,7 @@ const PUZZLE_A_CADENAS_57_74: readonly PuzzleACadenasEntry[] = [
     '57-cretes-cachees',
     'Les crêtes cachées',
     'Facile',
-    'Compte les sommets : un chiffre strictement plus grand que ses deux voisins immédiats.',
+    'Compte les sommets, c’est-à-dire les chiffres strictement plus grands que leurs deux voisins immédiats.',
     ['05739 → 1', '51238 → 0', '46917 → 1', '35460 → 2'],
     ['A  85047 → ?', 'B  23915 → ?', 'C  78291 → ?', 'D  93751 → ?'],
     '0121',
@@ -959,7 +959,7 @@ const PUZZLE_A_CADENAS_57_74: readonly PuzzleACadenasEntry[] = [
     '58-vallees-secretes',
     'Les vallées secrètes',
     'Facile',
-    'Compte les creux : un chiffre strictement plus petit que ses deux voisins.',
+    'Compte les creux, c’est-à-dire les chiffres strictement plus petits que leurs deux voisins.',
     ['32145 → 1', '61053 → 1', '21769 → 2', '19853 → 0'],
     ['A  19728 → ?', 'B  21784 → ?', 'C  37542 → ?', 'D  51937 → ?'],
     '1102',
@@ -1420,7 +1420,7 @@ const PUZZLE_A_CADENAS_75_100: readonly PuzzleACadenasEntry[] = [
     '90-poids-manquant',
     'Le poids manquant',
     'Facile',
-    'Trouve ? pour que les deux côtés de l’égalité donnent la même somme.',
+    'Trouve le nombre manquant pour que les deux côtés de l’égalité donnent la même somme.',
     ['6 + 3 = 0 + ? → 9', '5 + 2 = 2 + ? → 5', '3 + 8 = 3 + ? → 8', '8 + 2 = 5 + ? → 5'],
     [
       'A  1 + 4 = 3 + ? → ?',

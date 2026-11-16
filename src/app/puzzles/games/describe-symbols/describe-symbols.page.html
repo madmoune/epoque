@@ -25,8 +25,8 @@
 
     @if (!firebaseReady()) {
       <section class="setup-panel warning-panel">
-        <h2>Firebase n'est pas configure</h2>
-        <p>Ajoute la configuration Firebase avant de creer une salle.</p>
+        <h2>Firebase n’est pas configuré</h2>
+        <p>Configure Firebase pour pouvoir créer une salle.</p>
       </section>
     }
 
@@ -61,7 +61,7 @@
           <section class="room-choice join-choice">
             <div>
               <h3>Rejoindre</h3>
-              <p>Entre le code du host.</p>
+              <p>Entre le code de la salle.</p>
             </div>
             <label class="text-field compact">
               <span>Code</span>
@@ -108,7 +108,7 @@
           }
         </div>
         <div class="host-status">
-          {{ isHost() ? 'Tu es le host' : 'Host: ' + (hostPlayer()?.name ?? 'en attente') }}
+          {{ isHost() ? 'Tu as créé la salle' : 'Hôte : ' + (hostPlayer()?.name ?? 'en attente') }}
         </div>
         <button type="button" class="ghost-button" (click)="leaveRoom()" [disabled]="busy()">
           Quitter
@@ -124,7 +124,7 @@
           >
             <span>{{ player.name }}</span>
             @if (room()?.hostId === player.id) {
-              <span class="role-badge">Host</span>
+              <span class="role-badge">Hôte</span>
             }
           </div>
         }
@@ -133,7 +133,7 @@
       <section class="round-bar">
         <p role="status" aria-live="polite">{{ statusText() }}</p>
         <span>{{
-          phase() === 'lobby' ? 'Salon' : phase() === 'reveal' ? 'Reponse' : 'En jeu'
+          phase() === 'lobby' ? 'Salon' : phase() === 'reveal' ? 'Réponse' : 'En jeu'
         }}</span>
       </section>
 
@@ -148,10 +148,10 @@
         <section class="setup-panel">
           <div class="panel-heading">
             <h2>Salon</h2>
-            <span>{{ players().length }} joueur(s)</span>
+            <span>{{ players().length }} joueur{{ players().length > 1 ? 's' : '' }}</span>
           </div>
 
-          <p class="muted">Partage le code de salle. Le createur de la salle lance la partie.</p>
+          <p class="muted">Partage le code de la salle. La personne qui l’a créée lance la partie.</p>
 
           @if (isHost()) {
             <button
@@ -163,7 +163,7 @@
               Lancer
             </button>
           } @else {
-            <p class="muted">En attente du createur de la salle.</p>
+            <p class="muted">En attente du lancement de la partie.</p>
           }
         </section>
       } @else {
@@ -181,7 +181,7 @@
             </div>
 
             <div class="describer-actions">
-              <p>Tu es le descripteur. Fais deviner ce symbole aux autres joueurs.</p>
+              <p>Fais deviner ce symbole aux autres joueurs en le décrivant.</p>
             </div>
           </section>
         } @else {
@@ -240,7 +240,7 @@
           <section class="round-footer">
             <div class="reveal-actions">
               <button type="button" class="ghost-button" data-confirm-action="restart" (click)="resetRoom()" [disabled]="busy()">
-                Reinitialiser
+                Réinitialiser
               </button>
               <button
                 type="button"

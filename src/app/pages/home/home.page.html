@@ -3,7 +3,7 @@
     <p class="eyebrow">Collection de jeux</p>
     <h1>Choisis un puzzle</h1>
     <p class="hero-text">
-      Entraîne ta logique, ta mémoire, ton sens spatial et ta résolution de problèmes.
+      Exerce ta logique, ta mémoire et ton sens de l’espace en résolvant des problèmes.
     </p>
 
     <div class="game-search" role="search">
@@ -23,7 +23,7 @@
       </div>
     </div>
 
-    <div class="sort-controls" aria-label="Ordre d'affichage des jeux">
+    <div class="sort-controls" aria-label="Ordre d’affichage des jeux">
       <button
         type="button"
         class="sort-button"
@@ -38,7 +38,7 @@
         [class.active]="sortMode() === 'oldest'"
         (click)="setSortMode('oldest')"
       >
-        Plus longtemps non joué
+        Les moins récemment joués
       </button>
       <button type="button" class="sort-button random-button" (click)="playRandomOldestPuzzle()">
         Jeu au hasard
@@ -89,13 +89,13 @@
                 <span class="playlist-static-label">Disponible pour tout le monde</span>
               }
               <span
-                >{{ playlist.routes.length }} jeu{{ playlist.routes.length === 1 ? '' : 'x' }}</span
+                >{{ playlist.routes.length }} jeu{{ playlist.routes.length > 1 ? 'x' : '' }}</span
               >
               <span class="playlist-last-completed">{{ playlistLastCompletedText(playlist) }}</span>
               @if (playlistProgress(playlist); as progress) {
                 <span class="playlist-progress"
                   >{{ progress.index }} / {{ playlist.routes.length }} complété{{
-                    progress.index === 1 ? '' : 's'
+                    progress.index > 1 ? 's' : ''
                   }}
                   · Reprise disponible</span
                 >
@@ -316,7 +316,7 @@
                   </span>
                   <p>{{ puzzle.description }}</p>
 
-                  <span class="play-link">Jouer -></span>
+                  <span class="play-link">Jouer →</span>
                 </a>
               }
             </div>

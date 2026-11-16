@@ -3005,7 +3005,7 @@ export class LabPage {
         return {
           sevenSegmentDigits: this.sevenSegmentRow(initial, figureId, 50),
           notes: [
-            { id: `${figureId}-note`, x: 18, y: 32, text: 'Deplacer 1 segment; plus grand nombre' },
+            { id: `${figureId}-note`, x: 18, y: 32, text: 'Déplace 1 segment : nombre maximal' },
           ],
           code: result.join(''),
           gridSize: 4,
@@ -3017,7 +3017,7 @@ export class LabPage {
         return {
           sevenSegmentDigits: this.sevenSegmentRow(shown, figureId, 50),
           notes: [
-            { id: `${figureId}-note`, x: 18, y: 32, text: 'Regle: alterner ajout et retrait' },
+            { id: `${figureId}-note`, x: 18, y: 32, text: 'Règle : alterner ajout et retrait' },
           ],
           code: values.join(''),
           gridSize: 4,
@@ -3030,7 +3030,7 @@ export class LabPage {
         )[0];
         return {
           sevenSegmentDigits: this.sevenSegmentRow(available, figureId, 50),
-          notes: [{ id: `${figureId}-note`, x: 18, y: 32, text: 'Cout = segments changes' }],
+          notes: [{ id: `${figureId}-note`, x: 18, y: 32, text: 'Coût = segments modifiés' }],
           code: route.join(''),
           gridSize: 4,
         };
@@ -3063,7 +3063,7 @@ export class LabPage {
               id: `${figureId}-note-b`,
               x: 18,
               y: 40,
-              text: `Indice: ${pairs[0][0]} est dans le premier`,
+              text: `Indice : ${pairs[0][0]} est dans le premier`,
             },
           ],
           code: pairs.flat().join(''),
@@ -3101,7 +3101,7 @@ export class LabPage {
               id: `${figureId}-note-b`,
               x: 18,
               y: 40,
-              text: `Indice: ${pairs[0][0]} est dans le premier`,
+              text: `Indice : ${pairs[0][0]} est dans le premier`,
             },
           ],
           code: pairs.flat().join(''),
@@ -3146,7 +3146,7 @@ export class LabPage {
               id: `${figureId}-note-c`,
               x: 18,
               y: 72,
-              text: '4 chiffres distincts; debut 0, fin 9',
+              text: '4 chiffres distincts, début : 0, fin : 9',
             },
           ],
           code: values.join(''),
@@ -3162,12 +3162,12 @@ export class LabPage {
             ...this.sevenSegmentRow(distractors, `${figureId}-decoy`, 78, 18, 32),
           ],
           notes: [
-            { id: `${figureId}-note-a`, x: 18, y: 104, text: 'Relier si 1 segment change' },
+            { id: `${figureId}-note-a`, x: 18, y: 104, text: 'Relie si un seul segment change' },
             {
               id: `${figureId}-note-b`,
               x: 18,
               y: 113,
-              text: `Depart ${route[0]} / arrivee ${route[3]}`,
+              text: `Départ : ${route[0]} · Arrivée : ${route[3]}`,
             },
           ],
           code: route.join(''),

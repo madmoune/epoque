@@ -144,7 +144,7 @@ describe('ZebraPage', () => {
       expect(
         page.describeChoiceClue('oneOf', { id: 'person' }, 'Adam', { id: 'hobby' }, [
           'Lecture',
-          'Echecs',
+          'Échecs',
         ]),
       ).toBe('Adam pratique soit la lecture, soit les échecs.');
       expect(
@@ -379,11 +379,11 @@ describe('ZebraPage', () => {
     const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0);
 
     try {
-      expect(page.describeSameClue({ id: 'person' }, 'Félix', { id: 'drink' }, 'Cafe')).toBe(
+      expect(page.describeSameClue({ id: 'person' }, 'Félix', { id: 'drink' }, 'Café')).toBe(
         'Félix boit du café.',
       );
       page.clueWordingChoices.clear();
-      expect(page.describeSameClue({ id: 'person' }, 'Félix', { id: 'hobby' }, 'Jardin')).toBe(
+      expect(page.describeSameClue({ id: 'person' }, 'Félix', { id: 'hobby' }, 'Jardinage')).toBe(
         'Félix pratique le jardinage.',
       );
       expect(page.hobbyWithArticle('Yoga')).toBe('le yoga');

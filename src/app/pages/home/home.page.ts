@@ -179,10 +179,10 @@ export class HomePage {
 
   playlistLastCompletedText(playlist: PuzzlePlaylist): string {
     if (playlist.lastCompletedAt == null) {
-      return 'Jamais complétée';
+      return 'Jamais terminée';
     }
 
-    return `Dernière complétion : ${new Intl.DateTimeFormat('fr-CA', {
+    return `Terminée le ${new Intl.DateTimeFormat('fr-CA', {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
@@ -332,7 +332,7 @@ export class HomePage {
     const elapsedDays = Math.floor(elapsedMilliseconds / 86_400_000);
 
     if (elapsedDays <= 0) {
-      return "Joué aujourd'hui";
+      return 'Joué aujourd’hui';
     }
 
     if (elapsedDays === 1) {

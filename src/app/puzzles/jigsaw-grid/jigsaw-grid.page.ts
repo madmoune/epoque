@@ -592,7 +592,7 @@ export class JigsawGridPage {
           this.jigsawGridService.analyzePlacement(this.puzzle(), this.placedPieces(), placedPiece),
         );
       }
-      this.errorMessage.set('This piece cannot be placed there.');
+      this.errorMessage.set('Cette pièce ne peut pas être placée ici.');
       return;
     }
 

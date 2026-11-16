@@ -212,7 +212,8 @@ export class App {
       case 'hint':
         return {
           title: 'Utiliser un indice ?',
-          message: 'Une partie de la solution sera révélée et ta progression sera marquée comme aidée.',
+          message:
+            'Une partie de la solution sera révélée. L’utilisation de l’indice sera indiquée dans ta progression.',
         };
       case 'restart':
         return {

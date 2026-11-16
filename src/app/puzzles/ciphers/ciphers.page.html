@@ -1,12 +1,12 @@
 <main class="page">
   <div class="page-links">
     <a routerLink="/" fragment="ciphers" class="back-link">Retour au menu</a>
-    <a routerLink="/ciphers/cheatsheet" class="reference-link">Voir la cheatsheet des légendes</a>
+    <a routerLink="/ciphers/cheatsheet" class="reference-link">Voir la fiche des codes</a>
   </div>
 
   <section class="card">
     <header class="header">
-      <p class="eyebrow">Ciphers</p>
+      <p class="eyebrow">Codes et déchiffrement</p>
       <h1>{{ selectedCipherLabel() }}</h1>
       <p class="intro">{{ introText() }}</p>
     </header>
@@ -422,7 +422,7 @@
             </div>
           } @else if (!isCreeSymbolMode()) {
             <label class="answer-group">
-              <span>{{ isNatoLetterMode() ? 'Code NATO' : 'Mot original' }}</span>
+              <span>{{ isNatoLetterMode() ? 'Code radio de l’OTAN' : 'Mot original' }}</span>
               <input
                 #answerField
                 class="answer-input"

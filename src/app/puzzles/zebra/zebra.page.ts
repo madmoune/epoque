@@ -36,7 +36,7 @@ const ZEBRA_PUZZLES: Record<ZebraLevel, ZebraPuzzle> = {
   3: {
     level: 3,
     title: 'Trois maisons',
-    intro: 'Associe chaque maison à sa personne, sa couleur et son animal.',
+    intro: 'Associe à chaque maison la personne qui y vit, une couleur et un animal.',
     positions: ['Maison 1', 'Maison 2', 'Maison 3'],
     categories: [
       { id: 'house', label: 'Maison', values: ['Maison 1', 'Maison 2', 'Maison 3'] },
@@ -60,14 +60,14 @@ const ZEBRA_PUZZLES: Record<ZebraLevel, ZebraPuzzle> = {
   4: {
     level: 4,
     title: 'Quatre maisons',
-    intro: 'Associe chaque maison à sa personne, sa couleur, son animal et son loisir.',
+    intro: 'Associe à chaque maison la personne qui y vit, une couleur, un animal et un loisir.',
     positions: ['Maison 1', 'Maison 2', 'Maison 3', 'Maison 4'],
     categories: [
       { id: 'house', label: 'Maison', values: ['Maison 1', 'Maison 2', 'Maison 3', 'Maison 4'] },
       { id: 'person', label: 'Personne', values: ['Alice', 'Bruno', 'Clara', 'Diego'] },
       { id: 'color', label: 'Couleur', values: ['Rouge', 'Bleu', 'Vert', 'Jaune'] },
       { id: 'pet', label: 'Animal', values: ['Chat', 'Chien', 'Oiseau', 'Poisson'] },
-      { id: 'hobby', label: 'Loisir', values: ['Echecs', 'Peinture', 'Course', 'Violon'] },
+      { id: 'hobby', label: 'Loisir', values: ['Échecs', 'Peinture', 'Course', 'Violon'] },
     ],
     clues: [
       'La maison bleue est la deuxième.',
@@ -83,7 +83,7 @@ const ZEBRA_PUZZLES: Record<ZebraLevel, ZebraPuzzle> = {
     ],
     solution: [
       { house: 'Maison 1', person: 'Alice', color: 'Rouge', pet: 'Chat', hobby: 'Violon' },
-      { house: 'Maison 2', person: 'Bruno', color: 'Bleu', pet: 'Chien', hobby: 'Echecs' },
+      { house: 'Maison 2', person: 'Bruno', color: 'Bleu', pet: 'Chien', hobby: 'Échecs' },
       { house: 'Maison 3', person: 'Clara', color: 'Vert', pet: 'Oiseau', hobby: 'Peinture' },
       { house: 'Maison 4', person: 'Diego', color: 'Jaune', pet: 'Poisson', hobby: 'Course' },
     ],
@@ -91,7 +91,7 @@ const ZEBRA_PUZZLES: Record<ZebraLevel, ZebraPuzzle> = {
   5: {
     level: 5,
     title: 'Cinq maisons',
-    intro: 'Associe chaque maison à sa personne, sa couleur, son animal, sa boisson et son loisir.',
+    intro: 'Associe à chaque maison la personne qui y vit, une couleur, un animal, une boisson et un loisir.',
     positions: ['Maison 1', 'Maison 2', 'Maison 3', 'Maison 4', 'Maison 5'],
     categories: [
       {
@@ -102,11 +102,11 @@ const ZEBRA_PUZZLES: Record<ZebraLevel, ZebraPuzzle> = {
       { id: 'person', label: 'Personne', values: ['Alice', 'Bruno', 'Clara', 'Diego', 'Emma'] },
       { id: 'color', label: 'Couleur', values: ['Rouge', 'Bleu', 'Vert', 'Jaune', 'Blanc'] },
       { id: 'pet', label: 'Animal', values: ['Chat', 'Chien', 'Oiseau', 'Poisson', 'Lapin'] },
-      { id: 'drink', label: 'Boisson', values: ['The', 'Lait', 'Jus', 'Cafe', 'Eau'] },
+      { id: 'drink', label: 'Boisson', values: ['Thé', 'Lait', 'Jus', 'Café', 'Eau'] },
       {
         id: 'hobby',
         label: 'Loisir',
-        values: ['Echecs', 'Peinture', 'Course', 'Violon', 'Jardin'],
+        values: ['Échecs', 'Peinture', 'Course', 'Violon', 'Jardinage'],
       },
     ],
     clues: [
@@ -134,7 +134,7 @@ const ZEBRA_PUZZLES: Record<ZebraLevel, ZebraPuzzle> = {
         person: 'Alice',
         color: 'Rouge',
         pet: 'Chat',
-        drink: 'The',
+        drink: 'Thé',
         hobby: 'Violon',
       },
       {
@@ -142,8 +142,8 @@ const ZEBRA_PUZZLES: Record<ZebraLevel, ZebraPuzzle> = {
         person: 'Bruno',
         color: 'Bleu',
         pet: 'Chien',
-        drink: 'Cafe',
-        hobby: 'Echecs',
+        drink: 'Café',
+        hobby: 'Échecs',
       },
       {
         house: 'Maison 3',
@@ -167,7 +167,7 @@ const ZEBRA_PUZZLES: Record<ZebraLevel, ZebraPuzzle> = {
         color: 'Blanc',
         pet: 'Lapin',
         drink: 'Eau',
-        hobby: 'Jardin',
+        hobby: 'Jardinage',
       },
     ],
   },
@@ -1697,14 +1697,7 @@ export class ZebraPage {
   }
 
   private displayValue(value: string): string {
-    const values: Record<string, string> = {
-      Cafe: 'café',
-      Echecs: 'échecs',
-      Jardin: 'jardinage',
-      The: 'thé',
-    };
-
-    return values[value] ?? value.toLowerCase();
+    return value.toLocaleLowerCase('fr-CA');
   }
 
   private drinkWithArticle(value: string): string {
@@ -1753,18 +1746,18 @@ export class ZebraPage {
   private formatClue(clue: string): string {
     const formattedClue = clue
       .replace(/\bde ([AEIOUYÉÈÊËÀÂÄÎÏÔÖÙÛÜ])/g, 'd’$1')
-      .replace(/de le/g, 'du')
-      .replace(/De le/g, 'Du')
-      .replace(/de Le/g, 'du')
-      .replace(/De Le/g, 'Du')
+      .replace(/de le\b/g, 'du')
+      .replace(/De le\b/g, 'Du')
+      .replace(/de Le\b/g, 'du')
+      .replace(/De Le\b/g, 'Du')
       .replace(/de La/g, 'de la')
       .replace(/De La/g, 'De la')
       .replace(/de L'/g, "de l'")
       .replace(/De L'/g, "De l'")
-      .replace(/à le/g, 'au')
-      .replace(/À le/g, 'Au')
-      .replace(/à Le/g, 'au')
-      .replace(/À Le/g, 'Au')
+      .replace(/à le\b/g, 'au')
+      .replace(/À le\b/g, 'Au')
+      .replace(/à Le\b/g, 'au')
+      .replace(/À Le\b/g, 'Au')
       .replace(/à La/g, 'à la')
       .replace(/À La/g, 'À la')
       .replace(/à L'/g, "à l'")
@@ -2395,7 +2388,7 @@ export class ZebraPage {
     }
 
     if (category.id === 'drink') {
-      return `ne boit pas ${this.drinkWithArticle(value)}`;
+      return `ne choisit pas ${this.drinkName(value)} comme boisson`;
     }
 
     if (category.id === 'hobby') {
@@ -2437,13 +2430,13 @@ export class ZebraPage {
     }
 
     if (category.id === 'drink') {
-      const drink = this.drinkWithArticle(value);
-      const drinkName = this.drinkName(value);
+      const drink = this.displayValue(value);
+      const article = /^[aeiouyéèêëàâäîïôöùûü]/.test(drink) ? 'd’' : 'de ';
 
       return this.chooseClueWording('notPosition:drink', [
-        `On ne boit pas ${drink} dans ${houseText}.`,
-        `Dans ${houseText}, on ne sert pas ${drink}.`,
-        `La boisson de ${houseText} n'est pas ${drinkName}.`,
+        `On ne boit pas ${article}${drink} dans ${houseText}.`,
+        `Dans ${houseText}, on ne sert pas ${article}${drink}.`,
+        `La boisson de ${houseText} n’est pas ${this.drinkName(value)}.`,
       ]);
     }
 

@@ -222,7 +222,7 @@
       <section
         class="preview-stage"
         [style.grid-column]="isPlayPage() ? '1' : ''"
-        aria-label="Aperçu joueur"
+        aria-label="Aperçu pour les joueurs"
       >
         @if (!isPlayPage()) {
           <div class="variant-summary step-overview">
@@ -607,7 +607,7 @@
                     [class.navigation-svg]="figure.displayMode === 'navigation'"
                     [class.clock-svg]="figure.displayMode === 'clock-letters'"
                     role="img"
-                    [attr.aria-label]="'Figure exemple : ' + (figure.example?.name ?? 'défi')"
+                    [attr.aria-label]="'Exemple : ' + (figure.example?.name ?? 'défi')"
                     [attr.title]="figure.example?.description"
                   >
                     <rect
@@ -1253,7 +1253,7 @@
                   <app-puzzle-answer
                     [answer]="instance().solution"
                     [partials]="challengePartialAnswers()"
-                    label="Votre réponse"
+                    label="Ta réponse"
                     submitLabel="Vérifier"
                     [autoValidate]="selectedType().id === 'syllabic-rotation'"
                     [clearAfterSubmit]="selectedType().id !== 'syllabic-rotation'"
@@ -1287,7 +1287,7 @@
                       Indice
                     </button>
                   }
-                  <label for="challenge-answer">Votre réponse</label>
+                  <label for="challenge-answer">Ta réponse</label>
                   <input
                     id="challenge-answer"
                     type="text"

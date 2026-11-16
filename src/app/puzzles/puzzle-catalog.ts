@@ -132,7 +132,7 @@ export const PUZZLE_CATEGORIES: readonly PuzzleCategory[] = [
       },
       {
         title: 'Tap code',
-        description: 'Utilise les coordonnées de la grille 5 x 5.',
+        description: 'Utilise les coordonnées de la grille de 5 × 5 cases.',
         route: '/ciphers/tap-code',
         tag: 'Codes',
       },
@@ -199,7 +199,7 @@ export const PUZZLE_CATEGORIES: readonly PuzzleCategory[] = [
       },
       {
         title: 'Pyramide de sommes',
-        description: 'Complète la pyramide en additionnant deux cases collées vers le haut.',
+        description: 'Additionne les nombres de deux cases voisines pour remplir celle du dessus.',
         route: '/sum-pyramid',
         tag: 'Sommes',
       },
@@ -332,7 +332,8 @@ export const PUZZLE_CATEGORIES: readonly PuzzleCategory[] = [
       },
       {
         title: 'Rush Hour',
-        description: 'Déplace les véhicules dans une grille 6×6 pour libérer la voiture rouge.',
+        description:
+          'Déplace les véhicules dans une grille de 6 × 6 cases pour libérer la voiture rouge.',
         route: '/rush-hour',
         tag: 'Blocage',
       },
