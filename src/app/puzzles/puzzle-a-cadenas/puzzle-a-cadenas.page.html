@@ -51,6 +51,7 @@
       <section
         id="selected-puzzle"
         class="puzzle-content"
+        [class.solved-puzzle]="isSolved(puzzle.id)"
         [attr.aria-label]="'Puzzle ' + puzzleNumber(puzzles.indexOf(puzzle))"
       >
         <header class="puzzle-heading">
@@ -60,10 +61,20 @@
           <div class="puzzle-heading-meta">
             <span class="puzzle-difficulty">{{ puzzle.difficulty }}</span>
             @if (isSolved(puzzle.id)) {
-              <span class="solved-label">Ouvert</span>
+              <span class="solved-label"><span aria-hidden="true">✓</span> Cadenas ouvert</span>
             }
           </div>
         </header>
+
+        @if (isSolved(puzzle.id)) {
+          <div class="hint-card solved-banner" role="status">
+            <span class="solved-banner-icon" aria-hidden="true">✓</span>
+            <div class="solved-banner-copy">
+              <span class="hint-label">Puzzle résolu</span>
+              <span>Le cadenas est ouvert. Tu peux passer directement au suivant.</span>
+            </div>
+          </div>
+        }
 
         <div class="puzzle-display" aria-label="Énoncé du puzzle">
           @for (block of displayBlocks(puzzle); track $index) {
@@ -734,18 +745,29 @@
         @if (isSolved(puzzle.id)) {
           <div class="success-actions">
             @if (nextUnsolvedPuzzle(); as nextPuzzle) {
-              <button
-                type="button"
-                class="next-button"
-                (click)="goToNextUnsolved()"
-                [attr.aria-label]="
-                  'Ouvrir l’énigme suivante : ' + puzzleLabel(puzzles.indexOf(nextPuzzle))
-                "
-              >
-                Suivant <span aria-hidden="true">→</span>
-              </button>
+              <div class="hint-card next-puzzle-card">
+                <div class="next-puzzle-copy">
+                  <span class="hint-label">Prochaine étape</span>
+                  <strong>{{ puzzleLabel(puzzles.indexOf(nextPuzzle)) }}</strong>
+                  <span>Continue la collection avec le prochain cadenas.</span>
+                </div>
+                <button
+                  type="button"
+                  class="next-button"
+                  (click)="goToNextUnsolved()"
+                  [attr.aria-label]="
+                    'Ouvrir l’énigme suivante : ' + puzzleLabel(puzzles.indexOf(nextPuzzle))
+                  "
+                >
+                  <span>Ouvrir le prochain</span>
+                  <span aria-hidden="true">→</span>
+                </button>
+              </div>
             } @else {
-              <p class="collection-complete">Tous les cadenas sont ouverts !</p>
+              <p class="collection-complete" role="status">
+                <span aria-hidden="true">✓</span>
+                <span>Tous les cadenas sont ouverts !</span>
+              </p>
             }
           </div>
         }

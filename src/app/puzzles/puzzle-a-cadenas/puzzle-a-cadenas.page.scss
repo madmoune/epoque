@@ -243,10 +243,13 @@ h1 {
 }
 
 .solved-label {
+  display: inline-flex;
+  gap: 0.3rem;
+  align-items: center;
   padding: 0.3rem 0.55rem;
   border-radius: 999px;
-  background: var(--accent);
-  color: var(--accent-contrast);
+  background: var(--success, #2e9b5f);
+  color: #fff;
   font-size: 0.8rem;
   font-weight: 900;
 }
@@ -1452,6 +1455,7 @@ button.logic-grid-cell:active {
   display: inline-flex;
   gap: 0.5rem;
   align-items: center;
+  justify-content: space-between;
   min-height: 2.75rem;
   padding: 0.4rem 0.9rem;
   border: 1px solid var(--accent);
@@ -1460,6 +1464,8 @@ button.logic-grid-cell:active {
   color: var(--accent-contrast);
   cursor: pointer;
   font-weight: 900;
+  min-width: 10rem;
+  white-space: nowrap;
 }
 
 .next-button:focus-visible {
@@ -1469,7 +1475,7 @@ button.logic-grid-cell:active {
 
 .collection-complete {
   margin: 0;
-  color: var(--accent);
+  color: var(--success, #2e9b5f);
   font-weight: 900;
 }
 

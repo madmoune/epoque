@@ -781,3 +781,83 @@ html[data-theme] body .success-popup button {
     min-width: 0;
   }
 }
+
+app-puzzle-a-cadenas-page .puzzle-entry.solved {
+  border-color: color-mix(in srgb, var(--success, #2e9b5f) 36%, var(--border, #d5dcda));
+  background: color-mix(in srgb, var(--success, #2e9b5f) 9%, transparent);
+}
+
+app-puzzle-a-cadenas-page .puzzle-entry.solved.active {
+  border-color: var(--success, #2e9b5f);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--success, #2e9b5f) 20%, transparent);
+}
+
+app-puzzle-a-cadenas-page .puzzle-entry.solved .puzzle-number {
+  background: var(--success, #2e9b5f);
+}
+
+app-puzzle-a-cadenas-page .puzzle-content.solved-puzzle {
+  border-color: color-mix(in srgb, var(--success, #2e9b5f) 48%, var(--border, #d5dcda)) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--success, #2e9b5f) 12%, transparent);
+}
+
+app-puzzle-a-cadenas-page .hint-card.solved-banner {
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+  border-left-color: var(--success, #2e9b5f) !important;
+  background: color-mix(in srgb, var(--success, #2e9b5f) 10%, var(--surface-raised, #fff));
+}
+
+app-puzzle-a-cadenas-page .solved-banner-icon {
+  display: grid;
+  width: 2.35rem;
+  height: 2.35rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--success, #2e9b5f);
+  color: #fff;
+  font-weight: 950;
+}
+
+app-puzzle-a-cadenas-page .solved-banner-copy {
+  display: grid;
+  gap: 0.15rem;
+}
+
+app-puzzle-a-cadenas-page .solved-banner .hint-label {
+  color: var(--success, #2e9b5f);
+}
+
+app-puzzle-a-cadenas-page .next-puzzle-card {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+app-puzzle-a-cadenas-page .next-puzzle-copy {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+app-puzzle-a-cadenas-page .next-puzzle-copy strong {
+  color: var(--text, #1f2926);
+  font-size: 1rem;
+}
+
+@media (max-width: 700px) {
+  app-puzzle-a-cadenas-page .next-puzzle-card {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  app-puzzle-a-cadenas-page .next-button {
+    justify-content: center;
+    width: 100%;
+    min-height: 3.1rem;
+  }
+}

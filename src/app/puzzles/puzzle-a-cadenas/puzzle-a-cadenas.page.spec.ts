@@ -234,6 +234,27 @@ describe('Puzzle à Cadenas display', () => {
     page['revealHint']('nouveaux-74-rectangles-sur-mesure');
     expect(page['isHintVisible']('nouveaux-74-rectangles-sur-mesure')).toBe(false);
   });
+
+  it('emphasizes a solved puzzle and exposes the next puzzle action', () => {
+    const fixture = TestBed.createComponent(PuzzleACadenasPage);
+    const page = fixture.componentInstance;
+    const solvedId = PUZZLE_A_CADENAS[0].id;
+
+    page['selectedPuzzleId'].set(solvedId);
+    page['solved'].set(new Set([solvedId]));
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.puzzle-content.solved-puzzle')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.solved-banner')?.textContent).toContain(
+      'Puzzle résolu',
+    );
+    expect(fixture.nativeElement.querySelector('.next-puzzle-card')?.textContent).toContain(
+      'Prochaine étape',
+    );
+    expect(fixture.nativeElement.querySelector('.next-button')?.textContent).toContain(
+      'Ouvrir le prochain',
+    );
+  });
 });
 
 describe('Puzzle à Cadenas in Finale 2', () => {
