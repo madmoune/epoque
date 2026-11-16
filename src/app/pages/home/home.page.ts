@@ -62,7 +62,7 @@ export class HomePage {
   readonly categories = computed<PuzzleCategory[]>(() => {
     const labCategory: PuzzleCategory = {
       id: 'enigmes',
-      title: 'Énigmes du laboratoire',
+      title: 'Énigmes',
       description: 'Résous des énigmes individuelles approuvées par le laboratoire.',
       puzzles: LAB_PUZZLE_TYPES.filter(
         (type) => (this.labTypeStates()[type.id] ?? type.state) === 'approved',
