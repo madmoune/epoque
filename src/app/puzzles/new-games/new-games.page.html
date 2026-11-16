@@ -1,5 +1,5 @@
 <main class="training-page" [class.keyboard-open]="selectedDigit() !== null">
-  <a class="back-link" routerLink="/" fragment="nouveaux-jeux">Retour au menu</a>
+  <a class="back-link" routerLink="/" [fragment]="menuFragment">Retour au menu</a>
   <section class="training-card">
     <header class="training-header">
       <span class="eyebrow">Nouveaux jeux · {{ game.tag }}</span>

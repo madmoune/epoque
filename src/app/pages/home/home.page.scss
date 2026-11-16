@@ -131,6 +131,38 @@ h1 {
   color: #fff !important;
 }
 
+.category-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.95rem;
+}
+
+.category-nav-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.5rem;
+  box-sizing: border-box;
+  padding: 0.3rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 0.55rem;
+  background: var(--surface-raised);
+  color: var(--text);
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-decoration: none;
+
+  &:hover {
+    border-color: var(--focus);
+    color: var(--focus);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+}
+
 .playlists-panel {
   scroll-margin-top: 1.25rem;
   display: grid;
@@ -513,6 +545,7 @@ h1 {
 }
 
 .category-list {
+  scroll-margin-top: 1.25rem;
   display: grid;
   gap: 0.85rem;
   margin-top: 1rem;

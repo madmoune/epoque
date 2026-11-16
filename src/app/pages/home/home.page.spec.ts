@@ -111,11 +111,13 @@ describe('HomePage playlist category controls', () => {
     expect(page.pendingPlaylistDeletion()).toBeNull();
   });
 
-  it('filters the home game cards by name without hiding playlist options', () => {
+  it('filters the home game cards and their category links without hiding playlist options', () => {
     const fixture = TestBed.createComponent(HomePage);
     const page = fixture.componentInstance;
+    const root = fixture.nativeElement as HTMLElement;
 
     page.searchQuery.set('carre magique');
+    fixture.detectChanges();
 
     expect(
       page
@@ -123,26 +125,39 @@ describe('HomePage playlist category controls', () => {
         .flatMap((category) => category.puzzles.map((puzzle) => puzzle.title)),
     ).toEqual(['Carré magique']);
     expect(page.playlistPuzzleOptions().some((puzzle) => puzzle.title === 'Tangram')).toBe(true);
+    const links = root.querySelectorAll<HTMLAnchorElement>('.category-nav-link');
+    expect(Array.from(links, (link) => link.getAttribute('href'))).toEqual(['#grilles-numeriques']);
+    expect(root.querySelector('.category-card')?.id).toBe('grilles-numeriques');
 
     page.clearSearch();
 
     expect(page.visibleCategories().length).toBe(page.categories().length);
   });
 
-  it('lists exactly the six implemented games in the new section, playlists and routes', () => {
+  it('classifies the six games in their themed categories and keeps them in playlists', () => {
     const page = TestBed.createComponent(HomePage).componentInstance;
-    const category = page.categories().find((category) => category.id === 'nouveaux-jeux');
+    const expectedCategory: Record<string, string> = {
+      '/cryptarithms': 'nombres-calcul',
+      '/skyscrapers': 'grilles-numeriques',
+      '/kakuro': 'grilles-numeriques',
+      '/sumplete': 'grilles-numeriques',
+      '/word-fit': 'mots-langage',
+      '/drop-quote': 'mots-langage',
+    };
 
-    expect(category?.title).toBe('Nouveaux jeux');
-    expect(category?.puzzles.map((puzzle) => puzzle.route)).toEqual(NEW_GAME_ROUTES);
-    expect(category?.puzzles).toHaveLength(6);
+    const playlistOptions = page.playlistPuzzleOptions();
+    expect(new Set(playlistOptions.map((puzzle) => puzzle.route)).size).toBe(
+      playlistOptions.length,
+    );
     for (const route of NEW_GAME_ROUTES) {
-      expect(page.playlistPuzzleOptions().some((puzzle) => puzzle.route === route)).toBe(true);
+      const category = page.categories().find((group) => group.puzzles.some((p) => p.route === route));
+      expect(category?.id).toBe(expectedCategory[route]);
+      expect(playlistOptions.some((puzzle) => puzzle.route === route)).toBe(true);
       expect(routes.find((candidate) => candidate.path === route.slice(1))?.data?.['game']).toBe(
         route.slice(1),
       );
     }
-    expect(category?.puzzles.some((puzzle) => /rébus|groupe de 4/i.test(puzzle.title))).toBe(false);
+    expect(playlistOptions.some((puzzle) => /rébus|groupe de 4/i.test(puzzle.title))).toBe(false);
   });
 
   it('propose le Nim à retrait limité dans Duels, les playlists et les routes', () => {

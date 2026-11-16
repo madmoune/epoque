@@ -44,6 +44,16 @@
         Jeu au hasard
       </button>
     </div>
+
+    @if (visibleCategories().length > 0) {
+      <nav class="category-nav" aria-label="Accès rapide aux catégories">
+        @for (category of visibleCategories(); track category.id) {
+          <a class="category-nav-link" [href]="'#' + category.id">
+            {{ category.title }}
+          </a>
+        }
+      </nav>
+    }
   </section>
 
   <section class="playlists-panel" id="playlists" aria-labelledby="playlists-title">
@@ -267,16 +277,17 @@
     </div>
   }
 
-  <section class="category-list" aria-label="Catégories de puzzles">
+  <!-- Point d’ancrage conservé pour les liens vers l’ancienne rubrique. -->
+  <section id="nouveaux-jeux" class="category-list" aria-label="Catégories de puzzles">
     @if (visibleCategories().length > 0) {
-      @for (category of visibleCategories(); track category.title) {
-        <section class="category-card" [attr.id]="category.id">
+      @for (category of visibleCategories(); track category.id) {
+        <section class="category-card" [attr.id]="category.id" tabindex="-1">
           <div class="category-header">
             <h2>{{ category.title }}</h2>
             <p>{{ category.description }}</p>
             @if (category.id === 'ciphers') {
               <a class="category-reference-link" routerLink="/ciphers/cheatsheet">
-                Consulter la cheatsheet des légendes
+                Consulter la fiche des codes
               </a>
             }
           </div>

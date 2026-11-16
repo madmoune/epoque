@@ -110,4 +110,18 @@ describe('PuzzleSuccessPopupComponent', () => {
     expect(actionSpy).toHaveBeenCalledOnce();
     expect(navigateSpy).not.toHaveBeenCalled();
   });
+
+  it.each([
+    ['/cryptograms?from=random', '/#ciphers'],
+    ['/rush-hour', '/#parcours-deplacements'],
+    ['/puzzle-a-cadenas', '/#collections'],
+    ['/play/hidden-colors', '/#enigmes'],
+  ])('links back to the home category for %s', (url, href) => {
+    vi.spyOn(TestBed.inject(Router), 'url', 'get').mockReturnValue(url);
+    const fixture = TestBed.createComponent(PuzzleSuccessPopupComponent);
+    fixture.componentInstance.title = 'Puzzle résolu';
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.menu-action')?.getAttribute('href')).toBe(href);
+  });
 });

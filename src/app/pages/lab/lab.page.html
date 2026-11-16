@@ -1,7 +1,7 @@
 <main class="lab-page">
   <header class="lab-header">
     @if (isPlayPage()) {
-      <a class="back-link" routerLink="/">Retour au menu</a>
+      <a class="back-link" routerLink="/" fragment="enigmes">Retour au menu</a>
     } @else if (isTypeDetailPage()) {
       <a class="back-link" routerLink="/lab">Toutes les énigmes</a>
     } @else {

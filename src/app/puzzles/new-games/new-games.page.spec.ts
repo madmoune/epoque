@@ -2,6 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
+import { puzzleMenuFragment } from '../puzzle-catalog';
 import { NEW_GAMES, NewGameId } from './new-games.catalog';
 import { NewGamesPage } from './new-games.page';
 import { createDropQuote, remainingDropLetters } from './drop-quote.logic';
@@ -139,7 +140,7 @@ describe('NewGamesPage interactions', () => {
     const page = fixture.componentInstance;
     expect(fixture.nativeElement.querySelector('h1').textContent).toBe(game.title);
     const backLink = fixture.nativeElement.querySelector('.back-link') as HTMLAnchorElement;
-    expect(backLink.getAttribute('href')).toBe('/#nouveaux-jeux');
+    expect(backLink.getAttribute('href')).toBe(`/#${puzzleMenuFragment(`/${game.id}`)}`);
     expect(backLink.textContent?.trim()).toBe('Retour au menu');
     expect(page['isSolved']()).toBe(false);
 

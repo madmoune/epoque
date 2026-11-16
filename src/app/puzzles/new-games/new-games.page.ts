@@ -1,6 +1,7 @@
 import { Component, HostListener, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { PuzzlePlayHistoryService } from '../../puzzle-play-history.service';
+import { puzzleMenuFragment } from '../puzzle-catalog';
 import {
   CustomKeyboardComponent,
   CustomKeyboardKey,
@@ -33,6 +34,7 @@ export class NewGamesPage {
   private readonly playHistory = inject(PuzzlePlayHistoryService);
   protected readonly id = this.route.snapshot.data['game'] as NewGameId;
   protected readonly game = NEW_GAMES.find((game) => game.id === this.id)!;
+  protected readonly menuFragment = puzzleMenuFragment(`/${this.id}`);
   protected readonly range = range;
   private readonly dropQuoteService = this.id === 'drop-quote' ? inject(DropQuoteService) : null;
   private readonly wordFitService = this.id === 'word-fit' ? inject(WordFitService) : null;

@@ -13,6 +13,7 @@ import {
 import { Router, RouterLink } from '@angular/router';
 import { PuzzlePlayHistoryService } from '../../../puzzle-play-history.service';
 import { PuzzlePlaylistService } from '../../../puzzle-playlist.service';
+import { puzzleMenuFragment } from '../../puzzle-catalog';
 import { NEW_GAME_ROUTES } from '../../new-games/new-games.catalog';
 
 export type PuzzlePopupTone = 'success' | 'partial';
@@ -87,79 +88,6 @@ export class PuzzleSuccessPopupComponent implements OnInit {
     '/play/syllabic-rotation',
   ];
 
-  private readonly sectionFragmentsByRoute: Record<string, string> = {
-    ...Object.fromEntries(NEW_GAME_ROUTES.map((route) => [route.slice(1), 'nouveaux-jeux'])),
-    anagrams: 'mots-langage',
-    cryptograms: 'mots-langage',
-    'word-search': 'mots-langage',
-    'word-ladder': 'mots-langage',
-    wordle: 'mots-langage',
-    'pivot-word': 'mots-langage',
-    'hidden-phrase': 'mots-langage',
-    phrases: 'mots-langage',
-    'ciphers/caesar': 'ciphers',
-    'ciphers/pigpen': 'ciphers',
-    'ciphers/a1z26': 'ciphers',
-    'ciphers/morse': 'ciphers',
-    'ciphers/braille': 'ciphers',
-    'ciphers/atbash': 'ciphers',
-    'ciphers/tap-code': 'ciphers',
-    'ciphers/semaphore': 'ciphers',
-    'ciphers/nato': 'ciphers',
-    'ciphers/cree-syllabics': 'ciphers',
-    'memory-grid': 'memoire',
-    'memory-pieces': 'memoire',
-    'symbol-pairs': 'memoire',
-    mnemonic: 'memoire',
-    sequences: 'nombres-calcul',
-    crossmath: 'nombres-calcul',
-    'latin-square': 'nombres-calcul',
-    'magic-square': 'nombres-calcul',
-    'sum-pyramid': 'nombres-calcul',
-    'count-is-good': 'nombres-calcul',
-    calcudoku: 'nombres-calcul',
-    'mental-arithmetic': 'nombres-calcul',
-    'quick-arithmetic': 'nombres-calcul',
-    nim: 'nombres-calcul',
-    'knights-and-knaves': 'deduction-logique',
-    'weight-deduction': 'deduction-logique',
-    'hanging-weights': 'deduction-logique',
-    mastermind: 'deduction-logique',
-    zebra: 'deduction-logique',
-    'jigsaw-grid': 'spatial-placement',
-    'jigsaw-blocks': 'spatial-placement',
-    'corner-cube': 'spatial-placement',
-    'sliding-puzzle': 'spatial-placement',
-    'knights-tour': 'spatial-placement',
-    laser: 'spatial-placement',
-    'shape-layers': 'spatial-placement',
-    tangram: 'spatial-placement',
-    tiges: 'spatial-placement',
-    'color-rods': 'spatial-placement',
-    'rush-hour': 'spatial-placement',
-    'towers-of-hanoi': 'spatial-placement',
-    dice: 'spatial-placement',
-    'tic-tac-toe': 'strategie-timing',
-    'timing-drop': 'strategie-timing',
-    'describe-symbols': 'multijoueurs',
-    'puzzlehunt/navigation': 'enigmes',
-    'puzzlehunt/clock-letters': 'enigmes',
-    'play/count-by-symbol': 'enigmes',
-    'play/geometric-shapes': 'enigmes',
-    'play/seven-segment': 'enigmes',
-    'play/faux-words': 'enigmes',
-    'play/segment-phrase': 'enigmes',
-    'play/color-chain': 'enigmes',
-    'play/syllabic-rotation': 'enigmes',
-    wythoff: 'duels-epique',
-    'nim-limite': 'duels-epique',
-    'nim-emission': 'duels-epique',
-    isola: 'duels-epique',
-    domineering: 'duels-epique',
-    sim: 'duels-epique',
-    hex: 'duels-epique',
-  };
-
   private readonly router = inject(Router);
   private readonly playHistory = inject(PuzzlePlayHistoryService);
   private readonly playlistService = inject(PuzzlePlaylistService);
@@ -192,9 +120,7 @@ export class PuzzleSuccessPopupComponent implements OnInit {
   }
 
   protected get menuFragment(): string {
-    const route = this.router.url.split(/[?#]/)[0].replace(/^\/+/, '');
-
-    return this.sectionFragmentsByRoute[route] ?? route;
+    return puzzleMenuFragment(this.router.url);
   }
 
   protected get cameFromRandom(): boolean {
