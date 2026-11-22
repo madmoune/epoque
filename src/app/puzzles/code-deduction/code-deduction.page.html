@@ -1,0 +1,107 @@
+<main class="page">
+  <a routerLink="/" fragment="deduction-logique" class="back-link">Retour au menu</a>
+
+  <section class="card">
+    <header class="header">
+      <p class="eyebrow">Déduction logique</p>
+      <h1>Cadenas à indices</h1>
+      <p class="intro">
+        Trouve le code de quatre chiffres différents. Un chiffre bien placé est à la bonne position.
+        Un chiffre mal placé est dans le code à une autre position. Le code peut commencer par zéro.
+      </p>
+    </header>
+
+    <section class="puzzle-area">
+      <div class="clue-grid">
+        <table aria-label="Indices du cadenas">
+          <thead>
+            <tr>
+              <th scope="col">Essai</th>
+              <th scope="col">Bien placés</th>
+              <th scope="col">Mal placés</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (clue of puzzle().clues; track clue.attempt) {
+              <tr>
+                <th scope="row">{{ clue.attempt }}</th>
+                <td>{{ clue.wellPlaced }}</td>
+                <td>{{ clue.misplaced }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <form class="answer-form" (submit)="checkAnswer($event)">
+        <label for="code-answer">Code à quatre chiffres</label>
+        <div class="answer-row">
+          <input
+            #answerField
+            id="code-answer"
+            type="text"
+            inputmode="numeric"
+            autocomplete="off"
+            [value]="answer()"
+            [disabled]="isSolved()"
+            [attr.aria-invalid]="feedback() ? 'true' : null"
+            aria-describedby="code-feedback code-hint"
+            (input)="updateAnswer(answerField)"
+          />
+          <button type="submit" [disabled]="isSolved()">Valider</button>
+        </div>
+        <div id="code-feedback" role="status">
+          @if (feedback(); as message) {
+            <p class="error">{{ message }}</p>
+          }
+        </div>
+      </form>
+
+      <div id="code-hint" role="status">
+        @if (revealedPrefix(); as prefix) {
+          <p class="hint">
+            Le code commence par <strong>{{ prefix }}</strong
+            >.
+          </p>
+        }
+      </div>
+
+      <div class="actions">
+        <button
+          type="button"
+          class="secondary-button"
+          data-confirm-action="hint"
+          (click)="showHint()"
+          [disabled]="!canShowHint()"
+        >
+          Indice
+        </button>
+        <button
+          type="button"
+          class="secondary-button"
+          data-confirm-action="restart"
+          (click)="resetPuzzle()"
+        >
+          Recommencer
+        </button>
+        <button
+          type="button"
+          class="secondary-button"
+          data-confirm-action="new-game"
+          (click)="newPuzzle()"
+        >
+          Nouvelle énigme
+        </button>
+      </div>
+    </section>
+  </section>
+
+  @if (isSolved()) {
+    <app-puzzle-success-popup
+      title="Cadenas ouvert !"
+      [answer]="puzzle().solution"
+      actionLabel="Nouvelle énigme"
+      (action)="newPuzzle()"
+    />
+  }
+</main>

@@ -240,6 +240,12 @@ export const PUZZLE_CATEGORIES: readonly PuzzleCategory[] = [
         tag: 'Déduction',
       },
       {
+        title: 'Cadenas à indices',
+        description: 'Croise cinq essais pour déduire le code à quatre chiffres.',
+        route: '/code-deduction',
+        tag: 'Déduction',
+      },
+      {
         title: 'Zebra Puzzle',
         description: 'Déduis les bonnes caractéristiques en fonction des indices.',
         route: '/zebra',

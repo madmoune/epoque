@@ -219,6 +219,11 @@ export const routes: Routes = [
       import('./puzzles/games/mastermind/mastermind.page').then((m) => m.MastermindPage),
   },
   {
+    path: 'code-deduction',
+    loadComponent: () =>
+      import('./puzzles/code-deduction/code-deduction.page').then((m) => m.CodeDeductionPage),
+  },
+  {
     path: 'zebra',
     loadComponent: () => import('./puzzles/zebra/zebra.page').then((m) => m.ZebraPage),
   },

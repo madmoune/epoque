@@ -63,6 +63,7 @@ export class PuzzleSuccessPopupComponent implements OnInit {
     '/weight-deduction',
     '/hanging-weights',
     '/mastermind',
+    '/code-deduction',
     '/zebra',
     '/jigsaw-grid',
     '/jigsaw-blocks',
