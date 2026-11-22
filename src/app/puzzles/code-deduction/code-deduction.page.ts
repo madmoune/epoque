@@ -14,32 +14,27 @@ export class CodeDeductionPage {
   private readonly playHistory = inject(PuzzlePlayHistoryService);
   private readonly hintCount = signal(0);
 
+  protected readonly codeLength = CODE_LENGTH;
   protected readonly puzzle = signal(createCodeDeductionPuzzle());
   protected readonly answer = signal('');
   protected readonly feedback = signal('');
   protected readonly isSolved = signal(false);
   protected readonly canShowHint = computed(
-    () => !this.isSolved() && this.hintCount() < CODE_LENGTH - 1,
+    () => !this.isSolved() && this.hintCount() < CODE_LENGTH,
   );
   protected readonly revealedPrefix = computed(() =>
     this.puzzle().solution.slice(0, this.hintCount()),
   );
 
   protected updateAnswer(input: HTMLInputElement): void {
+    if (this.isSolved()) return;
+
     const answer = input.value.replace(/\D/g, '').slice(0, CODE_LENGTH);
     if (input.value !== answer) input.value = answer;
 
     this.answer.set(answer);
-    this.feedback.set('');
-  }
-
-  protected checkAnswer(event: Event): void {
-    event.preventDefault();
-    if (this.isSolved()) return;
-
-    const answer = this.answer();
-    if (answer.length !== CODE_LENGTH) {
-      this.feedback.set('Entre les quatre chiffres du code.');
+    if (answer.length < CODE_LENGTH) {
+      this.feedback.set('');
       return;
     }
     if (new Set(answer).size !== CODE_LENGTH) {

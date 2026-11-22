@@ -33,35 +33,32 @@
         </table>
       </div>
 
-      <form class="answer-form" (submit)="checkAnswer($event)">
+      <div class="answer-field">
         <label for="code-answer">Code à quatre chiffres</label>
-        <div class="answer-row">
-          <input
-            #answerField
-            id="code-answer"
-            type="text"
-            inputmode="numeric"
-            autocomplete="off"
-            [value]="answer()"
-            [disabled]="isSolved()"
-            [attr.aria-invalid]="feedback() ? 'true' : null"
-            aria-describedby="code-feedback code-hint"
-            (input)="updateAnswer(answerField)"
-          />
-          <button type="submit" [disabled]="isSolved()">Valider</button>
-        </div>
+        <input
+          #answerField
+          id="code-answer"
+          type="text"
+          inputmode="numeric"
+          autocomplete="off"
+          [value]="answer()"
+          [disabled]="isSolved()"
+          [attr.aria-invalid]="feedback() ? 'true' : null"
+          aria-describedby="code-feedback code-hint"
+          (input)="updateAnswer(answerField)"
+        />
         <div id="code-feedback" role="status">
           @if (feedback(); as message) {
             <p class="error">{{ message }}</p>
           }
         </div>
-      </form>
+      </div>
 
       <div id="code-hint" role="status">
         @if (revealedPrefix(); as prefix) {
           <p class="hint">
-            Le code commence par <strong>{{ prefix }}</strong
-            >.
+            {{ prefix.length === codeLength ? 'Le code est' : 'Le code commence par' }}
+            <strong>{{ prefix }}</strong>
           </p>
         }
       </div>
