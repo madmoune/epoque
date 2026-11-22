@@ -1,0 +1,1 @@
+function o(t){let r=[...t];for(let n=r.length-1;n>0;n--){let e=Math.floor(Math.random()*(n+1));[r[n],r[e]]=[r[e],r[n]]}return r}function u(t){return Array.from({length:t},(r,n)=>n)}export{o as a,u as b};
