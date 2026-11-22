@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1795382911070,
+  "timestamp": 1795383992109,
   "index": "/epoque/index.html",
   "assetGroups": [
     {
@@ -12,6 +12,7 @@
       },
       "urls": [
         "/epoque/chunk-2TLBHL4K.js",
+        "/epoque/chunk-3SWG4TJ2.js",
         "/epoque/chunk-427ZONYQ.js",
         "/epoque/chunk-46OJKRHE.js",
         "/epoque/chunk-4CL7OY4J.js",
@@ -33,7 +34,6 @@
         "/epoque/chunk-FAUPEPEG.js",
         "/epoque/chunk-FFRALVWM.js",
         "/epoque/chunk-FJUGLPCS.js",
-        "/epoque/chunk-FV7FLGSV.js",
         "/epoque/chunk-FZWWWEA6.js",
         "/epoque/chunk-GCZ4ZCCL.js",
         "/epoque/chunk-GQCVEMG7.js",
@@ -80,7 +80,7 @@
         "/epoque/chunk-ZXKURHZC.js",
         "/epoque/favicon.ico",
         "/epoque/index.html",
-        "/epoque/main-TVKYXYFE.js",
+        "/epoque/main-YBHNQDQB.js",
         "/epoque/manifest.webmanifest",
         "/epoque/styles-MFCS2XLC.css",
         "/epoque/worker-ZA2F6HJO.js"
@@ -409,6 +409,7 @@
     "/epoque/assets/cree-syllabics/ywaa.mp3": "2d742239604095aa2782aeaf447263d42eecbc93",
     "/epoque/assets/cree-syllabics/ywe.mp3": "0cca40326a1cfdf875c272b3ac9ed852357c2ef1",
     "/epoque/chunk-2TLBHL4K.js": "873c07ad3e60e2d3d54a7327b3a262576a0a3a14",
+    "/epoque/chunk-3SWG4TJ2.js": "fd6e7d45b8bb65f16760219d2cd23a496fcc9eb0",
     "/epoque/chunk-427ZONYQ.js": "6ff4b6a82a7d1b4e30c845c5f140761289139a78",
     "/epoque/chunk-46OJKRHE.js": "56516247c0b06a49ff1d48779427f8bc42a7fa08",
     "/epoque/chunk-4CL7OY4J.js": "85c6dcd155a248bde774922856a0290fb40d0344",
@@ -430,7 +431,6 @@
     "/epoque/chunk-FAUPEPEG.js": "ed25fe1dca76073eb19f926850f20b21499b5000",
     "/epoque/chunk-FFRALVWM.js": "532d554fb4597ae785eeacbbb82782ee04719cac",
     "/epoque/chunk-FJUGLPCS.js": "bbfedd2f4274d5bd024fa6525b4fe8e9b04dffd7",
-    "/epoque/chunk-FV7FLGSV.js": "6f1b90250d8e14a8944cc7bdf876dcdeb0bf6b00",
     "/epoque/chunk-FZWWWEA6.js": "6c544ba68ee3dbfb0ea220603e7363ee5f3362f3",
     "/epoque/chunk-GCZ4ZCCL.js": "287ebe3303ee246d2256358ebb70ff475525e014",
     "/epoque/chunk-GQCVEMG7.js": "22dc1f89fd6a7c0d1b60cb48e3174b0bdc8b043b",
@@ -477,8 +477,8 @@
     "/epoque/chunk-ZXKURHZC.js": "e1dc2fa1224bc2e218cba2cb481dff50fa8999e3",
     "/epoque/favicon.ico": "9c39f434fe1261f68c5e3eefdf734630d99c5670",
     "/epoque/grammalecte-4-5.txt": "ab9b8550e5e3c5faabd917192d30a92e5d6128fe",
-    "/epoque/index.html": "23d2cd2f3f9b5e9bb4eda54917a38f7889b22c5f",
-    "/epoque/main-TVKYXYFE.js": "e2bfa8452ef061cb46b902f143e3da8fbca105a9",
+    "/epoque/index.html": "962b7c981866aa6c02a59037d071c48d6baf43ce",
+    "/epoque/main-YBHNQDQB.js": "459e5e01e416ebef429d9b19c0665ff7d2878c94",
     "/epoque/manifest.webmanifest": "799ed34a76256b4f80340db28fc9909ec60dc91b",
     "/epoque/mid-mid-sentences.txt": "c92eec6e22aac9e088b896629d90b1f4c48e61d9",
     "/epoque/mid-sentences.txt": "aa4e51b7b91a9638d5b333c1ba67db308dd3faed",
