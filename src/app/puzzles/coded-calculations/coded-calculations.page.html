@@ -1,0 +1,231 @@
+<main class="page">
+  <a routerLink="/" fragment="nouveaux-jeux" class="back-link">Retour aux nouveaux jeux</a>
+
+  <section class="card">
+    <header>
+      <h1>Calcul codé</h1>
+      <p class="intro">
+        Chaque symbole cache un chiffre différent de 1 à 8. Tu as droit à {{ limit }} calculs.
+      </p>
+    </header>
+
+    @let values = guesses();
+    @let parts = draft();
+    @let log = trials();
+    @let ready = canCompose();
+    @let done = solved();
+    @let last = displayedTrial();
+
+    <form class="game" (submit)="checkGuesses($event)">
+      <section
+        class="workbench"
+        aria-label="Symboles et calcul"
+        (pointerdown)="drag.begin($event)"
+        (pointermove)="drag.move($event)"
+        (pointerup)="endPointer($event)"
+        (pointercancel)="drag.cancel($event)"
+        (lostpointercapture)="drag.cancel($event)"
+      >
+        <div class="symbol-tray" role="group" aria-label="Symboles et chiffres à proposer">
+          @for (symbol of symbols; track symbol.glyph; let index = $index) {
+            @let selected = parts.includes(index);
+            <div class="symbol-tile" [class.placed]="selected">
+              <button
+                type="button"
+                class="symbol-token"
+                data-board-cell
+                [attr.data-drag-number]="ready ? index : null"
+                [attr.aria-label]="symbol.label"
+                [attr.aria-pressed]="selected"
+                [disabled]="!ready"
+                (click)="selectToken(index, $event)"
+              >
+                <span aria-hidden="true">{{ symbol.glyph }}</span>
+              </button>
+              <select
+                class="digit-guess"
+                [attr.aria-label]="'Chiffre pour ' + symbol.label"
+                [value]="values[index] ?? ''"
+                [disabled]="done"
+                (change)="updateGuess(index, $event)"
+              >
+                <option value="">?</option>
+                @for (digit of digits; track digit) {
+                  <option [value]="digit">{{ digit }}</option>
+                }
+              </select>
+            </div>
+          }
+        </div>
+
+        <p class="controls" id="coded-controls">
+          Clique ou glisse pour composer. Note tes chiffres sous les symboles.
+        </p>
+
+        <div
+          class="equation"
+          role="group"
+          aria-label="Calcul à tester"
+          aria-describedby="coded-controls"
+        >
+          @for (slot of slots; track slot; let index = $index) {
+            @let token = parts[index];
+            <button
+              type="button"
+              class="equation-slot"
+              data-board-cell
+              [class.filled]="token !== null"
+              [class.symbol]="index !== 1"
+              [attr.data-placement-cell]="index"
+              [attr.data-drag-number]="ready ? token : null"
+              [attr.aria-label]="
+                slot +
+                (token === null
+                  ? ', vide'
+                  : ', ' + tokens[token].label + ', cliquer pour vider la case')
+              "
+              [disabled]="!ready"
+              (click)="clearSlot(index, $event)"
+            >
+              <span aria-hidden="true">{{ token === null ? '·' : tokens[token].glyph }}</span>
+            </button>
+          }
+          <span class="equals" aria-hidden="true">=</span>
+          <output
+            class="test-result"
+            [class.invalid]="!!last && last.result === null"
+            [class.revealed]="!!last"
+            [attr.aria-label]="
+              last
+                ? last.result === null
+                  ? 'Résultat hors des chiffres de 1 à 8'
+                  : 'Résultat, ' + symbols[last.result].label
+                : 'Résultat à découvrir'
+            "
+          >
+            <span aria-hidden="true">{{
+              last ? (last.result === null ? '✕' : symbols[last.result].glyph) : '?'
+            }}</span>
+          </output>
+        </div>
+
+        <div class="test-controls">
+          <div class="operator-tray" role="group" aria-label="Opérations">
+            @for (operator of operators; track operator; let index = $index) {
+              @let token = symbols.length + index;
+              <button
+                type="button"
+                class="operator-token"
+                data-board-cell
+                [class.placed]="parts[1] === token"
+                [attr.data-drag-number]="ready ? token : null"
+                [attr.aria-label]="tokens[token].label"
+                [attr.aria-pressed]="parts[1] === token"
+                [disabled]="!ready"
+                (click)="selectToken(token, $event)"
+              >
+                {{ operator }}
+              </button>
+            }
+          </div>
+          <button
+            type="button"
+            class="test-button"
+            aria-label="Tester le calcul"
+            [disabled]="!ready || !calculation()"
+            (click)="testCalculation()"
+          >
+            Tester
+          </button>
+          <p
+            class="trial-count"
+            role="status"
+            [attr.aria-label]="log.length + ' calculs testés sur ' + limit"
+          >
+            {{ log.length }} / {{ limit }}
+          </p>
+        </div>
+
+        @if (drag.preview(); as preview) {
+          <span
+            class="drag-preview"
+            aria-hidden="true"
+            [style.left.px]="preview.x"
+            [style.top.px]="preview.y"
+          >
+            {{ tokens[preview.number].glyph }}
+          </span>
+        }
+      </section>
+
+      @if (log.length) {
+        <details class="history">
+          <summary>Calculs testés</summary>
+          <ol>
+            @for (trial of log; track trial) {
+              <li
+                [attr.aria-label]="
+                  symbols[trial.left].label +
+                  ', ' +
+                  trial.operator +
+                  ', ' +
+                  symbols[trial.right].label +
+                  ', égal à ' +
+                  (trial.result === null
+                    ? 'un résultat hors des chiffres de 1 à 8'
+                    : symbols[trial.result].label)
+                "
+              >
+                <span aria-hidden="true"
+                  >{{ symbols[trial.left].glyph }} {{ trial.operator }}
+                  {{ symbols[trial.right].glyph }} =
+                  <span [class.invalid]="trial.result === null">{{
+                    trial.result === null ? '✕' : symbols[trial.result].glyph
+                  }}</span></span
+                >
+              </li>
+            }
+          </ol>
+        </details>
+      }
+
+      <p class="feedback" role="status">{{ feedback() }}</p>
+
+      @if (showHint()) {
+        <p class="hint">
+          Si un produit redonne l’un des deux symboles, l’autre vaut 1. Ensuite, ajoute ou soustrais
+          ce 1 pour découvrir les symboles voisins dans la suite des chiffres.
+        </p>
+      }
+
+      <div class="game-actions">
+        <button type="submit" [disabled]="done">Vérifier le code</button>
+        <button
+          type="button"
+          class="secondary-button"
+          data-confirm-action="hint"
+          [disabled]="done || showHint()"
+          (click)="showHint.set(true)"
+        >
+          Indice
+        </button>
+        <button
+          type="button"
+          class="secondary-button"
+          data-confirm-action="new-game"
+          (click)="newPuzzle()"
+        >
+          Nouvelle partie
+        </button>
+      </div>
+    </form>
+  </section>
+
+  @if (done) {
+    <app-puzzle-success-popup
+      title="Code déchiffré !"
+      actionLabel="Nouvelle partie"
+      (action)="newPuzzle()"
+    />
+  }
+</main>

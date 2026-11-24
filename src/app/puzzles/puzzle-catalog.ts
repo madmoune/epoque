@@ -30,6 +30,91 @@ function newGameCard(id: NewGameId): PuzzleCard {
 
 export const PUZZLE_CATEGORIES: readonly PuzzleCategory[] = [
   {
+    id: 'nouveaux-jeux',
+    title: 'Nouveaux jeux',
+    description: 'Découvre les dernières énigmes ajoutées à la collection.',
+    puzzles: [
+      {
+        title: 'Voisins numérotés',
+        description: 'Place huit nombres sur les chaises en respectant une règle de voisinage.',
+        route: '/voisins-numerotes',
+        tag: 'Déduction',
+      },
+      {
+        title: 'Calcul en chaîne',
+        description: 'Suis les opérations dans l’ordre pour trouver le résultat final.',
+        route: '/calcul-en-chaine',
+        tag: 'Calcul',
+      },
+      {
+        title: 'Triangle magique',
+        description: 'Place six chiffres pour égaliser les sommes des trois côtés du triangle.',
+        route: '/triangle-magique',
+        tag: 'Sommes',
+      },
+      {
+        title: 'Polygones étoilés',
+        description: 'Relie les étoiles pour retrouver deux figures géométriques superposées.',
+        route: '/polygones-etoiles',
+        tag: 'Géométrie',
+      },
+      {
+        title: 'Voie ferrée',
+        description: 'Trace une voie continue en respectant les compteurs des lignes et colonnes.',
+        route: '/voie-ferree',
+        tag: 'Parcours',
+      },
+      {
+        title: 'Grille de propriétés',
+        description: 'Place neuf nombres selon les règles de leurs lignes et colonnes.',
+        route: '/grille-proprietes',
+        tag: 'Déduction',
+      },
+      {
+        title: 'Triage ferroviaire',
+        description: 'Manœuvre les aiguillages pour garer quatre trains à la bonne place.',
+        route: '/triage-ferroviaire',
+        tag: 'Parcours',
+      },
+      {
+        title: 'Mots sans voyelles',
+        description: 'Retrouve un mot à partir de ses consonnes.',
+        route: '/mots-sans-voyelles',
+        tag: 'Lettres',
+      },
+      {
+        title: 'Bâtonnets de calcul',
+        description: 'Soulève les bâtonnets dans l’ordre pour reconstituer un calcul.',
+        route: '/batonnets-de-calcul',
+        tag: 'Calcul',
+      },
+      {
+        title: 'Grille d’opérations',
+        description: 'Place les chiffres de 1 à 9 pour réussir les quatre égalités de la grille.',
+        route: '/grille-operations',
+        tag: 'Calcul',
+      },
+      {
+        title: 'Ponts et îles',
+        description: 'Passe d’île en île en traversant chaque pont une seule fois.',
+        route: '/ponts-et-iles',
+        tag: 'Parcours',
+      },
+      {
+        title: 'Calcul codé',
+        description: 'Teste des calculs pour retrouver le chiffre caché derrière chaque symbole.',
+        route: '/calcul-code',
+        tag: 'Calcul',
+      },
+      {
+        title: 'Mosaïque logique',
+        description: 'Colorie une grille selon des indices de proportions, de symétrie et de position.',
+        route: '/mosaique-logique',
+        tag: 'Déduction',
+      },
+    ],
+  },
+  {
     id: 'mots-langage',
     title: 'Mots et phrases',
     description: 'Trouve des mots, croise des lettres et reconstitue des phrases.',

@@ -1,0 +1,121 @@
+<main class="page">
+  <a routerLink="/" fragment="nouveaux-jeux" class="back-link">Retour aux nouveaux jeux</a>
+
+  <section class="card">
+    <header>
+      <h1>Mosaïque logique</h1>
+      <p class="intro" id="mosaic-instructions">
+        Suis les indices. Clique sur une case pour changer sa couleur ou utilise la palette.
+      </p>
+    </header>
+
+    @let grid = values();
+    @let selected = brush();
+    @let totals = counts();
+    @let done = solved();
+    @let failed = failedClue();
+
+    <div class="puzzle-layout">
+      <div class="paint-area">
+        <div
+          class="mosaic-grid"
+          role="group"
+          aria-label="Grille de cinq lignes et cinq colonnes"
+          aria-describedby="mosaic-instructions"
+        >
+          <span aria-hidden="true"></span>
+          @for (column of indexes; track column) {
+            <span class="coordinate" aria-hidden="true">{{ column + 1 }}</span>
+          }
+          @for (row of indexes; track row) {
+            <span class="coordinate" aria-hidden="true">{{ row + 1 }}</span>
+            @for (column of indexes; track column) {
+              @let cell = row * size + column;
+              @let color = grid[cell];
+              <button
+                type="button"
+                class="mosaic-cell"
+                data-board-cell
+                [attr.data-mosaic-cell]="cell"
+                [attr.data-color]="color"
+                [attr.aria-label]="
+                  'Ligne ' +
+                  (row + 1) +
+                  ', colonne ' +
+                  (column + 1) +
+                  (color ? ', case ' + labels[color].adjective : ', case vide')
+                "
+                [disabled]="done"
+                (click)="paint(cell)"
+              >
+                <span aria-hidden="true">{{ color ? labels[color].letter : '·' }}</span>
+              </button>
+            }
+          }
+        </div>
+
+        <div class="palette" role="group" aria-label="Palette et compteurs de couleurs">
+          @for (color of colors; track color) {
+            <button
+              type="button"
+              class="palette-color"
+              data-board-cell
+              [attr.data-color]="color"
+              [attr.aria-label]="
+                labels[color].name +
+                ', ' +
+                totals[color] +
+                (totals[color] === 1 ? ' case' : ' cases')
+              "
+              [attr.aria-pressed]="selected === color"
+              [disabled]="done"
+              (click)="toggleBrush(color)"
+            >
+              <span aria-hidden="true">{{ labels[color].name }}</span>
+              <span class="color-count" aria-hidden="true">{{ totals[color] }}</span>
+            </button>
+          }
+        </div>
+      </div>
+
+      <section class="clues" aria-labelledby="mosaic-clues">
+        <h2 id="mosaic-clues">Indices</h2>
+        <ul>
+          <li>Symétrie horizontale et verticale.</li>
+          <li>Une seule case bleue.</li>
+          @for (ratio of ratios(); track ratio) {
+            <li>{{ ratio }}</li>
+          }
+          @for (item of clues(); track item.clue) {
+            <li [class.review]="failed === item.clue">{{ item.text }}</li>
+          }
+        </ul>
+      </section>
+    </div>
+
+    <p class="feedback" role="status">{{ feedback() }}</p>
+
+    <div class="game-actions">
+      <button type="button" [disabled]="done" (click)="verify()">Vérifier</button>
+      <button type="button" class="secondary-button" [disabled]="!canUndo()" (click)="undo()">
+        Annuler
+      </button>
+      <button
+        type="button"
+        class="secondary-button"
+        data-confirm-action="new-game"
+        (click)="newPuzzle()"
+      >
+        Nouvelle grille
+      </button>
+    </div>
+  </section>
+
+  @if (done) {
+    <app-puzzle-success-popup
+      title="Mosaïque réussie !"
+      actionLabel="Nouvelle grille"
+      (action)="newPuzzle()"
+    />
+  }
+</main>

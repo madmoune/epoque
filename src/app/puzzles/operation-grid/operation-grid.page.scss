@@ -1,0 +1,232 @@
+.page {
+  box-sizing: border-box;
+  width: min(100%, 38rem);
+  margin-inline: auto;
+  padding: clamp(0.65rem, 3vw, 1.5rem);
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+  font-weight: 800;
+}
+
+.card {
+  display: grid;
+  gap: 0.7rem;
+  padding: clamp(0.7rem, 2.7vw, 1.3rem);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surface);
+}
+
+h1,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: clamp(1.58rem, 5vw, 2.65rem);
+  line-height: 1.08;
+}
+
+.intro {
+  margin-top: 0.4rem;
+  color: var(--muted-strong);
+  line-height: 1.4;
+}
+
+.play-area {
+  display: grid;
+  justify-self: center;
+  gap: 0.65rem;
+  width: min(100%, 26rem);
+  min-width: 0;
+}
+
+.number-tray {
+  display: grid;
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  gap: clamp(0.2rem, 1vw, 0.35rem);
+  padding: 0.3rem;
+  border-radius: 0.65rem;
+  background: var(--surface-soft);
+}
+
+.number-token,
+.grid-slot,
+.drag-preview {
+  display: grid;
+  box-sizing: border-box;
+  min-width: 0;
+  padding: 0;
+  place-items: center;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.55rem;
+  color: var(--text);
+  font: inherit;
+  font-weight: 850;
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+}
+
+.number-token,
+.grid-slot {
+  cursor: pointer;
+  -webkit-touch-callout: none;
+
+  &[data-drag-number] {
+    cursor: grab;
+    touch-action: none;
+  }
+
+  &:hover:not(:disabled),
+  &.selected {
+    border-color: var(--focus);
+  }
+
+  &.selected {
+    outline: 2px solid var(--focus);
+    outline-offset: -2px;
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.number-token {
+  min-height: 2.5rem;
+  background: color-mix(in srgb, var(--focus) 14%, var(--surface-raised));
+  font-size: clamp(1rem, 4.2vw, 1.35rem);
+
+  &.used {
+    border-style: dashed;
+    border-color: var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    text-decoration: line-through;
+  }
+}
+
+.operation-grid {
+  --slot-height: clamp(2.65rem, 11vw, 3.4rem);
+  display: grid;
+  box-sizing: border-box;
+  justify-self: center;
+  grid-template-columns: 1fr 1.45rem 1fr 1.45rem 1fr;
+  grid-template-rows: var(--slot-height) 1.35rem var(--slot-height) 1.35rem var(--slot-height);
+  width: min(100%, 18rem);
+  padding: 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--surface-soft);
+}
+
+.grid-slot {
+  border-style: dashed;
+  background: var(--surface-raised);
+  color: var(--muted);
+  font-size: clamp(1.35rem, 5vw, 1.8rem);
+
+  &.result {
+    border-bottom: 2px solid var(--border-strong);
+  }
+
+  &.filled {
+    border-style: solid;
+    background: color-mix(in srgb, var(--focus) 13%, var(--surface-raised));
+    color: var(--text);
+  }
+
+  &.given {
+    border-color: var(--focus);
+    background: color-mix(in srgb, var(--focus) 22%, var(--surface-raised));
+  }
+}
+
+.sign {
+  place-self: center;
+  color: var(--muted-strong);
+  font-size: 1.25rem;
+  font-weight: 850;
+  line-height: 1;
+
+  &.correct {
+    color: var(--success, #2e9b5f);
+  }
+
+  &.incorrect {
+    color: var(--accent);
+    text-decoration: line-through;
+  }
+}
+
+.column-operator {
+  grid-row: 2;
+}
+
+.column-equals {
+  grid-row: 4;
+}
+
+.bottom-operator {
+  grid-area: 5 / 2;
+}
+
+.bottom-equals {
+  grid-area: 5 / 4;
+}
+
+.controls,
+.feedback {
+  line-height: 1.35;
+  text-align: center;
+}
+
+.controls {
+  color: var(--muted-strong);
+  font-size: 0.84rem;
+}
+
+.feedback {
+  color: var(--focus);
+  font-size: 0.89rem;
+  font-weight: 750;
+}
+
+.drag-preview {
+  position: fixed;
+  z-index: 1100;
+  width: 2.65rem;
+  aspect-ratio: 1;
+  transform: translate(-50%, -75%);
+  border-color: var(--focus);
+  background: var(--surface-raised);
+  box-shadow: 0 0.35rem 0.7rem var(--shadow);
+  font-size: 1.35rem;
+  pointer-events: none;
+}
+
+.game-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+
+  button {
+    min-height: var(--command-height);
+    padding: 0.35rem 0.55rem;
+    border: 1px solid var(--border);
+    border-radius: var(--command-radius);
+    font: inherit;
+    font-size: clamp(0.76rem, 3.3vw, 0.88rem);
+    font-weight: 750;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+  }
+}

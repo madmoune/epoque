@@ -1,0 +1,160 @@
+<main class="page">
+  <a routerLink="/" fragment="nouveaux-jeux" class="back-link">Retour aux nouveaux jeux</a>
+
+  <section class="card">
+    <header>
+      <h1>Grille d’opérations</h1>
+      <p class="intro">
+        Place les chiffres de 1 à 9 une seule fois chacun. Les trois colonnes et la dernière ligne
+        doivent former des égalités justes.
+      </p>
+    </header>
+
+    @let game = puzzle();
+    @let values = placed();
+    @let selected = picked();
+    @let done = solved();
+    @let equations = status();
+
+    <section
+      class="play-area"
+      aria-label="Chiffres et grille"
+      (pointerdown)="drag.begin($event)"
+      (pointermove)="drag.move($event)"
+      (pointerup)="endPointer($event)"
+      (pointercancel)="drag.cancel($event)"
+      (lostpointercapture)="drag.cancel($event)"
+    >
+      <div class="number-tray" role="group" aria-label="Réserve de chiffres">
+        @for (digit of digits; track digit) {
+          @let used = values.includes(digit);
+          <button
+            type="button"
+            class="number-token"
+            data-board-cell
+            [class.used]="used"
+            [class.selected]="selected === digit && !used"
+            [attr.aria-label]="'Chiffre ' + digit + (used ? ', placé' : '')"
+            [attr.aria-pressed]="selected === digit && !used"
+            [disabled]="used || done"
+            [attr.data-drag-number]="used || done ? null : digit"
+            (click)="selectNumber(digit, $event)"
+          >
+            {{ digit }}
+          </button>
+        }
+      </div>
+
+      <p class="controls" id="operation-controls">
+        Glisse un chiffre ou sélectionne-le, puis choisis une case. Deux appuis sur un chiffre placé
+        le remettent en réserve.
+      </p>
+
+      <div
+        class="operation-grid"
+        role="group"
+        [attr.aria-label]="boardLabel()"
+        aria-describedby="operation-controls"
+      >
+        @for (index of cells; track index) {
+          @let value = values[index];
+          @let given = game.givens[index] !== null;
+          @let column = index % 3;
+          @let row = (index - column) / 3;
+          <button
+            type="button"
+            class="grid-slot"
+            data-board-cell
+            [class.filled]="value !== null"
+            [class.selected]="value !== null && value === selected"
+            [class.given]="given"
+            [class.result]="row === 2"
+            [style.grid-column]="2 * column + 1"
+            [style.grid-row]="2 * row + 1"
+            [attr.aria-label]="cellLabel(index)"
+            [attr.aria-pressed]="value !== null && value === selected"
+            [attr.data-placement-cell]="index"
+            [attr.data-drag-number]="given || done ? null : value"
+            [disabled]="given || done"
+            (click)="selectCell(index, $event)"
+          >
+            <span aria-hidden="true">{{ value ?? '·' }}</span>
+          </button>
+        }
+
+        @for (operator of game.columns; track $index) {
+          <span
+            class="sign column-operator"
+            [style.grid-column]="2 * $index + 1"
+            aria-hidden="true"
+          >
+            {{ operator }}
+          </span>
+          <span
+            class="sign column-equals"
+            [class.correct]="equations[$index] === 'correct'"
+            [class.incorrect]="equations[$index] === 'incorrect'"
+            [style.grid-column]="2 * $index + 1"
+            aria-hidden="true"
+          >
+            =
+          </span>
+        }
+
+        <span class="sign bottom-operator" aria-hidden="true">{{ game.bottom }}</span>
+        <span
+          class="sign bottom-equals"
+          [class.correct]="equations[3] === 'correct'"
+          [class.incorrect]="equations[3] === 'incorrect'"
+          aria-hidden="true"
+        >
+          =
+        </span>
+      </div>
+
+      @if (drag.preview(); as preview) {
+        <span
+          class="drag-preview"
+          aria-hidden="true"
+          [style.left.px]="preview.x"
+          [style.top.px]="preview.y"
+        >
+          {{ preview.number }}
+        </span>
+      }
+    </section>
+
+    <p class="feedback" role="status">{{ feedback() }}</p>
+
+    <div class="game-actions">
+      <button
+        type="button"
+        class="secondary-button"
+        data-confirm-action="hint"
+        [disabled]="done"
+        (click)="revealHint()"
+      >
+        Indice
+      </button>
+      <button
+        type="button"
+        class="secondary-button"
+        data-confirm-action="restart"
+        (click)="restart()"
+      >
+        Recommencer
+      </button>
+      <button type="button" data-confirm-action="new-game" (click)="newPuzzle()">
+        Nouvelle grille
+      </button>
+    </div>
+  </section>
+
+  @if (done) {
+    <app-puzzle-success-popup
+      title="Grille complétée !"
+      actionLabel="Nouvelle grille"
+      (action)="newPuzzle()"
+    />
+  }
+</main>

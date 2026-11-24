@@ -1,0 +1,111 @@
+<main class="page">
+  <a routerLink="/" fragment="nouveaux-jeux" class="back-link">Retour aux nouveaux jeux</a>
+
+  <section class="card">
+    <header>
+      <h1>Calcul en chaîne</h1>
+      <p class="intro">
+        Pars du nombre affiché. Applique les opérations dans l’ordre, chaque fois à partir du
+        dernier résultat.
+      </p>
+    </header>
+
+    @let current = chain();
+    @let hints = revealedSteps();
+    @let done = isSolved();
+
+    <section class="chain-panel" aria-label="Chaîne à calculer">
+      <div class="start-value">
+        <span>Départ</span><strong>{{ format(current.start) }}</strong>
+      </div>
+
+      <ol class="operations" aria-label="Opérations dans l’ordre" role="list">
+        @for (step of current.steps; track $index) {
+          <li class="operation-tile" [class.revealed]="$index < hints">
+            <span class="step-index" aria-hidden="true">{{ $index + 1 }}</span>
+            <strong class="operation-symbol" aria-hidden="true">{{ step.operation.symbol }}</strong>
+            <span class="sr-only">Étape {{ $index + 1 }}. {{ step.operation.description }}.</span>
+            @if (step.operation.caption; as caption) {
+              <span class="operation-caption" aria-hidden="true">{{ caption }}</span>
+            }
+            @if ($index < hints) {
+              <span class="step-result"
+                ><span class="sr-only">Résultat </span>{{ format(step.result) }}</span
+              >
+            }
+          </li>
+        }
+      </ol>
+    </section>
+
+    <form class="answer-area" (submit)="$event.preventDefault(); checkAnswer()">
+      <div class="answer-field">
+        <label for="chain-answer">Résultat final</label>
+        <input
+          #answerField
+          id="chain-answer"
+          type="text"
+          inputmode="numeric"
+          maxlength="16"
+          autocomplete="off"
+          [value]="answer()"
+          [disabled]="done"
+          [attr.aria-invalid]="incorrect() ? 'true' : null"
+          aria-describedby="chain-feedback"
+          (input)="updateAnswer(answerField.value)"
+        />
+      </div>
+      <button type="submit" [disabled]="done || !answer().trim()">Vérifier</button>
+    </form>
+
+    <div class="commands">
+      <div id="chain-feedback" role="status">
+        @if (incorrect()) {
+          <p class="feedback">Essaie un autre résultat en reprenant la chaîne dans l’ordre.</p>
+        }
+      </div>
+      <div class="sr-only" role="status">
+        @if (hints > 0) {
+          Après l’étape {{ hints }}, on obtient {{ format(current.steps[hints - 1].result) }}.
+        }
+      </div>
+
+      <div class="game-actions">
+        <button
+          type="button"
+          class="secondary-button"
+          data-confirm-action="hint"
+          [disabled]="!canRevealHint()"
+          (click)="revealHint()"
+        >
+          Indice
+        </button>
+        <button
+          type="button"
+          class="secondary-button"
+          data-confirm-action="restart"
+          (click)="restart()"
+        >
+          Recommencer
+        </button>
+        <button
+          type="button"
+          class="secondary-button"
+          data-confirm-action="new-game"
+          (click)="newChain()"
+        >
+          Nouvelle chaîne
+        </button>
+      </div>
+    </div>
+  </section>
+
+  @if (done) {
+    <app-puzzle-success-popup
+      title="Bonne réponse !"
+      [answer]="format(current.answer)"
+      actionLabel="Nouvelle chaîne"
+      (action)="newChain()"
+    />
+  }
+</main>

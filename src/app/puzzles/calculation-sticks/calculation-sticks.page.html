@@ -1,0 +1,118 @@
+<main class="page">
+  <a routerLink="/" fragment="nouveaux-jeux" class="back-link">Retour aux nouveaux jeux</a>
+
+  <section class="card">
+    <header>
+      <h1>Bâtonnets de calcul</h1>
+      <p class="intro" id="stick-instructions">
+        Soulève les bâtonnets du dessus, un à la fois. Lis le calcul dans l’ordre du retrait, puis
+        trouve son résultat.
+      </p>
+    </header>
+
+    @let done = solved();
+    @let empty = pileEmpty();
+    @let round = puzzle();
+
+    @if (!empty) {
+      <div
+        class="stick-pile"
+        role="group"
+        aria-label="Pile de bâtonnets"
+        aria-describedby="stick-instructions"
+      >
+        @for (stick of visibleSticks(); track stick.id) {
+          <button
+            type="button"
+            class="stick"
+            data-board-cell
+            [class.vertical]="stick.vertical"
+            [class.hinted]="stickHint() && stick.id === lifted()"
+            [attr.data-stick-id]="stick.id"
+            [attr.aria-label]="
+              label(stick.symbol, stick.vertical) +
+              (stick.id === lifted() ? ', dégagé' : ', recouvert')
+            "
+            [style.left.%]="stick.x"
+            [style.top.%]="stick.y"
+            [style.width.%]="stickLength"
+            [style.z-index]="round.sticks.length - stick.id"
+            [style.--stick-angle]="stick.angle + 'deg'"
+            (click)="liftStick(stick.id)"
+          >
+            <span class="stick-label" aria-hidden="true">{{ stick.symbol }}</span>
+          </button>
+        }
+      </div>
+    }
+
+    @if (expression(); as calculation) {
+      <div class="calculation" aria-live="polite">
+        <p class="calculation-label">Calcul</p>
+        <p class="expression">{{ calculation }}</p>
+      </div>
+    }
+
+    @if (empty) {
+      @if (calculationHint()) {
+        <p class="hint" role="status">
+          Commence par la multiplication.
+          <strong>{{ round.product }} = {{ round.productValue }}</strong>
+        </p>
+      }
+      <form class="answer-form" (submit)="checkAnswer($event)">
+        <label for="stick-answer">Résultat du calcul</label>
+        <div class="answer-row">
+          <input
+            id="stick-answer"
+            name="result"
+            type="text"
+            inputmode="numeric"
+            enterkeyhint="done"
+            autocomplete="off"
+            maxlength="6"
+            [value]="answer()"
+            [disabled]="done"
+            (input)="updateAnswer($any($event.target).value)"
+          />
+          <button type="submit" [disabled]="done">Valider</button>
+        </div>
+      </form>
+    }
+
+    <p role="status" class="feedback">{{ notice() }}</p>
+
+    <div class="game-actions">
+      <button
+        type="button"
+        class="secondary-button"
+        data-confirm-action="hint"
+        [disabled]="done || (empty ? calculationHint() : stickHint())"
+        (click)="revealHint()"
+      >
+        Indice
+      </button>
+      <button
+        type="button"
+        class="secondary-button"
+        data-confirm-action="restart"
+        [disabled]="lifted() === 0 && !stickHint()"
+        (click)="restart()"
+      >
+        Recommencer
+      </button>
+      <button type="button" data-confirm-action="new-game" (click)="newPuzzle()">
+        Nouvelle pile
+      </button>
+    </div>
+  </section>
+
+  @if (done) {
+    <app-puzzle-success-popup
+      title="Calcul réussi !"
+      [answer]="expression() + ' = ' + round.answer"
+      actionLabel="Nouvelle pile"
+      (action)="newPuzzle()"
+    />
+  }
+</main>

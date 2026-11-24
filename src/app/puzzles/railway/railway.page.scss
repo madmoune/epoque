@@ -1,0 +1,332 @@
+.page {
+  box-sizing: border-box;
+  width: min(100%, 55rem);
+  margin-inline: auto;
+  padding: clamp(0.65rem, 3vw, 1.5rem);
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+  font-weight: 800;
+}
+
+.card {
+  display: grid;
+  gap: 0.7rem;
+  padding: clamp(0.7rem, 2.7vw, 1.3rem);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surface);
+}
+
+h1,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: clamp(1.85rem, 5vw, 2.65rem);
+  line-height: 1.08;
+}
+
+.intro {
+  margin-top: 0.4rem;
+  color: var(--muted-strong);
+  line-height: 1.4;
+}
+
+.play-layout {
+  display: grid;
+  gap: clamp(0.7rem, 3vw, 1.4rem);
+  min-width: 0;
+}
+
+.board-area {
+  display: grid;
+  gap: 0.65rem;
+  width: min(100%, 22.5rem);
+  min-width: 0;
+  justify-self: center;
+}
+
+.board-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 1.7rem;
+  grid-template-rows: 1.7rem auto;
+  gap: 0.3rem;
+}
+
+.column-clues,
+.row-clues {
+  display: grid;
+  place-items: center;
+}
+
+.column-clues {
+  grid-area: 1 / 1;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.row-clues {
+  grid-area: 2 / 2;
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+}
+
+.clue {
+  display: grid;
+  box-sizing: border-box;
+  width: 1.66rem;
+  height: 1.66rem;
+  place-items: center;
+  border-radius: 0.4rem;
+  color: var(--muted-strong);
+  font-weight: 850;
+  font-variant-numeric: tabular-nums;
+
+  &.exact {
+    color: var(--focus);
+    background: color-mix(in srgb, var(--focus) 15%, var(--surface-raised));
+  }
+
+  &.over {
+    color: var(--accent);
+    text-decoration: underline double;
+    text-underline-offset: 0.14em;
+  }
+}
+
+.rail-grid {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-area: 2 / 1;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  box-shadow: 0 0 0 1px var(--border-strong);
+  touch-action: none;
+  user-select: none;
+}
+
+.rail-cell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: inset -1px -1px var(--border-strong);
+  background: var(--surface-raised);
+  color: var(--muted-strong);
+  cursor: crosshair;
+  -webkit-tap-highlight-color: transparent;
+
+  &:nth-child(8n + 2),
+  &:nth-child(8n + 4),
+  &:nth-child(8n + 5),
+  &:nth-child(8n + 7) {
+    background: var(--surface-soft);
+  }
+
+  &.access {
+    background: color-mix(in srgb, var(--accent) 16%, var(--surface-raised));
+  }
+
+  &.crossed {
+    background: color-mix(in srgb, var(--border) 45%, var(--surface));
+  }
+
+  &:focus-visible,
+  &.selected {
+    outline: 2px solid var(--focus);
+    outline-offset: -3px;
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 1;
+  }
+}
+
+.gate-label {
+  position: absolute;
+  z-index: 2;
+  top: 0.16rem;
+  left: 0.16rem;
+  display: grid;
+  width: 1.16rem;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 0.28rem;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-size: 0.72rem;
+  font-weight: 850;
+  pointer-events: none;
+}
+
+.cross {
+  font-size: clamp(1.5rem, 7vw, 2.15rem);
+  line-height: 1;
+  pointer-events: none;
+}
+
+.track-drawing {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+
+  path.track-bed,
+  path.track-ties,
+  path.track-rails {
+    fill: none;
+  }
+}
+
+.track-bed {
+  stroke: #544a3e;
+  stroke-width: 24;
+}
+
+.track-ties {
+  stroke: #b59267;
+  stroke-width: 20;
+  stroke-dasharray: 3 4;
+}
+
+.track-rails {
+  stroke: #d6e3df;
+  stroke-width: 2.6;
+}
+
+.engine-stationary.on-route {
+  display: none;
+}
+
+.preview {
+  display: none;
+}
+
+.controls,
+.feedback {
+  text-align: center;
+  line-height: 1.35;
+}
+
+.controls {
+  color: var(--muted-strong);
+  font-size: 0.84rem;
+}
+
+.feedback {
+  color: var(--focus);
+  font-size: 0.91rem;
+  font-weight: 750;
+}
+
+.game-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+
+  button {
+    min-height: var(--command-height);
+    padding: 0.4rem 0.7rem;
+    border: 1px solid var(--border);
+    border-radius: var(--command-radius);
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 750;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (max-width: 24rem) {
+  .game-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 43rem) {
+  .play-layout {
+    grid-template-columns: 1.05fr 1fr;
+  }
+
+  .preview {
+    position: relative;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    min-width: 0;
+    padding: 0.8rem;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 0.7rem;
+    background: radial-gradient(ellipse at 50% 20%, var(--surface-soft), var(--surface-raised));
+  }
+
+  .preview-label {
+    color: var(--muted-strong);
+    font-size: 0.85rem;
+    font-weight: 800;
+  }
+
+  .preview-stage {
+    display: grid;
+    place-items: center;
+  }
+
+  .preview-plane {
+    position: relative;
+    width: min(70%, 16rem);
+    aspect-ratio: 1;
+    border: 1px solid #51766b;
+    border-radius: 0.28rem;
+    background:
+      linear-gradient(to right, #416a5f 1px, transparent 1px) 0 0 / 25% 25%,
+      linear-gradient(to bottom, #416a5f 1px, transparent 1px) 0 0 / 25% 25%,
+      linear-gradient(140deg, #2f5a4d, #2b4941);
+    box-shadow:
+      -0.45rem 0.45rem #142f2a,
+      -1rem 1rem 1.4rem var(--shadow);
+    transform: rotateX(52deg) rotateZ(-40deg);
+  }
+
+  .rail-grid :is(.engine-motion, .engine-stationary) {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .engine-motion {
+    display: none;
+  }
+
+  .engine-stationary.on-route {
+    display: block;
+  }
+}

@@ -1,0 +1,217 @@
+.page {
+  box-sizing: border-box;
+  width: min(100%, 41rem);
+  margin-inline: auto;
+  padding: clamp(0.65rem, 3vw, 1.5rem);
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+  font-weight: 800;
+}
+
+.card {
+  display: grid;
+  gap: 0.65rem;
+  padding: clamp(0.7rem, 2.7vw, 1.3rem);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surface);
+}
+
+h1,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: clamp(1.58rem, 5vw, 2.65rem);
+  line-height: 1.08;
+}
+
+.intro {
+  margin-top: 0.4rem;
+  color: var(--muted-strong);
+  line-height: 1.4;
+}
+
+.board-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.1rem 0.75rem;
+  font-size: 0.87rem;
+  line-height: 1.35;
+}
+
+.bridge-count {
+  color: var(--muted-strong);
+  font-variant-numeric: tabular-nums;
+
+  strong {
+    color: var(--text);
+  }
+}
+
+.feedback {
+  color: var(--focus);
+  font-weight: 750;
+}
+
+.bridge-map {
+  --water: color-mix(in srgb, #3f7390 17%, var(--surface-raised));
+  position: relative;
+  box-sizing: border-box;
+  justify-self: center;
+  width: min(100%, 29rem);
+  border: 1px solid var(--border-strong);
+  border-radius: 0.85rem;
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in srgb, var(--water) 92%, var(--focus)),
+    var(--water)
+  );
+  isolation: isolate;
+}
+
+.bridge,
+.island {
+  position: absolute;
+  box-sizing: border-box;
+  min-width: 0;
+  padding: 0;
+  touch-action: manipulation;
+  user-select: none;
+
+  &:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+.bridge {
+  --deck: color-mix(in srgb, var(--muted-strong) 55%, var(--water));
+  z-index: 1;
+  height: 1.75rem;
+  transform: translate(-50%, -50%) rotate(var(--bridge-angle));
+  border: 0;
+  border-radius: 0.4rem;
+  background: transparent;
+
+  &[disabled] {
+    pointer-events: none;
+  }
+
+  &::before {
+    position: absolute;
+    inset: 50% 0 auto;
+    height: 0.36rem;
+    transform: translateY(-50%);
+    border-radius: 0.2rem;
+    background: var(--deck);
+    box-shadow: 0 0 0 2px var(--water);
+    content: '';
+  }
+
+  &.crossed {
+    z-index: 0;
+
+    &::before {
+      height: 0.18rem;
+      background: repeating-linear-gradient(
+        90deg,
+        var(--deck) 0 0.3rem,
+        transparent 0.3rem 0.55rem
+      );
+      box-shadow: none;
+      opacity: 0.75;
+    }
+  }
+
+  &.available {
+    --deck: var(--focus);
+    z-index: 2;
+
+    &::before {
+      height: 0.48rem;
+      background: repeating-linear-gradient(
+        90deg,
+        var(--deck) 0 0.44rem,
+        color-mix(in srgb, var(--deck) 68%, var(--water)) 0.44rem 0.56rem
+      );
+    }
+
+    &:hover,
+    &:focus-visible {
+      --deck: color-mix(in srgb, var(--focus) 65%, var(--text));
+      z-index: 3;
+    }
+  }
+
+  &.hinted {
+    --deck: var(--accent);
+    z-index: 3;
+  }
+
+  &:focus-visible {
+    outline: 2px dashed var(--focus);
+    outline-offset: -3px;
+  }
+}
+
+.island {
+  z-index: 4;
+  display: grid;
+  width: clamp(2.4rem, 10vw, 3rem);
+  aspect-ratio: 1;
+  place-items: center;
+  transform: translate(-50%, -50%);
+  border: 1px solid var(--border-strong);
+  border-radius: 45% 45% 39% 39%;
+  background: color-mix(in srgb, var(--focus) 20%, var(--surface));
+  color: var(--text);
+  box-shadow:
+    0 0 0 2px var(--water),
+    inset 0 -3px color-mix(in srgb, var(--focus) 24%, transparent);
+  font: inherit;
+  font-size: 1.1rem;
+  font-weight: 850;
+
+  &.destination,
+  &:hover:not(:disabled) {
+    border-color: var(--focus);
+  }
+
+  &.current {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--accent-contrast);
+    box-shadow:
+      0 0 0 2px var(--water),
+      0 0 0 4px var(--accent);
+  }
+}
+
+.game-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+
+  button {
+    min-height: var(--command-height);
+    padding: 0.35rem 0.65rem;
+    border: 1px solid var(--border);
+    border-radius: var(--command-radius);
+    font: inherit;
+    font-size: 0.87rem;
+    font-weight: 750;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+  }
+}

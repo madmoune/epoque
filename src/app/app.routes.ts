@@ -229,6 +229,69 @@ export const routes: Routes = [
       import('./puzzles/code-deduction/code-deduction.page').then((m) => m.CodeDeductionPage),
   },
   {
+    path: 'voisins-numerotes',
+    loadComponent: () =>
+      import('./puzzles/number-neighbors/number-neighbors.page').then((m) => m.NumberNeighborsPage),
+  },
+  {
+    path: 'calcul-en-chaine',
+    loadComponent: () =>
+      import('./puzzles/arithmetic-chain/arithmetic-chain.page').then((m) => m.ArithmeticChainPage),
+  },
+  {
+    path: 'triangle-magique',
+    loadComponent: () =>
+      import('./puzzles/magic-triangle/magic-triangle.page').then((m) => m.MagicTrianglePage),
+  },
+  {
+    path: 'polygones-etoiles',
+    loadComponent: () =>
+      import('./puzzles/star-polygons/star-polygons.page').then((m) => m.StarPolygonsPage),
+  },
+  {
+    path: 'voie-ferree',
+    loadComponent: () => import('./puzzles/railway/railway.page').then((m) => m.RailwayPage),
+  },
+  {
+    path: 'grille-proprietes',
+    loadComponent: () =>
+      import('./puzzles/property-grid/property-grid.page').then((m) => m.PropertyGridPage),
+  },
+  {
+    path: 'triage-ferroviaire',
+    loadComponent: () => import('./puzzles/shunting/shunting.page').then((m) => m.ShuntingPage),
+  },
+  {
+    path: 'mots-sans-voyelles',
+    loadComponent: () =>
+      import('./puzzles/vowelless-words/vowelless-words.page').then((m) => m.VowellessWordsPage),
+  },
+  {
+    path: 'batonnets-de-calcul',
+    loadComponent: () =>
+      import('./puzzles/calculation-sticks/calculation-sticks.page').then((m) => m.CalculationSticksPage),
+  },
+  {
+    path: 'grille-operations',
+    loadComponent: () =>
+      import('./puzzles/operation-grid/operation-grid.page').then((m) => m.OperationGridPage),
+  },
+  {
+    path: 'ponts-et-iles',
+    loadComponent: () =>
+      import('./puzzles/island-bridges/island-bridges.page').then((m) => m.IslandBridgesPage),
+  },
+  {
+    path: 'calcul-code',
+    loadComponent: () =>
+      import('./puzzles/coded-calculations/coded-calculations.page').then((m) => m.CodedCalculationsPage),
+  },
+  {
+    path: 'mosaique-logique',
+    loadComponent: () =>
+      import('./puzzles/color-mosaic/color-mosaic.page').then((m) => m.ColorMosaicPage),
+  },
+  {
     path: 'zebra',
     loadComponent: () => import('./puzzles/zebra/zebra.page').then((m) => m.ZebraPage),
   },

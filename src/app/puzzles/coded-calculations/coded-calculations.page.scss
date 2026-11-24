@@ -1,0 +1,331 @@
+.page {
+  box-sizing: border-box;
+  width: min(100%, 43rem);
+  margin-inline: auto;
+  padding: clamp(0.65rem, 3vw, 1.5rem);
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+  font-weight: 800;
+}
+
+.card,
+.game,
+.workbench {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.card {
+  padding: clamp(0.7rem, 2.7vw, 1.3rem);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surface);
+}
+
+h1,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: clamp(1.58rem, 5vw, 2.65rem);
+  line-height: 1.08;
+}
+
+.intro {
+  margin-top: 0.4rem;
+  color: var(--muted-strong);
+  line-height: 1.4;
+}
+
+.symbol-tray {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: clamp(0.25rem, 1.1vw, 0.55rem);
+}
+
+.symbol-tile {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.22rem;
+  border: 1px solid var(--border);
+  border-radius: 0.62rem;
+  background: var(--surface-soft);
+
+  &.placed {
+    border-color: var(--focus);
+  }
+}
+
+.symbol-token,
+.operator-token,
+.equation-slot {
+  box-sizing: border-box;
+  min-width: 0;
+  padding: 0;
+  color: var(--text);
+  font: inherit;
+  user-select: none;
+  -webkit-touch-callout: none;
+
+  &:not(:disabled) {
+    cursor: pointer;
+  }
+
+  &[data-drag-number] {
+    cursor: grab;
+    touch-action: none;
+  }
+}
+
+.symbol-token {
+  min-height: 2.6rem;
+  border: 0;
+  border-radius: 0.4rem;
+  background: transparent;
+  font-size: clamp(1.35rem, 4.5vw, 1.8rem);
+
+  &:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--focus) 16%, transparent);
+  }
+}
+
+.symbol-token,
+.equation-slot.symbol,
+.test-result,
+.drag-preview,
+.history li {
+  font-family: system-ui, 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;
+}
+
+.digit-guess {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 1.75rem;
+  padding-inline: 0.2rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.35rem;
+  background: var(--surface-raised);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.controls,
+.feedback,
+.hint {
+  line-height: 1.35;
+  font-size: 0.88rem;
+}
+
+.controls {
+  color: var(--muted-strong);
+  text-align: center;
+}
+
+.equation {
+  display: grid;
+  justify-self: center;
+  align-items: center;
+  grid-template-columns: 1fr 0.72fr 1fr auto 1fr;
+  gap: clamp(0.25rem, 1.2vw, 0.55rem);
+  width: min(100%, 25rem);
+}
+
+.equation-slot,
+.test-result {
+  display: grid;
+  min-height: 3rem;
+  place-items: center;
+  border: 1px dashed var(--border-strong);
+  border-radius: 0.6rem;
+  background: var(--surface-soft);
+  color: var(--muted);
+  font-size: clamp(1.25rem, 5vw, 1.8rem);
+  font-weight: 850;
+
+  &.filled,
+  &.revealed {
+    border-style: solid;
+    color: var(--text);
+  }
+}
+
+.equation-slot.filled,
+.test-result.revealed {
+  background: color-mix(in srgb, var(--focus) 13%, var(--surface-raised));
+}
+
+.equation-slot:hover:not(:disabled) {
+  border-color: var(--focus);
+}
+
+.test-result.invalid {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 18%, var(--surface-raised));
+}
+
+.invalid {
+  color: var(--accent) !important;
+}
+
+.equals {
+  color: var(--muted-strong);
+  font-size: 1.25rem;
+  font-weight: 850;
+}
+
+.test-controls,
+.operator-tray,
+.game-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.test-controls,
+.game-actions {
+  flex-wrap: wrap;
+}
+
+.operator-token {
+  width: clamp(2rem, 8vw, 2.6rem);
+  min-height: 2.3rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.45rem;
+  background: var(--surface-raised);
+  font-size: 1.18rem;
+  font-weight: 800;
+
+  &.placed,
+  &:hover:not(:disabled) {
+    border-color: var(--focus);
+    color: var(--focus);
+  }
+}
+
+.trial-count {
+  padding-inline: 0.24rem;
+  color: var(--muted-strong);
+  font-size: 0.81rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.test-button,
+.game-actions button {
+  min-height: var(--command-height);
+  padding: 0.3rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: var(--command-radius);
+  font: inherit;
+  font-size: 0.83rem;
+  font-weight: 750;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+}
+
+.history {
+  border: 1px solid var(--border);
+  border-radius: 0.58rem;
+  background: var(--surface-soft);
+
+  summary {
+    padding: 0.45rem 0.6rem;
+    font-weight: 750;
+    cursor: pointer;
+  }
+
+  ol {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 7.9rem), 1fr));
+    gap: 0.35rem;
+    margin: 0;
+    padding: 0 0.5rem 0.5rem;
+    list-style: none;
+  }
+
+  li {
+    padding: 0.3rem;
+    border-radius: 0.4rem;
+    background: var(--surface-raised);
+    font-size: 1rem;
+    font-weight: 700;
+    text-align: center;
+    white-space: nowrap;
+  }
+}
+
+.feedback {
+  color: var(--focus);
+  font-weight: 750;
+  text-align: center;
+
+  &:empty {
+    display: none;
+  }
+}
+
+.hint {
+  padding: 0.5rem 0.65rem;
+  border-left: 3px solid var(--accent);
+  border-radius: 0.4rem;
+  background: var(--surface-soft);
+  color: var(--muted-strong);
+}
+
+.drag-preview {
+  position: fixed;
+  z-index: 1100;
+  display: grid;
+  width: 2.65rem;
+  aspect-ratio: 1;
+  place-items: center;
+  transform: translate(-50%, -75%);
+  border: 1px solid var(--focus);
+  border-radius: 0.55rem;
+  background: var(--surface-raised);
+  box-shadow: 0 0.35rem 0.7rem var(--shadow);
+  font-size: 1.3rem;
+  font-weight: 850;
+  pointer-events: none;
+}
+
+@media (max-width: 34rem) {
+  .card,
+  .game,
+  .workbench {
+    gap: 0.5rem;
+  }
+
+  .symbol-tray {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .symbol-token {
+    min-height: 2.3rem;
+  }
+
+  .game-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr) minmax(0, 1.3fr);
+
+    button {
+      min-width: 0;
+      padding-inline: 0.42rem;
+      line-height: 1.15;
+      text-wrap: balance;
+    }
+  }
+}

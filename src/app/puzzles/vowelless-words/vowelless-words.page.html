@@ -1,0 +1,104 @@
+<main class="page">
+  <a routerLink="/" fragment="nouveaux-jeux" class="back-link">Retour aux nouveaux jeux</a>
+
+  <section class="card">
+    <header>
+      <h1>Mots sans voyelles</h1>
+      <p class="intro">Retrouve le mot en ajoutant les voyelles, y compris le Y.</p>
+    </header>
+
+    @if (loading()) {
+      <p role="status">Chargement des mots…</p>
+    } @else if (failed()) {
+      <p role="status">Le chargement des mots a échoué.</p>
+      <button type="button" class="retry" (click)="load()">Réessayer</button>
+    } @else if (puzzle(); as round) {
+      @let done = solvedWord() !== null;
+      <section class="clue" aria-label="Mot à retrouver">
+        <p class="length">{{ round.length }} lettres</p>
+        <div
+          class="letters"
+          role="group"
+          [attr.aria-label]="'Consonnes ' + round.consonants.split('').join(', ')"
+        >
+          @for (letter of round.consonants.split(''); track $index) {
+            <span aria-hidden="true">{{ letter }}</span>
+          }
+        </div>
+      </section>
+
+      @if (hintLevel() > 0) {
+        <div class="hint" role="status">
+          <p>Une solution possible</p>
+          <div class="hint-letters">
+            @for (letter of hintedLetters(); track $index) {
+              <span
+                [class.missing]="letter === null"
+                [attr.aria-label]="letter ?? 'Voyelle manquante'"
+              >
+                {{ letter ?? '·' }}
+              </span>
+            }
+          </div>
+        </div>
+      }
+
+      <form class="answer-form" (submit)="submit($event)">
+        <label for="vowelless-answer">Ta réponse</label>
+        <div class="answer-row">
+          <input
+            id="vowelless-answer"
+            type="text"
+            name="word"
+            autocomplete="off"
+            autocapitalize="characters"
+            spellcheck="false"
+            enterkeyhint="done"
+            maxlength="24"
+            aria-describedby="accent-note"
+            [value]="answer()"
+            [disabled]="done"
+            (input)="updateAnswer($any($event.target).value)"
+          />
+          <button type="submit" [disabled]="done">Valider</button>
+        </div>
+        <p id="accent-note" class="accent-note">Les accents sont facultatifs.</p>
+      </form>
+
+      <div role="status" class="feedback">
+        @if (feedback(); as message) {
+          <p>{{ message }}</p>
+        }
+      </div>
+
+      <div class="game-actions">
+        <button
+          type="button"
+          class="secondary-button"
+          data-confirm-action="hint"
+          [disabled]="done || hintLevel() >= maxHintLevel()"
+          (click)="revealHint()"
+        >
+          Indice
+        </button>
+        <button
+          type="button"
+          class="secondary-button"
+          data-confirm-action="new-game"
+          (click)="nextPuzzle()"
+        >
+          Nouveau mot
+        </button>
+      </div>
+    }
+  </section>
+
+  @if (solvedWord(); as word) {
+    <app-puzzle-success-popup
+      title="Mot trouvé !"
+      [answer]="word"
+      actionLabel="Nouveau mot"
+      (action)="nextPuzzle()"
+    />
+  }
+</main>

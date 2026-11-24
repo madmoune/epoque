@@ -1,0 +1,221 @@
+.page {
+  box-sizing: border-box;
+  width: min(100%, 39rem);
+  margin-inline: auto;
+  padding: clamp(0.65rem, 3vw, 1.5rem);
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+  font-weight: 800;
+}
+
+.card {
+  display: grid;
+  gap: 0.7rem;
+  padding: clamp(0.7rem, 3vw, 1.35rem);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surface);
+}
+
+h1,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: clamp(1.68rem, 5vw, 2.65rem);
+  line-height: 1.08;
+}
+
+.intro {
+  margin-top: 0.42rem;
+  color: var(--muted-strong);
+  line-height: 1.4;
+}
+
+.stick-pile {
+  position: relative;
+  isolation: isolate;
+  justify-self: center;
+  width: min(100%, 21rem);
+  aspect-ratio: 1;
+  box-sizing: border-box;
+  border: 1px solid #495a58;
+  border-radius: 0.7rem;
+  background:
+    linear-gradient(to right, rgb(204 215 209 / 7%) 1px, transparent 1px) center / 12.5% 12.5%,
+    linear-gradient(to bottom, rgb(204 215 209 / 7%) 1px, transparent 1px) center / 12.5% 12.5%,
+    radial-gradient(ellipse at 45% 28%, #344742, #192724 85%);
+}
+
+.stick {
+  --stick-body: #e3b77f;
+  --stick-grain: #ca9a69;
+  --stick-cap: #66433d;
+  position: absolute;
+  box-sizing: border-box;
+  height: 10.5%;
+  min-width: 0;
+  padding: 0;
+  transform: translate(-50%, -50%) rotate(var(--stick-angle));
+  border: 1px solid #111c1a;
+  border-radius: 0.42rem;
+  background:
+    linear-gradient(90deg, var(--stick-cap) 13%, transparent 13% 87%, var(--stick-cap) 87%),
+    repeating-linear-gradient(
+      1.5deg,
+      transparent 0 4px,
+      var(--stick-grain) 5px 6px,
+      transparent 7px 9px
+    ),
+    var(--stick-body);
+  box-shadow:
+    0 2px 4px rgb(0 0 0 / 54%),
+    inset 0 1px rgb(255 255 255 / 24%);
+  color: #fff6e3;
+  font: inherit;
+  font-size: clamp(1.02rem, 5.5vw, 1.45rem);
+  font-weight: 850;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+
+  &.vertical {
+    --stick-body: #97c1bc;
+    --stick-grain: #79a9a6;
+    --stick-cap: #31535a;
+  }
+
+  &:hover,
+  &:focus-visible {
+    border-color: #fff1c6;
+  }
+
+  &.hinted,
+  &:focus-visible {
+    outline: 2px solid #fff1a7;
+    outline-offset: 1px;
+  }
+}
+
+.stick-label {
+  position: absolute;
+  top: 50%;
+  left: 93.5%;
+  transform: translate(-50%, -50%) rotate(calc(0deg - var(--stick-angle)));
+  line-height: 1;
+  pointer-events: none;
+}
+
+.vertical .stick-label {
+  left: 6.5%;
+}
+
+.calculation {
+  display: grid;
+  justify-items: center;
+  gap: 0.2rem;
+  padding: 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  background: var(--surface-raised);
+  text-align: center;
+}
+
+.calculation-label {
+  color: var(--muted-strong);
+  font-size: 0.82rem;
+  font-weight: 750;
+}
+
+.expression {
+  font-size: clamp(1.35rem, 6vw, 2rem);
+  font-weight: 850;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+}
+
+.answer-form {
+  display: grid;
+  gap: 0.35rem;
+
+  label {
+    font-size: 0.9rem;
+    font-weight: 800;
+  }
+}
+
+.answer-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.45rem;
+
+  input {
+    box-sizing: border-box;
+    min-width: 0;
+    min-height: var(--command-height);
+    padding: 0.45rem 0.6rem;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--command-radius);
+    background: var(--surface-raised);
+    color: var(--text);
+    font: inherit;
+    font-weight: 750;
+  }
+}
+
+.feedback,
+.hint {
+  color: var(--muted-strong);
+  font-size: 0.85rem;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+.feedback:empty {
+  position: absolute;
+}
+
+.hint strong {
+  color: var(--focus);
+}
+
+.game-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.game-actions button,
+.answer-row button {
+  min-height: var(--command-height);
+  padding: 0.35rem 0.66rem;
+  border: 1px solid var(--border);
+  border-radius: var(--command-radius);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 750;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+}
+
+@media (max-width: 24rem) {
+  .game-actions {
+    display: grid;
+    grid-template-columns: 0.75fr 1.25fr 1.15fr;
+    gap: 0.3rem;
+
+    button {
+      min-width: 0;
+      padding-inline: 0.3rem;
+      font-size: 0.79rem;
+    }
+  }
+}

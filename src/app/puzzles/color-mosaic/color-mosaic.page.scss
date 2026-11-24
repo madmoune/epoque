@@ -1,0 +1,265 @@
+.page {
+  box-sizing: border-box;
+  width: min(100%, 48rem);
+  margin-inline: auto;
+  padding: clamp(0.65rem, 3vw, 1.5rem);
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+  font-weight: 800;
+}
+
+.card {
+  display: grid;
+  gap: 0.75rem;
+  padding: clamp(0.7rem, 2.7vw, 1.3rem);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surface);
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: clamp(1.58rem, 5vw, 2.65rem);
+  line-height: 1.08;
+}
+
+.intro {
+  margin-top: 0.4rem;
+  color: var(--muted-strong);
+  line-height: 1.4;
+}
+
+.puzzle-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  align-items: center;
+  gap: clamp(0.75rem, 3vw, 1.5rem);
+}
+
+.paint-area {
+  display: grid;
+  justify-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.mosaic-grid {
+  display: grid;
+  grid-template-columns: 1.05rem repeat(5, minmax(0, 1fr));
+  gap: clamp(0.2rem, 0.8vw, 0.35rem);
+  width: min(100%, 16.5rem);
+}
+
+.coordinate {
+  display: grid;
+  min-height: 0.95rem;
+  place-items: center;
+  color: var(--muted);
+  font-size: 0.71rem;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+[data-color='red'] {
+  --paint: #eb9995;
+}
+
+[data-color='green'] {
+  --paint: #9bceaa;
+}
+
+[data-color='yellow'] {
+  --paint: #f5cf79;
+}
+
+[data-color='blue'] {
+  --paint: #a2c1ee;
+}
+
+.mosaic-cell,
+.palette-color {
+  box-sizing: border-box;
+  min-width: 0;
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  font: inherit;
+  user-select: none;
+  touch-action: manipulation;
+
+  &[data-color] {
+    border-color: color-mix(in srgb, var(--paint) 78%, var(--surface-raised));
+    background: var(--paint);
+    color: #131c19;
+  }
+
+  &:not(:disabled) {
+    cursor: pointer;
+  }
+
+  &:hover:not(:disabled),
+  &:focus-visible,
+  &[aria-pressed='true'] {
+    outline: 2px solid var(--focus);
+    outline-offset: 1px;
+  }
+}
+
+.mosaic-cell {
+  display: grid;
+  aspect-ratio: 1;
+  padding: 0;
+  place-items: center;
+  border-radius: 0.35rem;
+  background: var(--surface-raised);
+  color: var(--muted);
+  font-size: clamp(0.95rem, 4vw, 1.15rem);
+  font-weight: 850;
+}
+
+.palette {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.35rem;
+  width: min(100%, 18rem);
+}
+
+.palette-color {
+  display: flex;
+  min-height: 2.2rem;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.25rem 0.34rem;
+  border-radius: 0.45rem;
+  font-size: clamp(0.72rem, 2.75vw, 0.83rem);
+  font-weight: 800;
+}
+
+.color-count {
+  min-width: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+.clues {
+  align-self: stretch;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 0.68rem;
+  background: var(--surface-soft);
+
+  h2 {
+    margin-bottom: 0.4rem;
+    font-size: 1.08rem;
+  }
+
+  ul {
+    display: grid;
+    gap: 0.18rem;
+    margin: 0;
+    padding-inline-start: 1.05rem;
+    color: var(--muted-strong);
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  li::marker {
+    color: var(--focus);
+  }
+
+  li.review {
+    color: var(--text);
+    text-decoration: underline;
+    text-decoration-color: var(--accent);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.18em;
+  }
+}
+
+.feedback {
+  color: var(--focus);
+  font-size: 0.88rem;
+  font-weight: 750;
+  line-height: 1.35;
+  text-align: center;
+
+  &:empty {
+    display: none;
+  }
+}
+
+.game-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+
+  button {
+    min-height: var(--command-height);
+    padding: 0.35rem 0.62rem;
+    border: 1px solid var(--border);
+    border-radius: var(--command-radius);
+    font: inherit;
+    font-size: 0.86rem;
+    font-weight: 750;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+  }
+}
+
+@media (max-width: 37rem) {
+  .card,
+  .puzzle-layout {
+    gap: 0.5rem;
+  }
+
+  .intro {
+    font-size: 0.9rem;
+    line-height: 1.3;
+  }
+
+  .puzzle-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .paint-area {
+    gap: 0.4rem;
+  }
+
+  .mosaic-grid {
+    width: min(100%, clamp(13rem, 65vw, 14rem));
+  }
+
+  .clues {
+    padding: 0.5rem 0.65rem;
+
+    h2 {
+      margin-bottom: 0.3rem;
+      font-size: 1rem;
+    }
+
+    ul {
+      gap: 0.12rem;
+      font-size: 0.82rem;
+      line-height: 1.28;
+    }
+  }
+
+  .game-actions button {
+    padding-inline: 0.48rem;
+    font-size: 0.8rem;
+  }
+}

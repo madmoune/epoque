@@ -277,8 +277,7 @@
     </div>
   }
 
-  <!-- Point d’ancrage conservé pour les liens vers l’ancienne rubrique. -->
-  <section id="nouveaux-jeux" class="category-list" aria-label="Catégories de puzzles">
+  <section class="category-list" aria-label="Catégories de puzzles">
     @if (visibleCategories().length > 0) {
       @for (category of visibleCategories(); track category.id) {
         <section class="category-card" [attr.id]="category.id" tabindex="-1">

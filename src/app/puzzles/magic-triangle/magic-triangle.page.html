@@ -1,0 +1,116 @@
+<main class="page">
+  <a routerLink="/" fragment="nouveaux-jeux" class="back-link">Retour aux nouveaux jeux</a>
+
+  <section class="card">
+    <header>
+      <h1>Triangle magique</h1>
+      <p class="intro">Place les six chiffres pour obtenir la même somme sur les trois côtés.</p>
+    </header>
+
+    @let picked = selected();
+    @let done = isSolved();
+    @let values = placements();
+    @let totals = sums();
+
+    <section class="puzzle-area" aria-label="Triangle à compléter">
+      <div class="digit-tray" role="group" aria-label="Chiffres à placer">
+        @for (digit of puzzle().digits; track digit) {
+          @let placed = values.includes(digit);
+          <button
+            type="button"
+            class="digit"
+            data-board-cell
+            [class.placed]="placed"
+            [class.selected]="picked === digit"
+            [attr.aria-label]="'Chiffre ' + digit + (placed ? ', déjà placé' : '')"
+            [attr.aria-pressed]="picked === digit"
+            [disabled]="done"
+            [draggable]="!done"
+            (click)="selectDigit(digit)"
+            (dragstart)="startDrag(digit, $event)"
+          >
+            {{ digit }}
+          </button>
+        }
+      </div>
+      <p class="help">
+        Glisse un chiffre ou sélectionne-le puis choisis une case. Deux appuis sur une case la
+        vident.
+      </p>
+
+      <div class="triangle-board" role="group" aria-label="Six cases du triangle">
+        @for (slot of slots; track slot.label) {
+          @let digit = values[$index];
+          <button
+            type="button"
+            class="triangle-slot"
+            data-board-cell
+            [style.left.%]="slot.x"
+            [style.top.%]="slot.y"
+            [class.filled]="digit !== null"
+            [class.selected]="digit !== null && picked === digit"
+            [attr.aria-label]="slotLabel($index)"
+            [attr.aria-pressed]="digit !== null && picked === digit"
+            [disabled]="done"
+            [draggable]="digit !== null && !done"
+            (click)="selectSlot($index)"
+            (dragstart)="digit !== null && startDrag(digit, $event)"
+            (dragover)="allowDrop($event)"
+            (drop)="dropDigit($index, $event)"
+          >
+            {{ digit ?? '·' }}
+          </button>
+        }
+      </div>
+
+      <dl class="side-sums" aria-label="Sommes des côtés">
+        @for (side of sides; track side.label) {
+          <div class="side-sum" [class.equal]="done">
+            <dt>{{ side.label }}</dt>
+            <dd>{{ totals[$index] ?? '—' }}</dd>
+          </div>
+        }
+      </dl>
+    </section>
+
+    <div>
+      <div role="status">
+        @if (feedback(); as message) {
+          <p class="feedback">{{ message }}</p>
+        }
+      </div>
+
+      <div class="game-actions">
+        <button
+          type="button"
+          class="secondary-button"
+          data-confirm-action="hint"
+          [disabled]="isComplete()"
+          (click)="revealHint()"
+        >
+          Indice
+        </button>
+        <button
+          type="button"
+          class="secondary-button"
+          data-confirm-action="restart"
+          (click)="restart()"
+        >
+          Recommencer
+        </button>
+        <button type="button" data-confirm-action="new-game" (click)="newPuzzle()">
+          Nouveau triangle
+        </button>
+      </div>
+    </div>
+  </section>
+
+  @if (done) {
+    <app-puzzle-success-popup
+      title="Triangle équilibré !"
+      message="Les trois côtés ont la même somme."
+      actionLabel="Nouveau triangle"
+      (action)="newPuzzle()"
+    />
+  }
+</main>

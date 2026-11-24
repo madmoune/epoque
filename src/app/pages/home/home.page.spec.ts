@@ -37,8 +37,8 @@ describe('HomePage playlist category controls', () => {
     const page = fixture.componentInstance;
     const playlistService = TestBed.inject(PuzzlePlaylistService);
     const playlist = playlistService.create('Test');
-    const wordsCategory = page.categories()[0];
-    const unrelatedRoute = page.categories()[1].puzzles[0].route;
+    const wordsCategory = page.categories().find((category) => category.id === 'mots-langage')!;
+    const unrelatedRoute = '/voisins-numerotes';
 
     playlistService.update(playlist.id, { routes: [unrelatedRoute] });
     page.togglePlaylistCategory(playlist.id, wordsCategory.puzzles);
@@ -160,6 +160,42 @@ describe('HomePage playlist category controls', () => {
     expect(
       [...root.querySelectorAll('.category-card .puzzle-card h3')].map((card) => card.textContent),
     ).toEqual(['Déduction de Nombre']);
+  });
+
+  it('displays the new games in their home section and includes them in playlists', () => {
+    const fixture = TestBed.createComponent(HomePage);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const section = root.querySelector('section#nouveaux-jeux');
+    const games = [
+      ['/voisins-numerotes', 'Voisins numérotés'],
+      ['/calcul-en-chaine', 'Calcul en chaîne'],
+      ['/triangle-magique', 'Triangle magique'],
+      ['/polygones-etoiles', 'Polygones étoilés'],
+      ['/voie-ferree', 'Voie ferrée'],
+      ['/grille-proprietes', 'Grille de propriétés'],
+      ['/triage-ferroviaire', 'Triage ferroviaire'],
+      ['/mots-sans-voyelles', 'Mots sans voyelles'],
+      ['/batonnets-de-calcul', 'Bâtonnets de calcul'],
+      ['/grille-operations', 'Grille d’opérations'],
+      ['/ponts-et-iles', 'Ponts et îles'],
+      ['/calcul-code', 'Calcul codé'],
+      ['/mosaique-logique', 'Mosaïque logique'],
+    ] as const;
+
+    expect(root.querySelectorAll('#nouveaux-jeux')).toHaveLength(1);
+    expect(
+      root.querySelector('.category-nav-link[href="#nouveaux-jeux"]')?.textContent?.trim(),
+    ).toBe('Nouveaux jeux');
+    for (const [route, title] of games) {
+      expect(section?.querySelector(`a[href="${route}"] h3`)?.textContent?.trim()).toBe(title);
+      expect(
+        fixture.componentInstance.playlistPuzzleOptions().some((puzzle) => puzzle.route === route),
+      ).toBe(true);
+      expect(
+        routes.find((candidate) => candidate.path === route.slice(1))?.loadComponent,
+      ).toBeDefined();
+    }
   });
 
   it('classifies the six games in their themed categories and keeps them in playlists', () => {

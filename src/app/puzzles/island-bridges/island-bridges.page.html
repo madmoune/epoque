@@ -1,0 +1,129 @@
+<main class="page">
+  <a routerLink="/" fragment="nouveaux-jeux" class="back-link">Retour aux nouveaux jeux</a>
+
+  <section class="card">
+    <header>
+      <h1>Ponts et îles</h1>
+      <p class="intro" id="bridge-instructions">
+        Choisis une île de départ, puis clique sur les ponts pour les traverser une seule fois
+        chacun. Tu peux aussi toucher l’île qu’un pont rejoint.
+      </p>
+    </header>
+
+    @let here = current();
+    @let visited = crossed();
+    @let reachable = destinations();
+    @let done = solved();
+
+    <div class="board-summary">
+      <p class="bridge-count">
+        <strong>{{ visited.size }} / {{ puzzle().bridges.length }}</strong> ponts traversés
+      </p>
+      <p class="feedback" role="status">{{ feedback() }}</p>
+    </div>
+
+    <div
+      #map
+      class="bridge-map"
+      role="group"
+      aria-label="Carte des îles et des ponts"
+      aria-describedby="bridge-instructions"
+      [style.aspect-ratio]="width + ' / ' + height"
+    >
+      @for (island of puzzle().islands; track island.id) {
+        @let destination = reachable.has(island.id);
+        <button
+          type="button"
+          class="island"
+          data-board-cell
+          [class.current]="here === island.id"
+          [class.destination]="destination"
+          [style.left.%]="(island.x / width) * 100"
+          [style.top.%]="(island.y / height) * 100"
+          [attr.data-island]="island.id"
+          [attr.aria-label]="
+            'Île ' +
+            island.id +
+            (here === island.id ? ', position actuelle' : destination ? ', accessible' : '')
+          "
+          [attr.aria-current]="here === island.id ? 'location' : null"
+          [disabled]="done || (here !== null && !destination)"
+          (click)="selectIsland(island.id, $event)"
+        >
+          {{ island.id }}
+        </button>
+      }
+
+      @for (item of layout(); track item.bridge.id) {
+        @let bridge = item.bridge;
+        @let crossed = visited.has(bridge.id);
+        @let available =
+          reachable.get(bridge.from) === bridge || reachable.get(bridge.to) === bridge;
+        @let highlighted = hinted() === bridge.id;
+        <button
+          type="button"
+          class="bridge"
+          data-board-cell
+          [class.crossed]="crossed"
+          [class.available]="available"
+          [class.hinted]="highlighted"
+          [style.left.%]="(item.x / width) * 100"
+          [style.top.%]="(item.y / height) * 100"
+          [style.width.%]="(item.length / width) * 100"
+          [style.--bridge-angle]="item.angle + 'rad'"
+          [attr.data-bridge]="bridge.id"
+          [attr.aria-label]="
+            'Pont entre les îles ' +
+            bridge.from +
+            ' et ' +
+            bridge.to +
+            (crossed ? ', déjà traversé' : highlighted ? ', proposé par l’indice' : '')
+          "
+          [disabled]="!available || done"
+          (click)="crossBridge(bridge, $event)"
+        ></button>
+      }
+    </div>
+
+    <div class="game-actions">
+      <button
+        #undoButton
+        type="button"
+        class="secondary-button"
+        [disabled]="!visited.size || done"
+        (click)="undo()"
+      >
+        Annuler
+      </button>
+      <button
+        type="button"
+        class="secondary-button"
+        data-confirm-action="hint"
+        [disabled]="here === null || done"
+        (click)="hint()"
+      >
+        Indice
+      </button>
+      <button
+        type="button"
+        class="secondary-button"
+        data-confirm-action="restart"
+        [disabled]="here === null"
+        (click)="restart()"
+      >
+        Recommencer
+      </button>
+      <button type="button" data-confirm-action="new-game" (click)="newPuzzle()">
+        Nouvelle carte
+      </button>
+    </div>
+  </section>
+
+  @if (done) {
+    <app-puzzle-success-popup
+      title="Tous les ponts traversés !"
+      actionLabel="Nouvelle carte"
+      (action)="newPuzzle()"
+    />
+  }
+</main>

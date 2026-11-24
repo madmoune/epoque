@@ -1,0 +1,354 @@
+.page {
+  box-sizing: border-box;
+  width: min(100%, 57rem);
+  margin-inline: auto;
+  padding: clamp(0.65rem, 3vw, 1.5rem);
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+  font-weight: 800;
+}
+
+.card {
+  display: grid;
+  gap: 0.75rem;
+  padding: clamp(0.7rem, 2.7vw, 1.35rem);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surface);
+}
+
+h1,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: clamp(1.72rem, 5vw, 2.65rem);
+  line-height: 1.08;
+}
+
+.intro {
+  margin-top: 0.42rem;
+  color: var(--muted-strong);
+  line-height: 1.4;
+}
+
+.game-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.7rem;
+
+  button {
+    min-height: var(--command-height);
+    padding: 0.35rem 0.7rem;
+    border: 1px solid var(--border);
+    border-radius: var(--command-radius);
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 750;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+  }
+}
+
+.shunting-board {
+  --open-route: #8de3c8;
+  --diverging-route: #ffcf8a;
+  position: relative;
+  isolation: isolate;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  aspect-ratio: 100 / 42;
+  border: 1px solid #435963;
+  border-radius: 0.75rem;
+  background:
+    linear-gradient(to right, rgb(181 209 218 / 8%) 1px, transparent 1px) center / 8.5% 20%,
+    linear-gradient(to bottom, rgb(181 209 218 / 8%) 1px, transparent 1px) center / 8.5% 20%,
+    radial-gradient(ellipse at 52% 34%, #253740, #132229 82%);
+  user-select: none;
+}
+
+.rail-network {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+
+  path {
+    fill: none;
+  }
+}
+
+.rail-bed {
+  stroke: #524641;
+  stroke-width: 21px;
+  stroke-linecap: round;
+}
+
+.rail-ties {
+  stroke: #ae8a6d;
+  stroke-width: 17px;
+  stroke-dasharray: 2.7px 5px;
+}
+
+.rail-edges {
+  stroke: #b3cbd0;
+  stroke-width: 9px;
+}
+
+.rail-gap {
+  stroke: #39484c;
+  stroke-width: 5px;
+}
+
+.switch-route,
+.open-branch,
+.route-preview {
+  stroke-width: 3px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.switch-route {
+  stroke: var(--open-route);
+
+  &.diverging {
+    stroke: var(--diverging-route);
+  }
+}
+
+.open-branch {
+  stroke: var(--diverging-route);
+}
+
+.route-preview {
+  stroke: #b4ffee;
+  stroke-width: 5px;
+}
+
+.track-marker {
+  position: absolute;
+  left: var(--track-x);
+  top: var(--track-y);
+  display: grid;
+  box-sizing: border-box;
+  place-items: center;
+  padding: 0;
+  transform: translate(-50%, -50%);
+  font: inherit;
+  font-weight: 850;
+  -webkit-tap-highlight-color: transparent;
+
+  &:focus-visible {
+    outline: 2px solid #fff2cd;
+    outline-offset: 2px;
+  }
+}
+
+.train,
+.dragged-train {
+  border: 2px solid var(--train-color);
+  border-radius: 0.55rem;
+  background: color-mix(in srgb, var(--train-color) 86%, #dcefed);
+  color: #102027;
+  box-shadow: 0 0.16rem 0.25rem rgb(0 0 0 / 45%);
+}
+
+.train {
+  z-index: 3;
+  width: min(7.8%, 3.05rem);
+  height: 2rem;
+  cursor: grab;
+  touch-action: none;
+  -webkit-touch-callout: none;
+
+  &::before {
+    position: absolute;
+    left: 0.22rem;
+    width: 0.22rem;
+    height: 54%;
+    border-radius: 0.16rem;
+    background: #27434d;
+    content: '';
+  }
+
+  &.held {
+    opacity: 0.45;
+  }
+
+  &.parked {
+    box-shadow:
+      0 0 0 2px #e7fff0,
+      0 0.16rem 0.25rem rgb(0 0 0 / 45%);
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.dragged-train {
+  position: fixed;
+  z-index: 6;
+  display: grid;
+  box-sizing: border-box;
+  width: 3rem;
+  height: 2rem;
+  place-items: center;
+  transform: translate(-50%, -85%);
+  font-weight: 850;
+  pointer-events: none;
+
+  &.can-drop {
+    outline: 2px solid var(--open-route);
+    outline-offset: 2px;
+  }
+}
+
+.switch-toggle {
+  z-index: 4;
+  width: 2rem;
+  height: 2rem;
+  border: 2px solid var(--open-route);
+  border-radius: 50%;
+  background: #172c33;
+  color: var(--open-route);
+  font-size: 0.81rem;
+  cursor: pointer;
+
+  &.diverging {
+    border-color: var(--diverging-route);
+    color: var(--diverging-route);
+  }
+
+  &:hover:not(:disabled) {
+    background: #314a53;
+  }
+}
+
+.stop {
+  z-index: 2;
+  width: min(7.8%, 3.1rem);
+  height: 2.05rem;
+  border: 2px solid transparent;
+  border-radius: 0.55rem;
+  background: transparent;
+  color: #dbe8ee;
+
+  &.bay {
+    border-color: var(--train-color);
+    border-style: dashed;
+    background: #17282fc9;
+    color: var(--train-color);
+  }
+
+  &.reachable {
+    border-color: var(--open-route);
+    background: #1c433ed6;
+    color: #dffff5;
+  }
+
+  &.targeted {
+    border-style: solid;
+    box-shadow: 0 0 0.6rem #8de3c8a6;
+  }
+
+  &:enabled {
+    cursor: pointer;
+  }
+}
+
+.stop:not(.bay) .stop-mark {
+  width: 0.43rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.feedback {
+  color: var(--focus);
+  font-size: 0.9rem;
+  font-weight: 750;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (max-width: 42rem) {
+  .page {
+    width: min(100%, 31rem);
+  }
+
+  .shunting-board {
+    justify-self: center;
+    width: min(100%, 23rem);
+    height: clamp(22rem, 57svh, 25rem);
+    aspect-ratio: auto;
+    background-size:
+      20% 8.5%,
+      20% 8.5%,
+      auto;
+  }
+
+  .track-plan {
+    transform: matrix(0, 1, -1, 0, 100, 0);
+    transform-origin: 0 0;
+  }
+
+  .track-marker {
+    left: calc(100% - var(--track-y));
+    top: var(--track-x);
+  }
+
+  .train,
+  .stop {
+    width: 2.15rem;
+    height: 1.75rem;
+  }
+
+  .train::before {
+    top: 0.16rem;
+    left: 50%;
+    width: 46%;
+    height: 0.15rem;
+    transform: translateX(-50%);
+  }
+
+  .switch-toggle {
+    width: 1.8rem;
+    height: 1.8rem;
+  }
+}
+
+@media (max-width: 24rem) {
+  .game-actions {
+    display: grid;
+    grid-template-columns: 0.8fr 1.2fr 1.2fr;
+    gap: 0.3rem;
+
+    button {
+      min-width: 0;
+      padding-inline: 0.35rem;
+      font-size: 0.79rem;
+    }
+  }
+}

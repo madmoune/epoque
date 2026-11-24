@@ -1,0 +1,148 @@
+<main class="page">
+  <a routerLink="/" fragment="nouveaux-jeux" class="back-link">Retour aux nouveaux jeux</a>
+
+  <section class="card">
+    <header>
+      <h1>Grille de propriétés</h1>
+      <p class="intro">Place les neuf nombres selon les règles des lignes et des colonnes.</p>
+    </header>
+
+    @let game = puzzle();
+    @let values = placed();
+    @let selected = picked();
+    @let done = solved();
+
+    <section
+      class="play-area"
+      aria-label="Nombres et grille"
+      (pointerdown)="drag.begin($event)"
+      (pointermove)="drag.move($event)"
+      (pointerup)="endPointer($event)"
+      (pointercancel)="drag.cancel($event)"
+      (lostpointercapture)="drag.cancel($event)"
+    >
+      <div class="number-tray" role="group" aria-label="Réserve de nombres">
+        @for (number of game.numbers; track number) {
+          @let used = values.includes(number);
+          <button
+            type="button"
+            class="number-token"
+            data-board-cell
+            [class.used]="used"
+            [class.selected]="selected === number && !used"
+            [attr.aria-label]="'Nombre ' + number + (used ? ', placé' : '')"
+            [attr.aria-pressed]="selected === number && !used"
+            [disabled]="used || done"
+            [attr.data-drag-number]="used || done ? null : number"
+            (click)="selectNumber(number, $event)"
+          >
+            {{ number }}
+          </button>
+        }
+      </div>
+
+      <p class="controls" id="property-controls">
+        Glisse un nombre ou choisis-le, puis touche une case. Deux appuis le remettent en réserve.
+      </p>
+
+      <table class="property-grid" aria-describedby="property-controls">
+        <caption class="sr-only">
+          Règles des lignes et des colonnes
+        </caption>
+        <colgroup>
+          <col class="rule-column" />
+          <col span="3" />
+        </colgroup>
+        <thead>
+          <tr>
+            <td></td>
+            @for (column of game.columns; track column.id) {
+              <th scope="col">
+                <span class="rule column-rule">{{ column.label }}</span>
+              </th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of game.rows; track row.id; let rowIndex = $index) {
+            <tr>
+              <th scope="row">
+                <span class="rule row-rule">{{ row.label }}</span>
+              </th>
+              @for (column of game.columns; track column.id) {
+                @let index = rowIndex * size + $index;
+                @let number = values[index];
+                @let conflict = errors()[index].length > 0;
+                <td>
+                  <button
+                    type="button"
+                    class="grid-slot"
+                    data-board-cell
+                    [class.filled]="number !== null"
+                    [class.selected]="number !== null && number === selected"
+                    [class.conflict]="conflict"
+                    [attr.aria-label]="cellLabel(index)"
+                    [attr.aria-pressed]="number !== null && number === selected"
+                    [disabled]="done"
+                    [attr.data-placement-cell]="index"
+                    [attr.data-drag-number]="done ? null : number"
+                    (click)="selectCell(index, $event)"
+                  >
+                    <span aria-hidden="true">{{ number ?? '·' }}</span>
+                    @if (conflict) {
+                      <span class="conflict-mark" aria-hidden="true">!</span>
+                    }
+                  </button>
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      @if (drag.preview(); as preview) {
+        <span
+          class="drag-preview"
+          aria-hidden="true"
+          [style.left.px]="preview.x"
+          [style.top.px]="preview.y"
+        >
+          {{ preview.number }}
+        </span>
+      }
+    </section>
+
+    <p class="feedback" role="status">{{ feedback() }}</p>
+
+    <div class="game-actions">
+      <button
+        type="button"
+        class="secondary-button"
+        data-confirm-action="hint"
+        [disabled]="done"
+        (click)="revealHint()"
+      >
+        Indice
+      </button>
+      <button
+        type="button"
+        class="secondary-button"
+        data-confirm-action="restart"
+        (click)="restart()"
+      >
+        Recommencer
+      </button>
+      <button type="button" data-confirm-action="new-game" (click)="newPuzzle()">
+        Nouvelle grille
+      </button>
+    </div>
+  </section>
+
+  @if (done) {
+    <app-puzzle-success-popup
+      title="Grille complétée !"
+      actionLabel="Nouvelle grille"
+      (action)="newPuzzle()"
+    />
+  }
+</main>

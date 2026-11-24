@@ -1,0 +1,227 @@
+.page {
+  box-sizing: border-box;
+  width: min(100%, 39rem);
+  margin-inline: auto;
+  padding: clamp(0.65rem, 3vw, 1.5rem);
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+  font-weight: 800;
+}
+
+.card {
+  display: grid;
+  gap: 0.7rem;
+  padding: clamp(0.75rem, 2.5vw, 1.35rem);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surface);
+}
+
+h1,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: clamp(1.8rem, 5vw, 2.65rem);
+  line-height: 1.08;
+}
+
+.intro {
+  margin-top: 0.4rem;
+  color: var(--muted-strong);
+  line-height: 1.4;
+}
+
+.play-area {
+  display: grid;
+  gap: 0.5rem;
+  width: min(100%, 21rem);
+  min-width: 0;
+  justify-self: center;
+}
+
+.challenge-control {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.6rem;
+  font-size: 0.88rem;
+  font-weight: 750;
+
+  select {
+    box-sizing: border-box;
+    flex: 1;
+    min-width: min(100%, 12em);
+    max-width: 100%;
+    min-height: var(--command-height);
+    padding: 0.4rem 0.55rem;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--command-radius);
+    background: var(--surface-raised);
+    color: var(--text);
+    font: inherit;
+  }
+}
+
+.star-board {
+  --gold: #ffdf8a;
+  --mint: #71dfc7;
+  --peach: #ffab93;
+  position: relative;
+  box-sizing: border-box;
+  aspect-ratio: 1;
+  border: 1px solid #3e5662;
+  border-radius: 0.8rem;
+  background:
+    linear-gradient(to right, rgb(171 206 221 / 7%) 1px, transparent 1px) center / 12.5% 12.5%,
+    linear-gradient(to bottom, rgb(171 206 221 / 7%) 1px, transparent 1px) center / 12.5% 12.5%,
+    radial-gradient(ellipse at 48% 25%, #263b48, #101c26 85%);
+}
+
+.outlines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+
+  polygon,
+  polyline {
+    fill: none;
+    stroke-width: 2.5px;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  polygon {
+    stroke: var(--mint);
+    fill: color-mix(in srgb, var(--mint) 9%, transparent);
+  }
+
+  polygon.second {
+    stroke: var(--peach);
+    fill: color-mix(in srgb, var(--peach) 9%, transparent);
+  }
+
+  polyline {
+    stroke: var(--gold);
+  }
+}
+
+.star {
+  --star-color: var(--gold);
+  position: absolute;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: min(14%, var(--command-height));
+  aspect-ratio: 1;
+  min-width: 0;
+  padding: 0;
+  transform: translate(-50%, -50%);
+  border: 2px solid transparent;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--star-color);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  span {
+    width: 56%;
+    aspect-ratio: 1;
+    background: currentColor;
+    clip-path: polygon(
+      50% 0%,
+      62% 34%,
+      98% 36%,
+      69% 58%,
+      79% 94%,
+      50% 73%,
+      21% 94%,
+      31% 58%,
+      2% 36%,
+      38% 34%
+    );
+  }
+
+  &.first {
+    --star-color: var(--mint);
+  }
+
+  &.second {
+    --star-color: var(--peach);
+  }
+
+  &:disabled {
+    opacity: 1;
+    cursor: default;
+  }
+
+  &:hover:not(:disabled),
+  &.start {
+    border-color: color-mix(in srgb, var(--star-color) 65%, transparent);
+    background: #14222deb;
+  }
+
+  &.hint {
+    border-style: dashed;
+    border-color: #fff2c4;
+    background: #14222d;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #fff2c4;
+    outline-offset: 1px;
+  }
+}
+
+.rules,
+.feedback {
+  line-height: 1.35;
+  text-align: center;
+}
+
+.rules {
+  color: var(--muted-strong);
+  font-size: 0.83rem;
+}
+
+.feedback {
+  color: var(--focus);
+  font-size: 0.89rem;
+  font-weight: 750;
+}
+
+.game-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.45rem;
+
+  button {
+    min-height: var(--command-height);
+    padding: 0.35rem 0.66rem;
+    border: 1px solid var(--border);
+    border-radius: var(--command-radius);
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 750;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+  }
+}
+
+@media (max-width: 24rem) {
+  .game-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

@@ -1,0 +1,176 @@
+<main class="page">
+  <a routerLink="/" fragment="nouveaux-jeux" class="back-link">Retour aux nouveaux jeux</a>
+
+  <section class="card">
+    <header class="game-header">
+      <h1>Triage ferroviaire</h1>
+      <p id="shunting-help" class="intro">
+        Glisse chaque train vers la place de même lettre. Clique sur les aiguillages pour ouvrir un
+        trajet libre.
+      </p>
+      <div class="game-actions">
+        <button
+          type="button"
+          class="secondary-button"
+          [disabled]="!history().length || drag() !== null"
+          (click)="undo()"
+        >
+          Annuler
+        </button>
+        <button
+          type="button"
+          class="secondary-button"
+          data-confirm-action="restart"
+          (click)="restart()"
+        >
+          Recommencer
+        </button>
+        <button type="button" data-confirm-action="new-game" (click)="newPuzzle()">
+          Nouveau triage
+        </button>
+      </div>
+    </header>
+
+    @let game = state();
+    @let held = drag();
+    @let targets = reachable();
+    @let complete = solved();
+
+    <p class="sr-only" id="shunting-keyboard">
+      Au clavier, sélectionne un train avec Entrée, puis valide un repère accessible.
+    </p>
+    <div
+      class="shunting-board"
+      role="group"
+      aria-label="Réseau de triage"
+      aria-describedby="shunting-help shunting-keyboard"
+      (pointermove)="moveDrag($event)"
+      (pointerup)="endDrag($event)"
+      (pointercancel)="cancelDrag($event)"
+      (lostpointercapture)="cancelDrag($event)"
+    >
+      <svg class="rail-network" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        <g class="track-plan">
+          @for (track of tracks; track track) {
+            <path class="rail-bed" [attr.d]="track" vector-effect="non-scaling-stroke" />
+            <path class="rail-ties" [attr.d]="track" vector-effect="non-scaling-stroke" />
+            <path class="rail-edges" [attr.d]="track" vector-effect="non-scaling-stroke" />
+            <path class="rail-gap" [attr.d]="track" vector-effect="non-scaling-stroke" />
+          }
+          @for (branch of connectedBranches(); track branch) {
+            <path class="open-branch" [attr.d]="branch" vector-effect="non-scaling-stroke" />
+          }
+          @for (turnout of turnouts(); track turnout.point.node) {
+            <path
+              class="switch-route"
+              [class.diverging]="turnout.diverging"
+              [attr.d]="turnout.route"
+              vector-effect="non-scaling-stroke"
+            />
+          }
+          @if (previewPath(); as route) {
+            <path class="route-preview" [attr.d]="route" vector-effect="non-scaling-stroke" />
+          }
+        </g>
+      </svg>
+
+      @for (train of trains; track train.letter) {
+        @let index = $index;
+        @let stop = nodes[game.positions[index]];
+        <button
+          type="button"
+          class="track-marker train"
+          data-board-cell
+          [class.held]="held?.train === index && held?.moved"
+          [class.parked]="stop.node === train.bay"
+          [style.--track-x]="stop.x + '%'"
+          [style.--track-y]="stop.y + '%'"
+          [style.--train-color]="train.color"
+          [attr.data-shunt-stop]="stop.node"
+          [attr.aria-label]="
+            'Train ' +
+            train.letter +
+            ', ' +
+            stop.track +
+            ', repère ' +
+            stop.position +
+            (stop.node === train.bay ? ', stationné' : '')
+          "
+          [attr.aria-pressed]="keyboardTrain() === index"
+          [disabled]="complete"
+          (pointerdown)="beginDrag(index, $event)"
+          (click)="selectTrain(index, $event)"
+        >
+          <span>{{ train.letter }}</span>
+        </button>
+      }
+
+      @for (turnout of turnouts(); track turnout.point.node) {
+        <button
+          type="button"
+          class="track-marker switch-toggle"
+          data-board-cell
+          [class.diverging]="turnout.diverging"
+          [style.--track-x]="turnout.point.x + '%'"
+          [style.--track-y]="turnout.point.y + '%'"
+          [attr.aria-label]="
+            'Aiguillage ' + ($index + 1) + (turnout.diverging ? ', voie déviée' : ', voie directe')
+          "
+          [attr.aria-pressed]="turnout.diverging"
+          [disabled]="complete"
+          (click)="toggleSwitch($index)"
+        >
+          {{ $index + 1 }}
+        </button>
+      }
+
+      @for (stop of stops; track stop.node) {
+        @let available = targets.has(stop.node);
+        <button
+          type="button"
+          class="track-marker stop"
+          data-board-cell
+          [class.bay]="stop.bay !== undefined"
+          [class.reachable]="available"
+          [class.targeted]="available && held?.target === stop.node"
+          [style.--track-x]="stop.x + '%'"
+          [style.--track-y]="stop.y + '%'"
+          [style.--train-color]="stop.bay?.color ?? null"
+          [attr.data-shunt-stop]="stop.node"
+          [attr.aria-label]="
+            stop.bay
+              ? 'Place de garage ' + stop.bay.letter
+              : 'Repère ' + stop.position + ', ' + stop.track
+          "
+          [disabled]="keyboardTrain() === null || !available || complete"
+          (click)="activateStop(stop.node, $event)"
+        >
+          <span class="stop-mark" aria-hidden="true">{{ stop.bay?.letter ?? '' }}</span>
+        </button>
+      }
+
+      @if (held && held.moved) {
+        <span
+          class="dragged-train"
+          [class.can-drop]="previewPath() !== null"
+          [style.left.px]="held.x"
+          [style.top.px]="held.y"
+          [style.--train-color]="trains[held.train].color"
+          aria-hidden="true"
+        >
+          {{ trains[held.train].letter }}
+        </span>
+      }
+    </div>
+
+    <p class="feedback" role="status">{{ feedback() }}</p>
+  </section>
+
+  @if (complete) {
+    <app-puzzle-success-popup
+      title="Les quatre trains sont stationnés !"
+      actionLabel="Nouveau triage"
+      (action)="newPuzzle()"
+    />
+  }
+</main>

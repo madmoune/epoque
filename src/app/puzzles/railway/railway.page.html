@@ -1,0 +1,185 @@
+<main class="page">
+  <a routerLink="/" fragment="nouveaux-jeux" class="back-link">Retour aux nouveaux jeux</a>
+
+  <section class="card">
+    <header>
+      <h1>Voie ferrée</h1>
+      <p class="intro">
+        Relie A et B par une seule voie. Chaque chiffre indique combien de cases de sa ligne ou
+        colonne contiennent un rail.
+      </p>
+    </header>
+
+    @let clues = puzzle();
+    @let current = progress();
+    @let done = solved();
+
+    <div class="play-layout">
+      <div class="board-area">
+        <div class="board-layout">
+          <div class="column-clues" role="group" aria-label="Compteurs des colonnes">
+            @for (target of clues.columns; track $index) {
+              @let placed = current.columns[$index];
+              <span class="clue" [class.exact]="placed === target" [class.over]="placed > target">
+                <span aria-hidden="true">{{ target }}</span>
+                <span class="sr-only">Colonne {{ $index + 1 }}, {{ placed }} sur {{ target }}</span>
+              </span>
+            }
+          </div>
+
+          <div
+            class="rail-grid"
+            role="group"
+            aria-label="Grille ferroviaire"
+            aria-describedby="rail-controls rail-keyboard"
+            (pointerdown)="beginPointer($event)"
+            (pointermove)="movePointer($event)"
+            (pointerup)="endPointer($event)"
+            (pointercancel)="cancelPointer($event)"
+            (lostpointercapture)="cancelPointer($event)"
+          >
+            @for (cell of cells(); track cell.index) {
+              <button
+                type="button"
+                class="rail-cell"
+                data-board-cell
+                [class.access]="cell.gate !== null"
+                [class.crossed]="cell.crossed"
+                [class.selected]="keyboardCell() === cell.index"
+                [attr.aria-label]="cell.label"
+                [disabled]="done"
+                (click)="activateCell(cell.index, $event)"
+              >
+                @if (cell.gate) {
+                  <span class="gate-label" aria-hidden="true">{{ cell.gate }}</span>
+                } @else if (cell.crossed) {
+                  <span class="cross" aria-hidden="true">×</span>
+                }
+              </button>
+            }
+            <ng-container
+              [ngTemplateOutlet]="trackDrawing"
+              [ngTemplateOutletContext]="{ train: done }"
+            />
+          </div>
+
+          <div class="row-clues" role="group" aria-label="Compteurs des lignes">
+            @for (target of clues.rows; track $index) {
+              @let placed = current.rows[$index];
+              <span class="clue" [class.exact]="placed === target" [class.over]="placed > target">
+                <span aria-hidden="true">{{ target }}</span>
+                <span class="sr-only">Ligne {{ $index + 1 }}, {{ placed }} sur {{ target }}</span>
+              </span>
+            }
+          </div>
+        </div>
+
+        <p id="rail-controls" class="controls">
+          Glisse pour poser ou retirer un rail. Appuie sur une case vide pour la barrer.
+        </p>
+        <p id="rail-keyboard" class="sr-only">
+          Au clavier, valide deux cases voisines pour les relier. Valide deux fois la même case vide
+          pour la barrer.
+        </p>
+      </div>
+
+      <div class="preview" aria-hidden="true">
+        <span class="preview-label">Aperçu de la voie</span>
+        <div class="preview-stage">
+          <div class="preview-plane">
+            <ng-container
+              [ngTemplateOutlet]="trackDrawing"
+              [ngTemplateOutletContext]="{ train: true }"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="feedback" role="status">{{ feedback() }}</p>
+
+    <div class="game-actions">
+      <button
+        type="button"
+        class="secondary-button"
+        [disabled]="drawing() || !undoStates().length"
+        (click)="undo()"
+      >
+        Annuler
+      </button>
+      <button
+        type="button"
+        class="secondary-button"
+        [disabled]="drawing() || !redoStates().length"
+        (click)="redo()"
+      >
+        Rétablir
+      </button>
+      <button
+        type="button"
+        class="secondary-button"
+        data-confirm-action="restart"
+        [disabled]="drawing() || (!undoStates().length && !redoStates().length)"
+        (click)="restart()"
+      >
+        Recommencer
+      </button>
+      <button
+        type="button"
+        data-confirm-action="new-game"
+        [disabled]="drawing()"
+        (click)="newPuzzle()"
+      >
+        Nouvelle grille
+      </button>
+    </div>
+  </section>
+
+  @if (done) {
+    <app-puzzle-success-popup
+      title="Voie terminée !"
+      actionLabel="Nouvelle grille"
+      (action)="newPuzzle()"
+    />
+  }
+</main>
+
+<ng-template #trackDrawing let-train="train">
+  <svg class="track-drawing" [attr.viewBox]="viewBox" aria-hidden="true">
+    @for (tile of tiles(); track tile.cell) {
+      <path class="track-bed" [attr.d]="tile.bed" />
+      <path class="track-ties" [attr.d]="tile.bed" />
+      <path class="track-rails" [attr.d]="tile.rails" />
+    }
+    @if (train) {
+      @if (trainRoute(); as route) {
+        <g class="engine-motion">
+          <animateMotion
+            #trainAnimation
+            [attr.path]="route"
+            begin="indefinite"
+            dur="4s"
+            rotate="auto"
+            fill="freeze"
+          />
+          <ng-container [ngTemplateOutlet]="engine" />
+        </g>
+      }
+      <g
+        class="engine-stationary"
+        [class.on-route]="trainRoute() !== null"
+        [attr.transform]="trainStation()"
+      >
+        <ng-container [ngTemplateOutlet]="engine" />
+      </g>
+    }
+  </svg>
+
+  <ng-template #engine>
+    <svg:rect x="-13" y="-8" width="25" height="16" rx="2" fill="#23323b" />
+    <svg:rect x="-11" y="-6" width="21" height="12" rx="3" fill="#e58557" />
+    <svg:rect x="-11" y="-5" width="8" height="10" rx="1" fill="#ffe0a1" />
+    <svg:circle cx="5" cy="0" r="3" fill="#6c3730" />
+    <svg:path d="M 11 -4 V 4" stroke="#fff3cb" stroke-width="2" />
+  </ng-template>
+</ng-template>

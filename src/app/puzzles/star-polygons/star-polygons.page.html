@@ -1,0 +1,127 @@
+<main class="page">
+  <a routerLink="/" fragment="nouveaux-jeux" class="back-link">Retour aux nouveaux jeux</a>
+
+  <section class="card">
+    <header>
+      <h1>Polygones étoilés</h1>
+      <p class="intro">
+        Relie les étoiles pour tracer deux figures régulières. Reviens au départ pour fermer chaque
+        figure.
+      </p>
+    </header>
+
+    @let current = board();
+    @let drawn = path();
+    @let colors = starColors();
+    @let found = completed().length;
+    @let done = solved();
+
+    <div class="play-area">
+      <div class="challenge-control">
+        <label for="star-challenge">Défi</label>
+        <select
+          #challengeSelect
+          id="star-challenge"
+          (change)="changeChallenge(challengeSelect.selectedIndex)"
+        >
+          @for (option of challenges; track option.label) {
+            <option [selected]="option === challenge()">{{ option.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div
+        class="star-board"
+        role="group"
+        aria-label="Étoiles à relier"
+        aria-describedby="star-rules"
+      >
+        <svg class="outlines" viewBox="0 0 100 100" aria-hidden="true">
+          @for (points of lines(); track $index) {
+            <polygon
+              [attr.points]="points"
+              [class.second]="$index === 1"
+              vector-effect="non-scaling-stroke"
+            />
+          }
+          @if (drawn.length > 1) {
+            <polyline [attr.points]="draft()" vector-effect="non-scaling-stroke" />
+          }
+        </svg>
+
+        @for (star of current.stars; track $index) {
+          @let color = colors.get($index);
+          @let isStart = drawn[0] === $index;
+          @let isHint = hintStar() === $index;
+          <button
+            type="button"
+            class="star"
+            data-board-cell
+            [style.left.%]="star.x"
+            [style.top.%]="star.y"
+            [class.start]="isStart"
+            [class.hint]="isHint"
+            [class.first]="color === 0"
+            [class.second]="color === 1"
+            [attr.aria-label]="
+              'Étoile ' + ($index + 1) + (isStart ? ', départ' : '') + (isHint ? ', indice' : '')
+            "
+            [attr.aria-pressed]="color !== undefined || drawn.includes($index)"
+            [disabled]="color !== undefined"
+            (click)="selectStar($index)"
+          >
+            <span aria-hidden="true"></span>
+          </button>
+        }
+      </div>
+
+      <p id="star-rules" class="rules">
+        Chaque étoile sert une fois. Les deux tracés peuvent se croiser.
+      </p>
+
+      <p class="feedback" role="status">
+        {{ message() || found + ' / ' + current.outlines.length + ' figures trouvées' }}
+      </p>
+    </div>
+
+    <div class="game-actions">
+      <button
+        type="button"
+        class="secondary-button"
+        [disabled]="done || (!drawn.length && !found)"
+        (click)="undo()"
+      >
+        Annuler
+      </button>
+      <button
+        type="button"
+        class="secondary-button"
+        data-confirm-action="hint"
+        [disabled]="done"
+        (click)="revealHint()"
+      >
+        Indice
+      </button>
+      <button
+        type="button"
+        class="secondary-button"
+        data-confirm-action="restart"
+        [disabled]="!drawn.length && !found && hintStar() === null"
+        (click)="restart()"
+      >
+        Recommencer
+      </button>
+      <button type="button" data-confirm-action="new-game" (click)="newPuzzle()">
+        Nouvelle grille
+      </button>
+    </div>
+  </section>
+
+  @if (done) {
+    <app-puzzle-success-popup
+      title="Deux figures trouvées !"
+      actionLabel="Nouvelle grille"
+      (action)="newPuzzle()"
+    />
+  }
+</main>
