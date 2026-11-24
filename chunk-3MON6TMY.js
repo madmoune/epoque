@@ -1,0 +1,1 @@
+var o=["+","\u2212","\xD7","\xF7"],t={"+":"Addition","\u2212":"Soustraction","\xD7":"Multiplication","\xF7":"Division"};function a(r,e,n){switch(e){case"+":return r+n;case"\u2212":return r-n;case"\xD7":return r*n;case"\xF7":return r/n}}export{o as a,t as b,a as c};
