@@ -4,7 +4,7 @@ const distinctCodes = Array.from({ length: 10_000 }, (_, value) =>
   String(value).padStart(4, '0'),
 ).filter((code) => new Set(code).size === 4);
 
-describe('Cadenas à indices', () => {
+describe('Indice', () => {
   afterEach(() => vi.restoreAllMocks());
 
   it('generates five distinct clues consistent with exactly one code', () => {

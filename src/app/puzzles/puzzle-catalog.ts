@@ -240,7 +240,7 @@ export const PUZZLE_CATEGORIES: readonly PuzzleCategory[] = [
         tag: 'Déduction',
       },
       {
-        title: 'Cadenas à indices',
+        title: 'Déduction de Nombre',
         description: 'Croise cinq essais pour déduire le code à quatre chiffres.',
         route: '/code-deduction',
         tag: 'Déduction',
@@ -446,6 +446,12 @@ export const PUZZLE_CATEGORIES: readonly PuzzleCategory[] = [
         description: 'Parcours une collection de puzzles à déverrouiller au fil des défis.',
         route: '/puzzle-a-cadenas',
         tag: 'Collection',
+      },
+      {
+        title: 'Cadenas mystère',
+        description: 'Déduis un code à quatre chiffres dans une énigme générée à chaque partie.',
+        route: '/cadenas-mystere',
+        tag: 'Aléatoire',
       },
     ],
   },

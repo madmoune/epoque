@@ -41,51 +41,6 @@ h1 {
   line-height: 1.5;
 }
 
-.clue-grid {
-  overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: 0.75rem;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-}
-
-th,
-td {
-  padding: 0.55rem clamp(0.3rem, 2vw, 1rem);
-  border: 1px solid var(--border);
-}
-
-tr > :first-child {
-  border-left: 0;
-}
-
-tr > :last-child {
-  border-right: 0;
-}
-
-thead th {
-  border-top: 0;
-  color: var(--muted);
-  font-size: 0.78rem;
-  text-transform: uppercase;
-}
-
-tbody tr:last-child > * {
-  border-bottom: 0;
-}
-
-tbody th,
-td {
-  font-size: clamp(1.15rem, 4vw, 1.55rem);
-  font-weight: 800;
-}
-
-tbody th,
 input,
 .hint strong {
   letter-spacing: 0.12em;

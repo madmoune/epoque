@@ -13,6 +13,7 @@ describe('PuzzlePlaylistService progress', () => {
   const progressStorageKey = 'epique-puzzle-playlist-progress';
   const finale1CompletionKey = 'epique-puzzle-playlist-completed-at-finale-1';
   const finale2CompletionKey = 'epique-puzzle-playlist-completed-at-finale-2';
+  const previousFinale2Routes = [...FINALE_2_PLAYLIST_ROUTES.slice(0, -2), '/puzzle-a-cadenas'];
   const playlist: PuzzlePlaylist = {
     id: 'progress-test',
     name: 'Progression',
@@ -84,7 +85,8 @@ describe('PuzzlePlaylistService progress', () => {
       }),
     );
     expect(finale1?.routes.at(-1)).toBe('/quick-arithmetic');
-    expect(finale2?.routes.at(-1)).toBe('/puzzle-a-cadenas');
+    expect(finale2?.routes.slice(-3)).toEqual(['/rush-hour', '/code-deduction', '/cadenas-mystere']);
+    expect(finale2?.routes).not.toContain('/puzzle-a-cadenas');
 
     service.update(FINALE_1_PLAYLIST_ID, { routes: ['/changed'] });
     service.remove(FINALE_2_PLAYLIST_ID);
@@ -98,6 +100,63 @@ describe('PuzzlePlaylistService progress', () => {
       localStorage.getItem('epique-puzzle-playlists') ?? '[]',
     ) as PuzzlePlaylist[];
     expect(storedPlaylists.some((playlist) => playlist.isStatic)).toBe(false);
+  });
+
+  it.each([
+    [2, '/rush-hour'],
+    [1, '/code-deduction'],
+  ] as const)('continues the former Finale 2 with %i steps left at %s', (remaining, route) => {
+    const index = previousFinale2Routes.length - remaining;
+    localStorage.setItem(
+      progressStorageKey,
+      JSON.stringify({
+        [FINALE_2_PLAYLIST_ID]: {
+          index,
+          order: previousFinale2Routes.map((_, i) => i),
+          routes: previousFinale2Routes,
+        },
+      }),
+    );
+
+    const service = TestBed.inject(PuzzlePlaylistService);
+    const finale = service.find(FINALE_2_PLAYLIST_ID)!;
+    const resumed = service.startUrl(finale)!;
+    expect(resumed.split('?')[0]).toBe(route);
+    expect(service.progressFor(finale)?.index).toBe(index);
+    expect(service.progressFromUrl(resumed)?.nextRoute?.split('?')[0]).toBe(
+      finale.routes[index + 1],
+    );
+  });
+
+  it('continues a shuffled Finale 2 after the removed game and appends the new games', () => {
+    const removed = previousFinale2Routes.length - 1;
+    const remaining = Array.from({ length: removed }, (_, i) => i).reverse();
+    const order = [removed, ...remaining];
+    const index = 2;
+    const route = previousFinale2Routes[order[index]];
+    localStorage.setItem(
+      progressStorageKey,
+      JSON.stringify({
+        [FINALE_2_PLAYLIST_ID]: { index, order, routes: previousFinale2Routes },
+      }),
+    );
+
+    const service = TestBed.inject(PuzzlePlaylistService);
+    const finale = service.find(FINALE_2_PLAYLIST_ID)!;
+    const resumed = service.startUrl(finale)!;
+    expect(resumed.split('?')[0]).toBe(route);
+    const progress = service.progressFromUrl(resumed);
+    expect(progress?.index).toBe(index - 1);
+    expect(progress?.order).toEqual([...remaining, removed, removed + 1]);
+    expect(progress?.order.slice(-2).map((i) => finale.routes[i])).toEqual([
+      '/code-deduction',
+      '/cadenas-mystere',
+    ]);
+
+    const openBeforeUpdate = `${route}?from=playlist&playlist=${finale.id}&playlistIndex=${index}&playlistOrder=${order.join(',')}`;
+    expect(service.progressFromUrl(openBeforeUpdate)).toEqual(progress);
+    service.complete(progress!);
+    expect(service.startUrl(finale)).toBe(progress?.nextRoute);
   });
 
   it.each([

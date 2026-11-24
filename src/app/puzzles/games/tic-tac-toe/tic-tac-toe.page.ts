@@ -1,6 +1,7 @@
 import { Component, computed, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { PuzzleSuccessPopupComponent } from '../../shared/puzzle-success-popup/puzzle-success-popup.component';
+import { WINNING_LINES } from './tic-tac-toe.logic';
 
 type Mark = 'X' | 'O';
 type Cell = Mark | null;
@@ -12,16 +13,6 @@ type Move = {
 };
 
 const STARTING_BOARD: Cell[] = ['X', 'O', 'X', null, null, null, 'O', 'X', 'O'];
-const WINNING_LINES = [
-  [0, 1, 2],
-  [3, 4, 5],
-  [6, 7, 8],
-  [0, 3, 6],
-  [1, 4, 7],
-  [2, 5, 8],
-  [0, 4, 8],
-  [2, 4, 6],
-] as const;
 
 @Component({
   selector: 'app-tic-tac-toe-page',

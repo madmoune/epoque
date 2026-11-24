@@ -5,9 +5,9 @@
 
 .page {
   box-sizing: border-box;
-  width: min(100%, 1120px);
+  width: min(100%, 1000px);
   margin: 0 auto;
-  padding: 1.5rem;
+  padding: 1rem;
 }
 
 .back-link {
@@ -19,8 +19,8 @@
 
 .shell {
   display: grid;
-  gap: 1.25rem;
-  padding: clamp(1rem, 3vw, 1.7rem);
+  gap: 1rem;
+  padding: clamp(0.85rem, 2.5vw, 1.35rem);
   border: 1px solid var(--border);
   border-radius: 1rem;
   background: var(--surface);
@@ -53,7 +53,7 @@ figure {
 }
 
 h1 {
-  font-size: clamp(2rem, 6vw, 3.2rem);
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
   line-height: 1;
 }
 
@@ -75,11 +75,11 @@ h2 {
 
 .mobile-panel {
   display: grid;
-  gap: 0.7rem;
+  gap: 0.55rem;
 }
 
 .mobile-panel {
-  padding: clamp(0.8rem, 2.5vw, 1.2rem);
+  padding: clamp(0.7rem, 2vw, 1rem);
 }
 
 .answer-tools {
@@ -99,8 +99,7 @@ h2 {
 
 .mobile-figure {
   min-width: 0;
-  overflow-x: auto;
-  overscroll-behavior-inline: contain;
+  overflow-x: hidden;
 
   &:focus-visible {
     outline: 2px solid var(--focus);
@@ -109,15 +108,11 @@ h2 {
 }
 
 .mobile-canvas {
-  --weight-box-width: 7.5rem;
-  --weight-box-height: 3.875rem;
-  --diagram-min-width: max(
-    calc(var(--diagram-width-per-weight) * (var(--weight-box-width) + 0.5rem)),
-    calc(var(--diagram-width-per-row-height) * (var(--weight-box-height) + 0.5rem))
-  );
+  --weight-box-width: 5rem;
+  --weight-box-height: 2.75rem;
   position: relative;
   box-sizing: border-box;
-  width: clamp(calc(var(--diagram-min-width) + 2px), 86vh, 100%);
+  width: min(100%, 35rem);
   margin-inline: auto;
   overflow: hidden;
   border: 1px solid var(--border);
@@ -126,13 +121,7 @@ h2 {
     linear-gradient(color-mix(in srgb, var(--focus) 4%, transparent) 1px, transparent 1px),
     linear-gradient(90deg, color-mix(in srgb, var(--focus) 4%, transparent) 1px, transparent 1px),
     color-mix(in srgb, var(--surface-soft) 78%, var(--surface-raised));
-  background-size: 2.5rem 2.5rem;
-}
-
-.diagram-scroll-hint {
-  display: none;
-  color: var(--muted);
-  font-size: 0.8rem;
+  background-size: 2rem 2rem;
 }
 
 .mobile-diagram {
@@ -156,7 +145,7 @@ h2 {
 .bar-line {
   stroke: var(--focus);
   stroke-linecap: round;
-  stroke-width: 7;
+  stroke-width: 6;
 }
 
 .pivot-dot {
@@ -168,7 +157,7 @@ h2 {
 .unit-marker {
   stroke: var(--text);
   stroke-linecap: round;
-  stroke-width: 3;
+  stroke-width: 2.5;
 }
 
 .diagram-weight-editors {
@@ -187,7 +176,7 @@ h2 {
   gap: 0.2rem;
   width: var(--weight-box-width);
   min-height: var(--weight-box-height);
-  padding: 0.25rem 0.35rem;
+  padding: 0.18rem 0.25rem;
   border: 2px solid var(--focus);
   border-radius: 0.78rem;
   color: var(--text);
@@ -195,14 +184,14 @@ h2 {
   transform: translateX(-50%);
 
   strong {
-    font-size: 1.125rem;
+    font-size: 1rem;
     font-variant-numeric: tabular-nums;
     text-align: center;
   }
 
   small {
     color: var(--muted);
-    font-size: 0.7rem;
+    font-size: 0.62rem;
     font-weight: 850;
   }
 }
@@ -234,14 +223,14 @@ h2 {
     box-sizing: border-box;
     width: 100%;
     min-width: 0;
-    height: 2.875rem;
+    height: 2rem;
     padding: 0.1rem 0.2rem;
     border: 1px solid var(--border-strong);
     border-radius: 0.42rem;
     background: var(--surface-soft);
     color: var(--text);
     font: inherit;
-    font-size: 1.125rem;
+    font-size: 0.95rem;
     font-weight: 950;
     font-variant-numeric: tabular-nums;
     text-align: center;
@@ -517,11 +506,9 @@ h2 {
   }
 
   .mobile-canvas {
-    --weight-box-width: 3.5rem;
-  }
-
-  .diagram-scroll-hint {
-    display: block;
+    --weight-box-width: 2.6rem;
+    --weight-box-height: 2.65rem;
+    width: min(100%, 30rem);
   }
 
   .diagram-weight-editor,
@@ -532,16 +519,22 @@ h2 {
 
     .diagram-weight-symbol {
       position: absolute;
-      inset-block-start: -0.7rem;
+      inset-block-start: -0.58rem;
       inset-inline-start: 50%;
-      width: 1.25rem;
-      height: 1.25rem;
+      width: 1.1rem;
+      height: 1.1rem;
       transform: translateX(-50%);
     }
 
     .diagram-equals,
     small {
       display: none;
+    }
+
+    input {
+      height: 2rem;
+      padding-inline: 0.1rem;
+      font-size: 0.9rem;
     }
   }
 
@@ -557,12 +550,12 @@ h2 {
 @media (max-width: 760px) {
   .page {
     width: 100%;
-    padding: 0.65rem;
+    padding: 0.5rem;
   }
 
   .shell {
-    gap: 0.9rem;
-    padding: 0.75rem;
+    gap: 0.75rem;
+    padding: 0.65rem;
   }
 
   .section-heading {
@@ -572,7 +565,7 @@ h2 {
 
 @media (max-width: 480px) {
   h1 {
-    font-size: 2rem;
+    font-size: 1.8rem;
   }
 
   .intro {
@@ -580,7 +573,12 @@ h2 {
   }
 
   .mobile-panel {
-    padding: 0.55rem;
+    padding: 0.45rem;
+  }
+
+  .mobile-canvas {
+    --weight-box-width: 2.5rem;
+    --weight-box-height: 2.55rem;
   }
 
   .answer-tools {

@@ -8,7 +8,7 @@ const ALL_CODES = enumerateCodes('');
 // Ces cinq essais isolent 0123. Une permutation des chiffres conserve les indices.
 const FALLBACK_ATTEMPTS = ['3526', '0419', '7291', '3164', '0753'];
 
-type CodeClue = {
+export type CodeClue = {
   attempt: string;
   wellPlaced: number;
   misplaced: number;

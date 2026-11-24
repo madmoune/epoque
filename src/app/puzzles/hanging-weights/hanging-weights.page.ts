@@ -62,8 +62,6 @@ type MobileWeightLayout = {
 type HangingMobileLayout = {
   width: number;
   height: number;
-  widthPerWeight: number;
-  widthPerRowHeight: number;
   ceilingY: number;
   rootX: number;
   rootBarY: number;
@@ -670,12 +668,12 @@ export class HangingWeightsPage {
 }
 
 function createHangingMobileLayout(root: HangingWeightBranchNode): HangingMobileLayout {
-  const width = 760;
-  const ceilingY = 28;
-  const rootBarY = 102;
-  const levelGap = 160;
-  const leafDrop = 44;
-  const horizontalPadding = 62;
+  const width = 560;
+  const ceilingY = 16;
+  const rootBarY = 56;
+  const levelGap = 96;
+  const leafDrop = 24;
+  const horizontalPadding = 36;
   const rawBars: RawMobileBarLayout[] = [];
   const rawConnectors: MobileConnectorLayout[] = [];
   const rawWeights: MobileWeightLayout[] = [];
@@ -731,7 +729,7 @@ function createHangingMobileLayout(root: HangingWeightBranchNode): HangingMobile
   const minX = Math.min(...allXPositions);
   const maxX = Math.max(...allXPositions);
   const span = Math.max(1, maxX - minX);
-  const scale = Math.min(66, (width - horizontalPadding * 2) / span);
+  const scale = Math.min(46, (width - horizontalPadding * 2) / span);
   const midpoint = (minX + maxX) / 2;
   const mapX = (x: number): number => width / 2 + (x - midpoint) * scale;
   const bars = rawBars.map((bar) => ({
@@ -758,24 +756,9 @@ function createHangingMobileLayout(root: HangingWeightBranchNode): HangingMobile
   const rowHeight = levelGap - leafDrop;
   const height = Math.max(...weights.map((weight) => weight.y)) + rowHeight;
 
-  // Leave room for full-size controls between neighboring weights and at either edge.
-  let weightSpacing = horizontalPadding * 2;
-  const previousWeightXByRow = new Map<number, number>();
-  for (const { x, y } of [...weights].sort((first, second) => first.x - second.x)) {
-    const previousX = previousWeightXByRow.get(y);
-
-    if (previousX !== undefined) {
-      weightSpacing = Math.min(weightSpacing, x - previousX);
-    }
-
-    previousWeightXByRow.set(y, x);
-  }
-
   return {
     width,
     height,
-    widthPerWeight: width / weightSpacing,
-    widthPerRowHeight: width / rowHeight,
     ceilingY,
     rootX: mapX(0),
     rootBarY,

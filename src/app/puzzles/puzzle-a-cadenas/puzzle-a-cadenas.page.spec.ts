@@ -2,11 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { PuzzlePlayHistoryService } from '../../puzzle-play-history.service';
-import {
-  FINALE_2_PLAYLIST_ID,
-  FINALE_2_PLAYLIST_ROUTES,
-  PuzzlePlaylistService,
-} from '../../puzzle-playlist.service';
+import { PuzzlePlaylistService } from '../../puzzle-playlist.service';
 import { PUZZLE_A_CADENAS, type PuzzleACadenasEntry } from './puzzle-a-cadenas.catalog';
 import { PuzzleACadenasPage } from './puzzle-a-cadenas.page';
 
@@ -277,15 +273,21 @@ describe('Puzzle à Cadenas display', () => {
   });
 });
 
-describe('Puzzle à Cadenas in Finale 2', () => {
+describe('Puzzle à Cadenas in a playlist', () => {
   const solvedStorageKey = 'epique-puzzle-a-cadenas-solved';
+  const playlistsStorageKey = 'epique-puzzle-playlists';
   const progressStorageKey = 'epique-puzzle-playlist-progress';
-  const completionStorageKey = 'epique-puzzle-playlist-completed-at-finale-2';
-  const index = FINALE_2_PLAYLIST_ROUTES.length - 1;
-  const finalUrl = `/puzzle-a-cadenas?from=playlist&playlist=${FINALE_2_PLAYLIST_ID}&playlistIndex=${index}`;
+  const playlist = {
+    id: 'cadenas-playlist',
+    name: 'Parcours de cadenas',
+    routes: ['/rush-hour', '/puzzle-a-cadenas'],
+  };
+  const index = playlist.routes.length - 1;
+  const finalUrl = `/puzzle-a-cadenas?from=playlist&playlist=${playlist.id}&playlistIndex=${index}`;
   const completedAt = Date.UTC(2026, 10, 16, 13);
 
   beforeEach(() => {
+    localStorage.setItem(playlistsStorageKey, JSON.stringify([playlist]));
     TestBed.configureTestingModule({
       providers: [
         provideRouter([{ path: 'puzzle-a-cadenas', component: PuzzleACadenasPage }]),
@@ -297,19 +299,19 @@ describe('Puzzle à Cadenas in Finale 2', () => {
 
   afterEach(() => {
     localStorage.removeItem(solvedStorageKey);
+    localStorage.removeItem(playlistsStorageKey);
     localStorage.removeItem(progressStorageKey);
-    localStorage.removeItem(completionStorageKey);
     vi.restoreAllMocks();
   });
 
-  function saveProgressAtFinale(): void {
+  function saveProgressAtCollection(): void {
     localStorage.setItem(
       progressStorageKey,
       JSON.stringify({
-        [FINALE_2_PLAYLIST_ID]: {
+        [playlist.id]: {
           index,
-          order: FINALE_2_PLAYLIST_ROUTES.map((_, routeIndex) => routeIndex),
-          routes: FINALE_2_PLAYLIST_ROUTES,
+          order: playlist.routes.map((_, routeIndex) => routeIndex),
+          routes: playlist.routes,
         },
       }),
     );
@@ -318,42 +320,43 @@ describe('Puzzle à Cadenas in Finale 2', () => {
   it('completes the playlist when the last lock is opened', async () => {
     const [lastLock, ...openedLocks] = PUZZLE_A_CADENAS;
     localStorage.setItem(solvedStorageKey, JSON.stringify(openedLocks.map(({ id }) => id)));
-    saveProgressAtFinale();
+    saveProgressAtCollection();
 
     const harness = await RouterTestingHarness.create(finalUrl);
     const playlists = TestBed.inject(PuzzlePlaylistService);
-    const finale = playlists.find(FINALE_2_PLAYLIST_ID)!;
-    expect(finale.lastCompletedAt).toBeNull();
+    expect(playlists.find(playlist.id)?.lastCompletedAt).toBeNull();
 
     const input = harness.routeNativeElement!.querySelector<HTMLInputElement>('.answer-row input')!;
     input.value = lastLock.answer;
     input.dispatchEvent(new Event('input', { bubbles: true }));
     harness.detectChanges();
 
-    expect(playlists.find(finale.id)?.lastCompletedAt).toBe(completedAt);
-    expect(playlists.progressFor(finale)).toBeNull();
+    expect(playlists.find(playlist.id)?.lastCompletedAt).toBe(completedAt);
+    expect(playlists.progressFor(playlist)).toBeNull();
   });
 
   it('counts the previously opened collection when an active run reaches it', async () => {
     localStorage.setItem(solvedStorageKey, JSON.stringify(PUZZLE_A_CADENAS.map(({ id }) => id)));
-    saveProgressAtFinale();
+    saveProgressAtCollection();
 
     await RouterTestingHarness.create(finalUrl);
 
     const playlists = TestBed.inject(PuzzlePlaylistService);
-    const finale = playlists.find(FINALE_2_PLAYLIST_ID)!;
-    expect(finale.lastCompletedAt).toBe(completedAt);
-    expect(playlists.progressFor(finale)).toBeNull();
+    expect(playlists.find(playlist.id)?.lastCompletedAt).toBe(completedAt);
+    expect(playlists.progressFor(playlist)).toBeNull();
   });
 
   it('preserves the completion date when reopening a finished run', async () => {
     const savedCompletion = completedAt - 60_000;
     localStorage.setItem(solvedStorageKey, JSON.stringify(PUZZLE_A_CADENAS.map(({ id }) => id)));
-    localStorage.setItem(completionStorageKey, String(savedCompletion));
+    localStorage.setItem(
+      playlistsStorageKey,
+      JSON.stringify([{ ...playlist, lastCompletedAt: savedCompletion }]),
+    );
 
     await RouterTestingHarness.create(finalUrl);
 
     const playlists = TestBed.inject(PuzzlePlaylistService);
-    expect(playlists.find(FINALE_2_PLAYLIST_ID)?.lastCompletedAt).toBe(savedCompletion);
+    expect(playlists.find(playlist.id)?.lastCompletedAt).toBe(savedCompletion);
   });
 });

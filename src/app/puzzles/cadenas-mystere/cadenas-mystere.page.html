@@ -1,0 +1,158 @@
+<main class="page">
+  <a routerLink="/" fragment="collections" class="back-link">Retour au menu</a>
+
+  <section class="card">
+    <header>
+      <h1>Cadenas mystère</h1>
+      <p class="intro">
+        Trouve les chiffres A, B, C et D, puis entre-les dans cet ordre pour ouvrir le cadenas.
+      </p>
+    </header>
+
+    @let current = puzzle();
+    @if (current.instruction) {
+      <p class="instruction">{{ current.instruction }}</p>
+    }
+    @if (controls().marks) {
+      <p class="marking-help">Touche une case pour la marquer, la barrer ou effacer ta marque.</p>
+    }
+    @if (controls().choices) {
+      <p class="marking-help">Touche une case à compléter pour essayer une valeur.</p>
+    }
+    @if (controls().paths) {
+      <p class="marking-help">
+        Touche entre deux repères pour ajouter ou effacer un trait de brouillon.
+      </p>
+    }
+
+    @if (current.shared; as shared) {
+      <div class="shared-clues" [style.--min-clue-width.px]="minClueWidth(shared)">
+        @for (clue of shared; track $index) {
+          <div class="clue-card" [class.full-row]="fullRow(clue)">
+            <app-cadenas-mystere-clue [clue]="clue" [round]="round()" />
+          </div>
+        }
+      </div>
+    }
+
+    @if (current.examples?.length) {
+      <section aria-labelledby="mystery-examples">
+        <h2 id="mystery-examples">Exemples résolus</h2>
+        <div class="clue-list examples" [style.--min-clue-width.px]="exampleClueWidth()">
+          @for (example of current.examples; track $index) {
+            <div class="clue-card">
+              <app-cadenas-mystere-clue [clue]="example.clue" [round]="round()" />
+              <p class="result"><span class="sr-only">Résultat </span>{{ example.digit }}</p>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    @if (current.challenges; as challenges) {
+      <section aria-labelledby="mystery-challenges">
+        <h2 id="mystery-challenges">À résoudre</h2>
+        <div class="clue-list challenges" [style.--min-clue-width.px]="minClueWidth(challenges)">
+          @for (clue of challenges; track $index) {
+            <div class="clue-card challenge">
+              <h3 class="position">{{ positions[$index] }}</h3>
+              <app-cadenas-mystere-clue [clue]="clue" [round]="round()" />
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <section class="answer-area" aria-label="Code et indices">
+      <div class="answer-field">
+        <label for="mystery-code">Code à quatre chiffres</label>
+        <input
+          #code
+          id="mystery-code"
+          type="text"
+          inputmode="numeric"
+          pattern="[0-9]{4}"
+          maxlength="4"
+          autocomplete="off"
+          [value]="attempt()"
+          [disabled]="isSolved()"
+          [attr.aria-invalid]="wrongCode() ? 'true' : null"
+          aria-describedby="mystery-feedback"
+          (input)="updateAttempt(code)"
+        />
+        <div id="mystery-feedback" role="status">
+          @if (wrongCode()) {
+            <p class="feedback">Ce code n’ouvre pas le cadenas.</p>
+          }
+        </div>
+      </div>
+
+      <div class="actions">
+        <button
+          type="button"
+          class="secondary-button"
+          data-confirm-action="hint"
+          [disabled]="!canRevealHint()"
+          (click)="revealHint()"
+        >
+          Indice
+        </button>
+        <button
+          type="button"
+          class="secondary-button"
+          data-confirm-action="restart"
+          (click)="restart()"
+        >
+          Recommencer
+        </button>
+        <button type="button" data-confirm-action="new-game" (click)="newPuzzle()">
+          Nouvelle énigme
+        </button>
+      </div>
+
+      <div role="status">
+        @if (showMechanic()) {
+          <div class="hint-panel">
+            <p class="hint-title">{{ current.title }}</p>
+            @if (showSolutionHint()) {
+              <p class="hint-method">{{ current.solutionHint }}</p>
+            }
+            @if (showExampleHint()) {
+              <div class="hint-example">
+                <p class="hint-title">Exemple expliqué</p>
+                <div class="hint-example-content">
+                  @if (current.workedExample.clue; as clue) {
+                    <app-cadenas-mystere-clue
+                      [clue]="clue"
+                      [round]="round()"
+                      [style.--example-width.px]="minClueWidth([clue])"
+                    />
+                  }
+                  <p class="hint-explanation">{{ current.workedExample.explanation }}</p>
+                </div>
+              </div>
+            }
+            @if (revealedDigits().length) {
+              <p class="revealed-digits" aria-label="Chiffres révélés">
+                @for (position of positions; track position; let i = $index) {
+                  <span
+                    >{{ position }} <strong>{{ revealedDigits().at(i) ?? '·' }}</strong></span
+                  >
+                }
+              </p>
+            }
+          </div>
+        }
+      </div>
+    </section>
+  </section>
+
+  @if (isSolved()) {
+    <app-puzzle-success-popup
+      title="Cadenas ouvert !"
+      [answer]="current.answer"
+      actionLabel="Nouvelle énigme"
+      (action)="newPuzzle()"
+    />
+  }
+</main>

@@ -135,6 +135,33 @@ describe('HomePage playlist category controls', () => {
     expect(page.visibleCategories().length).toBe(page.categories().length);
   });
 
+  it('finds Déduction logique by category name and Déduction de Nombre by game name', () => {
+    const fixture = TestBed.createComponent(HomePage);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const input = root.querySelector<HTMLInputElement>('#game-search-input')!;
+    const search = (query: string) => {
+      input.value = query;
+      input.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+    };
+
+    search('deduction logique');
+    expect([...root.querySelectorAll('.category-card')].map(({ id }) => id)).toEqual([
+      'deduction-logique',
+    ]);
+    expect(root.querySelector('.category-nav-link')?.textContent?.trim()).toBe('Déduction logique');
+    expect(root.querySelector('#deduction-logique [href="/code-deduction"] h3')?.textContent).toBe(
+      'Déduction de Nombre',
+    );
+    expect(root.querySelector('#deduction-logique [href="/mastermind"]')).not.toBeNull();
+
+    search('deduction de nombre');
+    expect(
+      [...root.querySelectorAll('.category-card .puzzle-card h3')].map((card) => card.textContent),
+    ).toEqual(['Déduction de Nombre']);
+  });
+
   it('classifies the six games in their themed categories and keeps them in playlists', () => {
     const page = TestBed.createComponent(HomePage).componentInstance;
     const expectedCategory: Record<string, string> = {

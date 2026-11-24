@@ -4,7 +4,7 @@
   <section class="card">
     <header class="header">
       <p class="eyebrow">Déduction logique</p>
-      <h1>Cadenas à indices</h1>
+      <h1>Déduction de Nombre</h1>
       <p class="intro">
         Trouve le code de quatre chiffres différents. Un chiffre bien placé est à la bonne position.
         Un chiffre mal placé est dans le code à une autre position. Le code peut commencer par zéro.
@@ -12,26 +12,7 @@
     </header>
 
     <section class="puzzle-area">
-      <div class="clue-grid">
-        <table aria-label="Indices du cadenas">
-          <thead>
-            <tr>
-              <th scope="col">Essai</th>
-              <th scope="col">Bien placés</th>
-              <th scope="col">Mal placés</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (clue of puzzle().clues; track clue.attempt) {
-              <tr>
-                <th scope="row">{{ clue.attempt }}</th>
-                <td>{{ clue.wellPlaced }}</td>
-                <td>{{ clue.misplaced }}</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
+      <app-code-deduction-clues [clues]="puzzle().clues" [round]="round()" />
 
       <div class="answer-field">
         <label for="code-answer">Code à quatre chiffres</label>
@@ -95,7 +76,7 @@
 
   @if (isSolved()) {
     <app-puzzle-success-popup
-      title="Cadenas ouvert !"
+      title="Code trouvé !"
       [answer]="puzzle().solution"
       actionLabel="Nouvelle énigme"
       (action)="newPuzzle()"

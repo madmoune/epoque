@@ -97,9 +97,9 @@ export class HomePage {
     return this.categories()
       .map((category) => ({
         ...category,
-        puzzles: category.puzzles.filter((puzzle) =>
-          this.normalizeSearch(puzzle.title).includes(query),
-        ),
+        puzzles: this.normalizeSearch(category.title).includes(query)
+          ? category.puzzles
+          : category.puzzles.filter((puzzle) => this.normalizeSearch(puzzle.title).includes(query)),
       }))
       .filter((category) => category.puzzles.length > 0);
   });

@@ -2,11 +2,12 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { PuzzlePlayHistoryService } from '../../puzzle-play-history.service';
 import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
+import { CodeDeductionCluesComponent } from './code-deduction-clues.component';
 import { CODE_LENGTH, createCodeDeductionPuzzle } from './code-deduction.logic';
 
 @Component({
   selector: 'app-code-deduction-page',
-  imports: [RouterLink, PuzzleSuccessPopupComponent],
+  imports: [RouterLink, CodeDeductionCluesComponent, PuzzleSuccessPopupComponent],
   templateUrl: './code-deduction.page.html',
   styleUrl: './code-deduction.page.scss',
 })
@@ -16,6 +17,7 @@ export class CodeDeductionPage {
 
   protected readonly codeLength = CODE_LENGTH;
   protected readonly puzzle = signal(createCodeDeductionPuzzle());
+  protected readonly round = signal(0);
   protected readonly answer = signal('');
   protected readonly feedback = signal('');
   protected readonly isSolved = signal(false);
@@ -59,6 +61,7 @@ export class CodeDeductionPage {
     this.answer.set('');
     this.feedback.set('');
     this.hintCount.set(0);
+    this.round.update((round) => round + 1);
     this.isSolved.set(false);
   }
 

@@ -1,0 +1,89 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.drawing {
+  position: relative;
+  max-width: 100%;
+  margin-inline: auto;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.drawing-edge {
+  position: absolute;
+  width: calc(var(--edge-length) - 4px);
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 0.2rem;
+  background: transparent;
+  color: var(--focus);
+  cursor: pointer;
+  touch-action: manipulation;
+  transform: translate(-50%, -50%);
+
+  &.vertical {
+    width: 24px;
+    height: calc(var(--edge-length) - 4px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+  }
+
+  &::before {
+    position: absolute;
+    inset: 50% -2px auto;
+    height: 2px;
+    border-radius: 2px;
+    background: currentColor;
+    content: '';
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-50%);
+  }
+
+  &.vertical::before {
+    inset: -2px auto -2px 50%;
+    width: 2px;
+    height: auto;
+    transform: translateX(-50%);
+  }
+
+  &:focus-visible::before,
+  &:hover::before {
+    opacity: 0.45;
+  }
+
+  &[aria-pressed='true']::before {
+    opacity: 1;
+  }
+
+  &.bridge::before {
+    inset-inline: 9px;
+  }
+
+  &.vertical.bridge::before {
+    inset-block: 9px;
+    inset-inline: 50% auto;
+  }
+
+  &.double::before {
+    background: transparent;
+    box-shadow:
+      0 -2px currentColor,
+      0 2px currentColor;
+  }
+
+  &.vertical.double::before {
+    box-shadow:
+      -2px 0 currentColor,
+      2px 0 currentColor;
+  }
+}

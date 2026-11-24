@@ -41,20 +41,12 @@
           </p>
         }
 
-        <p id="diagram-scroll-hint" class="diagram-scroll-hint">
-          Fais défiler le schéma horizontalement au besoin.
-        </p>
         <figure
           class="mobile-figure"
           tabindex="0"
           aria-label="Schéma du mobile"
-          aria-describedby="diagram-scroll-hint"
         >
-          <div
-            class="mobile-canvas"
-            [style.--diagram-width-per-weight]="layout().widthPerWeight"
-            [style.--diagram-width-per-row-height]="layout().widthPerRowHeight"
-          >
+          <div class="mobile-canvas">
             <svg
               class="mobile-diagram"
               [attr.viewBox]="'0 0 ' + layout().width + ' ' + layout().height"

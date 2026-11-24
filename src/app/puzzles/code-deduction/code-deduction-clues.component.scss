@@ -1,0 +1,96 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.clue-grid {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+th,
+td {
+  padding: clamp(0.35rem, 1.6vw, 0.55rem) clamp(0.3rem, 2vw, 1rem);
+  border: 1px solid var(--border);
+}
+
+.attempt-cell {
+  white-space: nowrap;
+  letter-spacing: 0.12em;
+}
+
+.digit-toggle {
+  box-sizing: border-box;
+  display: inline-grid;
+  min-width: clamp(1.55rem, 8vw, 1.85rem);
+  min-height: 2.2rem;
+  place-items: center;
+  margin: 0 0.02rem;
+  padding: 0.1rem 0.15rem;
+  border: 0;
+  border-radius: 0.35rem;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  touch-action: manipulation;
+
+  &:hover,
+  &:focus-visible {
+    background: var(--surface-soft);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 1px;
+  }
+
+  &.is-excluded {
+    color: var(--muted);
+    text-decoration: line-through;
+    text-decoration-color: var(--accent);
+    text-decoration-thickness: 0.14em;
+  }
+}
+
+.digit-marking-help {
+  margin: 0.65rem 0 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+tr > :first-child {
+  border-left: 0;
+}
+
+tr > :last-child {
+  border-right: 0;
+}
+
+thead th {
+  border-top: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+}
+
+tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+tbody th,
+td {
+  font-size: clamp(1.15rem, 4vw, 1.55rem);
+  font-weight: 800;
+}

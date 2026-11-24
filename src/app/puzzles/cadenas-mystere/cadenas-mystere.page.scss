@@ -1,0 +1,217 @@
+.page {
+  box-sizing: border-box;
+  width: min(100%, 64rem);
+  margin-inline: auto;
+  padding: clamp(0.65rem, 2.8vw, 1.6rem);
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 0.7rem;
+  font-weight: 800;
+}
+
+.card {
+  --clue-padding: clamp(0.5rem, 1.5vw, 0.8rem);
+  display: grid;
+  gap: 1rem;
+  padding: clamp(0.75rem, 2.5vw, 1.45rem);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surface);
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: clamp(1.85rem, 4.5vw, 2.75rem);
+  line-height: 1.08;
+}
+
+h2 {
+  margin-bottom: 0.5rem;
+  font-size: 1.05rem;
+}
+
+.intro {
+  margin-top: 0.45rem;
+  color: var(--muted-strong);
+}
+
+.instruction,
+.marking-help {
+  max-width: 62ch;
+  line-height: 1.45;
+}
+
+.marking-help {
+  margin-top: -0.3rem;
+  color: var(--muted-strong);
+  font-size: 0.875rem;
+}
+
+.shared-clues,
+.clue-list {
+  display: grid;
+  gap: 0.6rem;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(100%, calc(var(--min-clue-width, 12rem) + 2 * var(--clue-padding) + 2px)), 1fr)
+  );
+}
+
+.full-row {
+  grid-column: 1 / -1;
+}
+
+.clue-card {
+  display: grid;
+  align-content: center;
+  gap: 0.35rem;
+  position: relative;
+  min-width: 0;
+  padding: var(--clue-padding);
+  border: 1px solid var(--border);
+  border-radius: 0.65rem;
+  background: var(--surface-raised);
+}
+
+.challenge {
+  align-content: start;
+  grid-template-rows: auto 1fr;
+}
+
+.position {
+  width: fit-content;
+  color: var(--focus);
+  font-size: 0.92rem;
+  font-weight: 850;
+}
+
+.result {
+  justify-self: center;
+  min-width: 1.7rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.32rem;
+  background: var(--surface-soft);
+  color: var(--focus);
+  font-weight: 800;
+  text-align: center;
+}
+
+.answer-area {
+  display: grid;
+  gap: 0.8rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--border);
+}
+
+.answer-field label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-weight: 800;
+}
+
+.answer-field input {
+  box-sizing: border-box;
+  width: 10rem;
+  max-width: 100%;
+  min-height: var(--command-height);
+  padding-inline: 0.7rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--command-radius);
+  font: inherit;
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  font-variant-numeric: tabular-nums;
+}
+
+.feedback {
+  margin-top: 0.4rem;
+  color: var(--text);
+}
+
+.hint-panel {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.7rem;
+  border: 1px solid var(--border);
+  border-inline-start: 3px solid var(--accent);
+  border-radius: 0.55rem;
+  background: var(--surface-raised);
+}
+
+.hint-title {
+  font-weight: 800;
+}
+
+.hint-method,
+.hint-explanation {
+  max-width: 64ch;
+  line-height: 1.45;
+}
+
+.hint-example {
+  display: grid;
+  gap: 0.55rem;
+  border-top: 1px solid var(--border);
+  padding-top: 0.6rem;
+}
+
+.hint-example-content {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem 0.85rem;
+
+  app-cadenas-mystere-clue {
+    box-sizing: border-box;
+    width: min(100%, max(12rem, calc(var(--example-width) + 1rem)));
+    padding: 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 0.45rem;
+    background: var(--surface);
+  }
+}
+
+.hint-explanation {
+  flex: 1 1 16rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.revealed-digits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  font-variant-numeric: tabular-nums;
+
+  span {
+    display: inline-flex;
+    gap: 0.4rem;
+    justify-content: space-between;
+    min-width: 2.2rem;
+    padding: 0.2rem 0.4rem;
+    border: 1px solid var(--border);
+    border-radius: 0.3rem;
+  }
+
+  strong {
+    color: var(--focus);
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

@@ -37,7 +37,7 @@ export const FINALE_1_PLAYLIST_ROUTES = [
   '/quick-arithmetic',
 ] as const;
 
-export const FINALE_2_PLAYLIST_ROUTES = [
+const FINALE_2_FIRST_ROUTES = [
   '/cryptarithms',
   '/nim-emission',
   '/isola',
@@ -57,7 +57,14 @@ export const FINALE_2_PLAYLIST_ROUTES = [
   '/jigsaw-blocks',
   '/sliding-puzzle',
   '/rush-hour',
-  '/puzzle-a-cadenas',
+] as const;
+
+const PREVIOUS_FINALE_2_PLAYLIST_ROUTES = [...FINALE_2_FIRST_ROUTES, '/puzzle-a-cadenas'] as const;
+
+export const FINALE_2_PLAYLIST_ROUTES = [
+  ...FINALE_2_FIRST_ROUTES,
+  '/code-deduction',
+  '/cadenas-mystere',
 ] as const;
 
 export const FINALE_1_PLAYLIST: PuzzlePlaylist = {
@@ -205,11 +212,16 @@ export class PuzzlePlaylistService {
   progressFor(playlist: PuzzlePlaylist): PlaylistProgressSnapshot | null {
     const savedProgress = this.progress()[playlist.id];
 
-    if (
-      !savedProgress ||
-      savedProgress.index >= savedProgress.order.length ||
-      !this.arraysEqual(savedProgress.routes, playlist.routes.slice(0, savedProgress.routes.length))
-    ) {
+    if (!savedProgress || savedProgress.index >= savedProgress.order.length) {
+      return null;
+    }
+
+    if (this.arraysEqual(savedProgress.routes, PREVIOUS_FINALE_2_PLAYLIST_ROUTES)) {
+      const migrated = this.migrateFinale2Order(playlist, savedProgress.order, savedProgress.index);
+      if (migrated) return { ...migrated, routes: [...playlist.routes] };
+    }
+
+    if (!this.arraysEqual(savedProgress.routes, playlist.routes)) {
       return null;
     }
 
@@ -236,17 +248,24 @@ export class PuzzlePlaylistService {
     }
 
     const playlist = this.find(params.get('playlist') ?? '');
-    const index = Number(params.get('playlistIndex'));
-    const order = playlist && this.orderFromParam(params.get('playlistOrder'), playlist);
+    if (!playlist) return null;
 
-    if (
-      !playlist ||
-      !order ||
-      !Number.isInteger(index) ||
-      index < 0 ||
-      index >= order.length ||
-      playlist.routes[order[index]] !== currentRoute
-    ) {
+    const urlIndex = Number(params.get('playlistIndex'));
+    const orderParam = params.get('playlistOrder');
+    const urlOrder =
+      orderParam === null
+        ? this.createOrderedOrder(playlist.routes.length)
+        : orderParam.split(',').map(Number);
+
+    if (!Number.isInteger(urlIndex) || urlIndex < 0 || urlIndex >= urlOrder.length) {
+      return null;
+    }
+
+    const migrated = this.migrateFinale2Order(playlist, urlOrder, urlIndex);
+    const order = migrated?.order ?? this.orderForPlaylist(urlOrder, playlist);
+    const index = migrated?.index ?? urlIndex;
+
+    if (!order || playlist.routes[order[index]] !== currentRoute) {
       return null;
     }
 
@@ -319,12 +338,24 @@ export class PuzzlePlaylistService {
     return order;
   }
 
-  private orderFromParam(value: string | null, playlist: PuzzlePlaylist): number[] | null {
-    if (value === null) {
-      return this.createOrderedOrder(playlist.routes.length);
+  private migrateFinale2Order(
+    playlist: PuzzlePlaylist,
+    order: readonly number[],
+    index: number,
+  ): { index: number; order: number[] } | null {
+    if (
+      playlist.id !== FINALE_2_PLAYLIST_ID ||
+      !this.arraysEqual(playlist.routes, FINALE_2_PLAYLIST_ROUTES) ||
+      !this.isValidOrder(order, PREVIOUS_FINALE_2_PLAYLIST_ROUTES.length)
+    ) {
+      return null;
     }
 
-    return this.orderForPlaylist(value.split(',').map(Number), playlist);
+    const removed = FINALE_2_FIRST_ROUTES.length;
+    return {
+      index: order.indexOf(removed) < index ? index - 1 : index,
+      order: [...order.filter((routeIndex) => routeIndex !== removed), removed, removed + 1],
+    };
   }
 
   private orderForPlaylist(order: readonly number[], playlist: PuzzlePlaylist): number[] | null {

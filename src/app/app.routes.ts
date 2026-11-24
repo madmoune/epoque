@@ -194,6 +194,11 @@ export const routes: Routes = [
       import('./puzzles/puzzle-a-cadenas/puzzle-a-cadenas.page').then((m) => m.PuzzleACadenasPage),
   },
   {
+    path: 'cadenas-mystere',
+    loadComponent: () =>
+      import('./puzzles/cadenas-mystere/cadenas-mystere.page').then((m) => m.CadenasMysterePage),
+  },
+  {
     path: 'quick-arithmetic',
     data: { mode: 'quick' },
     loadComponent: () =>
