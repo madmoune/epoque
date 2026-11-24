@@ -37,7 +37,7 @@ export class CadenasMysterePage {
     this.puzzle().answer.slice(0, Math.max(0, this.hintCount() - EXAMPLE_HINT_STEP)),
   );
   protected readonly canRevealHint = computed(
-    () => !this.isSolved() && this.hintCount() < EXAMPLE_HINT_STEP + CODE_POSITIONS.length,
+    () => this.hintCount() < EXAMPLE_HINT_STEP + CODE_POSITIONS.length,
   );
   protected readonly controls = computed(() => {
     const puzzle = this.puzzle();

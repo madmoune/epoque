@@ -1,6 +1,8 @@
 import { Component, input, linkedSignal } from '@angular/core';
 import { type CodeClue } from './code-deduction.logic';
 
+type DigitState = 'free' | 'excluded' | 'selected';
+
 @Component({
   selector: 'app-code-deduction-clues',
   template: `
@@ -18,18 +20,16 @@ import { type CodeClue } from './code-deduction.logic';
             <tr>
               <th scope="row" class="attempt-cell">
                 @for (digit of clue.attempt; track $index) {
-                  @let excluded = excludedDigits().has(digit);
+                  @let state = digitState(digit);
                   <button
                     type="button"
                     class="digit-toggle"
                     data-board-cell
-                    [class.is-excluded]="excluded"
-                    [attr.aria-label]="
-                      excluded
-                        ? 'Réactiver le chiffre ' + digit
-                        : 'Barrer le chiffre ' + digit + ' partout'
-                    "
-                    [attr.aria-pressed]="excluded"
+                    [class.is-excluded]="state === 'excluded'"
+                    [class.is-selected]="state === 'selected'"
+                    [attr.data-state]="state"
+                    [attr.aria-label]="digitLabel(digit, state)"
+                    [attr.aria-pressed]="state !== 'free'"
                     [attr.data-digit]="digit"
                     (click)="toggleDigit(digit)"
                   >
@@ -45,25 +45,42 @@ import { type CodeClue } from './code-deduction.logic';
       </table>
     </div>
 
-    <p class="digit-marking-help">Sélectionne un chiffre pour le barrer partout ou le réactiver.</p>
+    <p class="digit-marking-help">
+      Un clic barre le chiffre partout, un deuxième le sélectionne et un troisième le rend libre.
+    </p>
   `,
   styleUrl: './code-deduction-clues.component.scss',
 })
 export class CodeDeductionCluesComponent {
   readonly clues = input.required<readonly CodeClue[]>();
   readonly round = input.required<number>();
-  protected readonly excludedDigits = linkedSignal<ReadonlySet<string>>(() => {
+  protected readonly digitStates = linkedSignal<ReadonlyMap<string, DigitState>>(() => {
     this.clues();
     this.round();
-    return new Set();
+    return new Map();
   });
 
+  protected digitState(digit: string): DigitState {
+    return this.digitStates().get(digit) ?? 'free';
+  }
+
   protected toggleDigit(digit: string): void {
-    this.excludedDigits.update((digits) => {
-      const next = new Set(digits);
-      if (next.has(digit)) next.delete(digit);
-      else next.add(digit);
+    this.digitStates.update((states) => {
+      const next = new Map(states);
+      const state = states.get(digit) ?? 'free';
+      const nextState: DigitState =
+        state === 'free' ? 'excluded' : state === 'excluded' ? 'selected' : 'free';
+
+      if (nextState === 'free') next.delete(digit);
+      else next.set(digit, nextState);
+
       return next;
     });
+  }
+
+  protected digitLabel(digit: string, state: DigitState): string {
+    if (state === 'excluded') return `Sélectionner le chiffre ${digit} partout`;
+    if (state === 'selected') return `Libérer le chiffre ${digit} partout`;
+    return `Barrer le chiffre ${digit} partout`;
   }
 }

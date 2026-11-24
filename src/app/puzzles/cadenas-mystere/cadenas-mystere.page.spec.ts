@@ -89,6 +89,17 @@ describe('Cadenas mystère page', () => {
     expect(markSolved).toHaveBeenCalledWith('/cadenas-mystere');
   });
 
+  it('keeps hints available after the code is solved', () => {
+    enter('0522');
+
+    const button = root.querySelector<HTMLButtonElement>(hintButton)!;
+    expect(root.querySelector('app-puzzle-success-popup')).not.toBeNull();
+    expect(button.disabled).toBe(false);
+
+    click(hintButton);
+    expect(root.querySelector('.hint-title')?.textContent).toBe('Mécanique à découvrir');
+  });
+
   it('clears hints, marks and the attempt on restart or on a fresh puzzle', () => {
     click('.clue-cell');
     for (let i = 0; i < 4; i++) click(hintButton);

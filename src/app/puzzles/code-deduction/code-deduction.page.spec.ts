@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { CodeDeductionPage } from './code-deduction.page';
 
 describe('CodeDeductionPage digit marking', () => {
-  it('strikes the selected digit in every clue and toggles it back', async () => {
+  it('cycles a digit through barred, selected and free in every clue', async () => {
     await TestBed.configureTestingModule({
       imports: [CodeDeductionPage],
       providers: [provideRouter([])],
@@ -27,12 +27,24 @@ describe('CodeDeductionPage digit marking', () => {
     expect([...digitButtons()].every((button) => button.classList.contains('is-excluded'))).toBe(
       true,
     );
+    expect([...digitButtons()].every((button) => button.dataset['state'] === 'excluded')).toBe(
+      true,
+    );
 
     firstDigitButton!.click();
     fixture.detectChanges();
-    expect([...digitButtons()].some((button) => button.classList.contains('is-excluded'))).toBe(
-      false,
+    expect([...digitButtons()].every((button) => button.classList.contains('is-selected'))).toBe(
+      true,
     );
+    expect([...digitButtons()].every((button) => button.dataset['state'] === 'selected')).toBe(
+      true,
+    );
+
+    firstDigitButton!.click();
+    fixture.detectChanges();
+    expect([...digitButtons()].every((button) => button.dataset['state'] === 'free')).toBe(true);
+    expect(root.querySelector('.digit-toggle.is-excluded')).toBeNull();
+    expect(root.querySelector('.digit-toggle.is-selected')).toBeNull();
 
     firstDigitButton!.click();
     root.querySelector<HTMLButtonElement>('[data-confirm-action="restart"]')!.click();
