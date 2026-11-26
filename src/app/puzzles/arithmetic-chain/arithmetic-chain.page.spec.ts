@@ -29,12 +29,10 @@ describe('ArithmeticChainPage', () => {
     fixture.detectChanges();
   }
 
-  function submit(value: string): void {
+  function enterAnswer(value: string): void {
     const input = root.querySelector<HTMLInputElement>('#chain-answer')!;
     input.value = value;
     input.dispatchEvent(new Event('input'));
-    fixture.detectChanges();
-    root.querySelector('form')!.dispatchEvent(new Event('submit', { cancelable: true }));
     fixture.detectChanges();
   }
 
@@ -57,14 +55,24 @@ describe('ArithmeticChainPage', () => {
     expect(page['chain']().start).not.toBe(chain.start);
   });
 
-  it('checks the final integer on submission and records a solved game', () => {
+  it('checks the final integer automatically and records a solved game', () => {
     const page = fixture.componentInstance;
     const answer = page['chain']().answer;
-    submit(String(answer + 1));
+    expect(root.querySelector('button[type="submit"]')).toBeNull();
+    const input = root.querySelector<HTMLInputElement>('#chain-answer')!;
+    expect(input.inputMode).toBe('none');
+    input.focus();
+    fixture.detectChanges();
+    expect(root.querySelector('.custom-keyboard')).not.toBeNull();
+    root.querySelector<HTMLButtonElement>('.custom-keyboard button')!.click();
+    fixture.detectChanges();
+    expect(input.value).toBe('1');
+
+    enterAnswer(String(answer + 1));
     expect(root.querySelector('.feedback')).not.toBeNull();
     expect(markSolved).not.toHaveBeenCalled();
 
-    submit(page['format'](answer));
+    enterAnswer(page['format'](answer));
     expect(root.querySelector('.feedback')).toBeNull();
     expect(root.querySelector('app-puzzle-success-popup')?.textContent).toContain('Bonne réponse');
     expect(markSolved).toHaveBeenCalledExactlyOnceWith('/calcul-en-chaine');

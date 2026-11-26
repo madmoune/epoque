@@ -66,7 +66,14 @@ describe('NumberNeighborsPage', () => {
     place(first, firstSeat);
     place(other, otherSeat);
     expect(root.querySelectorAll('button.chair.conflict')).toHaveLength(2);
-    expect(root.querySelector('.conflict-feedback')?.textContent).toContain('un nombre premier');
+    const feedback = root.querySelector('.conflict-feedback')?.textContent;
+    expect(feedback).toBeTruthy();
+    const expectedFeedback = {
+      'consecutive-digits': 'consécutifs',
+      'common-factor': 'diviseur commun',
+      'multiple-of-five': 'multiple de 5',
+    }[puzzle.rule];
+    expect(feedback).toContain(expectedFeedback);
     expect(markSolved).not.toHaveBeenCalled();
 
     chair(firstSeat).click();
@@ -84,15 +91,17 @@ describe('NumberNeighborsPage', () => {
     expect(root.querySelector('.conflict-feedback')).toBeNull();
   });
 
-  it('starts a chosen variant, places a hint and completes by placing the remaining numbers', () => {
+  it('randomizes the rule for a new game, places a hint and completes the puzzle', () => {
     const page = fixture.componentInstance;
-    const picker = root.querySelector<HTMLSelectElement>('#neighbor-rule')!;
-    picker.value = 'multiple-of-five';
-    picker.dispatchEvent(new Event('change'));
+    const firstRule = page['puzzle']().rule;
+    root.querySelector<HTMLButtonElement>('[data-confirm-action="new-game"]')!.click();
     fixture.detectChanges();
     const puzzle = page['puzzle']();
 
-    expect(puzzle.rule).toBe('multiple-of-five');
+    expect(puzzle.rule).not.toBe(firstRule);
+    expect(root.querySelector('.rule-heading strong')?.textContent).toContain(
+      page['rules'].find(({ id }) => id === puzzle.rule)?.label,
+    );
     root.querySelector<HTMLButtonElement>('[data-confirm-action="hint"]')!.click();
     fixture.detectChanges();
     expect(page['placedCount']()).toBe(1);

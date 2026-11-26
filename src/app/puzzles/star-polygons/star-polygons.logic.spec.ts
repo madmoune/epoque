@@ -1,7 +1,18 @@
 import { describe, expect, it } from 'vitest';
-import { createStarPuzzle, nextStarInOutline, STAR_CHALLENGES } from './star-polygons.logic';
+import {
+  createStarPuzzle,
+  nextStarInOutline,
+  randomStarChallenge,
+  STAR_CHALLENGES,
+} from './star-polygons.logic';
 
 describe('star polygon generation', () => {
+  it('randomizes challenges without repeating the previous one', () => {
+    expect(randomStarChallenge(undefined, () => 0)).toBe(STAR_CHALLENGES[0]);
+    expect(randomStarChallenge(STAR_CHALLENGES[0], () => 0)).toBe(STAR_CHALLENGES[1]);
+    expect(randomStarChallenge(STAR_CHALLENGES[6], () => 0.999999)).toBe(STAR_CHALLENGES[7]);
+  });
+
   it('generates all eight combinations with regular figures and distinct, well-spaced stars', () => {
     const combinations = STAR_CHALLENGES.map(({ sizes }) => sizes);
     expect(combinations).toEqual([

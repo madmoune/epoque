@@ -57,22 +57,14 @@ h2 {
   gap: 0.65rem 1rem;
 }
 
-.rule-select {
+.rule-heading {
   display: grid;
   gap: 0.3rem;
   font-size: 0.875rem;
   font-weight: 750;
 
-  select {
-    box-sizing: border-box;
-    width: 100%;
-    min-height: var(--command-height);
-    padding: 0.35rem 0.6rem;
-    border: 1px solid var(--border-strong);
-    border-radius: var(--command-radius);
-    color: var(--text);
-    background: var(--surface);
-    font: inherit;
+  strong {
+    font-size: 1rem;
   }
 }
 

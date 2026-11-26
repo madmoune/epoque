@@ -84,7 +84,7 @@ describe('PuzzlePlaylistService progress', () => {
         routes: [...FINALE_2_PLAYLIST_ROUTES],
       }),
     );
-    expect(finale1?.routes.at(-1)).toBe('/quick-arithmetic');
+    expect(finale1?.routes.at(-1)).toBe('/mots-sans-voyelles');
     expect(finale2?.routes.slice(-3)).toEqual(['/rush-hour', '/code-deduction', '/cadenas-mystere']);
     expect(finale2?.routes).not.toContain('/puzzle-a-cadenas');
 

@@ -47,23 +47,33 @@
         <label for="vowelless-answer">Ta réponse</label>
         <div class="answer-row">
           <input
+            #answerField
             id="vowelless-answer"
+            class="answer-input"
             type="text"
             name="word"
             autocomplete="off"
             autocapitalize="characters"
             spellcheck="false"
-            enterkeyhint="done"
+            inputmode="none"
             maxlength="24"
             aria-describedby="accent-note"
             [value]="answer()"
             [disabled]="done"
+            (focus)="showKeyboard()"
+            (click)="showKeyboard()"
             (input)="updateAnswer($any($event.target).value)"
           />
-          <button type="submit" [disabled]="done">Valider</button>
         </div>
         <p id="accent-note" class="accent-note">Les accents sont facultatifs.</p>
       </form>
+
+      <app-custom-keyboard
+        [rows]="letterKeyboardRows"
+        [visible]="keyboardVisible()"
+        [disabled]="done"
+        (keyPress)="handleKeyboardKey($event)"
+      />
 
       <div role="status" class="feedback">
         @if (feedback(); as message) {

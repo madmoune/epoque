@@ -53,32 +53,41 @@
       </div>
     }
 
-    @if (empty) {
-      @if (calculationHint()) {
-        <p class="hint" role="status">
-          Commence par la multiplication.
-          <strong>{{ round.product }} = {{ round.productValue }}</strong>
-        </p>
-      }
-      <form class="answer-form" (submit)="checkAnswer($event)">
-        <label for="stick-answer">Résultat du calcul</label>
-        <div class="answer-row">
-          <input
-            id="stick-answer"
-            name="result"
-            type="text"
-            inputmode="numeric"
-            enterkeyhint="done"
-            autocomplete="off"
-            maxlength="6"
-            [value]="answer()"
-            [disabled]="done"
-            (input)="updateAnswer($any($event.target).value)"
-          />
-          <button type="submit" [disabled]="done">Valider</button>
-        </div>
-      </form>
+    @if (empty && calculationHint()) {
+      <p class="hint" role="status">
+        Commence par la multiplication.
+        <strong>{{ round.product }} = {{ round.productValue }}</strong>
+      </p>
     }
+
+    <form class="answer-form" (submit)="checkAnswer($event)">
+      <label for="stick-answer">Résultat du calcul</label>
+      <div class="answer-row">
+        <input
+          #answerField
+          id="stick-answer"
+          class="answer-input"
+          name="result"
+          type="text"
+          inputmode="none"
+          autocomplete="off"
+          maxlength="6"
+          [value]="answer()"
+          [disabled]="done"
+          (focus)="showKeyboard()"
+          (click)="showKeyboard()"
+          (input)="updateAnswer($any($event.target).value)"
+        />
+        <button type="submit" [disabled]="done || !empty">Valider</button>
+      </div>
+    </form>
+
+    <app-custom-keyboard
+      [rows]="numberKeyboardRows"
+      [visible]="keyboardVisible()"
+      [disabled]="done"
+      (keyPress)="handleKeyboardKey($event)"
+    />
 
     <p role="status" class="feedback">{{ notice() }}</p>
 

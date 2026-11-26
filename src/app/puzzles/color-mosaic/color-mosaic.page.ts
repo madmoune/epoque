@@ -98,6 +98,7 @@ export class ColorMosaicPage {
     if (before === after) return;
     this.moves.update((moves) => [...moves, { cell, before }]);
     this.setColor(cell, after);
+    this.validateIfComplete();
   }
 
   protected undo(): void {
@@ -105,9 +106,10 @@ export class ColorMosaicPage {
     if (!move || this.solved()) return;
     this.moves.update((moves) => moves.slice(0, -1));
     this.setColor(move.cell, move.before);
+    this.validateIfComplete();
   }
 
-  protected verify(): void {
+  private validate(): void {
     if (this.solved()) return;
     const result = checkColorMosaic(this.puzzle(), this.values());
     this.result.set(result);
@@ -125,6 +127,10 @@ export class ColorMosaicPage {
   private setColor(cell: number, color: MosaicCell): void {
     this.values.update((values) => values.map((value, index) => (index === cell ? color : value)));
     this.result.set(null);
+  }
+
+  private validateIfComplete(): void {
+    if (this.values().every((value) => value !== null)) this.validate();
   }
 
   private describeRatio(first: MosaicColor, second: MosaicColor): string {

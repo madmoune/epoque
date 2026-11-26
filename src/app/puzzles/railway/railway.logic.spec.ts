@@ -4,6 +4,7 @@ import {
   EMPTY_RAILS,
   inspectRailState,
   RailPuzzle,
+  RAIL_SIZES,
   railSweep,
   toggleRailLink,
 } from './railway.logic';
@@ -40,6 +41,37 @@ function countSolutions(puzzle: RailPuzzle): number {
 }
 
 describe('Voie ferrée', () => {
+  it('generates valid routes for every available board size', () => {
+    for (const size of RAIL_SIZES) {
+      const puzzle = createRailPuzzle(undefined, () => 0.5, size);
+      expect(puzzle.size).toBe(size);
+      expect(puzzle.rows).toHaveLength(size.rows);
+      expect(puzzle.columns).toHaveLength(size.columns);
+      expect(puzzle.solution.every((cell) => cell < size.rows * size.columns)).toBe(true);
+
+      const state = puzzle.solution
+        .slice(1)
+        .reduce(
+          (state, cell, offset) => toggleRailLink(puzzle, state, puzzle.solution[offset], cell),
+          EMPTY_RAILS,
+        );
+      expect(inspectRailState(puzzle, state).solved).toBe(true);
+
+      let seed = size.rows * 100 + size.columns;
+      let previous: RailPuzzle | undefined;
+      for (let index = 0; index < 10; index++) {
+        const random = () => {
+          seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+          return seed / 2 ** 32;
+        };
+        const next = createRailPuzzle(previous, random, size);
+        expect(next.size).toBe(size);
+        expect(inspectRailState(next, EMPTY_RAILS).solved).toBe(false);
+        previous = next;
+      }
+    }
+  });
+
   it('generates one valid route for each tested combination of gates and counters', () => {
     for (let index = 0; index < 100; index++) {
       const puzzle = createRailPuzzle(undefined, () => (index + 0.5) / 100);
@@ -60,6 +92,7 @@ describe('Voie ferrée', () => {
 
   it('requires a single route and both sets of counters before declaring a win', () => {
     const puzzle: RailPuzzle = {
+      size: RAIL_SIZES[0],
       start: { cell: 0, side: 'west' },
       end: { cell: 3, side: 'east' },
       rows: [4, 2, 0, 0],

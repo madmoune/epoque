@@ -36,6 +36,28 @@ h1 {
   line-height: 1.4;
 }
 
+.size-control {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: min(100%, 22.5rem);
+  justify-self: center;
+  font-size: 0.88rem;
+  font-weight: 800;
+
+  select {
+    flex: 1;
+    min-width: 0;
+    min-height: var(--command-height);
+    padding: 0.35rem 0.55rem;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--command-radius);
+    color: var(--text);
+    background: var(--surface-raised);
+    font: inherit;
+  }
+}
+
 .play-layout {
   display: grid;
   gap: clamp(0.7rem, 3vw, 1.4rem);
@@ -65,12 +87,12 @@ h1 {
 
 .column-clues {
   grid-area: 1 / 1;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--rail-columns), minmax(0, 1fr));
 }
 
 .row-clues {
   grid-area: 2 / 2;
-  grid-template-rows: repeat(4, minmax(0, 1fr));
+  grid-template-rows: repeat(var(--rail-rows), minmax(0, 1fr));
 }
 
 .clue {
@@ -101,9 +123,9 @@ h1 {
   isolation: isolate;
   display: grid;
   grid-area: 2 / 1;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  grid-template-rows: repeat(4, minmax(0, 1fr));
-  aspect-ratio: 1;
+  grid-template-columns: repeat(var(--rail-columns), minmax(0, 1fr));
+  grid-template-rows: repeat(var(--rail-rows), minmax(0, 1fr));
+  aspect-ratio: var(--rail-columns) / var(--rail-rows);
   overflow: hidden;
   border-radius: 0.5rem;
   box-shadow: 0 0 0 1px var(--border-strong);
@@ -145,6 +167,10 @@ h1 {
   &.selected {
     outline: 2px solid var(--focus);
     outline-offset: -3px;
+  }
+
+  &.hinted {
+    box-shadow: inset 0 0 0 3px var(--focus);
   }
 
   &:disabled {
@@ -211,10 +237,6 @@ h1 {
   display: none;
 }
 
-.preview {
-  display: none;
-}
-
 .controls,
 .feedback {
   text-align: center;
@@ -269,55 +291,6 @@ h1 {
   .game-actions {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 43rem) {
-  .play-layout {
-    grid-template-columns: 1.05fr 1fr;
-  }
-
-  .preview {
-    position: relative;
-    display: grid;
-    grid-template-rows: auto 1fr;
-    min-width: 0;
-    padding: 0.8rem;
-    overflow: hidden;
-    border: 1px solid var(--border);
-    border-radius: 0.7rem;
-    background: radial-gradient(ellipse at 50% 20%, var(--surface-soft), var(--surface-raised));
-  }
-
-  .preview-label {
-    color: var(--muted-strong);
-    font-size: 0.85rem;
-    font-weight: 800;
-  }
-
-  .preview-stage {
-    display: grid;
-    place-items: center;
-  }
-
-  .preview-plane {
-    position: relative;
-    width: min(70%, 16rem);
-    aspect-ratio: 1;
-    border: 1px solid #51766b;
-    border-radius: 0.28rem;
-    background:
-      linear-gradient(to right, #416a5f 1px, transparent 1px) 0 0 / 25% 25%,
-      linear-gradient(to bottom, #416a5f 1px, transparent 1px) 0 0 / 25% 25%,
-      linear-gradient(140deg, #2f5a4d, #2b4941);
-    box-shadow:
-      -0.45rem 0.45rem #142f2a,
-      -1rem 1rem 1.4rem var(--shadow);
-    transform: rotateX(52deg) rotateZ(-40deg);
-  }
-
-  .rail-grid :is(.engine-motion, .engine-stationary) {
-    display: none;
   }
 }
 

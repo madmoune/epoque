@@ -16,7 +16,7 @@
     @let done = solved();
     @let last = displayedTrial();
 
-    <form class="game" (submit)="checkGuesses($event)">
+    <div class="game">
       <section
         class="workbench"
         aria-label="Symboles et calcul"
@@ -128,15 +128,6 @@
               </button>
             }
           </div>
-          <button
-            type="button"
-            class="test-button"
-            aria-label="Tester le calcul"
-            [disabled]="!ready || !calculation()"
-            (click)="testCalculation()"
-          >
-            Tester
-          </button>
           <p
             class="trial-count"
             role="status"
@@ -199,7 +190,6 @@
       }
 
       <div class="game-actions">
-        <button type="submit" [disabled]="done">Vérifier le code</button>
         <button
           type="button"
           class="secondary-button"
@@ -218,7 +208,7 @@
           Nouvelle partie
         </button>
       </div>
-    </form>
+    </div>
   </section>
 
   @if (done) {

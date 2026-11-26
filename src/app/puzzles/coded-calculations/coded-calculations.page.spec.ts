@@ -36,7 +36,6 @@ describe('CodedCalculationsPage', () => {
     click(`.symbol-token[data-drag-number="${left}"]`);
     click(operator === '+' ? '[aria-label="Addition"]' : '[aria-label="Soustraction"]');
     click(`.symbol-token[data-drag-number="${right}"]`);
-    click('.test-button');
   }
 
   function choose(index: number, digit: number): void {
@@ -47,6 +46,7 @@ describe('CodedCalculationsPage', () => {
   }
 
   it('shows the test result, retains the history and treats reversed additions as the same test', () => {
+    expect(root.querySelector('.test-button')).toBeNull();
     expect(root.querySelector('.test-result')?.classList.contains('invalid')).toBe(false);
     testCalculation(0, '+', 1);
     expect(root.querySelector('.test-result')?.textContent).toContain('🎾');
@@ -66,18 +66,14 @@ describe('CodedCalculationsPage', () => {
     for (let right = 1; right < 8; right++) testCalculation(0, '+', right);
     for (let right = 1; right < 7; right++) testCalculation(0, '−', right);
     expect(root.querySelectorAll('.history li')).toHaveLength(13);
-    expect(root.querySelector<HTMLButtonElement>('.test-button')?.disabled).toBe(true);
+    expect(root.querySelector<HTMLButtonElement>('.test-button')).toBeNull();
     expect(root.querySelector<HTMLSelectElement>('.digit-guess')?.disabled).toBe(false);
-    click('button[type="submit"]');
-    expect(root.querySelector('.feedback')?.textContent).toContain('chacun des huit symboles');
 
-    CODED_DIGITS.forEach((digit, index) => choose(index, digit));
+    CODED_DIGITS.slice(0, -1).forEach((digit, index) => choose(index, digit));
     choose(7, 1);
-    click('button[type="submit"]');
     expect(root.querySelector('.feedback')?.textContent).toContain('une seule fois');
     expect(markSolved).not.toHaveBeenCalled();
     choose(7, 8);
-    click('button[type="submit"]');
     expect(root.querySelector('[role="alert"]')?.textContent).toContain('Code déchiffré');
     expect(markSolved).toHaveBeenCalledExactlyOnceWith('/calcul-code');
 

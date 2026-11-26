@@ -5,6 +5,7 @@ import {
   findSeatingSolution,
   NEIGHBOR_RULES,
   NumberNeighborsPuzzle,
+  randomNeighborRule,
   seatingConflicts,
 } from './number-neighbors.logic';
 
@@ -12,10 +13,10 @@ describe('Voisins numérotés', () => {
   afterEach(() => vi.restoreAllMocks());
 
   it('checks each of the three rules symmetrically', () => {
-    expect(canSitTogether('prime-gap', 15, 2)).toBe(false);
-    expect(canSitTogether('prime-gap', 2, 15)).toBe(false);
-    expect(canSitTogether('prime-gap', 2, 3)).toBe(true);
-    expect(canSitTogether('prime-gap', 3, 9)).toBe(true);
+    expect(canSitTogether('consecutive-digits', 2, 3)).toBe(false);
+    expect(canSitTogether('consecutive-digits', 3, 2)).toBe(false);
+    expect(canSitTogether('consecutive-digits', 2, 4)).toBe(true);
+    expect(canSitTogether('consecutive-digits', 3, 9)).toBe(true);
     expect(canSitTogether('common-factor', 9, 15)).toBe(false);
     expect(canSitTogether('common-factor', 1, 12)).toBe(true);
     expect(canSitTogether('common-factor', 8, 15)).toBe(true);
@@ -68,4 +69,14 @@ describe('Voisins numérotés', () => {
       expect(sets.size).toBeGreaterThan(3);
     },
   );
+
+  it('randomizes the rule without repeating the previous one', () => {
+    expect(randomNeighborRule(undefined, () => 0)).toBe('consecutive-digits');
+    expect(randomNeighborRule('consecutive-digits', () => 0)).toBe('common-factor');
+    expect(randomNeighborRule('common-factor', () => 0.999999)).toBe('multiple-of-five');
+
+    const first = createNumberNeighborsPuzzle();
+    const second = createNumberNeighborsPuzzle(first);
+    expect(second.rule).not.toBe(first.rule);
+  });
 });

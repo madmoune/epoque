@@ -104,15 +104,15 @@ export class CodedCalculationsPage {
     const digit = this.digits.includes(value) ? value : null;
     this.guesses.update((guesses) => guesses.map((guess, i) => (index === i ? digit : guess)));
     this.feedback.set('');
+    this.validateGuesses();
   }
 
-  protected checkGuesses(event: Event): void {
-    event.preventDefault();
+  private validateGuesses(): void {
     if (this.solved()) return;
     const guesses = this.guesses();
-    if (guesses.includes(null)) {
-      this.feedback.set('Propose un chiffre pour chacun des huit symboles.');
-    } else if (new Set(guesses).size !== this.symbols.length) {
+    if (guesses.includes(null)) return;
+
+    if (new Set(guesses).size !== this.symbols.length) {
       this.feedback.set('Utilise chaque chiffre une seule fois.');
     } else if (guesses.some((guess, index) => guess !== this.secret()[index])) {
       this.feedback.set('Au moins un chiffre est à revoir.');
@@ -139,5 +139,6 @@ export class CodedCalculationsPage {
     if (token >= this.symbols.length !== (slot === 1)) return;
     this.draft.update((draft) => placeNumber(draft, token, slot));
     this.feedback.set('');
+    this.testCalculation();
   }
 }

@@ -258,10 +258,6 @@ export const routes: Routes = [
       import('./puzzles/property-grid/property-grid.page').then((m) => m.PropertyGridPage),
   },
   {
-    path: 'triage-ferroviaire',
-    loadComponent: () => import('./puzzles/shunting/shunting.page').then((m) => m.ShuntingPage),
-  },
-  {
     path: 'mots-sans-voyelles',
     loadComponent: () =>
       import('./puzzles/vowelless-words/vowelless-words.page').then((m) => m.VowellessWordsPage),

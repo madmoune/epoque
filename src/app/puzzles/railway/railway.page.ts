@@ -11,15 +11,16 @@ import {
 import { RouterLink } from '@angular/router';
 import { PuzzlePlayHistoryService } from '../../puzzle-play-history.service';
 import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
-import { drawRailRoute, drawRailTiles, parkedTrain, RAIL_VIEWBOX } from './railway.drawing';
+import { drawRailRoute, drawRailTiles, parkedTrain, railViewBox } from './railway.drawing';
 import {
+  cellsForSize,
   createRailPuzzle,
   EMPTY_RAILS,
   gateAt,
   hasRailCross,
+  hasRailLink,
   inspectRailState,
-  RAIL_CELLS,
-  RAIL_SIZE,
+  RAIL_SIZES,
   railColumn,
   railRow,
   RailState,
@@ -36,6 +37,8 @@ interface RailGesture {
   moved: boolean;
 }
 
+type RailHint = readonly [from: number, to: number];
+
 @Component({
   selector: 'app-railway-page',
   imports: [NgTemplateOutlet, RouterLink, PuzzleSuccessPopupComponent],
@@ -50,20 +53,23 @@ export class RailwayPage {
   private readonly trainAnimations =
     viewChildren<ElementRef<SVGAnimationElement>>('trainAnimation');
 
-  protected readonly viewBox = RAIL_VIEWBOX;
+  protected readonly sizes = RAIL_SIZES;
   protected readonly puzzle = signal(createRailPuzzle());
+  protected readonly viewBox = computed(() => railViewBox(this.puzzle().size));
   protected readonly state = signal(EMPTY_RAILS);
   protected readonly undoStates = signal<readonly RailState[]>([]);
   protected readonly redoStates = signal<readonly RailState[]>([]);
   protected readonly drawing = signal(false);
   protected readonly keyboardCell = signal<number | null>(null);
+  protected readonly hintedLink = signal<RailHint | null>(null);
   protected readonly progress = computed(() => inspectRailState(this.puzzle(), this.state()));
   protected readonly solved = computed(() => !this.drawing() && this.progress().solved);
   protected readonly cells = computed(() =>
-    RAIL_CELLS.map((cell) => {
+    cellsForSize(this.puzzle().size).map((cell) => {
       const gate = gateAt(this.puzzle(), cell);
       const crossed = hasRailCross(this.state(), cell);
       const occupied = this.progress().occupied.includes(cell);
+      const hinted = this.hintedLink()?.includes(cell) ?? false;
       const detail = gate
         ? `accès ${gate}`
         : crossed
@@ -75,14 +81,17 @@ export class RailwayPage {
         index: cell,
         gate,
         crossed,
-        label: `Ligne ${railRow(cell) + 1}, colonne ${railColumn(cell) + 1}, ${detail}`,
+        hinted,
+        label: `Ligne ${railRow(cell, this.puzzle().size) + 1}, colonne ${railColumn(cell, this.puzzle().size) + 1}, ${detail}${hinted ? ', indice' : ''}`,
       };
     }),
   );
   protected readonly tiles = computed(() =>
     drawRailTiles(this.puzzle(), this.progress().neighbors),
   );
-  protected readonly trainStation = computed(() => parkedTrain(this.puzzle().start));
+  protected readonly trainStation = computed(() =>
+    parkedTrain(this.puzzle().start, this.puzzle().size),
+  );
   protected readonly trainRoute = computed(() => {
     const route = this.progress().route;
     return this.solved() && route ? drawRailRoute(this.puzzle(), route) : null;
@@ -140,7 +149,7 @@ export class RailwayPage {
     if (previous === null || cell === null) return;
 
     let from = previous;
-    for (const to of railSweep(previous, cell)) {
+    for (const to of railSweep(previous, cell, this.puzzle().size)) {
       if (!this.editLink(from, to)) break;
       from = to;
     }
@@ -173,13 +182,14 @@ export class RailwayPage {
     const from = this.keyboardCell();
     const before = this.state();
     this.notice.set('');
+    this.hintedLink.set(null);
 
     if (from === cell) {
       this.state.set(toggleRailCross(this.puzzle(), before, cell));
       this.keyboardCell.set(null);
     } else {
       this.keyboardCell.set(cell);
-      if (from !== null && sideBetween(from, cell)) {
+      if (from !== null && sideBetween(from, cell, this.puzzle().size)) {
         this.editLink(from, cell);
       } else {
         this.notice.set('Choisis une case voisine pour tracer, ou valide à nouveau pour barrer.');
@@ -219,17 +229,46 @@ export class RailwayPage {
     this.clearSelection();
   }
 
+  protected changeSize(value: string): void {
+    const size = this.sizes.find(({ id }) => id === value);
+    if (!size || size.id === this.puzzle().size.id) return;
+    this.puzzle.set(createRailPuzzle(undefined, Math.random, size));
+    this.restart();
+  }
+
   protected newPuzzle(): void {
     this.puzzle.update((previous) => createRailPuzzle(previous));
     this.restart();
   }
 
+  protected revealHint(): void {
+    if (this.solved()) return;
+
+    const puzzle = this.puzzle();
+    const route = puzzle.solution;
+    const link = route
+      .slice(1)
+      .map((to, index): RailHint => [route[index], to])
+      .find(([from, to]) => !hasRailLink(puzzle, this.state(), from, to));
+
+    if (!link) {
+      this.notice.set('Annule un tronçon incorrect pour retrouver la voie solution.');
+      return;
+    }
+
+    this.hintedLink.set(link);
+    this.notice.set(
+      `Indice : relie ${this.cellDescription(link[0])} à ${this.cellDescription(link[1])}.`,
+    );
+  }
+
   private pointerCell(event: PointerEvent): number | null {
     const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
-    const column = Math.floor(((event.clientX - rect.left) / rect.width) * RAIL_SIZE);
-    const row = Math.floor(((event.clientY - rect.top) / rect.height) * RAIL_SIZE);
-    return row >= 0 && row < RAIL_SIZE && column >= 0 && column < RAIL_SIZE
-      ? row * RAIL_SIZE + column
+    const size = this.puzzle().size;
+    const column = Math.floor(((event.clientX - rect.left) / rect.width) * size.columns);
+    const row = Math.floor(((event.clientY - rect.top) / rect.height) * size.rows);
+    return row >= 0 && row < size.rows && column >= 0 && column < size.columns
+      ? row * size.columns + column
       : null;
   }
 
@@ -261,6 +300,12 @@ export class RailwayPage {
 
   private clearSelection(): void {
     this.keyboardCell.set(null);
+    this.hintedLink.set(null);
     this.notice.set('');
+  }
+
+  private cellDescription(cell: number): string {
+    const size = this.puzzle().size;
+    return `la case ${railRow(cell, size) + 1},${railColumn(cell, size) + 1}`;
   }
 }

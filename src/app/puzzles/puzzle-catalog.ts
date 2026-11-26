@@ -71,12 +71,6 @@ export const PUZZLE_CATEGORIES: readonly PuzzleCategory[] = [
         tag: 'Déduction',
       },
       {
-        title: 'Triage ferroviaire',
-        description: 'Manœuvre les aiguillages pour garer quatre trains à la bonne place.',
-        route: '/triage-ferroviaire',
-        tag: 'Parcours',
-      },
-      {
         title: 'Mots sans voyelles',
         description: 'Retrouve un mot à partir de ses consonnes.',
         route: '/mots-sans-voyelles',

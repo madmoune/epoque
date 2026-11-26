@@ -96,7 +96,6 @@
     <p class="feedback" role="status">{{ feedback() }}</p>
 
     <div class="game-actions">
-      <button type="button" [disabled]="done" (click)="verify()">Vérifier</button>
       <button type="button" class="secondary-button" [disabled]="!canUndo()" (click)="undo()">
         Annuler
       </button>

@@ -1,5 +1,21 @@
-export const RAIL_SIZE = 4;
-export const RAIL_CELLS = Array.from({ length: RAIL_SIZE ** 2 }, (_, cell) => cell);
+export interface RailBoardSize {
+  readonly id: string;
+  readonly label: string;
+  readonly rows: number;
+  readonly columns: number;
+}
+
+export const RAIL_SIZES = [
+  { id: '4x4', label: '4 × 4', rows: 4, columns: 4 },
+  { id: '5x5', label: '5 × 5', rows: 5, columns: 5 },
+  { id: '6x5', label: '6 × 5', rows: 5, columns: 6 },
+] as const satisfies readonly RailBoardSize[];
+
+const DEFAULT_RAIL_SIZE = RAIL_SIZES[0];
+
+// Kept as the default dimensions for callers that do not pass a board size.
+export const RAIL_SIZE = DEFAULT_RAIL_SIZE.columns;
+export const RAIL_CELLS = cellsForSize(DEFAULT_RAIL_SIZE);
 
 export const RAIL_DIRECTIONS = {
   north: { x: 0, y: -1 },
@@ -16,6 +32,7 @@ export interface RailGate {
 }
 
 export interface RailPuzzle {
+  readonly size: RailBoardSize;
   readonly start: RailGate;
   readonly end: RailGate;
   readonly rows: readonly number[];
@@ -24,8 +41,8 @@ export interface RailPuzzle {
 }
 
 export interface RailState {
-  readonly tracks: number;
-  readonly crosses: number;
+  readonly tracks: bigint;
+  readonly crosses: bigint;
 }
 
 interface RailCounts {
@@ -33,61 +50,57 @@ interface RailCounts {
   columns: readonly number[];
 }
 
-export const EMPTY_RAILS: RailState = { tracks: 0, crosses: 0 };
+export const EMPTY_RAILS: RailState = { tracks: 0n, crosses: 0n };
 
-export function railRow(cell: number): number {
-  return Math.floor(cell / RAIL_SIZE);
+export function cellsForSize(size: RailBoardSize): number[] {
+  return Array.from({ length: size.rows * size.columns }, (_, cell) => cell);
 }
 
-export function railColumn(cell: number): number {
-  return cell % RAIL_SIZE;
+export function railRow(cell: number, sizeOrColumns: RailBoardSize | number = RAIL_SIZE): number {
+  const columns = typeof sizeOrColumns === 'number' ? sizeOrColumns : sizeOrColumns.columns;
+  return Math.floor(cell / columns);
 }
 
-export function sideBetween(from: number, to: number): RailSide | undefined {
-  const x = railColumn(to) - railColumn(from);
-  const y = railRow(to) - railRow(from);
+export function railColumn(
+  cell: number,
+  sizeOrColumns: RailBoardSize | number = RAIL_SIZE,
+): number {
+  const columns = typeof sizeOrColumns === 'number' ? sizeOrColumns : sizeOrColumns.columns;
+  return cell % columns;
+}
+
+export function sideBetween(
+  from: number,
+  to: number,
+  size: RailBoardSize = DEFAULT_RAIL_SIZE,
+): RailSide | undefined {
+  const x = railColumn(to, size) - railColumn(from, size);
+  const y = railRow(to, size) - railRow(from, size);
   return (Object.keys(RAIL_DIRECTIONS) as RailSide[]).find((side) => {
     const direction = RAIL_DIRECTIONS[side];
     return direction.x === x && direction.y === y;
   });
 }
 
-const NEIGHBORS = RAIL_CELLS.map((cell) => RAIL_CELLS.filter((other) => sideBetween(cell, other)));
-
-// There are 24 possible links on the 4 × 4 board. Keep each as one bit so a sweep can be
-// compared with its starting state and undone in a single step.
-const LINKS = NEIGHBORS.flatMap((neighbors, from) =>
-  neighbors.filter((to) => to > from).map((to) => ({ from, to })),
-).map((link, index) => ({ ...link, bit: 1 << index }));
-
-const BOUNDARY_GATES = RAIL_CELLS.slice(0, RAIL_SIZE).flatMap<RailGate>((offset) => [
-  { cell: offset, side: 'north' },
-  { cell: offset * RAIL_SIZE + RAIL_SIZE - 1, side: 'east' },
-  { cell: (RAIL_SIZE - 1) * RAIL_SIZE + offset, side: 'south' },
-  { cell: offset * RAIL_SIZE, side: 'west' },
-]);
-
-const GATE_PAIRS = BOUNDARY_GATES.flatMap((start, index) =>
-  BOUNDARY_GATES.slice(index + 1)
-    .filter(
-      (end) =>
-        start.side !== end.side &&
-        Math.abs(railRow(start.cell) - railRow(end.cell)) +
-          Math.abs(railColumn(start.cell) - railColumn(end.cell)) >=
-          3,
-    )
-    .map((end) => ({ start, end })),
-);
-
-export function createRailPuzzle(previous?: RailPuzzle, random = Math.random): RailPuzzle {
-  const previousCells = previous ? [previous.start.cell, previous.end.cell] : [];
-  const pairs = GATE_PAIRS.filter(
+export function createRailPuzzle(
+  previous?: RailPuzzle,
+  random = Math.random,
+  requestedSize?: RailBoardSize,
+): RailPuzzle {
+  const size = requestedSize ?? previous?.size ?? DEFAULT_RAIL_SIZE;
+  const previousCells =
+    previous?.size.id === size.id ? [previous.start.cell, previous.end.cell] : [];
+  const pairs = gatePairsFor(size).filter(
     ({ start, end }) => !(previousCells.includes(start.cell) && previousCells.includes(end.cell)),
   );
-  const { start, end } = pairs[Math.floor(random() * pairs.length)];
-  const candidates = uniqueRoutes(start.cell, end.cell);
-  const candidate = candidates[Math.floor(random() * candidates.length)];
-  return { start, end, ...candidate };
+  const firstPair = randomIndex(pairs.length, random);
+  for (let offset = 0; offset < pairs.length; offset++) {
+    const { start, end } = pairs[(firstPair + offset) % pairs.length];
+    const candidates = uniqueRoutes(start.cell, end.cell, size);
+    const candidate = candidates[randomIndex(candidates.length, random)];
+    if (candidate) return { size, start, end, ...candidate };
+  }
+  throw new Error(`Unable to create a ${size.label} railway puzzle.`);
 }
 
 export function toggleRailLink(
@@ -96,28 +109,47 @@ export function toggleRailLink(
   from: number,
   to: number,
 ): RailState {
-  const low = Math.min(from, to);
-  const high = Math.max(from, to);
-  const link = LINKS.find((candidate) => candidate.from === low && candidate.to === high);
+  const link = linksFor(puzzle.size).find(
+    (candidate) => candidate.from === Math.min(from, to) && candidate.to === Math.max(from, to),
+  );
   if (!link) return state;
-  if (state.tracks & link.bit) return { ...state, tracks: state.tracks ^ link.bit };
+  if ((state.tracks & link.bit) !== 0n) return { ...state, tracks: state.tracks ^ link.bit };
 
-  const neighbors = linkedCells(state);
+  const neighbors = linkedCells(state, puzzle.size);
   const atLimit = (cell: number) => neighbors[cell].length >= (gateAt(puzzle, cell) ? 1 : 2);
   if (atLimit(from) || atLimit(to)) return state;
 
-  return { tracks: state.tracks | link.bit, crosses: state.crosses & ~((1 << from) | (1 << to)) };
+  return {
+    tracks: state.tracks | link.bit,
+    crosses: state.crosses & ~((1n << BigInt(from)) | (1n << BigInt(to))),
+  };
+}
+
+export function hasRailLink(
+  puzzle: RailPuzzle,
+  state: RailState,
+  from: number,
+  to: number,
+): boolean {
+  const link = linksFor(puzzle.size).find(
+    (candidate) => candidate.from === Math.min(from, to) && candidate.to === Math.max(from, to),
+  );
+  return link !== undefined && (state.tracks & link.bit) !== 0n;
 }
 
 export function toggleRailCross(puzzle: RailPuzzle, state: RailState, cell: number): RailState {
-  if (!RAIL_CELLS.includes(cell) || gateAt(puzzle, cell) || linkedCells(state)[cell].length) {
+  if (
+    !cellsForSize(puzzle.size).includes(cell) ||
+    gateAt(puzzle, cell) ||
+    linkedCells(state, puzzle.size)[cell].length
+  ) {
     return state;
   }
-  return { ...state, crosses: state.crosses ^ (1 << cell) };
+  return { ...state, crosses: state.crosses ^ (1n << BigInt(cell)) };
 }
 
 export function hasRailCross(state: RailState, cell: number): boolean {
-  return (state.crosses & (1 << cell)) !== 0;
+  return (state.crosses & (1n << BigInt(cell))) !== 0n;
 }
 
 export function gateAt(puzzle: RailPuzzle, cell: number): 'A' | 'B' | null {
@@ -127,9 +159,11 @@ export function gateAt(puzzle: RailPuzzle, cell: number): 'A' | 'B' | null {
 }
 
 export function inspectRailState(puzzle: RailPuzzle, state: RailState) {
-  const neighbors = linkedCells(state);
-  const occupied = RAIL_CELLS.filter((cell) => neighbors[cell].length || gateAt(puzzle, cell));
-  const counts = countLines(occupied);
+  const neighbors = linkedCells(state, puzzle.size);
+  const occupied = cellsForSize(puzzle.size).filter(
+    (cell) => neighbors[cell].length || gateAt(puzzle, cell),
+  );
+  const counts = countLines(occupied, puzzle.size);
   const route = followRail(puzzle, neighbors);
   const connected = route !== null && route.length === occupied.length;
   const solved =
@@ -140,18 +174,26 @@ export function inspectRailState(puzzle: RailPuzzle, state: RailState) {
   return { ...counts, neighbors, occupied, route, connected, solved };
 }
 
-export function railSweep(from: number, to: number): number[] {
-  if (from === to || (railRow(from) !== railRow(to) && railColumn(from) !== railColumn(to))) {
+export function railSweep(
+  from: number,
+  to: number,
+  size: RailBoardSize = DEFAULT_RAIL_SIZE,
+): number[] {
+  if (
+    from === to ||
+    (railRow(from, size) !== railRow(to, size) && railColumn(from, size) !== railColumn(to, size))
+  ) {
     return [];
   }
-  const step = (railRow(from) === railRow(to) ? 1 : RAIL_SIZE) * Math.sign(to - from);
+  const step =
+    (railRow(from, size) === railRow(to, size) ? 1 : size.columns) * Math.sign(to - from);
   return Array.from({ length: (to - from) / step }, (_, index) => from + (index + 1) * step);
 }
 
-function linkedCells(state: RailState): number[][] {
-  const neighbors = RAIL_CELLS.map((): number[] => []);
-  for (const { from, to, bit } of LINKS) {
-    if (state.tracks & bit) {
+function linkedCells(state: RailState, size: RailBoardSize): number[][] {
+  const neighbors = cellsForSize(size).map((): number[] => []);
+  for (const { from, to, bit } of linksFor(size)) {
+    if ((state.tracks & bit) !== 0n) {
       neighbors[from].push(to);
       neighbors[to].push(from);
     }
@@ -173,12 +215,12 @@ function followRail(
   return null;
 }
 
-function countLines(cells: readonly number[]): RailCounts {
-  const rows = Array<number>(RAIL_SIZE).fill(0);
-  const columns = Array<number>(RAIL_SIZE).fill(0);
+function countLines(cells: readonly number[], size: RailBoardSize): RailCounts {
+  const rows = Array<number>(size.rows).fill(0);
+  const columns = Array<number>(size.columns).fill(0);
   for (const cell of cells) {
-    rows[railRow(cell)]++;
-    columns[railColumn(cell)]++;
+    rows[railRow(cell, size)]++;
+    columns[railColumn(cell, size)]++;
   }
   return { rows, columns };
 }
@@ -186,25 +228,30 @@ function countLines(cells: readonly number[]): RailCounts {
 function uniqueRoutes(
   from: number,
   to: number,
+  size: RailBoardSize,
 ): Pick<RailPuzzle, 'solution' | 'rows' | 'columns'>[] {
   type Route = Pick<RailPuzzle, 'solution' | 'rows' | 'columns'>;
   const routes = new Map<string, Route | null>();
+  const neighbors = neighborsFor(size);
   const path = [from];
+  const minPathLength = size.rows + size.columns;
+  const maxPathLength = Math.min(size.rows * size.columns, minPathLength + 5);
 
   function visit(cell: number, occupied: number): void {
     if (cell === to) {
-      if (path.length < 8) return;
-      const { rows, columns } = countLines(path);
+      if (path.length < minPathLength) return;
+      const { rows, columns } = countLines(path, size);
       const counts = [...rows, ...columns];
-      if (counts.includes(0) || !counts.includes(RAIL_SIZE)) return;
+      if (counts.includes(0) || (!rows.includes(size.columns) && !columns.includes(size.rows)))
+        return;
       const key = counts.join(',');
       // Other routes with these clues have the same length and are counted here as well.
       routes.set(key, routes.has(key) ? null : { rows, columns, solution: [...path] });
       return;
     }
-    if (path.length === 13) return;
+    if (path.length >= maxPathLength) return;
 
-    for (const next of NEIGHBORS[cell]) {
+    for (const next of neighbors[cell]) {
       const bit = 1 << next;
       if (occupied & bit) continue;
       path.push(next);
@@ -214,5 +261,56 @@ function uniqueRoutes(
   }
 
   visit(from, 1 << from);
-  return [...routes.values()].filter((route) => route !== null);
+  return [...routes.values()].filter((route): route is Route => route !== null);
+}
+
+function neighborsFor(size: RailBoardSize): number[][] {
+  const cells = cellsForSize(size);
+  return cells.map((cell) => cells.filter((other) => sideBetween(cell, other, size)));
+}
+
+function linksFor(size: RailBoardSize): { from: number; to: number; bit: bigint }[] {
+  return neighborsFor(size)
+    .flatMap((neighbors, from) => neighbors.filter((to) => to > from).map((to) => ({ from, to })))
+    .map((link, index) => ({ ...link, bit: 1n << BigInt(index) }));
+}
+
+function gatePairsFor(size: RailBoardSize): { start: RailGate; end: RailGate }[] {
+  const gates = boundaryGatesFor(size);
+  return gates.flatMap((start, index) =>
+    gates
+      .slice(index + 1)
+      .filter(
+        (end) =>
+          start.side !== end.side &&
+          Math.abs(railRow(start.cell, size) - railRow(end.cell, size)) +
+            Math.abs(railColumn(start.cell, size) - railColumn(end.cell, size)) >=
+            3,
+      )
+      .map((end) => ({ start, end })),
+  );
+}
+
+function boundaryGatesFor(size: RailBoardSize): RailGate[] {
+  const top = Array.from({ length: size.columns }, (_, column) => ({
+    cell: column,
+    side: 'north' as const,
+  }));
+  const right = Array.from({ length: size.rows }, (_, row) => ({
+    cell: row * size.columns + size.columns - 1,
+    side: 'east' as const,
+  }));
+  const bottom = Array.from({ length: size.columns }, (_, column) => ({
+    cell: (size.rows - 1) * size.columns + column,
+    side: 'south' as const,
+  }));
+  const left = Array.from({ length: size.rows }, (_, row) => ({
+    cell: row * size.columns,
+    side: 'west' as const,
+  }));
+  return [...top, ...right, ...bottom, ...left];
+}
+
+function randomIndex(length: number, random: () => number): number {
+  return Math.max(0, Math.min(length - 1, Math.floor(random() * length)));
 }

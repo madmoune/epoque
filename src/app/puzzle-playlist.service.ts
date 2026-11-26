@@ -35,6 +35,7 @@ export const FINALE_1_PLAYLIST_ROUTES = [
   '/crossmath',
   '/magic-square',
   '/quick-arithmetic',
+  '/mots-sans-voyelles',
 ] as const;
 
 const FINALE_2_FIRST_ROUTES = [

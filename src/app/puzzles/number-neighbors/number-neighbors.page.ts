@@ -7,7 +7,6 @@ import {
   describeConflict,
   findSeatingSolution,
   NEIGHBOR_RULES,
-  NeighborRule,
   seatingConflicts,
 } from './number-neighbors.logic';
 
@@ -22,7 +21,7 @@ export class NumberNeighborsPage {
   private readonly notice = signal('');
 
   protected readonly rules = NEIGHBOR_RULES;
-  protected readonly puzzle = signal(createNumberNeighborsPuzzle('prime-gap'));
+  protected readonly puzzle = signal(createNumberNeighborsPuzzle());
   protected readonly placements = signal<(number | null)[]>(this.emptyChairs());
   protected readonly selected = signal<number | null>(null);
   protected readonly selectedRule = computed(
@@ -83,11 +82,6 @@ export class NumberNeighborsPage {
     return `${position}, ${occupant}${this.conflictingChairs().has(index) ? ', conflit' : ''}`;
   }
 
-  protected changeRule(value: string): void {
-    const next = this.rules.find(({ id }) => id === value);
-    if (next && next.id !== this.puzzle().rule) this.loadPuzzle(next.id);
-  }
-
   protected revealHint(): void {
     if (this.isSolved() || this.conflicts().length) return;
 
@@ -115,11 +109,11 @@ export class NumberNeighborsPage {
   }
 
   protected newPuzzle(): void {
-    this.loadPuzzle(this.puzzle().rule);
+    this.loadPuzzle();
   }
 
-  private loadPuzzle(rule: NeighborRule): void {
-    this.puzzle.set(createNumberNeighborsPuzzle(rule, this.puzzle()));
+  private loadPuzzle(): void {
+    this.puzzle.set(createNumberNeighborsPuzzle(this.puzzle()));
     this.restart();
   }
 

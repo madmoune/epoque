@@ -97,4 +97,32 @@ describe('RailwayPage', () => {
     expect(root.querySelector('[role="alert"]')).toBeNull();
     expect(root.querySelectorAll('.rail-grid .track-bed')).toHaveLength(2);
   });
+
+  it('offers larger board sizes, a hint, and no separate route preview', () => {
+    const page = fixture.componentInstance;
+    const sizeSelect = root.querySelector<HTMLSelectElement>('#rail-size')!;
+    expect([...sizeSelect.options].map((option) => option.textContent?.trim())).toEqual([
+      '4 × 4',
+      '5 × 5',
+      '6 × 5',
+    ]);
+    expect(root.querySelector('.preview')).toBeNull();
+    expect(root.textContent).not.toContain('Aperçu de la voie');
+
+    command('Indice');
+    expect(root.querySelectorAll('.rail-cell.hinted')).toHaveLength(2);
+    expect(page['feedback']()).toContain('Indice');
+
+    sizeSelect.value = '5x5';
+    sizeSelect.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    expect(page['puzzle']().size.id).toBe('5x5');
+    expect(root.querySelectorAll('.rail-cell')).toHaveLength(25);
+
+    sizeSelect.value = '6x5';
+    sizeSelect.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    expect(page['puzzle']().size.id).toBe('6x5');
+    expect(root.querySelectorAll('.rail-cell')).toHaveLength(30);
+  });
 });

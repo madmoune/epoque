@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { PuzzlePlayHistoryService } from '../../puzzle-play-history.service';
+import { createStarPuzzle, STAR_CHALLENGES } from './star-polygons.logic';
 import { StarPolygonsPage } from './star-polygons.page';
 
 describe('StarPolygonsPage', () => {
@@ -39,7 +40,17 @@ describe('StarPolygonsPage', () => {
     clickStar(outline[0]);
   }
 
+  function setChallenge(index: number): void {
+    const page = fixture.componentInstance;
+    const challenge = STAR_CHALLENGES[index];
+    page['challenge'].set(challenge);
+    page['board'].set(createStarPuzzle(challenge, () => 0));
+    page['restart']();
+    fixture.detectChanges();
+  }
+
   it('rejects crossed paths, highlights a continuation, and lets the player undo a closure', () => {
+    setChallenge(0);
     const [a, b, c, d] = fixture.componentInstance['board']().outlines[0];
     trace([a, b, d, c]);
     expect(root.querySelector('[role="status"]')?.textContent).toContain('figure régulière');
@@ -62,12 +73,13 @@ describe('StarPolygonsPage', () => {
     expect(root.querySelector('svg polyline')).not.toBeNull();
   });
 
-  it('plays either figure first, counts both toward a win, and changes challenge from the selector', () => {
-    const selector = root.querySelector<HTMLSelectElement>('#star-challenge')!;
-    expect(selector.options).toHaveLength(8);
-    selector.selectedIndex = 5;
-    selector.dispatchEvent(new Event('change'));
-    fixture.detectChanges();
+  it('plays either figure first, counts both toward a win, and randomizes the next challenge', () => {
+    setChallenge(5);
+    const page = fixture.componentInstance;
+    const firstChallenge = page['challenge']();
+    expect(root.querySelector('.challenge-control strong')?.textContent).toContain(
+      firstChallenge.label,
+    );
     expect(root.querySelectorAll('.star')).toHaveLength(9);
 
     const { outlines } = fixture.componentInstance['board']();
@@ -88,9 +100,14 @@ describe('StarPolygonsPage', () => {
     expect(markSolved).toHaveBeenCalledExactlyOnceWith('/polygones-etoiles');
 
     clickButton('[data-confirm-action="new-game"]');
-    expect(selector.selectedIndex).toBe(5);
+    expect(page['challenge']()).not.toBe(firstChallenge);
+    expect(root.querySelector('.challenge-control strong')?.textContent).toContain(
+      page['challenge']().label,
+    );
     expect(root.querySelectorAll('svg polygon')).toHaveLength(0);
-    expect(root.querySelectorAll('.star')).toHaveLength(9);
+    expect(root.querySelectorAll('.star')).toHaveLength(
+      page['challenge']().sizes[0] + page['challenge']().sizes[1],
+    );
     expect(fixture.componentInstance['board']().outlines).not.toBe(outlines);
   });
 });

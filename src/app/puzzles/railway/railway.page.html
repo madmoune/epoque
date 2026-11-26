@@ -14,9 +14,27 @@
     @let current = progress();
     @let done = solved();
 
+    <div class="size-control">
+      <label for="rail-size">Taille</label>
+      <select
+        #sizeSelect
+        id="rail-size"
+        [value]="clues.size.id"
+        (change)="changeSize(sizeSelect.value)"
+      >
+        @for (size of sizes; track size.id) {
+          <option [value]="size.id">{{ size.label }}</option>
+        }
+      </select>
+    </div>
+
     <div class="play-layout">
       <div class="board-area">
-        <div class="board-layout">
+        <div
+          class="board-layout"
+          [style.--rail-columns]="clues.size.columns"
+          [style.--rail-rows]="clues.size.rows"
+        >
           <div class="column-clues" role="group" aria-label="Compteurs des colonnes">
             @for (target of clues.columns; track $index) {
               @let placed = current.columns[$index];
@@ -45,6 +63,7 @@
                 data-board-cell
                 [class.access]="cell.gate !== null"
                 [class.crossed]="cell.crossed"
+                [class.hinted]="cell.hinted"
                 [class.selected]="keyboardCell() === cell.index"
                 [attr.aria-label]="cell.label"
                 [disabled]="done"
@@ -82,18 +101,6 @@
           pour la barrer.
         </p>
       </div>
-
-      <div class="preview" aria-hidden="true">
-        <span class="preview-label">Aperçu de la voie</span>
-        <div class="preview-stage">
-          <div class="preview-plane">
-            <ng-container
-              [ngTemplateOutlet]="trackDrawing"
-              [ngTemplateOutletContext]="{ train: true }"
-            />
-          </div>
-        </div>
-      </div>
     </div>
 
     <p class="feedback" role="status">{{ feedback() }}</p>
@@ -114,6 +121,15 @@
         (click)="redo()"
       >
         Rétablir
+      </button>
+      <button
+        type="button"
+        class="secondary-button"
+        data-confirm-action="hint"
+        [disabled]="done || drawing()"
+        (click)="revealHint()"
+      >
+        Indice
       </button>
       <button
         type="button"
@@ -145,7 +161,7 @@
 </main>
 
 <ng-template #trackDrawing let-train="train">
-  <svg class="track-drawing" [attr.viewBox]="viewBox" aria-hidden="true">
+  <svg class="track-drawing" [attr.viewBox]="viewBox()" aria-hidden="true">
     @for (tile of tiles(); track tile.cell) {
       <path class="track-bed" [attr.d]="tile.bed" />
       <path class="track-ties" [attr.d]="tile.bed" />

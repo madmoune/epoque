@@ -14,18 +14,9 @@
     @let done = isSolved();
 
     <div class="rule-panel">
-      <div class="rule-select">
-        <label for="neighbor-rule">Règle de la manche</label>
-        <select
-          #ruleSelect
-          id="neighbor-rule"
-          [value]="current.rule"
-          (change)="changeRule(ruleSelect.value)"
-        >
-          @for (rule of rules; track rule.id) {
-            <option [value]="rule.id">{{ rule.label }}</option>
-          }
-        </select>
+      <div class="rule-heading">
+        <span>Règle de la manche</span>
+        <strong>{{ selectedRule().label }}</strong>
       </div>
       <div class="rule-copy">
         <p>{{ selectedRule().instruction }}</p>

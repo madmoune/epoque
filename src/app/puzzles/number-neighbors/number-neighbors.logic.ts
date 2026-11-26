@@ -1,12 +1,11 @@
 import { range, shuffle } from '../new-games/random';
 import { greatestCommonDivisor } from '../shared/greatest-common-divisor';
-import { isPrime } from '../shared/is-prime';
 
 export const NEIGHBOR_RULES = [
   {
-    id: 'prime-gap',
-    label: 'Écart premier',
-    instruction: 'L’écart entre deux voisins ne peut pas être un nombre premier.',
+    id: 'consecutive-digits',
+    label: 'Chiffres consécutifs',
+    instruction: 'Deux voisins ne peuvent pas avoir des nombres consécutifs.',
   },
   {
     id: 'common-factor',
@@ -21,6 +20,12 @@ export const NEIGHBOR_RULES = [
 ] as const;
 
 export type NeighborRule = (typeof NEIGHBOR_RULES)[number]['id'];
+
+export function randomNeighborRule(previous?: NeighborRule, random = Math.random): NeighborRule {
+  const candidates = NEIGHBOR_RULES.filter(({ id }) => id !== previous);
+  const index = Math.min(candidates.length - 1, Math.floor(random() * candidates.length));
+  return candidates[index].id;
+}
 
 type Chair = { row: number; column: number };
 type SeatingLayout = {
@@ -44,14 +49,18 @@ const LAYOUTS = [
 
 const NUMBERS = range(16).map((index) => index + 1);
 const GENERATION_ATTEMPTS = 48;
-const MIN_FORBIDDEN_PAIRS = 7;
+const MIN_FORBIDDEN_PAIRS: Record<NeighborRule, number> = {
+  'consecutive-digits': 3,
+  'common-factor': 7,
+  'multiple-of-five': 7,
+};
 
 type PuzzlePreset = readonly [layout: number, numbers: readonly number[]];
 
 const FALLBACKS: Record<NeighborRule, readonly [PuzzlePreset, PuzzlePreset]> = {
-  'prime-gap': [
-    [0, [1, 3, 4, 5, 8, 9, 13, 14]],
-    [2, [2, 6, 10, 11, 12, 14, 15, 16]],
+  'consecutive-digits': [
+    [0, [1, 3, 5, 7, 9, 11, 13, 15]],
+    [2, [2, 4, 6, 8, 10, 12, 14, 16]],
   ],
   'common-factor': [
     [1, [5, 7, 8, 9, 11, 12, 14, 15]],
@@ -80,8 +89,8 @@ function createLayout(shape: readonly string[]): SeatingLayout {
 
 export function canSitTogether(rule: NeighborRule, first: number, second: number): boolean {
   switch (rule) {
-    case 'prime-gap':
-      return !isPrime(Math.abs(first - second));
+    case 'consecutive-digits':
+      return Math.abs(first - second) !== 1;
     case 'common-factor':
       return greatestCommonDivisor(first, second) === 1;
     case 'multiple-of-five':
@@ -91,8 +100,8 @@ export function canSitTogether(rule: NeighborRule, first: number, second: number
 
 export function describeConflict(rule: NeighborRule, first: number, second: number): string {
   switch (rule) {
-    case 'prime-gap':
-      return `L’écart entre ${first} et ${second} vaut ${Math.abs(first - second)}, un nombre premier.`;
+    case 'consecutive-digits':
+      return `${first} et ${second} sont consécutifs : leur écart vaut 1.`;
     case 'common-factor':
       return `${first} et ${second} ont ${greatestCommonDivisor(first, second)} comme diviseur commun.`;
     case 'multiple-of-five':
@@ -175,14 +184,24 @@ function hasEnoughConstraints(puzzle: NumberNeighborsPuzzle): boolean {
       if (!canSitTogether(rule, numbers[first], numbers[second])) pairs++;
     }
   }
-  return pairs >= MIN_FORBIDDEN_PAIRS;
+  return pairs >= MIN_FORBIDDEN_PAIRS[rule];
 }
 
 export function createNumberNeighborsPuzzle(
+  previous?: NumberNeighborsPuzzle,
+): NumberNeighborsPuzzle;
+export function createNumberNeighborsPuzzle(
   rule: NeighborRule,
   previous?: NumberNeighborsPuzzle,
+): NumberNeighborsPuzzle;
+export function createNumberNeighborsPuzzle(
+  ruleOrPrevious?: NeighborRule | NumberNeighborsPuzzle,
+  previous?: NumberNeighborsPuzzle,
 ): NumberNeighborsPuzzle {
-  const layouts = LAYOUTS.filter((layout) => layout !== previous?.layout);
+  const explicitRule = typeof ruleOrPrevious === 'string' ? ruleOrPrevious : undefined;
+  const previousPuzzle = typeof ruleOrPrevious === 'string' ? previous : ruleOrPrevious;
+  const rule = explicitRule ?? randomNeighborRule(previousPuzzle?.rule);
+  const layouts = LAYOUTS.filter((layout) => layout !== previousPuzzle?.layout);
   for (let attempt = 0; attempt < GENERATION_ATTEMPTS; attempt++) {
     const layout = layouts[Math.floor(Math.random() * layouts.length)];
     const numbers = shuffle(NUMBERS)
@@ -196,6 +215,6 @@ export function createNumberNeighborsPuzzle(
 
   const presets = FALLBACKS[rule];
   const [layout, numbers] =
-    presets.find(([index]) => LAYOUTS[index] !== previous?.layout) ?? presets[0];
+    presets.find(([index]) => LAYOUTS[index] !== previousPuzzle?.layout) ?? presets[0];
   return { rule, layout: LAYOUTS[layout], numbers };
 }

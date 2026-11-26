@@ -52,18 +52,8 @@ h1 {
   font-size: 0.88rem;
   font-weight: 750;
 
-  select {
-    box-sizing: border-box;
-    flex: 1;
-    min-width: min(100%, 12em);
-    max-width: 100%;
-    min-height: var(--command-height);
-    padding: 0.4rem 0.55rem;
-    border: 1px solid var(--border-strong);
-    border-radius: var(--command-radius);
-    background: var(--surface-raised);
-    color: var(--text);
-    font: inherit;
+  strong {
+    color: var(--focus);
   }
 }
 

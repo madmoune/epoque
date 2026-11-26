@@ -174,7 +174,6 @@ describe('HomePage playlist category controls', () => {
       ['/polygones-etoiles', 'Polygones étoilés'],
       ['/voie-ferree', 'Voie ferrée'],
       ['/grille-proprietes', 'Grille de propriétés'],
-      ['/triage-ferroviaire', 'Triage ferroviaire'],
       ['/mots-sans-voyelles', 'Mots sans voyelles'],
       ['/batonnets-de-calcul', 'Bâtonnets de calcul'],
       ['/grille-operations', 'Grille d’opérations'],

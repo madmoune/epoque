@@ -18,16 +18,8 @@
 
     <div class="play-area">
       <div class="challenge-control">
-        <label for="star-challenge">Défi</label>
-        <select
-          #challengeSelect
-          id="star-challenge"
-          (change)="changeChallenge(challengeSelect.selectedIndex)"
-        >
-          @for (option of challenges; track option.label) {
-            <option [selected]="option === challenge()">{{ option.label }}</option>
-          }
-        </select>
+        <span>Défi</span>
+        <strong>{{ challenge().label }}</strong>
       </div>
 
       <div

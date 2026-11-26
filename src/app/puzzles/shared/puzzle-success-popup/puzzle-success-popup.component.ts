@@ -71,7 +71,6 @@ export class PuzzleSuccessPopupComponent implements OnInit {
     '/polygones-etoiles',
     '/voie-ferree',
     '/grille-proprietes',
-    '/triage-ferroviaire',
     '/mots-sans-voyelles',
     '/batonnets-de-calcul',
     '/grille-operations',

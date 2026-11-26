@@ -60,6 +60,9 @@ describe('ColorMosaicPage', () => {
   });
 
   it('marks the violated position clue, verifies a matching mosaic and clears the next grid', () => {
+    expect(
+      [...root.querySelectorAll('.game-actions button')].map((item) => item.textContent?.trim()),
+    ).not.toContain('Vérifier');
     const firstLine = ['red', 'green', 'yellow', 'green', 'red'] as const;
     const middle = ['yellow', 'yellow', 'blue', 'yellow', 'yellow'] as const;
     const mosaic = [...firstLine, ...firstLine, ...middle, ...firstLine, ...firstLine];
@@ -73,14 +76,12 @@ describe('ColorMosaicPage', () => {
     paintBoard(
       mosaic.map((color) => (color === 'red' ? 'yellow' : color === 'yellow' ? 'red' : color)),
     );
-    click('.game-actions button:first-child');
     expect(root.querySelector('.clues .review')?.textContent).toBe(
       '2 cases rouges sur la ligne 1.',
     );
     expect(markSolved).not.toHaveBeenCalled();
 
     paintBoard(mosaic);
-    click('.game-actions button:first-child');
     expect(root.querySelector('[role="alert"]')?.textContent).toContain('Mosaïque réussie');
     expect(markSolved).toHaveBeenCalledExactlyOnceWith('/mosaique-logique');
     click('[role="alert"] button');

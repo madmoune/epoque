@@ -63,17 +63,26 @@ describe('VowellessWordsPage', () => {
     fixture.detectChanges();
     expect(root.querySelectorAll('.hint-letters .missing')).toHaveLength(1);
 
-    const submit = (value: string) => {
+    const enter = (value: string) => {
       const input = root.querySelector<HTMLInputElement>('input')!;
       input.value = value;
       input.dispatchEvent(new Event('input'));
-      root.querySelector('form')!.dispatchEvent(new Event('submit', { cancelable: true }));
       fixture.detectChanges();
     };
-    submit('portier');
+    expect(root.querySelector('button[type="submit"]')).toBeNull();
+    const input = root.querySelector<HTMLInputElement>('#vowelless-answer')!;
+    expect(input.inputMode).toBe('none');
+    input.focus();
+    fixture.detectChanges();
+    expect(root.querySelector('.custom-keyboard')).not.toBeNull();
+    root.querySelector<HTMLButtonElement>('.custom-keyboard button')!.click();
+    fixture.detectChanges();
+    expect(input.value).toBe('Q');
+
+    enter('portier');
     expect(root.querySelector('.feedback')?.textContent).toContain('Essaie un autre mot');
     expect(markSolved).not.toHaveBeenCalled();
-    submit('PARTIR');
+    enter('PARTIR');
     expect(root.querySelector('[role="alert"]')?.textContent).toContain('partir');
     expect(markSolved).toHaveBeenCalledExactlyOnceWith('/mots-sans-voyelles');
 

@@ -6,7 +6,7 @@ import {
   createStarPuzzle,
   isRegularOutline,
   nextStarInOutline,
-  STAR_CHALLENGES,
+  randomStarChallenge,
 } from './star-polygons.logic';
 
 interface CompletedOutline {
@@ -23,8 +23,7 @@ interface CompletedOutline {
 export class StarPolygonsPage {
   private readonly playHistory = inject(PuzzlePlayHistoryService);
 
-  protected readonly challenges = STAR_CHALLENGES;
-  protected readonly challenge = signal(this.challenges[0]);
+  protected readonly challenge = signal(randomStarChallenge());
   protected readonly board = signal(createStarPuzzle(this.challenge()));
   protected readonly path = signal<readonly number[]>([]);
   protected readonly completed = signal<readonly CompletedOutline[]>([]);
@@ -48,13 +47,6 @@ export class StarPolygonsPage {
       .outlines.map((outline, index) => ({ outline, index }))
       .filter(({ index }) => this.completed().every((done) => done.index !== index)),
   );
-
-  protected changeChallenge(index: number): void {
-    const challenge = this.challenges[index];
-    if (!challenge || challenge === this.challenge()) return;
-    this.challenge.set(challenge);
-    this.newPuzzle();
-  }
 
   protected selectStar(star: number): void {
     if (this.solved() || this.starColors().has(star)) return;
@@ -109,6 +101,7 @@ export class StarPolygonsPage {
   }
 
   protected newPuzzle(): void {
+    this.challenge.set(randomStarChallenge(this.challenge()));
     this.board.set(createStarPuzzle(this.challenge()));
     this.restart();
   }

@@ -9,7 +9,7 @@ type Layout = readonly [
   tilt: number,
 ];
 
-interface StarChallenge {
+export interface StarChallenge {
   label: string;
   sizes: readonly [PolygonSize, PolygonSize];
   fallback: Layout;
@@ -53,6 +53,12 @@ export const STAR_CHALLENGES: readonly StarChallenge[] = [
     fallback: [20.27, 33.99, 31.5, 4.8254, 3.6363, 2.9485],
   },
 ];
+
+export function randomStarChallenge(previous?: StarChallenge, random = Math.random): StarChallenge {
+  const candidates = STAR_CHALLENGES.filter((challenge) => challenge !== previous);
+  const index = Math.min(candidates.length - 1, Math.floor(random() * candidates.length));
+  return candidates[index];
+}
 
 interface Point {
   x: number;

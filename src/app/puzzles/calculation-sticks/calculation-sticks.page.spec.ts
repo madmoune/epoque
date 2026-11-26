@@ -25,18 +25,27 @@ it('requires lifting the top stick, assembles the expression, and validates the 
   click('[data-stick-id="1"]');
   expect(root.querySelectorAll('.stick')).toHaveLength(9);
   expect(root.querySelector('.feedback')?.textContent).toContain('passe au-dessus');
+  const input = root.querySelector<HTMLInputElement>('#stick-answer')!;
+  expect(input).not.toBeNull();
+  expect(input.inputMode).toBe('none');
+  input.focus();
+  fixture.detectChanges();
+  expect(root.querySelector('.custom-keyboard')).not.toBeNull();
+  root.querySelector<HTMLButtonElement>('.custom-keyboard button')!.click();
+  fixture.detectChanges();
+  expect(input.value).toBe('1');
+  expect(root.querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled).toBe(true);
   click('[data-confirm-action="hint"]');
   expect(root.querySelector('.stick.hinted')?.getAttribute('data-stick-id')).toBe('0');
-  expect(root.querySelector('input')).toBeNull();
 
   for (const { id } of puzzle.sticks) click(`[data-stick-id="${id}"]`);
   const expected = formatCalculationSticks(puzzle.sticks.map(({ symbol }) => symbol).join(''));
   expect(root.querySelector('.expression')?.textContent).toBe(expected);
   expect(root.querySelector('.stick-pile')).toBeNull();
+  expect(root.querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled).toBe(false);
   click('[data-confirm-action="hint"]');
   expect(root.querySelector('.hint')?.textContent).toContain(puzzle.product);
 
-  const input = root.querySelector<HTMLInputElement>('input')!;
   const submit = (number: number) => {
     input.value = String(number);
     input.dispatchEvent(new Event('input'));

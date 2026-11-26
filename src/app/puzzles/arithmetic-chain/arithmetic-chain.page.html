@@ -44,19 +44,28 @@
         <input
           #answerField
           id="chain-answer"
+          class="answer-input"
           type="text"
-          inputmode="numeric"
+          inputmode="none"
           maxlength="16"
           autocomplete="off"
           [value]="answer()"
           [disabled]="done"
           [attr.aria-invalid]="incorrect() ? 'true' : null"
           aria-describedby="chain-feedback"
+          (focus)="showKeyboard()"
+          (click)="showKeyboard()"
           (input)="updateAnswer(answerField.value)"
         />
       </div>
-      <button type="submit" [disabled]="done || !answer().trim()">Vérifier</button>
     </form>
+
+    <app-custom-keyboard
+      [rows]="numberKeyboardRows"
+      [visible]="keyboardVisible()"
+      [disabled]="done"
+      (keyPress)="handleKeyboardKey($event)"
+    />
 
     <div class="commands">
       <div id="chain-feedback" role="status">
