@@ -38,6 +38,24 @@ describe('Indice', () => {
     }
   });
 
+  it('varies the total number of matching digits between generated puzzles', () => {
+    let seed = 981237;
+    vi.spyOn(Math, 'random').mockImplementation(() => {
+      seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+      return seed / 4294967296;
+    });
+
+    const totals = new Set<number>();
+    for (let round = 0; round < 20; round++) {
+      const { clues } = createCodeDeductionPuzzle();
+      clues.forEach(({ wellPlaced, misplaced }) => totals.add(wellPlaced + misplaced));
+    }
+
+    expect(totals.size).toBeGreaterThan(1);
+    expect(totals.has(2)).toBe(true);
+    expect([...totals].some((total) => total !== 2)).toBe(true);
+  });
+
   it('keeps leading zeroes and generates a different code even after the same draw', () => {
     vi.spyOn(Math, 'random').mockReturnValue(0.999999);
 

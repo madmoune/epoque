@@ -1,7 +1,13 @@
-import { Component, input, linkedSignal } from '@angular/core';
+import { Component, input, linkedSignal, output } from '@angular/core';
 import { type CodeClue } from './code-deduction.logic';
 
 type DigitState = 'free' | 'excluded' | 'selected';
+
+export type CodeDigitSelection = {
+  readonly digit: string;
+  readonly position: number;
+  readonly state: DigitState;
+};
 
 @Component({
   selector: 'app-code-deduction-clues',
@@ -31,7 +37,7 @@ type DigitState = 'free' | 'excluded' | 'selected';
                     [attr.aria-label]="digitLabel(digit, state)"
                     [attr.aria-pressed]="state !== 'free'"
                     [attr.data-digit]="digit"
-                    (click)="toggleDigit(digit)"
+                    (click)="toggleDigit(digit, $index)"
                   >
                     {{ digit }}
                   </button>
@@ -54,6 +60,7 @@ type DigitState = 'free' | 'excluded' | 'selected';
 export class CodeDeductionCluesComponent {
   readonly clues = input.required<readonly CodeClue[]>();
   readonly round = input.required<number>();
+  readonly digitSelection = output<CodeDigitSelection>();
   protected readonly digitStates = linkedSignal<ReadonlyMap<string, DigitState>>(() => {
     this.clues();
     this.round();
@@ -64,7 +71,7 @@ export class CodeDeductionCluesComponent {
     return this.digitStates().get(digit) ?? 'free';
   }
 
-  protected toggleDigit(digit: string): void {
+  protected toggleDigit(digit: string, position: number): void {
     this.digitStates.update((states) => {
       const next = new Map(states);
       const state = states.get(digit) ?? 'free';
@@ -76,6 +83,9 @@ export class CodeDeductionCluesComponent {
 
       return next;
     });
+
+    const state = this.digitStates().get(digit) ?? 'free';
+    this.digitSelection.emit({ digit, position, state });
   }
 
   protected digitLabel(digit: string, state: DigitState): string {

@@ -12,22 +12,37 @@
     </header>
 
     <section class="puzzle-area">
-      <app-code-deduction-clues [clues]="puzzle().clues" [round]="round()" />
+      <app-code-deduction-clues
+        [clues]="puzzle().clues"
+        [round]="round()"
+        (digitSelection)="useDigitSelection($event)"
+      />
 
       <div class="answer-field">
-        <label for="code-answer">Code à quatre chiffres</label>
-        <input
-          #answerField
-          id="code-answer"
-          type="text"
-          inputmode="numeric"
-          autocomplete="off"
-          [value]="answer()"
-          [disabled]="isSolved()"
-          [attr.aria-invalid]="feedback() ? 'true' : null"
+        <span id="code-answer-label" class="answer-label">Code à quatre chiffres</span>
+        <div
+          class="answer-inputs"
+          role="group"
+          aria-labelledby="code-answer-label"
           aria-describedby="code-feedback code-hint"
-          (input)="updateAnswer(answerField)"
-        />
+        >
+          @for (digit of answer(); track $index) {
+            <input
+              #answerField
+              class="code-answer"
+              [id]="'code-answer-' + $index"
+              type="text"
+              inputmode="numeric"
+              maxlength="1"
+              autocomplete="off"
+              [value]="digit"
+              [disabled]="isSolved()"
+              [attr.aria-label]="'Chiffre ' + ($index + 1) + ' sur ' + codeLength"
+              [attr.aria-invalid]="feedback() ? 'true' : null"
+              (input)="updateAnswer($index, answerField)"
+            />
+          }
+        </div>
         <div id="code-feedback" role="status">
           @if (feedback(); as message) {
             <p class="error">{{ message }}</p>

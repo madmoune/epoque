@@ -41,7 +41,6 @@ h1 {
   line-height: 1.5;
 }
 
-input,
 .hint strong {
   letter-spacing: 0.12em;
 }
@@ -50,14 +49,13 @@ input,
   margin-top: 1rem;
 }
 
-label {
+.answer-label {
   display: block;
   margin-bottom: 0.35rem;
   font-size: 0.9rem;
   font-weight: 800;
 }
 
-input,
 button {
   box-sizing: border-box;
   min-height: var(--command-height);
@@ -68,10 +66,18 @@ button {
   font-weight: 800;
 }
 
-input {
-  width: min(100%, 10rem);
+.answer-inputs {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.code-answer {
+  width: 3rem;
+  aspect-ratio: 1;
   font-size: 1.2rem;
   font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  text-align: center;
 }
 
 button {

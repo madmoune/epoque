@@ -30,8 +30,9 @@ export function createCodeDeductionPuzzle(previousSolution?: string): CodeDeduct
   let candidates = ALL_CODES;
 
   for (const attempt of shuffle(ALL_CODES)) {
+    if (attempt === solution) continue;
+
     const clue = scoreAttempt(attempt, solution);
-    if (clue.wellPlaced + clue.misplaced !== 2) continue;
 
     const matchingCodes = candidates.filter((code) => {
       const { wellPlaced, misplaced } = scoreAttempt(attempt, code);

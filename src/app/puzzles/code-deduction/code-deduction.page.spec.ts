@@ -15,8 +15,10 @@ describe('CodeDeductionPage digit marking', () => {
     fixture.detectChanges();
     const root = fixture.nativeElement as HTMLElement;
     const firstDigitButton = root.querySelector<HTMLButtonElement>('.digit-toggle');
+    const answerInputs = root.querySelectorAll<HTMLInputElement>('.code-answer');
 
     expect(firstDigitButton).not.toBeNull();
+    expect(answerInputs).toHaveLength(4);
 
     const digit = firstDigitButton!.dataset['digit']!;
     const digitButtons = () =>
@@ -39,16 +41,44 @@ describe('CodeDeductionPage digit marking', () => {
     expect([...digitButtons()].every((button) => button.dataset['state'] === 'selected')).toBe(
       true,
     );
+    expect(root.querySelector<HTMLInputElement>('#code-answer-0')?.value).toBe(digit);
 
     firstDigitButton!.click();
     fixture.detectChanges();
     expect([...digitButtons()].every((button) => button.dataset['state'] === 'free')).toBe(true);
     expect(root.querySelector('.digit-toggle.is-excluded')).toBeNull();
     expect(root.querySelector('.digit-toggle.is-selected')).toBeNull();
+    expect(root.querySelector<HTMLInputElement>('#code-answer-0')?.value).toBe('');
 
     firstDigitButton!.click();
     root.querySelector<HTMLButtonElement>('[data-confirm-action="restart"]')!.click();
     fixture.detectChanges();
     expect(root.querySelector('.digit-toggle.is-excluded')).toBeNull();
+  });
+
+  it('validates automatically when the four answer inputs are filled', async () => {
+    await TestBed.configureTestingModule({
+      imports: [CodeDeductionPage],
+      providers: [provideRouter([])],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(CodeDeductionPage);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const page = fixture.componentInstance as unknown as {
+      puzzle: () => { solution: string };
+    };
+    const answerInputs = [...root.querySelectorAll<HTMLInputElement>('.code-answer')];
+
+    page
+      .puzzle()
+      .solution.split('')
+      .forEach((digit, index) => {
+        answerInputs[index].value = digit;
+        answerInputs[index].dispatchEvent(new Event('input', { bubbles: true }));
+        fixture.detectChanges();
+      });
+
+    expect(root.querySelector('[role="alert"]')?.textContent).toContain('Code trouvé');
   });
 });

@@ -2,7 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { PuzzlePlayHistoryService } from '../../puzzle-play-history.service';
 import { PuzzleSuccessPopupComponent } from '../shared/puzzle-success-popup/puzzle-success-popup.component';
-import { CodeDeductionCluesComponent } from './code-deduction-clues.component';
+import { CodeDeductionCluesComponent, CodeDigitSelection } from './code-deduction-clues.component';
 import { CODE_LENGTH, createCodeDeductionPuzzle } from './code-deduction.logic';
 
 @Component({
@@ -18,7 +18,7 @@ export class CodeDeductionPage {
   protected readonly codeLength = CODE_LENGTH;
   protected readonly puzzle = signal(createCodeDeductionPuzzle());
   protected readonly round = signal(0);
-  protected readonly answer = signal('');
+  protected readonly answer = signal(createEmptyAnswer());
   protected readonly feedback = signal('');
   protected readonly isSolved = signal(false);
   protected readonly canShowHint = computed(
@@ -28,14 +28,42 @@ export class CodeDeductionPage {
     this.puzzle().solution.slice(0, this.hintCount()),
   );
 
-  protected updateAnswer(input: HTMLInputElement): void {
+  protected updateAnswer(index: number, input: HTMLInputElement): void {
     if (this.isSolved()) return;
 
-    const answer = input.value.replace(/\D/g, '').slice(0, CODE_LENGTH);
+    const answer = input.value.replace(/\D/g, '').slice(0, 1);
     if (input.value !== answer) input.value = answer;
 
-    this.answer.set(answer);
-    if (answer.length < CODE_LENGTH) {
+    this.answer.update((current) =>
+      current.map((digit, position) => (position === index ? answer : digit)),
+    );
+    this.validateAnswer();
+  }
+
+  protected useDigitSelection(selection: CodeDigitSelection): void {
+    if (this.isSolved()) return;
+
+    this.answer.update((current) => {
+      const next = [...current];
+      if (selection.state === 'selected') {
+        const previousPosition = next.indexOf(selection.digit);
+        if (previousPosition !== -1 && previousPosition !== selection.position) {
+          next[previousPosition] = '';
+        }
+        next[selection.position] = selection.digit;
+      } else if (selection.state === 'free') {
+        next.forEach((digit, position) => {
+          if (digit === selection.digit) next[position] = '';
+        });
+      }
+      return next;
+    });
+    this.validateAnswer();
+  }
+
+  private validateAnswer(): void {
+    const answer = this.answer().join('');
+    if (this.answer().some((digit) => digit === '')) {
       this.feedback.set('');
       return;
     }
@@ -58,7 +86,7 @@ export class CodeDeductionPage {
   }
 
   protected resetPuzzle(): void {
-    this.answer.set('');
+    this.answer.set(createEmptyAnswer());
     this.feedback.set('');
     this.hintCount.set(0);
     this.round.update((round) => round + 1);
@@ -69,4 +97,8 @@ export class CodeDeductionPage {
     this.puzzle.set(createCodeDeductionPuzzle(this.puzzle().solution));
     this.resetPuzzle();
   }
+}
+
+function createEmptyAnswer(): string[] {
+  return Array.from({ length: CODE_LENGTH }, () => '');
 }
