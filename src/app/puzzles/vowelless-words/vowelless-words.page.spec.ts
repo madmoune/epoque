@@ -88,9 +88,12 @@ describe('VowellessWordsPage', () => {
 
     root.querySelector<HTMLButtonElement>('[role="alert"] button')!.click();
     fixture.detectChanges();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    fixture.detectChanges();
     expect(root.querySelector('[role="alert"]')).toBeNull();
     expect(root.querySelector('.hint')).toBeNull();
     expect(root.querySelector<HTMLInputElement>('input')?.value).toBe('');
+    expect(document.activeElement).toBe(root.querySelector('#vowelless-answer'));
   });
 
   it('offers a retry when the bank fails to load', async () => {

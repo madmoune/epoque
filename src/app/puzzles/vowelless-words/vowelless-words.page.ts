@@ -152,6 +152,7 @@ export class VowellessWordsPage {
     this.hintLevel.set(0);
     this.solvedWord.set(null);
     this.keyboardVisible.set(false);
+    this.focusAnswerField();
   }
 
   private focusAnswerField(): void {
