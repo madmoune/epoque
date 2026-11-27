@@ -10,6 +10,11 @@ import {
   seatingConflicts,
 } from './number-neighbors.logic';
 
+type DragSource = {
+  number: number;
+  chairIndex: number | null;
+};
+
 @Component({
   selector: 'app-number-neighbors-page',
   imports: [RouterLink, PuzzleSuccessPopupComponent],
@@ -24,6 +29,8 @@ export class NumberNeighborsPage {
   protected readonly puzzle = signal(createNumberNeighborsPuzzle());
   protected readonly placements = signal<(number | null)[]>(this.emptyChairs());
   protected readonly selected = signal<number | null>(null);
+  private readonly draggedSource = signal<DragSource | null>(null);
+  private readonly dragMimeType = 'application/x-number-neighbors';
   protected readonly selectedRule = computed(
     () => this.rules.find(({ id }) => id === this.puzzle().rule)!,
   );
@@ -54,8 +61,7 @@ export class NumberNeighborsPage {
     if (this.isSolved()) return;
 
     const number = this.selected();
-    const next = [...this.placements()];
-    const occupant = next[index];
+    const occupant = this.placements()[index];
     this.notice.set('');
 
     if (number === null) {
@@ -64,14 +70,69 @@ export class NumberNeighborsPage {
       return;
     }
 
-    const source = next.indexOf(number);
-    if (source === index) {
-      next[index] = null;
-    } else {
-      if (source >= 0) next[source] = occupant;
-      next[index] = number;
+    this.placeNumberAt(index, number);
+  }
+
+  protected startDraggingNumber(number: number, event: DragEvent): void {
+    if (
+      this.isSolved() ||
+      !this.puzzle().numbers.includes(number) ||
+      this.placements().includes(number)
+    ) {
+      return;
     }
-    this.placeNumbers(next);
+
+    this.selected.set(null);
+    this.notice.set('');
+    this.setDragPayload({ number, chairIndex: null }, event);
+  }
+
+  protected startDraggingChair(index: number, event: DragEvent): void {
+    const number = this.placements()[index];
+    if (this.isSolved() || number === null) return;
+
+    this.selected.set(null);
+    this.notice.set('');
+    this.setDragPayload({ number, chairIndex: index }, event);
+  }
+
+  protected allowDrop(event: DragEvent): void {
+    if (this.isSolved()) return;
+
+    event.preventDefault();
+    if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+  }
+
+  protected dropOnChair(index: number, event: DragEvent): void {
+    event.preventDefault();
+
+    if (this.isSolved()) return;
+
+    const source = this.readDragSource(event);
+    if (!source) return;
+
+    if (source.chairIndex === null) {
+      this.placeNumberAt(index, source.number);
+    } else if (source.chairIndex !== index) {
+      this.moveOrSwapNumbers(source.chairIndex, index);
+    }
+    this.draggedSource.set(null);
+  }
+
+  protected dropOnTray(event: DragEvent): void {
+    event.preventDefault();
+
+    if (this.isSolved()) return;
+
+    const source = this.readDragSource(event);
+    if (!source || source.chairIndex === null) return;
+
+    this.removeNumberAt(source.chairIndex);
+    this.draggedSource.set(null);
+  }
+
+  protected endDragging(): void {
+    this.draggedSource.set(null);
   }
 
   protected chairLabel(index: number): string {
@@ -106,6 +167,7 @@ export class NumberNeighborsPage {
     this.placements.set(this.emptyChairs());
     this.selected.set(null);
     this.notice.set('');
+    this.draggedSource.set(null);
   }
 
   protected newPuzzle(): void {
@@ -125,5 +187,95 @@ export class NumberNeighborsPage {
     this.placements.set(next);
     this.selected.set(null);
     if (this.isSolved()) this.playHistory.markSolved('/voisins-numerotes');
+  }
+
+  private placeNumberAt(index: number, number: number): void {
+    if (index < 0 || index >= this.placements().length || !this.puzzle().numbers.includes(number)) {
+      return;
+    }
+
+    const next = [...this.placements()];
+    const source = next.indexOf(number);
+    if (source === index) {
+      next[index] = null;
+    } else {
+      if (source >= 0) next[source] = next[index];
+      next[index] = number;
+    }
+    this.placeNumbers(next);
+  }
+
+  private moveOrSwapNumbers(sourceIndex: number, targetIndex: number): void {
+    if (
+      sourceIndex < 0 ||
+      sourceIndex >= this.placements().length ||
+      targetIndex < 0 ||
+      targetIndex >= this.placements().length ||
+      sourceIndex === targetIndex ||
+      this.placements()[sourceIndex] === null
+    ) {
+      return;
+    }
+
+    const next = [...this.placements()];
+    [next[sourceIndex], next[targetIndex]] = [next[targetIndex], next[sourceIndex]];
+    this.placeNumbers(next);
+  }
+
+  private removeNumberAt(index: number): void {
+    if (index < 0 || index >= this.placements().length || this.placements()[index] === null) {
+      return;
+    }
+
+    const next = [...this.placements()];
+    next[index] = null;
+    this.placeNumbers(next);
+  }
+
+  private setDragPayload(source: DragSource, event: DragEvent): void {
+    this.draggedSource.set(source);
+
+    if (!event.dataTransfer) return;
+
+    const payload = JSON.stringify(source);
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData(this.dragMimeType, payload);
+    event.dataTransfer.setData('text/plain', payload);
+  }
+
+  private readDragSource(event: DragEvent): DragSource | null {
+    const rawPayload =
+      event.dataTransfer?.getData(this.dragMimeType) ||
+      event.dataTransfer?.getData('text/plain') ||
+      null;
+
+    if (!rawPayload) return this.draggedSource();
+
+    try {
+      const payload: unknown = JSON.parse(rawPayload);
+      if (!payload || typeof payload !== 'object') return null;
+
+      const record = payload as Record<string, unknown>;
+      const number = record['number'];
+      const chairIndex = record['chairIndex'];
+      if (
+        typeof number !== 'number' ||
+        !Number.isInteger(number) ||
+        !this.puzzle().numbers.includes(number) ||
+        !(
+          chairIndex === null ||
+          (typeof chairIndex === 'number' &&
+            Number.isInteger(chairIndex) &&
+            chairIndex >= 0 &&
+            chairIndex < this.placements().length)
+        )
+      ) {
+        return null;
+      }
+
+      return { number, chairIndex };
+    } catch {
+      return null;
+    }
   }
 }

@@ -105,7 +105,20 @@ export class ArithmeticChainPage {
   }
 
   protected revealHint(): void {
-    if (this.canRevealHint()) this.revealedSteps.update((count) => count + 1);
+    if (this.canRevealHint()) this.revealStep(this.revealedSteps());
+  }
+
+  protected revealStep(index: number): void {
+    if (
+      this.isSolved() ||
+      index < 0 ||
+      index >= this.chain().steps.length - 1 ||
+      !this.canRevealHint()
+    ) {
+      return;
+    }
+
+    this.revealedSteps.update((count) => Math.max(count, index + 1));
   }
 
   protected restart(): void {

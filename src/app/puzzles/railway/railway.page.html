@@ -63,16 +63,20 @@
                 data-board-cell
                 [class.access]="cell.gate !== null"
                 [class.crossed]="cell.crossed"
+                [class.marked]="cell.marked"
                 [class.hinted]="cell.hinted"
                 [class.selected]="keyboardCell() === cell.index"
                 [attr.aria-label]="cell.label"
                 [disabled]="done"
                 (click)="activateCell(cell.index, $event)"
+                (contextmenu)="barCell(cell.index, $event)"
               >
                 @if (cell.gate) {
                   <span class="gate-label" aria-hidden="true">{{ cell.gate }}</span>
                 } @else if (cell.crossed) {
                   <span class="cross" aria-hidden="true">×</span>
+                } @else if (cell.marked) {
+                  <span class="rail-mark" aria-hidden="true">●</span>
                 }
               </button>
             }
@@ -94,11 +98,12 @@
         </div>
 
         <p id="rail-controls" class="controls">
-          Glisse pour poser ou retirer un rail. Appuie sur une case vide pour la barrer.
+          Glisse pour poser ou retirer un rail. Clique sur une case vide pour alterner entre X, un
+          indicateur de rail et vide. Le clic droit barre directement la case.
         </p>
         <p id="rail-keyboard" class="sr-only">
-          Au clavier, valide deux cases voisines pour les relier. Valide deux fois la même case vide
-          pour la barrer.
+          Au clavier, valide deux cases voisines pour les relier. Valide à nouveau la même case vide
+          pour alterner entre X, indicateur de rail et vide.
         </p>
       </div>
     </div>

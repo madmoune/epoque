@@ -45,6 +45,9 @@ export class CodedCalculationsPage {
   protected readonly solved = signal(false);
   protected readonly showHint = signal(false);
   protected readonly feedback = signal('');
+  protected readonly successfulTrials = computed(() =>
+    this.trials().filter((trial) => trial.result !== null),
+  );
   protected readonly drag = new NumberDrag(inject(DOCUMENT), () => this.feedback.set(''));
   protected readonly canCompose = computed(
     () => !this.solved() && this.trials().length < this.limit,

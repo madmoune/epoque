@@ -73,8 +73,13 @@ h1 {
   list-style: none;
 }
 
+.operation-item {
+  min-width: 0;
+}
+
 .operation-tile {
   display: grid;
+  width: 100%;
   min-width: 0;
   min-height: 5rem;
   align-content: start;
@@ -83,9 +88,24 @@ h1 {
   padding: 0.38rem 0.25rem;
   border: 1px solid var(--border-strong);
   border-radius: 0.5rem;
+  color: var(--text);
   background: var(--surface);
+  font: inherit;
+  font-weight: 400;
   text-align: center;
   font-variant-numeric: tabular-nums;
+  cursor: pointer;
+
+  &:hover:not(:disabled),
+  &:focus-visible {
+    border-color: var(--focus);
+    outline: 2px solid color-mix(in srgb, var(--focus) 35%, transparent);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    cursor: default;
+  }
 
   &.revealed {
     border-color: var(--focus);

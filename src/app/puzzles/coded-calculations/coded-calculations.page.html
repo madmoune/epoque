@@ -11,7 +11,8 @@
 
     @let values = guesses();
     @let parts = draft();
-    @let log = trials();
+    @let attempts = trials();
+    @let log = successfulTrials();
     @let ready = canCompose();
     @let done = solved();
     @let last = displayedTrial();
@@ -131,9 +132,9 @@
           <p
             class="trial-count"
             role="status"
-            [attr.aria-label]="log.length + ' calculs testés sur ' + limit"
+            [attr.aria-label]="attempts.length + ' calculs testés sur ' + limit"
           >
-            {{ log.length }} / {{ limit }}
+            {{ attempts.length }} / {{ limit }}
           </p>
         </div>
 

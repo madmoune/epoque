@@ -78,6 +78,7 @@ export class CalculationSticksPage {
     this.lifted.update((count) => count + 1);
     this.stickHint.set(false);
     this.notice.set('');
+    if (this.pileEmpty()) this.checkAnswer();
   }
 
   protected revealHint(): void {
@@ -91,22 +92,22 @@ export class CalculationSticksPage {
   }
 
   protected updateAnswer(value: string): void {
+    if (this.solved()) return;
     this.answer.set(value);
     this.notice.set('');
+    if (this.pileEmpty() && value.trim().length >= String(this.puzzle().answer).length) {
+      this.checkAnswer();
+    }
   }
 
-  protected checkAnswer(event: Event): void {
-    event.preventDefault();
+  protected checkAnswer(): void {
     if (this.solved()) return;
     if (!this.pileEmpty()) {
       this.notice.set('Soulève tous les bâtonnets avant de valider.');
       return;
     }
     const value = this.answer().trim();
-    if (!value) {
-      this.notice.set('Entre le résultat du calcul.');
-      return;
-    }
+    if (value.length < String(this.puzzle().answer).length) return;
     if (!/^\d+$/.test(value) || Number(value) !== this.puzzle().answer) {
       this.notice.set('Essaie encore en commençant par la multiplication.');
       return;

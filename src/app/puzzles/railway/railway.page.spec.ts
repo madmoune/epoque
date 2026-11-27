@@ -28,14 +28,15 @@ describe('RailwayPage', () => {
   });
 
   function pointer(type: string, cell: number): void {
+    const size = fixture.componentInstance['puzzle']().size;
     grid.dispatchEvent(
       new PointerEvent(type, {
         bubbles: true,
         pointerId: 1,
         pointerType: 'touch',
         button: 0,
-        clientX: (cell % 4) * 64 + 32,
-        clientY: Math.floor(cell / 4) * 64 + 32,
+        clientX: ((cell % size.columns) + 0.5) * (256 / size.columns),
+        clientY: (Math.floor(cell / size.columns) + 0.5) * (256 / size.rows),
       }),
     );
     fixture.detectChanges();
@@ -48,31 +49,80 @@ describe('RailwayPage', () => {
     fixture.detectChanges();
   }
 
+  function rightClick(cell: number): void {
+    root
+      .querySelectorAll<HTMLButtonElement>('.rail-cell')
+      [cell].dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, button: 2 }));
+    fixture.detectChanges();
+  }
+
+  it('bars an empty cell with the right mouse button', () => {
+    const page = fixture.componentInstance;
+    const { columns } = page['puzzle']().size;
+    const cell = columns + Math.floor(columns / 2);
+    const target = root.querySelectorAll<HTMLButtonElement>('.rail-cell')[cell];
+
+    rightClick(cell);
+    expect(target.classList.contains('crossed')).toBe(true);
+    expect(page['undoStates']()).toHaveLength(1);
+
+    rightClick(cell);
+    expect(target.classList.contains('crossed')).toBe(false);
+    expect(page['undoStates']()).toHaveLength(2);
+  });
+
+  it('cycles a cell from empty to crossed, marked and empty', () => {
+    const page = fixture.componentInstance;
+    const { columns } = page['puzzle']().size;
+    const cell = columns + Math.floor(columns / 2);
+    const target = root.querySelectorAll<HTMLButtonElement>('.rail-cell')[cell];
+
+    pointer('pointerdown', cell);
+    pointer('pointerup', cell);
+    expect(target.classList.contains('crossed')).toBe(true);
+
+    pointer('pointerdown', cell);
+    pointer('pointerup', cell);
+    expect(target.classList.contains('crossed')).toBe(false);
+    expect(target.classList.contains('marked')).toBe(true);
+    expect(target.querySelector('.rail-mark')).not.toBeNull();
+
+    pointer('pointerdown', cell);
+    pointer('pointerup', cell);
+    expect(target.classList.contains('marked')).toBe(false);
+    expect(target.querySelector('.cross, .rail-mark')).toBeNull();
+  });
+
   it('marks empty squares, reverses a stroke, and restores it with undo and redo', () => {
     const page = fixture.componentInstance;
-    pointer('pointerdown', 5);
-    pointer('pointerup', 5);
-    expect(grid.querySelectorAll('.rail-cell')[5].classList.contains('crossed')).toBe(true);
+    const { columns } = page['puzzle']().size;
+    const rowStart = columns;
+    const crossCell = rowStart + Math.floor(columns / 2);
+    const rowEnd = rowStart + columns - 1;
 
-    pointer('pointerdown', 4);
-    pointer('pointermove', 7);
-    pointer('pointerup', 7);
-    expect(page['progress']().neighbors[5]).toEqual([4, 6]);
+    pointer('pointerdown', crossCell);
+    pointer('pointerup', crossCell);
+    expect(grid.querySelectorAll('.rail-cell')[crossCell].classList.contains('crossed')).toBe(true);
+
+    pointer('pointerdown', rowStart);
+    pointer('pointermove', rowEnd);
+    pointer('pointerup', rowEnd);
+    expect(page['progress']().neighbors[crossCell]).toEqual([crossCell - 1, crossCell + 1]);
     expect(grid.querySelector('.cross')).toBeNull();
 
     command('Annuler');
-    expect(page['progress']().neighbors[5]).toEqual([]);
+    expect(page['progress']().neighbors[crossCell]).toEqual([]);
     expect(grid.querySelector('.cross')).not.toBeNull();
     command('Rétablir');
-    expect(page['progress']().neighbors[5]).toEqual([4, 6]);
+    expect(page['progress']().neighbors[crossCell]).toEqual([crossCell - 1, crossCell + 1]);
 
-    pointer('pointerdown', 7);
-    pointer('pointermove', 4);
-    pointer('pointercancel', 4);
-    expect(page['progress']().neighbors[5]).toEqual([4, 6]);
-    pointer('pointerdown', 7);
-    pointer('pointerup', 4);
-    expect(page['progress']().neighbors[5]).toEqual([]);
+    pointer('pointerdown', rowEnd);
+    pointer('pointermove', rowStart);
+    pointer('pointercancel', rowStart);
+    expect(page['progress']().neighbors[crossCell]).toEqual([crossCell - 1, crossCell + 1]);
+    pointer('pointerdown', rowEnd);
+    pointer('pointerup', rowStart);
+    expect(page['progress']().neighbors[crossCell]).toEqual([]);
     expect(markSolved).not.toHaveBeenCalled();
   });
 
@@ -101,6 +151,8 @@ describe('RailwayPage', () => {
   it('offers larger board sizes, a hint, and no separate route preview', () => {
     const page = fixture.componentInstance;
     const sizeSelect = root.querySelector<HTMLSelectElement>('#rail-size')!;
+    expect(page['puzzle']().size.id).toBe('6x5');
+    expect(root.querySelectorAll('.rail-cell')).toHaveLength(30);
     expect([...sizeSelect.options].map((option) => option.textContent?.trim())).toEqual([
       '4 × 4',
       '5 × 5',

@@ -163,6 +163,10 @@ h1 {
     background: color-mix(in srgb, var(--border) 45%, var(--surface));
   }
 
+  &.marked {
+    background: color-mix(in srgb, var(--focus) 12%, var(--surface-raised));
+  }
+
   &:focus-visible,
   &.selected {
     outline: 2px solid var(--focus);
@@ -198,6 +202,13 @@ h1 {
 
 .cross {
   font-size: clamp(1.5rem, 7vw, 2.15rem);
+  line-height: 1;
+  pointer-events: none;
+}
+
+.rail-mark {
+  color: var(--focus);
+  font-size: clamp(1.1rem, 5vw, 1.55rem);
   line-height: 1;
   pointer-events: none;
 }

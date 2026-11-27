@@ -51,6 +51,13 @@ describe('ArithmeticChainPage', () => {
     click('[data-confirm-action="restart"]');
     expect(page['chain']()).toBe(chain);
     expect(root.querySelectorAll('.step-result')).toHaveLength(0);
+
+    root.querySelectorAll<HTMLButtonElement>('.operation-tile')[3].click();
+    fixture.detectChanges();
+    expect(
+      [...root.querySelectorAll('.step-result')].map((value) => value.textContent?.trim()),
+    ).toEqual(chain.steps.slice(0, 4).map(({ result }) => `Résultat ${page['format'](result)}`));
+
     click('[data-confirm-action="new-game"]');
     expect(page['chain']().start).not.toBe(chain.start);
   });

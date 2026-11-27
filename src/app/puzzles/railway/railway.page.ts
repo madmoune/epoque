@@ -15,10 +15,12 @@ import { drawRailRoute, drawRailTiles, parkedTrain, railViewBox } from './railwa
 import {
   cellsForSize,
   createRailPuzzle,
+  cycleRailMark,
   EMPTY_RAILS,
   gateAt,
   hasRailCross,
   hasRailLink,
+  hasRailMark,
   inspectRailState,
   RAIL_SIZES,
   railColumn,
@@ -68,19 +70,23 @@ export class RailwayPage {
     cellsForSize(this.puzzle().size).map((cell) => {
       const gate = gateAt(this.puzzle(), cell);
       const crossed = hasRailCross(this.state(), cell);
+      const marked = hasRailMark(this.state(), cell);
       const occupied = this.progress().occupied.includes(cell);
       const hinted = this.hintedLink()?.includes(cell) ?? false;
       const detail = gate
         ? `accès ${gate}`
         : crossed
           ? 'case barrée'
-          : occupied
-            ? 'rail'
-            : 'case vide';
+          : marked
+            ? 'indicateur de rail'
+            : occupied
+              ? 'rail'
+              : 'case vide';
       return {
         index: cell,
         gate,
         crossed,
+        marked,
         hinted,
         label: `Ligne ${railRow(cell, this.puzzle().size) + 1}, colonne ${railColumn(cell, this.puzzle().size) + 1}, ${detail}${hinted ? ', indice' : ''}`,
       };
@@ -162,7 +168,7 @@ export class RailwayPage {
 
     const cell = gesture.lastCell;
     if (!gesture.moved && cell !== null) {
-      this.state.update((state) => toggleRailCross(this.puzzle(), state, cell));
+      this.state.update((state) => cycleRailMark(this.puzzle(), state, cell));
     }
     this.gesture = null;
     this.drawing.set(false);
@@ -185,7 +191,7 @@ export class RailwayPage {
     this.hintedLink.set(null);
 
     if (from === cell) {
-      this.state.set(toggleRailCross(this.puzzle(), before, cell));
+      this.state.set(cycleRailMark(this.puzzle(), before, cell));
       this.keyboardCell.set(null);
     } else {
       this.keyboardCell.set(cell);
@@ -195,6 +201,17 @@ export class RailwayPage {
         this.notice.set('Choisis une case voisine pour tracer, ou valide à nouveau pour barrer.');
       }
     }
+    this.recordEdit(before);
+  }
+
+  protected barCell(cell: number, event: MouseEvent): void {
+    event.preventDefault();
+
+    if (this.drawing() || this.solved()) return;
+
+    const before = this.state();
+    this.clearSelection();
+    this.state.set(toggleRailCross(this.puzzle(), before, cell));
     this.recordEdit(before);
   }
 
@@ -286,7 +303,13 @@ export class RailwayPage {
 
   private recordEdit(before: RailState): void {
     const current = this.state();
-    if (before.tracks === current.tracks && before.crosses === current.crosses) return;
+    if (
+      before.tracks === current.tracks &&
+      before.crosses === current.crosses &&
+      before.marks === current.marks
+    ) {
+      return;
+    }
     this.undoStates.update((states) => [...states, before]);
     this.redoStates.set([]);
     this.recordWin();

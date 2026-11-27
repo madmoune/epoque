@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
   createRailPuzzle,
+  cycleRailMark,
   EMPTY_RAILS,
+  hasRailCross,
+  hasRailMark,
   inspectRailState,
   RailPuzzle,
   RAIL_SIZES,
@@ -12,11 +15,13 @@ import {
 function countSolutions(puzzle: RailPuzzle): number {
   const rows = [...puzzle.rows];
   const columns = [...puzzle.columns];
+  const rowCount = puzzle.size.rows;
+  const columnCount = puzzle.size.columns;
   const visited = new Set<number>();
 
   function visit(cell: number): number {
-    const row = Math.floor(cell / 4);
-    const column = cell % 4;
+    const row = Math.floor(cell / columnCount);
+    const column = cell % columnCount;
     if (!rows[row] || !columns[column] || visited.has(cell)) return 0;
     rows[row]--;
     columns[column]--;
@@ -26,10 +31,10 @@ function countSolutions(puzzle: RailPuzzle): number {
     if (cell === puzzle.end.cell) {
       count = rows.every((remaining) => remaining === 0) ? 1 : 0;
     } else {
-      if (row > 0) count += visit(cell - 4);
-      if (row < 3) count += visit(cell + 4);
+      if (row > 0) count += visit(cell - columnCount);
+      if (row < rowCount - 1) count += visit(cell + columnCount);
       if (column > 0) count += visit(cell - 1);
-      if (column < 3) count += visit(cell + 1);
+      if (column < columnCount - 1) count += visit(cell + 1);
     }
     rows[row]++;
     columns[column]++;
@@ -41,6 +46,10 @@ function countSolutions(puzzle: RailPuzzle): number {
 }
 
 describe('Voie ferrée', () => {
+  it('defaults to the 6 × 5 board', () => {
+    expect(createRailPuzzle(undefined, () => 0.5).size).toBe(RAIL_SIZES[2]);
+  });
+
   it('generates valid routes for every available board size', () => {
     for (const size of RAIL_SIZES) {
       const puzzle = createRailPuzzle(undefined, () => 0.5, size);
@@ -73,8 +82,9 @@ describe('Voie ferrée', () => {
   });
 
   it('generates one valid route for each tested combination of gates and counters', () => {
+    const size = RAIL_SIZES[0];
     for (let index = 0; index < 100; index++) {
-      const puzzle = createRailPuzzle(undefined, () => (index + 0.5) / 100);
+      const puzzle = createRailPuzzle(undefined, () => (index + 0.5) / 100, size);
       expect(countSolutions(puzzle)).toBe(1);
       const state = puzzle.solution
         .slice(1)
@@ -83,7 +93,7 @@ describe('Voie ferrée', () => {
           EMPTY_RAILS,
         );
       expect(inspectRailState(puzzle, state).solved).toBe(true);
-      const next = createRailPuzzle(puzzle, () => (index + 0.5) / 100);
+      const next = createRailPuzzle(puzzle, () => (index + 0.5) / 100, size);
       expect(new Set([next.start.cell, next.end.cell])).not.toEqual(
         new Set([puzzle.start.cell, puzzle.end.cell]),
       );
@@ -123,10 +133,28 @@ describe('Voie ferrée', () => {
     expect(inspectRailState(puzzle, state)).toMatchObject({ route: puzzle.solution, solved: true });
   });
 
+  it('cycles an empty cell through a cross, a rail mark and empty', () => {
+    const puzzle = createRailPuzzle(undefined, () => 0.5, RAIL_SIZES[2]);
+    const cell = puzzle.size.columns + 2;
+
+    let state = cycleRailMark(puzzle, EMPTY_RAILS, cell);
+    expect(hasRailCross(state, cell)).toBe(true);
+    expect(hasRailMark(state, cell)).toBe(false);
+
+    state = cycleRailMark(puzzle, state, cell);
+    expect(hasRailCross(state, cell)).toBe(false);
+    expect(hasRailMark(state, cell)).toBe(true);
+
+    state = cycleRailMark(puzzle, state, cell);
+    expect(hasRailCross(state, cell)).toBe(false);
+    expect(hasRailMark(state, cell)).toBe(false);
+  });
+
   it('fills skipped squares of one row or column without creating a diagonal or wraparound', () => {
-    expect(railSweep(7, 4)).toEqual([6, 5, 4]);
-    expect(railSweep(1, 13)).toEqual([5, 9, 13]);
-    expect(railSweep(3, 4)).toEqual([]);
-    expect(railSweep(0, 5)).toEqual([]);
+    const size = RAIL_SIZES[0];
+    expect(railSweep(7, 4, size)).toEqual([6, 5, 4]);
+    expect(railSweep(1, 13, size)).toEqual([5, 9, 13]);
+    expect(railSweep(3, 4, size)).toEqual([]);
+    expect(railSweep(0, 5, size)).toEqual([]);
   });
 });

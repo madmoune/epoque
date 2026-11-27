@@ -11,7 +11,7 @@ export const RAIL_SIZES = [
   { id: '6x5', label: '6 × 5', rows: 5, columns: 6 },
 ] as const satisfies readonly RailBoardSize[];
 
-const DEFAULT_RAIL_SIZE = RAIL_SIZES[0];
+const DEFAULT_RAIL_SIZE = RAIL_SIZES[2];
 
 // Kept as the default dimensions for callers that do not pass a board size.
 export const RAIL_SIZE = DEFAULT_RAIL_SIZE.columns;
@@ -43,6 +43,7 @@ export interface RailPuzzle {
 export interface RailState {
   readonly tracks: bigint;
   readonly crosses: bigint;
+  readonly marks: bigint;
 }
 
 interface RailCounts {
@@ -50,7 +51,7 @@ interface RailCounts {
   columns: readonly number[];
 }
 
-export const EMPTY_RAILS: RailState = { tracks: 0n, crosses: 0n };
+export const EMPTY_RAILS: RailState = { tracks: 0n, crosses: 0n, marks: 0n };
 
 export function cellsForSize(size: RailBoardSize): number[] {
   return Array.from({ length: size.rows * size.columns }, (_, cell) => cell);
@@ -122,6 +123,7 @@ export function toggleRailLink(
   return {
     tracks: state.tracks | link.bit,
     crosses: state.crosses & ~((1n << BigInt(from)) | (1n << BigInt(to))),
+    marks: state.marks & ~((1n << BigInt(from)) | (1n << BigInt(to))),
   };
 }
 
@@ -145,11 +147,35 @@ export function toggleRailCross(puzzle: RailPuzzle, state: RailState, cell: numb
   ) {
     return state;
   }
-  return { ...state, crosses: state.crosses ^ (1n << BigInt(cell)) };
+  const bit = 1n << BigInt(cell);
+  return { ...state, crosses: state.crosses ^ bit, marks: state.marks & ~bit };
 }
 
 export function hasRailCross(state: RailState, cell: number): boolean {
   return (state.crosses & (1n << BigInt(cell))) !== 0n;
+}
+
+export function hasRailMark(state: RailState, cell: number): boolean {
+  return (state.marks & (1n << BigInt(cell))) !== 0n;
+}
+
+export function cycleRailMark(puzzle: RailPuzzle, state: RailState, cell: number): RailState {
+  if (
+    !cellsForSize(puzzle.size).includes(cell) ||
+    gateAt(puzzle, cell) ||
+    linkedCells(state, puzzle.size)[cell].length
+  ) {
+    return state;
+  }
+
+  const bit = 1n << BigInt(cell);
+  if (hasRailCross(state, cell)) {
+    return { ...state, crosses: state.crosses & ~bit, marks: state.marks | bit };
+  }
+  if (hasRailMark(state, cell)) {
+    return { ...state, marks: state.marks & ~bit };
+  }
+  return { ...state, crosses: state.crosses | bit };
 }
 
 export function gateAt(puzzle: RailPuzzle, cell: number): 'A' | 'B' | null {

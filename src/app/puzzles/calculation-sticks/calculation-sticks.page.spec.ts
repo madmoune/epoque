@@ -34,7 +34,7 @@ it('requires lifting the top stick, assembles the expression, and validates the 
   root.querySelector<HTMLButtonElement>('.custom-keyboard button')!.click();
   fixture.detectChanges();
   expect(input.value).toBe('1');
-  expect(root.querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled).toBe(true);
+  expect(root.querySelector('button[type="submit"]')).toBeNull();
   click('[data-confirm-action="hint"]');
   expect(root.querySelector('.stick.hinted')?.getAttribute('data-stick-id')).toBe('0');
 
@@ -42,20 +42,19 @@ it('requires lifting the top stick, assembles the expression, and validates the 
   const expected = formatCalculationSticks(puzzle.sticks.map(({ symbol }) => symbol).join(''));
   expect(root.querySelector('.expression')?.textContent).toBe(expected);
   expect(root.querySelector('.stick-pile')).toBeNull();
-  expect(root.querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled).toBe(false);
+  expect(root.querySelector('button[type="submit"]')).toBeNull();
   click('[data-confirm-action="hint"]');
   expect(root.querySelector('.hint')?.textContent).toContain(puzzle.product);
 
-  const submit = (number: number) => {
+  const enterAnswer = (number: number) => {
     input.value = String(number);
     input.dispatchEvent(new Event('input'));
-    root.querySelector('form')!.dispatchEvent(new Event('submit', { cancelable: true }));
     fixture.detectChanges();
   };
-  submit(puzzle.answer + 1);
+  enterAnswer(puzzle.answer + 1);
   expect(root.querySelector('.feedback')?.textContent).toContain('multiplication');
   expect(markSolved).not.toHaveBeenCalled();
-  submit(puzzle.answer);
+  enterAnswer(puzzle.answer);
   expect(markSolved).toHaveBeenCalledExactlyOnceWith('/batonnets-de-calcul');
   expect(root.querySelector('[role="alert"]')?.textContent).toContain(
     `${expected} = ${puzzle.answer}`,

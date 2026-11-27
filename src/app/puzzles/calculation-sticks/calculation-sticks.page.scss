@@ -189,8 +189,7 @@ h1 {
   gap: 0.45rem;
 }
 
-.game-actions button,
-.answer-row button {
+.game-actions button {
   min-height: var(--command-height);
   padding: 0.35rem 0.66rem;
   border: 1px solid var(--border);

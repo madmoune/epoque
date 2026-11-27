@@ -27,7 +27,7 @@
     <div class="play-area">
       <section class="play-panel reserve" aria-labelledby="reserve-title">
         <h2 id="reserve-title">Nombres à placer</h2>
-        <div class="number-tray">
+        <div class="number-tray" (dragover)="allowDrop($event)" (drop)="dropOnTray($event)">
           @for (number of current.numbers; track number) {
             @let placed = numbersOnChairs.includes(number);
             <button
@@ -39,14 +39,18 @@
               [attr.aria-label]="'Nombre ' + number + (placed ? ', déjà assis' : '')"
               [attr.aria-pressed]="picked === number"
               [disabled]="done"
+              [draggable]="!done && !placed"
               (click)="selectNumber(number)"
+              (dragstart)="startDraggingNumber(number, $event)"
+              (dragend)="endDragging()"
             >
               {{ number }}
             </button>
           }
         </div>
         <p class="controls-help muted">
-          Choisis un nombre, puis une chaise. Deux appuis sur une chaise la vident.
+          Glisse un nombre vers une chaise, ou choisis-le puis appuie sur une chaise. Glisse un
+          nombre assis pour le déplacer, ou vers la réserve pour le retirer.
         </p>
       </section>
 
@@ -77,7 +81,12 @@
               [attr.aria-label]="chairLabel($index)"
               [attr.aria-pressed]="occupant !== null && occupant === picked"
               [disabled]="done"
+              [draggable]="occupant !== null && !done"
               (click)="selectChair($index)"
+              (dragstart)="startDraggingChair($index, $event)"
+              (dragend)="endDragging()"
+              (dragover)="allowDrop($event)"
+              (drop)="dropOnChair($index, $event)"
             >
               <span class="chair-back" aria-hidden="true"></span>
               <span class="chair-seat" aria-hidden="true">{{ occupant ?? '·' }}</span>

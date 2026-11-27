@@ -21,18 +21,35 @@
 
       <ol class="operations" aria-label="Opérations dans l’ordre" role="list">
         @for (step of current.steps; track $index) {
-          <li class="operation-tile" [class.revealed]="$index < hints">
-            <span class="step-index" aria-hidden="true">{{ $index + 1 }}</span>
-            <strong class="operation-symbol" aria-hidden="true">{{ step.operation.symbol }}</strong>
-            <span class="sr-only">Étape {{ $index + 1 }}. {{ step.operation.description }}.</span>
-            @if (step.operation.caption; as caption) {
-              <span class="operation-caption" aria-hidden="true">{{ caption }}</span>
-            }
-            @if ($index < hints) {
-              <span class="step-result"
-                ><span class="sr-only">Résultat </span>{{ format(step.result) }}</span
-              >
-            }
+          <li class="operation-item">
+            <button
+              type="button"
+              class="operation-tile"
+              [class.revealed]="$index < hints"
+              [disabled]="done"
+              [attr.aria-label]="
+                'Étape ' +
+                ($index + 1) +
+                '. ' +
+                step.operation.description +
+                ($index < hints ? '. Résultat ' + format(step.result) : '. Révéler le résultat')
+              "
+              (click)="revealStep($index)"
+            >
+              <span class="step-index" aria-hidden="true">{{ $index + 1 }}</span>
+              <strong class="operation-symbol" aria-hidden="true">{{
+                step.operation.symbol
+              }}</strong>
+              <span class="sr-only">Étape {{ $index + 1 }}. {{ step.operation.description }}.</span>
+              @if (step.operation.caption; as caption) {
+                <span class="operation-caption" aria-hidden="true">{{ caption }}</span>
+              }
+              @if ($index < hints) {
+                <span class="step-result"
+                  ><span class="sr-only">Résultat </span>{{ format(step.result) }}</span
+                >
+              }
+            </button>
           </li>
         }
       </ol>

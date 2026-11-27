@@ -60,7 +60,7 @@
       </p>
     }
 
-    <form class="answer-form" (submit)="checkAnswer($event)">
+    <form class="answer-form" (submit)="$event.preventDefault(); checkAnswer()">
       <label for="stick-answer">Résultat du calcul</label>
       <div class="answer-row">
         <input
@@ -78,7 +78,6 @@
           (click)="showKeyboard()"
           (input)="updateAnswer($any($event.target).value)"
         />
-        <button type="submit" [disabled]="done || !empty">Valider</button>
       </div>
     </form>
 

@@ -115,4 +115,46 @@ describe('NumberNeighborsPage', () => {
     );
     expect(markSolved).toHaveBeenCalledExactlyOnceWith('/voisins-numerotes');
   });
+
+  it('supports dragging numbers from the reserve to chairs and between chairs', () => {
+    const page = fixture.componentInstance;
+    const numbers = page['puzzle']().numbers;
+    const first = numbers[0];
+    const second = numbers[1];
+
+    const firstDrag = dragEvent();
+    page['startDraggingNumber'](first, firstDrag);
+    page['dropOnChair'](0, firstDrag);
+    expect(page['placements']()[0]).toBe(first);
+
+    const secondDrag = dragEvent();
+    page['startDraggingNumber'](second, secondDrag);
+    page['dropOnChair'](1, secondDrag);
+    expect(page['placements']().slice(0, 2)).toEqual([first, second]);
+
+    const chairDrag = dragEvent();
+    page['startDraggingChair'](0, chairDrag);
+    page['dropOnChair'](1, chairDrag);
+    expect(page['placements']().slice(0, 2)).toEqual([second, first]);
+
+    const removeDrag = dragEvent();
+    page['startDraggingChair'](1, removeDrag);
+    page['dropOnTray'](removeDrag);
+    expect(page['placements']().slice(0, 2)).toEqual([second, null]);
+  });
 });
+
+function dragEvent(): DragEvent {
+  const values = new Map<string, string>();
+  const dataTransfer = {
+    effectAllowed: 'none',
+    dropEffect: 'none',
+    setData: (type: string, value: string) => values.set(type, value),
+    getData: (type: string) => values.get(type) ?? '',
+  } as unknown as DataTransfer;
+
+  return {
+    preventDefault: () => undefined,
+    dataTransfer,
+  } as unknown as DragEvent;
+}

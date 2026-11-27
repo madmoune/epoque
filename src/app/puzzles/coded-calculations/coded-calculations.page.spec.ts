@@ -59,13 +59,15 @@ describe('CodedCalculationsPage', () => {
     expect(root.querySelector('.test-result')?.textContent).toContain('⚽');
     testCalculation(0, '−', 1);
     expect(root.querySelector('.test-result')?.classList.contains('invalid')).toBe(true);
+    expect(root.querySelectorAll('.history li')).toHaveLength(2);
     expect(root.querySelector('.trial-count')?.textContent).toContain('3 / 13');
   });
 
   it('caps the history at thirteen tests and still accepts guesses after the limit', () => {
     for (let right = 1; right < 8; right++) testCalculation(0, '+', right);
     for (let right = 1; right < 7; right++) testCalculation(0, '−', right);
-    expect(root.querySelectorAll('.history li')).toHaveLength(13);
+    expect(root.querySelectorAll('.history li')).toHaveLength(6);
+    expect(root.querySelector('.trial-count')?.textContent).toContain('13 / 13');
     expect(root.querySelector<HTMLButtonElement>('.test-button')).toBeNull();
     expect(root.querySelector<HTMLSelectElement>('.digit-guess')?.disabled).toBe(false);
 
