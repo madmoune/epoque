@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1795722487169,
+  "timestamp": 1795788066987,
   "index": "/epoque/index.html",
   "assetGroups": [
     {
@@ -89,8 +89,8 @@
         "/epoque/chunk-VNHSP4PX.js",
         "/epoque/chunk-VPGOSJEE.js",
         "/epoque/chunk-WRX4OPEL.js",
-        "/epoque/chunk-XBWOISQA.js",
         "/epoque/chunk-XVPZUDKC.js",
+        "/epoque/chunk-XYH46XBT.js",
         "/epoque/chunk-Y3O5YZK2.js",
         "/epoque/chunk-YCXBGKOK.js",
         "/epoque/chunk-YJOEDBYI.js",
@@ -99,7 +99,7 @@
         "/epoque/chunk-ZRMNPH2L.js",
         "/epoque/favicon.ico",
         "/epoque/index.html",
-        "/epoque/main-EHVGNFW4.js",
+        "/epoque/main-URD57PHI.js",
         "/epoque/manifest.webmanifest",
         "/epoque/styles-MFCS2XLC.css",
         "/epoque/worker-ZA2F6HJO.js"
@@ -506,8 +506,8 @@
     "/epoque/chunk-VNHSP4PX.js": "15a96dd3417b98ef0f441acc741f059bc3255aea",
     "/epoque/chunk-VPGOSJEE.js": "6a60f011104d7ed6812c2db63bd79ea2880f9b78",
     "/epoque/chunk-WRX4OPEL.js": "b936b2d2514b045b436f6de848957b79aa3018b3",
-    "/epoque/chunk-XBWOISQA.js": "97acf793107089acab0e4d0c02bd781ca6abae9e",
     "/epoque/chunk-XVPZUDKC.js": "071fcffb92a2787b3058cb621bddd3e84c41a56d",
+    "/epoque/chunk-XYH46XBT.js": "5138d15e38a7b7d2db512e6e3866ecf098759c35",
     "/epoque/chunk-Y3O5YZK2.js": "cb31986fbc35b9eda1cb449aafbb67b0e316cdd2",
     "/epoque/chunk-YCXBGKOK.js": "4f110fb7ec4dda504d62e44c1ee1027507cb2cce",
     "/epoque/chunk-YJOEDBYI.js": "9b363c8f7b864afc1a7ef6454194de82682e34f3",
@@ -516,8 +516,8 @@
     "/epoque/chunk-ZRMNPH2L.js": "8afe231b898cf2c68009ee098d46c3e9e9c89b1d",
     "/epoque/favicon.ico": "9c39f434fe1261f68c5e3eefdf734630d99c5670",
     "/epoque/grammalecte-4-5.txt": "ab9b8550e5e3c5faabd917192d30a92e5d6128fe",
-    "/epoque/index.html": "df7a4eb767b7ac5a75a2ad790df366b3f50a8b6b",
-    "/epoque/main-EHVGNFW4.js": "3353091ca8b296f131c3213903066d7278a3e8c8",
+    "/epoque/index.html": "36cfd09641a6a29421442e0f5fb91bd5cb8e03c9",
+    "/epoque/main-URD57PHI.js": "08717ac755d1363233fde7108e448421b5379480",
     "/epoque/manifest.webmanifest": "799ed34a76256b4f80340db28fc9909ec60dc91b",
     "/epoque/mid-mid-sentences.txt": "c92eec6e22aac9e088b896629d90b1f4c48e61d9",
     "/epoque/mid-sentences.txt": "aa4e51b7b91a9638d5b333c1ba67db308dd3faed",
